@@ -30,17 +30,19 @@ sites from leaking into each other (see §3).
 
 | Concern | Choice | Status |
 |---|---|---|
-| Framework | Next.js (App Router), React Server Components | Decided |
+| Framework | Next.js 16 (App Router), React 19, React Server Components | Decided (D16) |
+| Runtime | Node.js 24 LTS (`.nvmrc`, `engines`) | Decided (D16) |
 | Language | TypeScript, `strict: true` | Decided |
-| Styling | Tailwind CSS (v4, tokens in CSS via `@theme`) | Proposed — `open-questions.md` Q3 |
+| Styling | Tailwind CSS (v4, tokens in CSS via `@theme`) | Decided (D14) |
 | Database | PostgreSQL on Neon, provisioned through the Vercel Marketplace | Decided (D2) |
-| DB access | Drizzle ORM + `@neondatabase/serverless` driver | Proposed — Q2 |
+| DB access | Drizzle ORM + `@neondatabase/serverless` driver | Decided (D15) — installed in Phase 4 |
 | Validation | Zod (request bodies, MDX frontmatter, CMS responses) | Proposed |
 | Image/file uploads | Cloudinary (existing assets already live there) | Proposed — Q14 |
 | Blog | MDX compiled at build time | Decided (D7); tooling — Q16 |
 | Creatives content | Headless CMS | CMS choice open — Q1 |
 | Hosting | Vercel | Decided (D2) |
-| Package manager | pnpm | Proposed |
+| Package manager | pnpm 10 (pinned in `packageManager`; newest major Vercel supports) | Decided (D16) |
+| Lint / format | ESLint (`eslint-config-next`) + Prettier (Markdown excluded) | Decided |
 
 ## 3. Multi-tenant routing
 
@@ -218,8 +220,10 @@ Full schema and endpoints: `content-schema.md`.
 - Domains attached to the project: `chestlyace.online`, `www.chestlyace.online`
   (redirect), `creatives.chestlyace.online`, `blog.chestlyace.online`.
 - Database migrations run with Drizzle Kit as an explicit step, not on app boot.
-- CI (GitHub Actions or Vercel checks): typecheck, lint, build. Tests where
-  logic warrants them (host resolution, admin validation, frontmatter parsing).
+- CI: Vercel's build on every pull request is the only automated check (D17) —
+  it compiles and typechecks. Lint, format, and tests are run locally before
+  opening a PR (`instructions.md` §6). Tests where logic warrants them (host
+  resolution, admin validation, frontmatter parsing).
 
 ## 10. Migrating off the old site
 

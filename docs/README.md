@@ -42,6 +42,11 @@ every doc that depends on it.
 | D11 | **Shared header/footer across all three subdomains** | Each links to the other two |
 | D12 | **Existing copy and data carry over; the redesign is visual** | Copy that mentions design/photography still needs editing — see `ia-content.md` |
 | D13 | **Visual direction stays close to the current site** | Dark/light toggle kept, rounded cards, Tailwind — a polish and consistency pass |
+| D14 | **Styling: Tailwind CSS v4** | Q3. Tokens in `app/globals.css` via `@theme` |
+| D15 | **Database access: Drizzle ORM** | Q2. With the Neon serverless driver; installed in Phase 4 |
+| D16 | **Tooling: Next.js 16, Node 24 LTS, pnpm 10** | pnpm 10 because it's the newest major Vercel supports without extra settings |
+| D17 | **CI: Vercel's build on each PR only — no GitHub Actions** | Lint, format, and tests run locally before every PR |
+| D18 | **Keep Next.js's managed block in `AGENTS.md`** | Points agents to the bundled Next.js 16 docs; `next dev` re-adds it anyway |
 
 ## Status
 

@@ -1,6 +1,6 @@
 # Development Phases
 
-**Status: draft, awaiting the owner's approval.**
+**Status: approved by the owner (PR #4).**
 
 Work moves one phase at a time. A phase is **Done** only when the owner has
 merged its pull request (`instructions.md` §1). Each phase is one GitHub issue
@@ -11,8 +11,8 @@ before the phase starts.
 
 | # | Phase | Status | Blocking questions |
 |---|---|---|---|
-| 0 | Planning & workflow | In review | — |
-| 1 | Project scaffold | Not started | Q2, Q3 |
+| 0 | Planning & workflow | Done | — |
+| 1 | Project scaffold | In review | Q2, Q3 (decided) |
 | 2 | Multi-tenant routing | Not started | — |
 | 3 | Design system & shared layout | Not started | Q13, Q18 |
 | 4 | Database | Not started | Q19 |
@@ -33,23 +33,24 @@ the same foundation.
 **Goal:** agree on what we're building and how agents work.
 
 - Planning docs (`docs/`) — issue #1, PR #2 (merged)
-- `instructions.md`, `chestlyace-workflow` skill, this phase plan — issue #3
+- `instructions.md`, `chestlyace-workflow` skill, this phase plan — issue #3, PR #4 (merged)
 
 **Done when:** both PRs are merged.
 
-## Phase 1 — Project scaffold
+## Phase 1 — Project scaffold — issue #5
 
 **Goal:** an empty Next.js app that builds, lints, and deploys.
 
-- Next.js (App Router) + TypeScript `strict`, package manager
-- Styling setup (Tailwind or SCSS Modules, per Q3), no tokens yet
-- ESLint + Prettier, `typecheck` / `lint` / `build` scripts
+- Next.js 16 (App Router) + TypeScript `strict`, pnpm 10, Node 24 (D16)
+- Styling setup: Tailwind CSS v4 (D14), no tokens yet
+- ESLint + Prettier, `typecheck` / `lint` / `format` / `build` scripts
 - Folder skeleton from `architecture.md` §4 (only folders this phase needs)
 - `.env.example` listing every variable from `architecture.md` §8, with no values
-- CI running typecheck, lint, and build on every pull request
+- CI: Vercel's build on every pull request (D17)
 - Vercel project connected; preview deploys working
 
-**Done when:** a placeholder page deploys on a Vercel preview URL and CI is green.
+**Done when:** a placeholder page deploys on a Vercel preview URL and its Vercel
+build is green.
 **Refs:** `architecture.md` §2, §4, §8, §9.
 
 ## Phase 2 — Multi-tenant routing

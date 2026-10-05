@@ -19,12 +19,14 @@ code), **Payload** (open source, self-hosted, own your data, more setup),
 Needed before building the creatives site, not before the main site.
 Content model to satisfy: `content-schema.md` §5.
 
-### Q2 — Database access layer · Proposed
+### Q2 — Database access layer · Decided 2026-10-05 (D15)
+**Answer: Drizzle ORM.**
 Recommendation: **Drizzle ORM** with the Neon serverless driver. Type-safe,
 schema in TypeScript, plain-SQL feel, small. Alternative: Prisma (heavier,
 slower cold starts on serverless).
 
-### Q3 — Styling: Tailwind or SCSS? · Proposed
+### Q3 — Styling: Tailwind or SCSS? · Decided 2026-10-05 (D14)
+**Answer: Tailwind CSS v4.**
 Recommendation: **Tailwind CSS** — the old site already uses it and D13 says stay
 close to it. Your general preference for separate `.scss` files would point to
 **SCSS Modules** (`Component.module.scss` next to each component) instead.
