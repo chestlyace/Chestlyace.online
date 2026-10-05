@@ -18,6 +18,9 @@ as code; its content and data are migrated.
 | [`design.md`](./design.md) | Visual direction, design tokens (light + dark), typography, component inventory, theming across subdomains |
 | [`ia-content.md`](./ia-content.md) | Sitemap per subdomain, section-by-section page breakdown, navigation, SEO, redirects from old URLs, copy that has to change |
 | [`open-questions.md`](./open-questions.md) | Everything deliberately left undecided, with options and a recommendation where there is one |
+| [`phases.md`](./phases.md) | Development phases in order, what each delivers, and which open questions block it |
+
+Agents: read [`../instructions.md`](../instructions.md) before any work.
 
 ## Decisions log
 
