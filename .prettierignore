@@ -1,0 +1,7 @@
+.next
+node_modules
+pnpm-lock.yaml
+next-env.d.ts
+# Docs and agent files change only with the owner's permission (instructions.md §3)
+*.md
+.claude
