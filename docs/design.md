@@ -1,11 +1,12 @@
 # Design
 
-> **Status: foundations approved in Phase 5a.1 (D37–D41); core components
-> approved in Phase 5a.2 (D42–D46); content component specs written in Phase 5a.3
-> (D47–D53); sections pending (D30).** §1–§8 below are the owner-approved
-> foundations: direction, colour, typography, spacing, depth, icons, theming, and
-> motion. §13 holds the component specs. Page sections (§14) are still the Phase 3
-> placeholder baseline until their specs are approved in Phase 5a.4. Nothing visual is built or restyled
+> **Status: foundations (D37–D41), core components (D42–D46), and content
+> components (D47–D53) approved in Phase 5a.1–5a.3; homepage section and project
+> page specs written in Phase 5a.4 (D54–D62, §14).** §1–§8 below are the
+> owner-approved foundations: direction, colour, typography, spacing, depth, icons,
+> theming, and motion. §13 holds the component specs and §14 the section and page
+> specs. Nothing visual is built until Phase 5b, after the owner merges the last
+> design PR. Nothing visual is built or restyled
 > until its spec is written in this file and approved by the owner
 > (`instructions.md` §8). The process is in §12.
 
@@ -296,7 +297,7 @@ waiting on a click — runs longer.
 | `TextLink` | **Spec: §13.3.** Text roll (nav, footer, standalone) and inline underline (running text) |
 | `SitesMenu` | **Spec: §13.7.** Popover from the header's Sites chip |
 | `SkipLink` | **Spec: §13.9.** |
-| `SectionHeading` | Eyebrow label + Bebas display title + optional intro paragraph |
+| `SectionHeading` | **Spec: §14.0.** Mono index ("02 — SKILLS") + Bebas `display-xl` title with a letter reveal + optional intro |
 | `Tag` | **Spec: §13.4.** Mono label chip for tech stack, blog tags |
 | `StatusPill` | **Spec: §13.5.** "Open to Remote Roles" with pulsing green dot. Only the "open" state exists for now; other `profile.availability` states are decided when that data arrives |
 | `Container` | `max-w-7xl` + gutters |
@@ -305,9 +306,9 @@ waiting on a click — runs longer.
 
 | Component | Notes |
 |---|---|
-| `Hero` | Status pill, name in display type, headline, short intro, CTAs (View Projects, Get In Touch), quick contact row, portrait |
-| `About` | Quote, body text, resume download button |
-| `SkillGroup` | Category label + grid of devicon logo + name |
+| `Hero` | **Spec: §14.1.** The previous portfolio's hero, kept and restyled: status pill, stacked headline with a rotating outlined line, tagline, paragraph, CTAs, contact row, arched portrait with floating stickers and quote card, glow. New motion: letter entrance, cursor parallax, WebGL dot grid, scroll exit |
+| `About` | **Spec: §14.2.** Scroll-lit statement, body text, facts list, resume button |
+| `SkillGroup` | **Spec: §14.3.** Mono group label + logo tiles (mono → colour on hover); Certifications grid beneath |
 | `ServiceCard` | **Spec: §13.11.** Large cards that stack on scroll: number, Iconly icon, title, description, items |
 | `CreativesCard` | **Spec: §13.12.** Inverted last card of the service stack, linking to `creatives.chestlyace.online` |
 | `ProjectCard` | **Spec: §13.10.** Image-forward tile: image, mono category label, title + `↗`; links to the project page. Hover zoom and "View ↗" cursor label |
@@ -316,6 +317,10 @@ waiting on a click — runs longer.
 | `ContactForm` | **Spec: §13.15** (form fields). Name, email, subject, message; delivery per Q10 (email + WhatsApp) |
 | `FaqList` | **Spec: §13.16.** Hairline accordion on native `<details>/<summary>` |
 | `CertificationItem` | **Spec: §13.17.** Badge tile in a grid (Q22) |
+| `RotatingWords` | **Spec: §14.1.** The hero's outlined line; words roll in and out letter by letter |
+| `HeroBackground` | **Spec: §14.1.** OGL dot grid that reacts to the cursor; static CSS grid fallback |
+| `ProjectMedia` | **Spec: §14.5.** Project image with the hover zoom and the shared WebGL ripple canvas |
+| Project page | **Spec: §14.10.** `/projects/[slug]`: title, facts, hero image, Problem / Approach / Outcome, gallery, next project |
 
 ### Creatives (`components/creatives/`)
 
@@ -410,7 +415,7 @@ The design is led by the owner and built to the owner's taste.
 Shared components used by all three sites. Each spec follows the checklist in
 §12. Colours are token names from §2; type steps are from §3; curves, springs, and
 durations are from §8. **Approved in:** core components — PR #20 (issue #19);
-content components — the Phase 5a.3 PR (issue #21).
+content components — PR #22 (issue #21).
 
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
@@ -1234,4 +1239,598 @@ A linked tile's name is "Name — Issuer, verify credential (opens in a new tab)
 
 ## 14. Page and section specs
 
-_None approved yet._
+The main site's homepage (`/`) and the project page (`/projects/[slug]`). Each
+spec follows the section checklist in §12. Components are linked, not repeated.
+**Approved in:** the Phase 5a.4 PR (issue #23).
+
+**Homepage:** [Page-wide rules](#140-page-wide-rules) · [Hero](#141-hero) ·
+[About](#142-about) · [Skills and certifications](#143-skills-and-certifications) ·
+[Services](#144-services) · [Projects](#145-projects) ·
+[Experience](#146-experience) · [Volunteering](#147-volunteering) ·
+[Contact](#148-contact) · [FAQ](#149-faq)
+
+**Project page:** [Project page](#1410-project-page)
+
+### 14.0 Page-wide rules
+
+**Order, ids, and numbering.**
+
+| # | Section | `id` | Nav (§13.6) |
+|---|---|---|---|
+| — | Hero | `top` | brand link |
+| 01 | About | `about` | About |
+| 02 | Skills (+ Certifications) | `skills` | — |
+| 03 | Services | `services` | — |
+| 04 | Projects | `projects` | Projects |
+| 05 | Experience | `experience` | Experience |
+| 06 | Volunteering | `volunteering` | — |
+| 07 | Contact | `contact` | Contact |
+| 08 | FAQ | `faq` | — |
+
+- The index numbers are assigned at render time from the sections that are
+  actually shown, so a hidden Volunteering (no published entries) leaves no gap.
+- The header's active dot follows the section in view for the four nav links;
+  sections without a nav link keep the previous link active.
+
+**Section heading** (replaces the Phase 3 `SectionHeading`; owner's choice,
+2026-10-06):
+
+- A mono `label` index above the title: "02 — SKILLS", `muted`.
+- The title in Bebas at `display-xl`, `foreground`, uppercase.
+- An optional intro in `lead`, `muted`, max 52ch, 24px below the title.
+- Title → content: 48px phone / 64px desktop (§5).
+- **Reveal:** the title's letters rise from a clipping line box
+  (`translateY(105% → 0)`), 30ms stagger, 900ms `expo.out`, once, when the
+  heading is 85% down the viewport (GSAP ScrollTrigger + SplitText). The index
+  label and intro fade up 16px, 100ms later. Reduced motion: shown in final state.
+
+**Bands** (owner's choice: alternating):
+
+- Section backgrounds alternate between `background` and `background-alt` (§2).
+  The grid/glow effects exist only in the hero.
+- Bands are assigned **counting up from the footer**, which is `background-alt`
+  (§13.8): the last section before it is `background`, the one above it
+  `background-alt`, and so on. No two neighbours match, even when Volunteering is
+  hidden. With every section shown: FAQ `background`, Contact `background-alt`,
+  Volunteering `background`, Experience `background-alt`, Projects `background`,
+  Services `background-alt`, Skills `background`, About `background-alt`, Hero
+  `background`.
+- **Any component that uses `surface` (cards, tiles, fields) switches to
+  `surface-raised` on a `background-alt` band** (§2). Component specs say this
+  where it matters; this rule covers them all.
+- Padding: §5 — `py-24` / `md:py-40`. Containers: the wide container for grids and
+  media (Skills, Services, Projects, Contact); the narrow `980px` container for
+  text-led sections (About, Experience, Volunteering, FAQ).
+
+**Scroll and anchors.**
+
+- Lenis drives all scrolling (§8). Nav links and "Back to top" scroll through it
+  with `ease-in-out`, 1.2s; focus then moves to the section's heading
+  (`tabindex="-1"`).
+- Every section has `scroll-margin-top: 96px` so the capsule never covers a
+  heading.
+- Default section entrance (when a section's own spec doesn't say otherwise):
+  children fade up 24px, 650ms `power3.out`, 80ms stagger, batched, once.
+- Reduced motion: Lenis off; all reveals show their final state (§8).
+
+**Data.** Sections read from the database (`architecture.md` §5). A section with
+nothing to show is hidden, not rendered empty.
+
+### 14.1 Hero
+
+**Purpose.** The first screen: who Chestly is, what they do, and the two actions
+that matter (see the work, get in touch).
+
+**References.** Owner's choice (2026-10-06): **the previous portfolio's hero,
+kept as it is, with smooth animations and effects added.** The old hero's layout
+and ingredients stay; the foundations (§1–§8) and the core components (§13)
+restyle them; motion is new. anubi.io for the WebGL grid and the scroll feel.
+
+**What stays from the old hero.** A status pill; a giant stacked headline whose
+last line is outlined; a tagline; a short paragraph; two pill buttons; a
+phone / email / socials row; an arched portrait, grayscale until hovered, with a
+soft glow behind it; floating tech stickers and a speech-bubble quote card; a
+scroll cue at the bottom.
+
+**What changes, and why.**
+
+| Old | New | Why |
+|---|---|---|
+| Headline "Developer / Designer / & PHOTOGRAPHER" | "SOFTWARE / ENGINEER" + a rotating outlined line (owner's choice) | Main site is software-only (D4, Q4) |
+| Camera sticker | A software sticker (TypeScript — placeholder) | D4 |
+| Quote card: "…Not you devs & designers…" | Wording edited — owner's text at 5b | D4 |
+| Blue-to-purple glow | Blue only | §2: blue is the only accent |
+| Coloured sticker chips (dark slate, white, green) | Neutral chips (`surface-raised`, 1px `border`) with each logo in its brand colour | §1 airy, one accent; logos keep their own colours |
+| Glass buttons, `scale(1.05)` hover | Magnetic pills (§13.1) | D42 |
+| `bg-grid-pattern` class (never defined in the old CSS — the old hero had a plain background) | A WebGL grid that reacts to the cursor (below) | Signature moment (owner: hero background) |
+| Nav links "Home, About, Services…" | The capsule header (§13.6) | D44 |
+
+**Anatomy and layout.**
+
+- A 12-column grid in the wide container, `min-height: 100svh`, content
+  vertically centred, top padding **112px** (clears the 16px + 56px capsule),
+  bottom padding 48px.
+- **Left, columns 1–7** (`lg+`): left-aligned. **Phone and tablet:** one column,
+  centred, text first, portrait below with 48px between.
+- **Right, columns 8–12:** the portrait group.
+
+**Left column** (top to bottom, 32px between blocks):
+
+1. **Status pill** (§13.5) — `profile.tagline`.
+2. **Headline.** `<h1 class="sr-only">` carries the full text for search and
+   screen readers ("Chestly Ace, also known as Amahndong Chestly — software
+   engineer"); the visible lines are decorative (`aria-hidden`).
+   - Lines 1 and 2: `profile.headline` split at the first space ("Software
+     Engineer" → SOFTWARE / ENGINEER). A single-word headline is one line.
+     Bebas at `display-2xl` (5 → 11rem, leading 0.85), `foreground`.
+   - Line 3: the **rotating line** — Bebas at 50% of the line-1 size, outlined
+     (`-webkit-text-stroke: 1.5px foreground`, transparent fill, 40% opacity),
+     tracking `+0.02em`, 8px below line 2. The words are placeholders —
+     "& BACKEND", "& FULL-STACK", "& MOBILE" — until the owner supplies them.
+3. **Tagline** — `label` step in the text face (uppercase, `+0.1em`), `sm` size,
+   `muted`. Old: "Software developer, graphic designer, and photographer crafting
+   modern digital experiences." — edited to software only; owner's wording at 5b.
+4. **Paragraph** — `sm` step, `muted`, max 56ch. Old: "Amahndong Chestly, known
+   professionally as Chestly Ace, builds websites, brand visuals, and
+   photography-driven digital experiences." — edited; owner's wording at 5b.
+5. **Buttons** — `View Projects` (`primary`, `lg`, trailing `arrow-right`, links
+   `#projects`) and `Get In Touch` (`secondary`, `lg`, Iconly `Message` icon,
+   links `#contact`). Side by side from `sm` (16px gap); stacked and full width on
+   phones.
+6. **Contact row** — WhatsApp + phone, mail + email, then the socials (filtered by
+   `show_on`, Simple Icons, 20px, `muted` → `foreground` on hover, 44px hit
+   areas). Phone and email are text-roll links (§13.3, `sm`). Wraps with 16px
+   gaps; centred on phones.
+
+**Right column — the portrait group.**
+
+| Part | Values |
+|---|---|
+| Portrait | The arch from the old hero: `border-radius: 14rem 14rem 9999px 9999px`, 2px `border` edge, `surface` fill, `object-fit: cover`, aspect `3 / 4`; width `min(100%, 420px)` on phones, the column's width on desktop (max 480px), right-aligned on `lg+`. `profile.hero_image_url`, `fetchpriority="high"`, preloaded |
+| Treatment | `grayscale(1) contrast(1.25)`; full colour on hover, as in the old hero (700ms `ease-out`). A 128px fade at the bottom into `background` |
+| Depth | Light: the §5 float shadow, larger (`0 24px 64px rgb(0 0 0 / 0.12)`). Dark: none |
+| Glow | Behind the portrait: a 350px circle of `primary` at 18% opacity, `blur(60px)`, centred. Dark mode 24% |
+| Stickers (4) | 48px chips, radius `md`, `surface-raised` + 1px `border`, rotated and placed as in the old hero: React (top 15%, left −5%, −12°), AWS (bottom 20%, left −2%, +6°), Android (bottom 10%, right 10%, −8°), and a fourth in the old camera's place (top 30%, right −8%, +15°) — **TypeScript, placeholder**. Logos 28px, in brand colour (devicon, installed in 5b) |
+| Quote card | Top 5%, right −5% (−10% from `sm`), max 180px wide: `material-bar` + `material-blur`, radius `lg` with the bottom-left corner square (the speech-bubble tail), rotated +2°. Header: "@Dev.Ace" (`sm`, medium, `muted`) + Lucide `badge-check` 14px in `primary-text`; body: italic `sm`. Hover: rotates to 0° (default spring) |
+| Phones | Stickers and quote card scale to 80% and stay inside the gutters (offsets clamp to 0) |
+
+**Motion** (new — the owner's ask: "nice smooth animations and effects").
+
+*1. Load entrance* — pure CSS, so nothing waits for JavaScript and LCP is never
+delayed (§8 principle 8). The text and portrait are in the HTML; the entrance
+only styles their first seconds. Total ≈ 1.4s, then the page is fully usable.
+
+| Step | Element | Effect | Timing |
+|---|---|---|---|
+| 1 | Status pill | Fades up 12px, `blur(4px → 0)` | 0ms, 500ms `ease-out` |
+| 2 | Headline lines 1–2 | Each letter rises from its clipping line box, `translateY(110% → 0)` | Letter stagger 30ms, line offset 120ms, 900ms `ease-out`; starts at 100ms |
+| 3 | Rotating line | Letters rise the same way; the outline draws as the letters land | Starts at 450ms |
+| 4 | Tagline, paragraph, buttons, contact row | Fade up 16px, `blur(4px → 0)` | Start at 500ms, 70ms stagger, 600ms `ease-out` |
+| 5 | Portrait | The arch reveals bottom to top (`clip-path: inset(100% 0 0 0) → inset(0)`) while the image settles `scale(1.2 → 1)` | Starts at 200ms, 1100ms `ease-out` |
+| 6 | Glow | Fades in | Starts at 500ms, 1200ms |
+| 7 | Stickers, then quote card | Fade in with `scale(0.8 → 1)` and settle into their rotations | Start at 900ms, 90ms stagger, 500ms `ease-out` |
+
+The header capsule materializes at 100ms (§13.6). The scroll cue fades in at
+1.4s.
+
+*2. Rotating line.* Every **2.8s**, the current words roll up out of the clip while
+the next roll in from below, letter by letter (30ms stagger, 600ms `expo.out`) —
+the same roll as the text links (§13.3), at headline scale. Pauses while the tab
+is hidden, while the hero is off-screen, and while the pointer rests on the line.
+The line is `aria-hidden`; it adds colour, not meaning.
+
+*3. Ambient motion* (CSS, `transform` only):
+
+- Glow: drifts ±20px and breathes between 14% and 22% opacity over 14s,
+  `ease-in-out`, alternating.
+- Stickers: each floats ±6px vertically over 5–7s (a different period and phase
+  each, so they never move together).
+
+*4. Cursor motion* — fine pointers only (`(hover: hover) and (pointer: fine)`);
+GSAP `quickTo`, so motion follows the pointer smoothly without a spring per frame.
+
+- **Depth parallax:** with the pointer anywhere in the hero, the layers shift
+  toward or against it, scaled by depth — glow 24px, portrait 6px, quote card
+  10px, stickers 8–20px (the nearer ones further). Eased to a stop 0.4s after the
+  pointer stops. Pointer leaves → everything returns to rest over 0.6s.
+- **Letter lift:** headline letters within 140px of the pointer rise by up to
+  12px, falling off smoothly with distance, and settle back as it leaves. Lines 1
+  and 2 only.
+- **Portrait colour:** as in the old hero — hover brings the colour in.
+- **Buttons:** magnetic (§13.1).
+
+*5. WebGL grid* (OGL — the signature moment, owner's choice): a field of small
+dots on a **32px** grid fills the hero behind the content, in `border` colour at
+60%. Dots within **160px** of the pointer swell and are pushed gently outward,
+and turn `primary` at up to 40%, easing back over 600ms after the pointer leaves
+(a second, slower ripple trails it). Dots in the rest of the hero hold still.
+
+- Lazy: the canvas loads after the first paint and after the entrance (idle
+  callback), so it never competes with LCP.
+- Resolution capped (device pixel ratio ≤ 1.5); the loop runs only while the
+  hero is on-screen and the tab is visible.
+- Behind everything: `aria-hidden`, `pointer-events: none`; the pointer is read
+  from the window.
+- **Fallbacks:** reduced motion, `Save-Data`, no WebGL, and touch devices get the
+  **static** dot grid (a CSS radial-gradient pattern, same size and colour). Until
+  the canvas is ready the hero shows the same static grid, then cross-fades.
+- Light and dark use the theme's `border` and `primary` values; the canvas
+  re-reads them when the theme changes.
+
+*6. Touch devices.* No hover exists, so the portrait **turns to colour as it
+scrolls to the middle of the screen** (a scrubbed grayscale 1 → 0). Stickers
+still float; nothing depends on a cursor.
+
+*7. Scroll exit* — scrubbed to scroll (ScrollTrigger, 0 → one viewport height):
+
+- Headline lines drift apart: line 1 moves left up to 6vw, line 2 right up to 6vw,
+  line 3 left up to 3vw, and the block fades to 30%.
+- The portrait group rises slower than the page (−8% of its height) and scales to
+  96%.
+- The glow follows the portrait; the status pill and paragraph fade out.
+- The scroll cue fades out within the first 80px.
+
+*8. Scroll cue.* Desktop (`lg+`) only: a Lucide `chevron-down` (32px, `muted`),
+centred 32px from the hero's bottom, bobbing 8px over 2s (`ease-in-out`,
+infinite). A button — click scrolls to About through Lenis; `aria-label`: "Scroll
+to About".
+
+**Reduced motion.** Everything above is off: the entrance shows its final state,
+the rotating line stops on its first words, ambient and cursor motion and the
+scroll exit are removed, the grid is the static pattern. The portrait's colour
+change on hover stays; pill pulse and button colour changes stay (§8).
+
+**Light and dark.** Colours come from tokens. Light: float shadow on the portrait.
+Dark: no shadow; the portrait edge and the sticker chips use `border`; glow at 24%.
+
+**Responsive.**
+
+| Width | Layout |
+|---|---|
+| < `sm` | Centred; headline `display-2xl` at its 5rem minimum; buttons stacked and full width; contact row stacked |
+| `sm`–`lg` | Centred; buttons side by side; portrait max 420px, centred |
+| ≥ `lg` | Left-aligned text (columns 1–7), portrait right (columns 8–12); scroll cue shown |
+
+**Accessibility.** One `<h1>` (the `sr-only` one). Visible headline lines and the
+rotating line are `aria-hidden`; decorative layers (glow, grid, stickers) are
+`aria-hidden`. The portrait's `alt` is meaningful ("Chestly Ace"); the quote card
+is real text. The rotating line and the sticker float are decorative; both stop under
+reduced motion, and the rotating line also pauses on hover and focus
+(WCAG 2.2.2). Every interactive
+element keeps the `ring` focus outline; the page is fully usable by keyboard.
+Text colours are the §2 tokens (AA-checked); the outlined line is decorative and
+adds nothing the `<h1>` doesn't already say.
+
+**Performance budget.** The portrait is the LCP element: preloaded, correctly
+sized, WebP/AVIF. The entrance uses CSS only. Total JavaScript for the hero
+effects loads after first paint; the WebGL chunk is separate and lazy.
+
+### 14.2 About
+
+**Purpose.** A short statement of who Chestly is, plus the resume.
+
+**References.** Owner's choice (2026-10-06): **scroll-lit statement.** anubi.io's
+big text statements; Apple's confident type.
+
+**Content** (`profile`):
+
+| Element | Source | Copy |
+|---|---|---|
+| Statement | `about_quote` | "Blending logic with creativity to craft digital experiences that matter." — carries over |
+| Body | `about_body` | Edit needed — Q5 (still open). Paragraphs split on blank lines |
+| Facts | `location`, `headline`, `availability` | New (see below) |
+| Resume | `resume_url` | "Download Resume ↓" |
+
+**Layout** (narrow container; band `background-alt` in the normal order):
+
+1. **Heading** (§14.0): "01 — ABOUT".
+2. **Statement:** Bebas at `display-lg` (3 → 5rem), `foreground`, left-aligned,
+   with a max width of about 24ch so it breaks into 3–4 lines on desktop.
+3. **Two columns** (`lg+`; stacked on smaller screens), 96px below the statement:
+   - **Left (7 columns):** the body text, `lead` step, `foreground`, paragraphs
+     24px apart, max 56ch.
+   - **Right (5 columns):** a short facts list — mono `label` + value pairs,
+     divided by 1px `border` lines, 16px padding between rows:
+     "BASED IN" → `profile.location`; "ROLE" → `profile.headline`; "STATUS" →
+     the availability text. Below it, the resume button (`secondary`, `md`,
+     trailing Lucide `arrow-down`).
+   - The facts list is **my proposal** built from existing profile fields: the
+     hero already carries the portrait, so About has no photo; delete the list if
+     you'd rather About be text only.
+
+**Motion.**
+
+- **Scroll-lit words:** the statement's words start at `foreground` at **18%**
+  opacity and light up to 100% one after another as the block scrolls through
+  the viewport — the first word at the block's top reaching 80% of the viewport
+  height, the last at its bottom reaching 50% (GSAP ScrollTrigger, scrubbed,
+  SplitText by words). Scrolling back dims them again.
+- The text is in the HTML at full strength; the dim state is applied once the
+  words are split, so no-JS visitors read it normally.
+- Body and facts fade up with the default entrance (§14.0); the facts rows stagger
+  60ms.
+- Reduced motion: all words at full strength; entrance in its final state.
+
+**Accessibility.** The statement is one `<p>`; the split words are spans inside
+it, so assistive technology reads the sentence normally. The 18% state is
+transient — a word is dimmed only while it is still below the reading line — and
+the text is at full contrast once read; reduced-motion visitors see it at full
+strength at once. The facts are a `<dl>`.
+
+### 14.3 Skills and certifications
+
+**Purpose.** The tech stack, grouped, and the certifications beneath it.
+
+**References.** Owner's choices (2026-10-06): **grouped logo grid**; certifications
+**under Skills** (Q22).
+
+**Content.** `skills` (published, ordered), grouped by `category`: Languages,
+Frameworks, Databases, Cloud & DevOps, Tools (creative tools are on the creatives
+site — Q7; Figma stays). Certifications: §13.17.
+
+**Layout** (wide container, band `background` in the normal order):
+
+1. **Heading:** "02 — SKILLS".
+2. **Group rows**, 48px apart. Desktop: a 12-column row — the group's mono `label`
+   in `muted` (columns 1–3, sticky within the row), the tiles (columns 4–12).
+   Phones: label above the tiles.
+3. **Skill tile:** height 56px, padding 0 16px, radius `md`, `surface` fill
+   (`surface-raised` on `background-alt`), gap 12px between logo and name; logo
+   28px (devicon, or `icon_url` when there's no devicon); name `sm` step, medium,
+   `foreground`. Tiles wrap, 12px gaps.
+4. **Certifications:** below the last group, 96px gap, a mono `label`
+   "CERTIFICATIONS" and the badge grid (§13.17): 2 columns on phones, 3 from `sm`,
+   4 from `lg`, 16px gaps.
+
+**Tile colour treatment.** Logos show in **monochrome `foreground` at 80%** and
+turn to their **original colour** on hover (200ms) — the same grey-to-colour
+language as the hero portrait. A logo whose colour version is near-black or
+near-white in the current theme stays monochrome (so GitHub, Next.js, and similar
+never vanish in dark mode). The exact logo set is chosen at 5b.
+
+**Motion.**
+
+- Tiles rise in per group, batched (ScrollTrigger `batch`): `translateY(16px → 0)`
+  + opacity, 500ms `ease-out`, 40ms stagger, once.
+- Hover (fine pointer): the tile lifts `translateY(-2px)` (150ms) and its logo
+  turns colour. Tiles aren't links, so they take no focus and show no focus ring.
+- Reduced motion: no rise or lift; the colour change on hover stays.
+
+**Accessibility.** Each group is a `<section>` with its label as a heading
+(`<h3>`), tiles in a list. Logos are decorative; the name is text.
+
+### 14.4 Services
+
+**Purpose.** What Chestly offers (`services`, software only — D9) and a pointer to
+the creatives site.
+
+**References.** Owner's choice (2026-10-06): **stacking cards on scroll** (§13.11),
+the creatives card last (§13.12).
+
+**Content.** Heading "03 — SERVICES" and the intro (from `ia-content.md` §2.4,
+owner's wording at 5b): "I help businesses, founders, and teams launch responsive
+websites and custom web applications, with attention to performance, maintainable
+code, and clean delivery." Then the service cards in `order_index` order, then the
+creatives card.
+
+**Layout** (wide container, band `background-alt` in the normal order): the heading
+and intro in normal flow, then the stack as specified in §13.11 — cards stick
+below the capsule, each one sitting 16px lower than the one before. The cards use
+`surface-raised` on this band; their dimming overlay uses the band's colour
+(`background-alt`) so it blends. 64px of space follows the last card.
+
+**Motion.** As §13.11 and §13.12. The heading follows the §14.0 reveal.
+
+**Responsive and reduced motion.** As §13.11 — the stack only runs at 640px
+viewport height or more, and not under reduced motion; otherwise the cards are a
+plain list.
+
+**Accessibility.** As §13.11 — an ordered list, each card a list item with its
+title as an `<h3>`.
+
+### 14.5 Projects
+
+**Purpose.** The work. Every published project, opening its own page (Q11).
+
+**References.** Owner's choices (2026-10-06): **staggered two-column grid**, and a
+**WebGL ripple on image hover** (signature moment). anubi.io/work/all.
+
+**Content.** `projects` (published; featured first, then `order_index`), shown as
+project cards (§13.10). Heading "04 — PROJECTS" (old: "Work"); an optional one-line
+intro. No tabs or filters — design and events moved out (D8).
+
+**Layout** (wide container, band `background` in the normal order):
+
+- **Desktop (`md+`):** two columns, 32px column gap, 64px row gap. The **right
+  column is pushed down 96px**, so tiles step down the page.
+- **Featured projects:** each gets a full-width row (both columns) with the wide
+  16:9 card, before the grid starts; the grid then follows with its stagger.
+- **Phones:** one column, no stagger, 48px row gap.
+- A dense row of tiles with a long title wraps to two lines; the grid stays
+  aligned at the image tops.
+
+**Motion.**
+
+- **Tile entrance:** as specified in §13.10 (media reveals upward, labels rise),
+  batched per row.
+- **Media parallax:** inside each frame the image drifts `translateY(−5% → +5%)`
+  scrubbed to scroll (the image is rendered 110% tall to allow it). Reduced
+  motion: off.
+- **WebGL ripple** (OGL; owner's choice): on hover over a tile's media, the image
+  is drawn as a WebGL plane and **ripples outward from the pointer** — a soft
+  displacement wave that decays over about 600ms — while the "VIEW ↗" cursor label
+  (§13.10) stays on top.
+  - One shared canvas, created on the first hover and moved into the hovered
+    tile's media frame, so nothing runs until a visitor hovers.
+  - The image is read as a texture (`crossOrigin="anonymous"`); if that fails, the
+    normal DOM image stays and only the zoom hover plays.
+  - Fine pointers only; off under reduced motion and `Save-Data`.
+  - Cleaned up 5 seconds after the last hover.
+
+**Accessibility.** As §13.10. The grid is a list (`<ul>`) of cards. The ripple
+canvas is `aria-hidden`.
+
+### 14.6 Experience
+
+**Purpose.** Work history and education (`journey`).
+
+**References.** Owner's choice (2026-10-06): the timeline that fills on scroll
+(§13.13).
+
+**Content.** `journey` rows (`type` work or education), newest first by
+`start_date`; one timeline, with an "EDUCATION" Tag on education entries
+(`ia-content.md` §2.6). Heading "05 — EXPERIENCE" (old: "Journey").
+
+**Layout** (narrow container, band `background-alt` in the normal order): heading,
+then the timeline (§13.13). Timeline items use `surface-raised` for logo frames on
+this band.
+
+**Motion and accessibility.** As §13.13.
+
+### 14.7 Volunteering
+
+**Purpose.** Community and volunteer work (`volunteering`, D10, D33).
+
+**Content.** `volunteering` rows, newest first. Heading "06 — VOLUNTEERING", plus a
+short intro line (new copy — owner's wording at 5b). **Hidden entirely** while no
+entries are published (numbering closes up, §14.0).
+
+**Layout.** The same as Experience, in its own section: narrow container, the
+timeline (§13.13), band per §14.0 (normally `background`). A volunteering entry has
+no "EDUCATION" tag.
+
+**Motion and accessibility.** As §13.13.
+
+### 14.8 Contact
+
+**Purpose.** The ways to reach Chestly, and the form.
+
+**References.** Owner's choice (2026-10-06): **two columns** — tiles and heading on
+the left, form on the right. Components: contact tiles (§13.14), form fields
+(§13.15).
+
+**Content.**
+
+| Element | Source | Copy |
+|---|---|---|
+| Heading | static | "LET'S WORK TOGETHER" (carries over) |
+| Intro | static | "Have a project in mind? Let's create something extraordinary." — the old text's "whether it's development, design, or photography" is dropped; owner's wording at 5b |
+| Tiles | `email`, `phone`, `whatsapp_number` | Email `chestlyace@gmail.com` (Q9) |
+| Socials | `socials` with `main` in `show_on` | Instagram, LinkedIn, GitHub, TikTok (Q8) |
+| Form | static | Name, email, subject, message |
+
+**Layout** (wide container, band `background-alt` in the normal order):
+
+- **Left (columns 1–6):** the section label "07 — CONTACT"; the heading in Bebas
+  at `display-xl`; the intro in `lead`; then the tiles — a two-column grid with
+  the **Email tile spanning both columns** and **Phone** and **WhatsApp** below it,
+  side by side (16px gaps; `surface-raised` tiles on this band); then the socials
+  row (icon links as in the hero's contact row, with their names visible from
+  `sm`).
+- **Right (columns 7–12):** the form — no panel, fields directly on the band
+  (`surface-raised` fills). Fields: Name and Email side by side (`sm+`), Subject,
+  Message; a `primary` `lg` submit button. Subjects: "General Inquiry", "Web
+  Development Project", "Job Opportunity", "Collaboration" (`ia-content.md` §2.8).
+  The form's delivery is decided at 5b (Q10: email plus WhatsApp).
+- **Phones and tablets:** one column — heading and intro, tiles (single column),
+  socials, then the form.
+- **WhatsApp QR code** ("Scan To Connect" on the old site): on desktop
+  (`(hover: hover)`), a small "QR" button on the WhatsApp tile opens a popover
+  with the code (same entrance as the Sites menu, §13.7). Phones don't show it —
+  they can tap the link. **Proposed placement; say if you'd rather drop the QR.**
+
+**Motion.**
+
+- Heading reveal (§14.0); tiles rise in with the default entrance and a 80ms
+  stagger; form fields rise in with a 60ms stagger.
+- Tile and field motion as their specs (§13.14, §13.15).
+- Reduced motion: final states.
+
+**Accessibility.** Heading structure: section `<h2>`; the form's fields have
+labels. Landmark: the section is `aria-labelledby` its heading; the form is a
+named `<form>`.
+
+### 14.9 FAQ
+
+**Purpose.** Answers to common questions, which also feed the `FAQPage` structured
+data (Phase 7).
+
+**Content.** `faqs` (published, ordered). Heading "08 — FAQ" (old: "SEO FAQ" —
+becomes plain "FAQ", §11).
+
+**Layout** (narrow container, band `background` in the normal order — the last
+band before the footer): heading, then the accordion (§13.16), the whole width of
+the container. Several answers can be open at once.
+
+**Motion and accessibility.** As §13.16. The list fades in with the default
+entrance, 50ms stagger.
+
+### 14.10 Project page
+
+**Purpose.** A case study for one project — the depth the card can't show
+(Q11). Route: `/projects/[slug]`; an unknown slug shows the main site's 404.
+
+**References.** Owner's choice (2026-10-06): **case-study layout.**
+anubi.io/work/all, Apple.
+
+**Content.** `projects` row by `slug`. Today the schema has `title`, `summary`,
+`description`, `image_url`, `tech_stack`, `category_label`, `live_url`,
+`source_url`, and the private flags. The Problem / Approach / Outcome sections and
+extra screenshots need new fields — **proposed for Phase 5b, to be confirmed in
+that PR:** `problem`, `approach`, `outcome` (text, nullable) and `gallery_urls`
+(text array). A section whose text is empty is hidden; if all three are empty the
+page shows `description` instead.
+
+**Layout** (top to bottom; wide container unless noted):
+
+1. **Back link:** "← All projects" (text roll, §13.3) linking to `/#projects`;
+   112px below the top (clears the capsule).
+2. **Title:** Bebas at `display-xl`, uppercase, `foreground`, max 14ch per line
+   break; 24px above the facts row.
+3. **Facts row:** the category `label` (`muted`), the tech Tags (§13.4), and the
+   Live and Source buttons (`secondary`, `md`, trailing `arrow-up-right`) at the
+   right on `lg+`, wrapping below on smaller screens. A private link shows a
+   "Private" Tag instead of a button (`is_*_private`, §10: colour is never the
+   only signal).
+4. **Hero image:** full container width, aspect `16 / 9`, radius `xl` (28px),
+   `surface` fill. **This is the card's image morphing into place** (see Motion).
+5. **Summary:** `summary` in `lead`, narrow container, 64px below the image.
+6. **Problem / Approach / Outcome:** each a row — mono `label` in `muted` on the
+   left (columns 1–3), the text on the right (columns 4–12, `body`, max 68ch),
+   separated by 1px `border` lines, 48px of padding. Phones: label above text.
+7. **Gallery** (when `gallery_urls` has images): the images stacked full-width,
+   radius `lg`, 24px apart.
+8. **Next project:** a full-width band (`background-alt`): a mono `label` "NEXT
+   PROJECT", the next project's title in Bebas at `display-xl`, and `arrow-right`;
+   the whole block is a link. After the last project it points to the first.
+   Hover (fine pointer): the project's image fades in behind the title at 100%
+   → 25% opacity and the arrow nudges 8px (400ms `ease-out`). The block has a
+   `min-height` of 320px.
+
+The header capsule is the same as the homepage, with its key links pointing to
+`/#about`, `/#projects`, and so on (§13.6).
+
+**Motion.**
+
+- **Card to page** (§8, GSAP Flip): when opened from a project card, its media
+  frame **morphs into the hero image** — position, size, and radius animate
+  (800ms `ease-in-out`) while the title and facts fade up beneath it (150ms
+  later, 500ms `ease-out`). Closing with "← All projects" reverses it. Opened
+  directly (a link, a reload), the page uses the plain entrance: the image reveals
+  upward as in §13.10, the title's letters rise as in the hero.
+  *How the morph is carried across the route change (Flip state or the browser's
+  View Transitions) is decided in the build.* Browsers without support get a
+  cross-fade.
+- **Sections:** Problem / Approach / Outcome rows and gallery images use the
+  default entrance (§14.0); gallery images also parallax ±4% inside their frames.
+- Reduced motion: no morph — an instant swap with a 150ms cross-fade; reveals show
+  their final state.
+
+**Responsive.** Title scales with `display-xl` (4 → 8rem). The facts row stacks:
+category, tags, then the buttons. The Next project block's title scales to
+`display-lg` on phones.
+
+**Accessibility.** One `<h1>` (the title). The hero image has meaningful `alt`
+text (the project name and what's shown). "← All projects" is the first link in the
+page after the skip link. Live and Source links that open a new tab say so to
+screen readers. The `title` and metadata are set per project (SEO — Phase 7).
