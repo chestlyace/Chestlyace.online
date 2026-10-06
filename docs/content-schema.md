@@ -46,6 +46,7 @@ CREATE TABLE profile (
   phone           text,
   whatsapp_number text,                   -- digits only, for wa.me links
   location        text,                   -- e.g. 'Yaoundé, Cameroon'
+  headline_words  text[] NOT NULL DEFAULT '{}',  -- hero's rotating outlined line: 'Backend', 'Full-Stack', …
   updated_at      timestamptz NOT NULL DEFAULT now()
 );
 ```
@@ -57,6 +58,9 @@ Changed from the old table:
   — the main site is software-only now. Wording: `open-questions.md` Q4.
 - `about_text_1/2` become one `about_body`.
 - New: `legal_name`, `availability`, `location`.
+- New: `headline_words` — the words that rotate in the hero's outlined line
+  (`design.md` §14.1; the component adds the "& "). Empty means the line is hidden.
+  Seeded with placeholders until the owner supplies them.
 
 ### 1.2 `skills`
 
@@ -111,6 +115,10 @@ CREATE TABLE projects (
   is_live_url_private   boolean NOT NULL DEFAULT false,
   is_source_url_private boolean NOT NULL DEFAULT false,
   is_featured           boolean NOT NULL DEFAULT false,
+  problem               text,                   -- case study, for the project page
+  approach              text,
+  outcome               text,
+  gallery_urls          text[] NOT NULL DEFAULT '{}',  -- extra screenshots, in order
   order_index           integer NOT NULL DEFAULT 0,
   is_published          boolean NOT NULL DEFAULT true,
   created_at            timestamptz NOT NULL DEFAULT now(),
@@ -121,6 +129,12 @@ CREATE TABLE projects (
 Changed: renamed because it holds only software projects now (D8). Dropped
 `type`, `highlights`, `design_tool`, `client_name` (design/event only). Added
 `slug`, `summary`, `is_featured`. Placeholder links (`'#'`) become `NULL`.
+
+The project page (`/projects/[slug]`, Q11, `design.md` §14.10) shows `problem`,
+`approach`, and `outcome` as three sections and `gallery_urls` as a gallery. A
+section with no text is hidden; when all three are empty the page shows
+`description` instead. There is no `year` column (owner, 2026-10-06): the card's
+label is just `category_label`.
 
 ### 1.5 `journey` (experience and education)
 
@@ -168,6 +182,26 @@ CREATE TABLE volunteering (
   `journey` without `type`, so the same timeline component renders both. Extra
   fields (cause, hours, photos) can be added here later without touching `journey`.
 
+### 1.5b `certifications` (new)
+
+```sql
+CREATE TABLE certifications (
+  id             serial PRIMARY KEY,
+  name           text NOT NULL,          -- 'Introduction to Generative AI'
+  issuer         text NOT NULL,          -- 'Google Cloud'
+  issued_on      date,                   -- shown as the year when set
+  badge_url      text,                   -- badge image
+  credential_url text,                   -- 'Verify ↗' link; the tile is static without it
+  order_index    integer NOT NULL DEFAULT 0,
+  is_published   boolean NOT NULL DEFAULT true
+);
+```
+
+Shown under Skills (Q22, `design.md` §13.17, §14.3). The dev seed has the seven
+Google badges from the old repo's `assets/certs/`: names and issuers are read
+from the badge images, the images are in `public/certs/`, and `issued_on` and
+`credential_url` are empty because the images don't carry them.
+
 ### 1.6 `socials`
 
 ```sql
@@ -205,7 +239,9 @@ data. Now it's data, rendered and turned into JSON-LD on the server.
 
 All routes live on the main host under `/api/admin/`, require a valid admin
 session cookie, and validate bodies with Zod against an explicit field list.
-Every successful write calls `revalidateTag('portfolio')`.
+Every successful write calls `revalidateTag('portfolio', { expire: 0 })` (Next 16
+requires the second argument; `{ expire: 0 }` makes the next visit read fresh
+data instead of serving the old page while it refreshes).
 
 | Resource | GET (list) | POST | PATCH `/:id` | DELETE `/:id` | Reorder |
 |---|---|---|---|---|---|
@@ -215,6 +251,7 @@ Every successful write calls `revalidateTag('portfolio')`.
 | `projects` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `journey` | ✓ (`?type=`) | ✓ | ✓ | ✓ | ✓ |
 | `volunteering` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `certifications` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `socials` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `faqs` | ✓ | ✓ | ✓ | ✓ | ✓ |
 
@@ -308,14 +345,15 @@ Source is the **live** EC2 database, not `db/neon_setup.sql` (see
 | `profile.title_1/2/3` | `profile.headline` | Rewrite — Q4 |
 | `profile.about_text_1/2` | `profile.about_body` | Join; copy needs editing — Q5 |
 | `skills` (languages, frameworks) | `skills` | Copy; convert `icon` to `icon_slug`/`icon_url` |
-| `skills` Ps, Lr, Canva (and maybe Figma) | creatives site | Remove from main — Q7 |
+| `skills` Ps, Lr, Canva | creatives site | Remove from main — Q7 (decided; Figma stays on main) |
 | `skills` MongoDB/MySQL/PostgreSQL, Google Cloud/AWS | `skills` | Recategorise to `database` / `cloud` |
 | `services` 'Software Development' | `services` | Split into a few software services — `ia-content.md` §2.4 |
 | `services` 'UI/UX & Graphic Design', 'Photography', 'Event Coverage' | creatives `service` | Move |
 | `works` `type='project'` | `projects` | Copy; generate `slug`; `'#'` links → `NULL`; first sentence → `summary` |
 | `works` `type='design'`, `type='event'` | creatives `piece` | Export to JSON for CMS import. Seed rows are Unsplash placeholders — check live data. |
 | `journey` `type='work'`/`'education'` | `journey` | Copy; `company` → `organization`; parse `dates` into `start_date`/`end_date` |
-| `journey` 'Photographer/Designer — CEY2 Youth Church', 'Graphic Designer — Kris Kitchen' | `journey`, `volunteering`, or creatives site | Q6. The dev seed keeps them in `journey` for now |
+| `journey` 'Photographer/Designer — CEY2 Youth Church', 'Graphic Designer — Kris Kitchen' | creatives site | Q6 (decided). Removed from the dev seed |
+| — | `certifications` | New; no old rows. The seven Google badges in `assets/certs/` are seeded — Q22 |
 | — | `volunteering` | No volunteering entries exist in the old data |
 | `socials` | `socials` | Copy; set `show_on` — Q8 |
-| FAQ (hardcoded in `index.html`) | `faqs` | Keep software questions; design/photo questions move to the creatives site |
+| FAQ (hardcoded in `index.html`) | `faqs` | Keep software questions; design/photo questions move to the creatives site (removed from the dev seed) |

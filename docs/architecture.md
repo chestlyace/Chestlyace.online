@@ -191,9 +191,13 @@ chestlyace.online/
   `pnpm db:migrate` (apply; uses `DIRECT_URL` if set, else `DATABASE_URL`),
   `pnpm db:seed` (dev only — wipes the tables and loads the old site's data;
   refuses to run in production). All read `.env.local`.
-- **Caching**: homepage queries are cached and tagged (e.g. `portfolio`). Every
-  admin write calls `revalidateTag('portfolio')`, so the public page is static
-  until something changes.
+- **Caching** (D64): the pages read through `lib/portfolio.ts`, which wraps the
+  queries in `unstable_cache` with the `portfolio` tag. Every admin write calls
+  `revalidateTag('portfolio', { expire: 0 })`, so the public page is static until
+  something changes. The cache key includes `VERCEL_GIT_COMMIT_SHA` (Next's data
+  cache outlives deployments, so a redeploy must not show an older deployment's
+  data), and `next dev` skips the cache. `unstable_cache` is marked replaced by
+  `use cache` in Next 16; moving to Cache Components later only changes that file.
 - **Writes**: only through `/api/admin/*` Route Handlers, all behind the admin
   session check, all validating the body with Zod against an explicit field list.
   (The old API turned every key in the request body into a SQL column name — that

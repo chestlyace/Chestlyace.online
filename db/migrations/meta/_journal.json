@@ -15,6 +15,20 @@
       "when": 1791250722242,
       "tag": "0001_updated_at_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791292717450,
+      "tag": "0002_certifications_and_project_pages",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791292723873,
+      "tag": "0003_certifications_updated_at_trigger",
+      "breakpoints": true
     }
   ]
 }

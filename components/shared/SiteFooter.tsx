@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
 import { FOOTER_DESCRIPTIONS } from "@/content/copy";
+import type { FooterLink } from "@/lib/chrome";
 import { SITE_KEYS, SITE_LABELS, siteUrl, type SiteKey } from "@/lib/sites";
 import { Brand } from "./Brand";
 import { Container } from "./Container";
 import { FooterWordmark } from "./FooterWordmark";
 import { TextLink } from "./TextLink";
-
-export type FooterLink = { label: string; href: string; external?: boolean };
 
 function Column({
   title,

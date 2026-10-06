@@ -47,6 +47,12 @@ export const profile = pgTable(
     phone: text("phone"),
     whatsappNumber: text("whatsapp_number"),
     location: text("location"),
+    // The hero's rotating outlined line (design.md §14.1): "Backend",
+    // "Full-Stack", … — the component adds the "& ".
+    headlineWords: text("headline_words")
+      .array()
+      .notNull()
+      .default(emptyTextArray),
     ...timestamps,
   },
   (t) => [
@@ -101,6 +107,12 @@ export const projects = pgTable("projects", {
   isLiveUrlPrivate: boolean("is_live_url_private").notNull().default(false),
   isSourceUrlPrivate: boolean("is_source_url_private").notNull().default(false),
   isFeatured: boolean("is_featured").notNull().default(false),
+  // Case-study text for the project page (design.md §14.10). A section with no
+  // text is hidden; with none at all the page falls back to `description`.
+  problem: text("problem"),
+  approach: text("approach"),
+  outcome: text("outcome"),
+  galleryUrls: text("gallery_urls").array().notNull().default(emptyTextArray),
   ...ordering,
   ...timestamps,
 });
@@ -131,6 +143,18 @@ export const journey = pgTable(
 
 export const volunteering = pgTable("volunteering", {
   ...timelineColumns,
+  ...ordering,
+  ...timestamps,
+});
+
+// Certifications and course badges (design.md §13.17, Q22).
+export const certifications = pgTable("certifications", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  issuer: text("issuer").notNull(),
+  issuedOn: date("issued_on"),
+  badgeUrl: text("badge_url"),
+  credentialUrl: text("credential_url"),
   ...ordering,
   ...timestamps,
 });

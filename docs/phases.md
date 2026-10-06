@@ -16,7 +16,7 @@ before the phase starts.
 | 2 | Multi-tenant routing | Done | — |
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
 | 4 | Database | Done | Q19 (decided) |
-| 5 | Main site homepage | 5a done; 5b.1 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
+| 5 | Main site homepage | 5a done; 5b.1 done; 5b.2 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
 | 6 | Admin panel | Not started | Q14, Q15, Q21 |
 | 7 | SEO & redirects | Not started | — |
 | 8 | Main site launch | Not started | Q17, Q20 |
@@ -134,8 +134,8 @@ Design skills (D36) were installed beforehand (issue #16, PR #17).
 
 | Step | Covers | Status |
 |---|---|---|
-| 5b.1 Foundations + core components — issue #25 | Packages (`motion`, `gsap`, `lenis`); tokens and fonts; smooth scroll; button, icon button, text link, tag, status pill, skip link, section heading; header capsule + Sites menu; giant-wordmark footer; `/design-system` (`design.md` §1–§8, §13.1–13.9, §14.0) | In review |
-| 5b.2 Data layer | Schema additions the specs need (certifications table; `problem`, `approach`, `outcome`, `gallery_urls` on `projects`; where the hero's rotating words live); migration; seed (Q6, Q7); queries and tests; footer and header data | Not started |
+| 5b.1 Foundations + core components — issue #25 | Packages (`motion`, `gsap`, `lenis`); tokens and fonts; smooth scroll; button, icon button, text link, tag, status pill, skip link, section heading; header capsule + Sites menu; giant-wordmark footer; `/design-system` (`design.md` §1–§8, §13.1–13.9, §14.0) | Done (PR #26) |
+| 5b.2 Data layer — issue #27 | Certifications table; `problem`, `approach`, `outcome`, `gallery_urls` on `projects`; `profile.headline_words`; migrations; seed (Q4, Q6, Q7, Q9, certifications); queries (project by slug, next project); footer link mapper; cached reads with the `portfolio` tag; tests. Pages and layouts are wired to the data from 5b.3 | In review |
 | 5b.3 Hero | `design.md` §14.1, including the WebGL grid (installs `ogl`) | Not started |
 | 5b.4 About · Skills · Services · Projects | §13.10–13.12, §13.17, §14.2–14.5, including the project ripple; installs `react-iconly`, devicon and Simple Icons | Not started |
 | 5b.5 Experience · Volunteering · Contact · FAQ | §13.13–13.16, §14.6–14.9; email delivery and spam protection (Q10) need the owner's approval first | Not started |
@@ -143,7 +143,7 @@ Design skills (D36) were installed beforehand (issue #16, PR #17).
 
 Also part of 5b, in the PR that needs it:
 
-- Caching with the `portfolio` tag (5b.2 onward)
+- Wiring the pages and the footer to the data (from 5b.3, once both databases are migrated)
 - Contact form behaviour per Q10 (5b.5)
 - Copy edits from `ia-content.md` §7 using the owner's wording. Until it arrives,
   placeholder copy lives in one marked file, `content/copy.ts` (D63)
