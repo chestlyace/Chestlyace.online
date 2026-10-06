@@ -1,11 +1,11 @@
 # Design
 
-> **Status: foundations approved in Phase 5a.1 (D37–D41); core component specs
-> written in Phase 5a.2 (D42–D46, §13); content components and sections pending
-> (D30).** §1–§8 below are the owner-approved foundations: direction, colour,
-> typography, spacing, depth, icons, theming, and motion. §13 holds the component
-> specs. Components without a spec yet (§9) and page sections (§14) are still the
-> Phase 3 placeholder baseline until their specs are approved in Phase 5a.3–5a.4. Nothing visual is built or restyled
+> **Status: foundations approved in Phase 5a.1 (D37–D41); core components
+> approved in Phase 5a.2 (D42–D46); content component specs written in Phase 5a.3
+> (D47–D53); sections pending (D30).** §1–§8 below are the owner-approved
+> foundations: direction, colour, typography, spacing, depth, icons, theming, and
+> motion. §13 holds the component specs. Page sections (§14) are still the Phase 3
+> placeholder baseline until their specs are approved in Phase 5a.4. Nothing visual is built or restyled
 > until its spec is written in this file and approved by the owner
 > (`instructions.md` §8). The process is in §12.
 
@@ -308,13 +308,14 @@ waiting on a click — runs longer.
 | `Hero` | Status pill, name in display type, headline, short intro, CTAs (View Projects, Get In Touch), quick contact row, portrait |
 | `About` | Quote, body text, resume download button |
 | `SkillGroup` | Category label + grid of devicon logo + name |
-| `ServiceCard` | Icon, title, description, bullet items |
-| `CreativesCard` | Fixed card in Services linking to `creatives.chestlyace.online` |
-| `ProjectCard` | Image, category label, title, summary, tech tags, live/source buttons (hidden or "Private" badge when `is_*_private`) |
-| `Timeline` + `TimelineItem` | Used by both Experience and Volunteering. Logo, role, organization, dates, description. Vertical line on desktop, stacked on mobile. |
-| `ContactCard` | Email / phone / WhatsApp tiles |
-| `ContactForm` | Name, email, subject, message → opens WhatsApp prefilled (current behaviour; `open-questions.md` Q10) |
-| `FaqList` | Native `<details>/<summary>` accordion |
+| `ServiceCard` | **Spec: §13.11.** Large cards that stack on scroll: number, Iconly icon, title, description, items |
+| `CreativesCard` | **Spec: §13.12.** Inverted last card of the service stack, linking to `creatives.chestlyace.online` |
+| `ProjectCard` | **Spec: §13.10.** Image-forward tile: image, mono category label, title + `↗`; links to the project page. Hover zoom and "View ↗" cursor label |
+| `Timeline` + `TimelineItem` | **Spec: §13.13.** Used by both Experience and Volunteering. Rail that fills blue on scroll, a dot per entry; dates, role, organization, description, optional logo |
+| `ContactCard` | **Spec: §13.14.** Email / phone / WhatsApp tiles with copy buttons |
+| `ContactForm` | **Spec: §13.15** (form fields). Name, email, subject, message; delivery per Q10 (email + WhatsApp) |
+| `FaqList` | **Spec: §13.16.** Hairline accordion on native `<details>/<summary>` |
+| `CertificationItem` | **Spec: §13.17.** Badge tile in a grid (Q22) |
 
 ### Creatives (`components/creatives/`)
 
@@ -408,8 +409,8 @@ The design is led by the owner and built to the owner's taste.
 
 Shared components used by all three sites. Each spec follows the checklist in
 §12. Colours are token names from §2; type steps are from §3; curves, springs, and
-durations are from §8. **Approved in** for this group: the Phase 5a.2 PR
-(issue #19).
+durations are from §8. **Approved in:** core components — PR #20 (issue #19);
+content components — the Phase 5a.3 PR (issue #21).
 
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
@@ -861,6 +862,375 @@ linking to `#main` (the `<main>` element, `tabindex="-1"`). Hidden until
 focused; when focused, it appears at top 16px, left 16px, above the header
 (`z-[60]`), styled as a `primary` `md` button with no magnetic pull. Reduced
 motion has no effect (it doesn't animate).
+
+**Content components (Phase 5a.3, issue #21):**
+[Project card](#1310-project-card) · [Service card](#1311-service-card) ·
+[Creatives card](#1312-creatives-card) · [Timeline item](#1313-timeline-item) ·
+[Contact tile](#1314-contact-tile) · [Form fields](#1315-form-fields) ·
+[FAQ item](#1316-faq-item) · [Certification item](#1317-certification-item)
+
+Grids, section headings, and how many items show are decided in the section
+specs (§14, Phase 5a.4). These specs cover the component itself.
+
+### 13.10 Project card
+
+**Purpose.** One software project in the Projects section; opens the project's
+page (`/projects/[slug]`, Q11).
+
+**References.** Owner's choice (2026-10-06): **image-forward tile** —
+[anubi.io/work/all](https://anubi.io/work/all): big rounded image, small mono
+label, title, `↗`.
+
+**Anatomy.**
+
+1. **Media** — the project image (`projects.image_url`) in a rounded frame.
+2. **Label** — `category_label` in the `label` step (e.g. "WEB APP"). A year can
+   follow it ("WEB APP · 2025") only if a year field is added to `projects` —
+   the schema has none today; decided in review or at 5b.
+3. **Title row** — `title` + a Lucide `arrow-up-right` at the right edge.
+
+No summary, tech tags, or Live / Source buttons on the card — they live on the
+project page.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Media frame | Aspect `4 / 3`, radius `lg` (20px), `surface` background, image `object-fit: cover` |
+| No image | `surface` frame with the title in Bebas `display-lg`, `muted`, centred |
+| Media → label | 16px |
+| Label | `label` step, `muted` |
+| Label → title | 6px |
+| Title | `h3` step, `foreground`; icon 20px, `muted` |
+| Featured variant | Aspect `16 / 9`; used where the section spec gives a project a wider slot |
+
+**States and motion** (Motion for hover, GSAP for scroll):
+
+| State | Treatment |
+|---|---|
+| Hover (fine pointer) | Image scales `1 → 1.04` inside the frame (600ms `ease-out`); title icon turns `foreground` and nudges 2px up-right |
+| Cursor label | Over the media, a 88px `primary` circle with "VIEW ↗" (`label` step, `primary-foreground`) appears at the pointer — `scale(0.5 → 1)` + `opacity`, 200ms `ease-out` — and follows it with a spring (`bounce: 0, duration: 0.35`). The system cursor is hidden over the media only while the label shows. Leaves the same way it came |
+| Pressed | Whole card `scale(0.98)`, 120ms |
+| Focus | 2px `ring`, 4px offset, around the media frame (radius `lg`); the image zoom plays as on hover |
+| Scroll entrance | The media reveals upward — `clip-path: inset(100% 0 0 0) → inset(0)` — while the image settles `scale(1.15 → 1)`, 900ms `expo.out`; label and title fade up 16px, 80ms later. Batched per row (ScrollTrigger `batch`), plays once |
+
+- The move from card to project page (shared media, GSAP Flip) is specified
+  with the project page in Phase 5a.4.
+- Touch: no zoom, no cursor label; press feedback only.
+- Reduced motion: no zoom, cursor label, or entrance; title icon changes colour
+  only.
+
+**Accessibility.** The card is one `<a>`; its name is the title. The image is
+decorative inside the link (`alt=""`) so the title isn't read twice. The
+cursor label is `aria-hidden`. The image is lazy-loaded through `next/image`
+except for cards in the first viewport.
+
+### 13.11 Service card
+
+**Purpose.** One software service in the Services section (`services` table, D9).
+
+**References.** Owner's choice (2026-10-06): **stacking cards on scroll** — each
+service is a large card; as the visitor scrolls, the next card slides up over the
+previous one and they stack.
+
+**Anatomy.** Card → number ("01") → Iconly icon (`services.icon`) → title →
+description → items (`services.items`).
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Card | `surface` background, radius `xl` (28px), padding 48px desktop / 24px phone |
+| Height | `min(70vh, 560px)` desktop; content height on phones |
+| Layout (desktop) | Two columns: left — number and title; right — icon, description, items |
+| Layout (phone) | One column: number + icon on one row, then title, description, items |
+| Number | Bebas `display-lg`, `muted`, two digits |
+| Icon | Iconly Light, 40px, `foreground` |
+| Title | `title` step, `foreground` |
+| Description | `lead` step, `muted`, max 52ch |
+| Items | A list, 2 columns from `md`; each item `body`, `foreground`, preceded by a 16px `muted` dash, with a 1px `border` line between rows |
+
+**Stacking** (CSS `position: sticky` for the stack, GSAP ScrollTrigger for the
+scrubbed effects):
+
+- Every card sticks at `top: 112px + index × 16px` (phones: `96px + index × 8px`),
+  so each earlier card's top edge peeks out above the next — the visible stack.
+- As the next card slides over it, the card underneath scales `1 → 0.94` and
+  dims (an overlay of `background` at `0 → 40%` opacity), scrubbed to scroll.
+- Stacking needs room: it runs only when the viewport is at least 640px tall.
+  Shorter screens get a plain list with 16px gaps.
+- The last card in the stack is the creatives card (§13.12).
+
+**States.** Not interactive by itself (no hover). Items are plain text.
+
+**Reduced motion.** No sticking, scaling, or dimming — a plain list with 16px
+gaps.
+
+**Accessibility.** An `<ol>`; each card an `<li>` with an `<h3>` title. The number
+is `aria-hidden` (the list order already gives it). The dimming overlay is
+decorative; covered cards are still in the reading order.
+
+### 13.12 Creatives card
+
+**Purpose.** The fixed link from Services to `creatives.chestlyace.online` (D9).
+Not a database row, so it can't be deleted by accident.
+
+**References.** Owner's choice (2026-10-06): **the last card in the service
+stack**, styled differently.
+
+**Anatomy and values.** Same frame, size, and sticking as a service card (§13.11),
+but **inverted**: background `foreground`, text `background` (near-black card with
+white text in light mode, light card with near-black text in dark mode).
+
+| Part | Value |
+|---|---|
+| Label | "CREATIVES", `label` step, at 60% opacity |
+| Title | "Design & photography live on Creatives" — `title` step (placeholder copy from `ia-content.md` §2.4; owner's wording at 5b) |
+| Line | One short sentence, `lead` step, at 70% opacity |
+| Arrow | Lucide `arrow-up-right`, 32px, top-right |
+
+- The whole card is one link to the creatives site (stays on the preview on
+  Vercel previews, D28).
+- Hover (fine pointer): the arrow nudges 4px up-right and the card scales
+  `1 → 1.01` (default spring). Pressed: `scale(0.98)`.
+- Focus: 2px `ring`, 4px offset, radius `xl`.
+- Reduced motion: the arrow nudge only.
+- Contrast: the inverted pair is `foreground` / `background` swapped — the same
+  ratio as body text. The 60% and 70% text still pass 4.5:1 in both themes
+  (lowest: 5.1:1).
+
+### 13.13 Timeline item
+
+**Purpose.** One entry in Experience (`journey`) or Volunteering
+(`volunteering`) — the same component for both (D33).
+
+**References.** Owner's choice (2026-10-06): **a line that fills on scroll** — a
+vertical line with a dot per entry; the line fills with blue as the visitor
+scrolls, and each dot lights up as its entry reaches the middle of the screen.
+
+**Anatomy.**
+
+- **Rail** (per timeline): a 2px vertical line in `border`, with a `primary`
+  fill on top of it.
+- **Dot** (per entry): on the rail, level with the entry's date.
+- **Content:** date range → role → organization (+ location) → description →
+  optional logo and "EDUCATION" tag.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Rail column | 24px wide; line 2px, centred, radius `full` |
+| Rail → content | 32px desktop / 20px phone |
+| Between entries | 64px desktop / 48px phone |
+| Dot | 12px circle. Inactive: `background` fill, 2px `border` edge. Active: `primary` fill and edge, plus a 6px halo of `primary` at 20% |
+| Dates | `label` step, `muted` — `dates_label`, else built from `start_date` / `end_date` ("2024 — NOW") |
+| Role | `h3` step, `foreground` |
+| Organization | `body`, medium 500, `foreground`; a text-roll link with `↗` when `link_url` is set (§13.3). Location after it, `sm`, `muted` |
+| Description | `body`, `muted`, max 60ch, 12px above |
+| Logo | Optional 40px square, radius `md`, `surface` background, left of the role (desktop) |
+| Education | `journey.type = 'education'` adds a Tag (§13.4) "EDUCATION" after the dates |
+
+**Motion** (GSAP ScrollTrigger):
+
+- The `primary` fill grows down the rail (`scaleY 0 → 1`, origin top), scrubbed
+  so its tip stays at the middle of the viewport while the timeline passes.
+- As the tip reaches a dot, the dot activates: fill and edge to `primary`,
+  `scale(0.8 → 1)`, halo fades in — 300ms `ease-out`. Scrolling back up
+  deactivates it the same way.
+- Each entry's content fades up 24px as it enters (650ms `power3.out`, once).
+- Reduced motion: the rail shows fully filled in `primary`, every dot is active,
+  and content shows in its final state.
+
+**Responsive.** The same single column at every width; the rail always sits on
+the left.
+
+**Accessibility.** An `<ol>` of `<li>` entries; role in an `<h3>`; dates in
+`<time datetime>`. The rail, fill, and dots are `aria-hidden`.
+
+### 13.14 Contact tile
+
+**Purpose.** Email, phone, and WhatsApp in the Contact section (`profile.email`,
+`profile.phone`, `profile.whatsapp_number`; Q9, Q10).
+
+**References.** Owner's choice (2026-10-06): **tiles with copy**.
+
+**Anatomy.** Tile → Iconly icon → label → value → `↗` (top-right) → copy button
+(email and phone only).
+
+| Tile | Icon (Iconly Light) | Label | Value | Opens |
+|---|---|---|---|---|
+| Email | `Message` | EMAIL | `chestlyace@gmail.com` | `mailto:` |
+| Phone | `Call` | PHONE | the number, formatted | `tel:` |
+| WhatsApp | `Chat` | WHATSAPP | "Chat on WhatsApp" | `https://wa.me/<number>` |
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Tile | `surface` background (`surface-raised` on `background-alt`), radius `lg` (20px), padding 24px desktop / 20px phone, min height 176px |
+| Icon | 32px, `foreground`, top-left |
+| Label | `label` step, `muted`, 24px below the icon |
+| Value | 17px, medium 500, `foreground`; long values wrap anywhere rather than overflow |
+| Arrow | Lucide `arrow-up-right`, 20px, `muted`, top-right |
+| Copy button | Icon button (§13.2) at 36px visual size, bottom-right, Lucide `copy` |
+
+**States and motion.**
+
+| State | Treatment |
+|---|---|
+| Hover (fine pointer) | Background `surface-raised` (on `background-alt`: `surface`), 150ms; arrow turns `foreground` and nudges 2px up-right |
+| Pressed | `scale(0.98)`, 120ms |
+| Focus | 2px `ring`, 2px offset, radius `lg` |
+| Copied | The copy icon swaps to `check` in `secondary` green (icon swap from §13.2), and a small "Copied" bubble (`surface-raised`, radius `sm`, `label` step) grows from the button — `scale(0.95 → 1)` + opacity, 150ms. Both revert after 2s |
+
+- Reduced motion: no arrow nudge; the icon and bubble cross-fade.
+- If the clipboard isn't available, the copy button is not shown.
+
+**Responsive.** Three columns from `md`; one column on phones (min height drops
+to content height there).
+
+**Accessibility.** The tile's link covers the whole tile with a stretched
+pseudo-element; the copy button sits above it as a separate `<button>` (never
+nested inside the link). Copy button label: "Copy email address" / "Copy phone
+number". A polite live region announces "Email address copied". The link's name
+includes the label: "Email: chestlyace@gmail.com".
+
+### 13.15 Form fields
+
+**Purpose.** The contact form (name, email, subject, message; Q10) and, later,
+the admin's forms.
+
+**References.** Owner's choice (2026-10-06): **filled fields**, Apple style —
+soft grey fills, rounded corners, no hard border, label above.
+
+**Anatomy.** Label → control → helper or error message.
+
+**Controls.**
+
+| Control | Use | Values |
+|---|---|---|
+| Text input | Name, email | Height 48px, padding 0 16px |
+| Textarea | Message | Min height 160px, padding 12px 16px, grows with its content up to 320px, then scrolls |
+| Select | Subject ("General Inquiry", "Web Development Project", "Job Opportunity", "Collaboration") | Native `<select>`, same box as a text input, Lucide `chevron-down` 16px at 16px from the right |
+
+**Values (all controls).**
+
+| Property | Value |
+|---|---|
+| Fill | `surface` (`surface-raised` on `background-alt`) |
+| Edge | A soft inset 1px `border` line — keeps the field visible on white without reading as a hard outline |
+| Radius | `md` (12px) |
+| Text | 17px `body`, `foreground` (17px also stops iOS zooming on focus) |
+| Placeholder | `muted` |
+| Label | `sm` step, medium 500, `foreground`, 8px above the control |
+| Optional fields | "(optional)" after the label in `muted`; no asterisks |
+| Helper / error | `sm` step, 6px below the control |
+| Between fields | 20px |
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Hover (fine pointer) | Edge darkens to `muted` at 50%, 150ms |
+| Focus | 2px `ring` around the control (no offset), edge hidden; 150ms `ease-out` |
+| Error | Edge `danger`; message in `danger` with a 14px Lucide `circle-alert`; `aria-invalid="true"` |
+| Disabled | 50% opacity, no hover |
+| `prefers-contrast: more` | Edge becomes 1px `muted` (over 3:1 on every background) |
+
+- **Validation timing:** a field is first checked when the visitor leaves it,
+  then re-checked as they type once it has shown an error. On submit, every
+  field is checked and focus moves to the first invalid one.
+- Error messages enter with height + opacity, 200ms `ease-out`. Reduced motion:
+  they appear without the height animation.
+- **Form status:** the submit button is a `primary` `lg` Button (§13.1) with its
+  loading state while sending. On success the form cross-fades (300ms) into a
+  thank-you panel (`surface`, radius `lg`, Lucide `circle-check` in `secondary`,
+  owner's copy at 5b). A failed send shows an alert at the top of the form
+  (`danger` text, Lucide `circle-alert`, `role="alert"`), keeping what was typed.
+- Spam protection, if approved at 5b, sits directly above the submit button.
+
+**Responsive.** Name and email side by side from `sm`; everything else full width.
+
+**Accessibility.** Every control has a visible `<label for>`. Helper and error
+text are tied to the control with `aria-describedby`. Autocomplete attributes on
+name and email. The filled style keeps a label above every field, so the label —
+not the edge — identifies each one.
+
+### 13.16 FAQ item
+
+**Purpose.** One question in the FAQ (`faqs` table); the list also feeds the
+`FAQPage` JSON-LD.
+
+**References.** Owner's choice (2026-10-06): **hairline accordion** — thin lines
+between rows; a `+` turns into `×` and the answer opens smoothly below. Several
+can be open at once.
+
+**Anatomy.** Row → question + toggle icon → answer.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Row | 1px `border` line below each row, and above the first |
+| Question | `lead` step, medium 500, `foreground`; padding 24px top and bottom (20px phones); 56px right padding to clear the icon |
+| Icon | Lucide `plus`, 20px, `foreground`, in a 32px `surface` circle at the right |
+| Answer | `body`, `muted`, max 68ch, 24px bottom padding |
+
+**States and motion.**
+
+- **Open:** the icon rotates 45° (`+` becomes `×`) with the default spring; the
+  answer's height opens `0 → auto` (300ms `ease-out`) while its text fades in and
+  drops `translateY(-4px → 0)` (250ms, 50ms later). **Close:** faster — 200ms,
+  text and height together.
+- Hover (fine pointer): icon circle `surface-raised`, 150ms.
+- Focus: 2px `ring` on the question row, radius `sm`.
+- Reduced motion: opens and closes instantly; the icon still turns.
+
+**Implementation note.** Native `<details>` / `<summary>`, so it works without
+JavaScript and with the browser's find-in-page. The open/close animation uses
+CSS (`::details-content` with `interpolate-size`) where supported and Motion
+elsewhere; without either it opens instantly.
+
+**Accessibility.** `<summary>` is the keyboard control (Enter / Space). The icon
+is `aria-hidden`; the open state comes from `<details>` itself.
+
+### 13.17 Certification item
+
+**Purpose.** One certification in the Certifications block (Q22) — the Google
+badges from the old site's `assets/certs/`.
+
+**References.** Owner's choice (2026-10-06): **badge grid**.
+
+**Anatomy.** Tile → badge image → name → issuer · year → `↗` when there's a
+credential link.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Tile | `surface` background (`surface-raised` on `background-alt`), radius `lg`, padding 24px, min width 200px |
+| Badge | 64px, `object-fit: contain`, top-left; SVG preferred |
+| Name | `body`, medium 500, `foreground`, at most 2 lines; 16px below the badge |
+| Issuer · year | `label` step, `muted` (e.g. "GOOGLE · 2024"), 6px below |
+| Arrow | Lucide `arrow-up-right`, 18px, `muted`, top-right — only when linked |
+
+**States and motion.**
+
+- When the certification has a credential URL, the whole tile is a link to it.
+  Hover (fine pointer): background `surface-raised` (on `background-alt`:
+  `surface`); the badge lifts `translateY(-2px)` and scales `1 → 1.04` (default
+  spring); the arrow nudges. Pressed: `scale(0.98)`. Focus: 2px `ring`,
+  radius `lg`.
+- Without a URL, the tile is static — no hover.
+- Reduced motion: background change only.
+
+**Data.** The schema has no certifications table yet. Phase 5b adds one with at
+least: name, issuer, issued date, badge image, credential URL, order, and
+published flag (proposed; confirmed in the 5b PR).
+
+**Accessibility.** The badge is decorative (`alt=""`) because the name is text.
+A linked tile's name is "Name — Issuer, verify credential (opens in a new tab)".
 
 ## 14. Page and section specs
 

@@ -75,6 +75,13 @@ every doc that depends on it.
 | D44 | **Header: floating glass capsule in the old site's shape and position** | Centred, 16px from the top, max 896px, `rounded-full`. Key links + "Sites" chip (replaces the header's separate cross-site links); expands into the menu on phones. `design.md` §13.6–13.7, `ia-content.md` §3 |
 | D45 | **Footer: giant wordmark** | Sites, Connect, Contact columns and a full-width "CHESTLY ACE" revealed on scroll; Quick links column dropped. `design.md` §13.8, `ia-content.md` §3 |
 | D46 | **Tags: mono label chips** | JetBrains Mono `label` step, `sm` radius, neutral fill. `design.md` §13.4 |
+| D47 | **Project card: image-forward tile** | anubi.io/work style: image, mono label, title + `↗`; hover zoom and a "View ↗" cursor label. Summary, tags, and links move to the project page. `design.md` §13.10 |
+| D48 | **Services: cards that stack on scroll** | Sticky cards with scrubbed scale/dim; plain list on short screens and under reduced motion. `design.md` §13.11 |
+| D49 | **Creatives card: last card of the service stack, inverted** | `design.md` §13.12 |
+| D50 | **Timeline: rail that fills on scroll** | Same component for Experience and Volunteering; dots light up at mid-screen. `design.md` §13.13 |
+| D51 | **Contact: tiles with copy** | Email, phone, WhatsApp; copy buttons with "Copied" feedback. `design.md` §13.14 |
+| D52 | **Form fields: filled (Apple style), label above** | Soft inset edge; `muted` edge under `prefers-contrast: more`. `design.md` §13.15 |
+| D53 | **FAQ: hairline accordion; certifications: badge grid** | Native `<details>`; several answers open at once. `design.md` §13.16–13.17 |
 
 ## Status
 
