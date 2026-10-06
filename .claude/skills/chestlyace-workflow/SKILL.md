@@ -33,7 +33,13 @@ Before writing any code:
    your recommendation.
 2. Walk through the phase's deliverables. For each one, check that the docs say
    exactly what to build. Ask about anything they don't.
-3. Wait for the answers. Record them in the docs only as the owner instructs
+3. **Visual work needs an approved design spec** (`instructions.md` §8). If the
+   phase builds or restyles anything visual, every component and section in scope
+   must have a spec in `docs/design.md` §13–14 that the owner has merged. If one is
+   missing, stop: the design step (`a`) comes first. In a design step, ask the
+   owner for references (sites, screenshots, images) and tools before writing
+   specs — components first, then sections.
+4. Wait for the answers. Record them in the docs only as the owner instructs
    (`instructions.md` §3.3).
 
 ## Step 3 — Open the issue
@@ -74,6 +80,8 @@ Title: Phase <N> — <phase name>
 - **The moment something is unclear, stop and ask.** That includes a library
   choice, a file location, a name, a colour, some copy, or a behaviour the docs
   don't cover. Don't pick a default and carry on.
+- Build visuals exactly to the approved spec. No invented styles, and no
+  animation or UI libraries the owner hasn't named.
 - Commit in small Conventional Commit steps (`feat:`, `fix:`, `chore:`, …).
 - Don't touch `docs/`, `instructions.md`, or this skill unless the owner told you
   to make that specific change.
@@ -112,6 +120,7 @@ Closes #<issue>
 - [x] Added no dependencies the docs don't name, unless approved
 - [x] This PR closes exactly one issue
 - [x] Quality bar (§6) met
+- [x] Visual work follows an owner-approved design spec (§8), or the PR has no visual work
 ```
 
 ## Step 7 — Stop and wait for review
