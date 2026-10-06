@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { fontVariables } from "@/lib/fonts";
 import type { FooterLink } from "@/lib/chrome";
-import type { SiteKey } from "@/lib/sites";
+import type { PublicSiteKey } from "@/lib/sites";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { Providers } from "./Providers";
 import { SiteFooter } from "./SiteFooter";
@@ -15,7 +15,7 @@ export function SiteDocument({
   footer,
   children,
 }: {
-  site: SiteKey;
+  site: PublicSiteKey;
   /** The footer's Connect and Contact columns (main only, from the database). */
   footer?: { connect: readonly FooterLink[]; contact: readonly FooterLink[] };
   children: ReactNode;

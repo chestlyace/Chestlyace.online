@@ -1,6 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { PREVIEW_SITE_COOKIE, decideRoute } from "@/lib/sites";
 
+// The admin is never to be indexed (D71): every response says so, on top of the
+// page's own robots meta and robots.txt.
+function noindex(response: NextResponse) {
+  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+}
+
 export function proxy(request: NextRequest) {
   const decision = decideRoute({
     host: request.headers.get("host"),
@@ -14,12 +20,29 @@ export function proxy(request: NextRequest) {
     return new NextResponse("Not Found", { status: 404 });
   }
   if (decision.kind === "pass-through") {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    if (decision.site === "admin") noindex(response);
+    return response;
   }
 
   const url = request.nextUrl.clone();
   url.pathname = decision.pathname;
-  const response = NextResponse.rewrite(url);
+
+  // The admin's pages need the address the visitor asked for, to send them back
+  // to it after signing in (lib/admin/auth.ts).
+  const requestHeaders = new Headers(request.headers);
+  if (decision.site === "admin") {
+    requestHeaders.set(
+      "x-admin-path",
+      request.nextUrl.pathname + request.nextUrl.search,
+    );
+  } else {
+    requestHeaders.delete("x-admin-path");
+  }
+  const response = NextResponse.rewrite(url, {
+    request: { headers: requestHeaders },
+  });
+  if (decision.site === "admin") noindex(response);
 
   if (decision.setPreviewCookie) {
     response.cookies.set(PREVIEW_SITE_COOKIE, decision.setPreviewCookie, {

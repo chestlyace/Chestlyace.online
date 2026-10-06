@@ -14,7 +14,7 @@ import { cn } from "@/lib/cn";
 import { useIsPhone } from "@/lib/media";
 import { EASE_OUT, SPRING } from "@/lib/motion";
 import type { NavLink } from "@/lib/sections";
-import type { SiteKey } from "@/lib/sites";
+import type { PublicSiteKey } from "@/lib/sites";
 import { Brand } from "./Brand";
 import { IconButton } from "./IconButton";
 import { useSmoothScroll } from "./SmoothScroll";
@@ -23,7 +23,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useActiveNavLink } from "./useActiveSection";
 
 export type HeaderSite = {
-  key: SiteKey;
+  key: PublicSiteKey;
   label: string;
   description: string;
   href: string;

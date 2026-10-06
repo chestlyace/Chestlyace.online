@@ -187,6 +187,59 @@
   }
 }
 
+/* The admin's phone drawer (design.md §13.18): a native <dialog> that slides in
+   from the left over a scrim, 300ms. */
+@keyframes admin-card-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+.admin-drawer {
+  translate: -100% 0;
+  transition:
+    translate 300ms var(--ease-drawer),
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+}
+
+.admin-drawer[open] {
+  translate: 0 0;
+}
+
+@starting-style {
+  .admin-drawer[open] {
+    translate: -100% 0;
+  }
+}
+
+.admin-drawer::backdrop {
+  background-color: color-mix(in srgb, var(--foreground) 40%, transparent);
+  transition:
+    opacity 300ms var(--ease-out),
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+  opacity: 0;
+}
+
+.admin-drawer[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .admin-drawer[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-drawer,
+  .admin-drawer::backdrop {
+    transition: none;
+  }
+}
+
 /* Anchored sections never sit under the header capsule (design.md §14.0). */
 section[id] {
   scroll-margin-top: 96px;
