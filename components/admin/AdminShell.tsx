@@ -9,6 +9,9 @@ import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { TextLink } from "@/components/shared/TextLink";
 import { RESOURCES } from "@/lib/admin/resources";
 import { AdminNav } from "./AdminNav";
+import { ConfirmProvider } from "./ConfirmDialog";
+import { ToastProvider } from "./Toast";
+import { UnsavedProvider } from "./UnsavedGuard";
 import { SignOutButton } from "./SignOutButton";
 
 function screenTitle(pathname: string) {
@@ -61,6 +64,29 @@ export function AdminShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+
+  return (
+    <ToastProvider>
+      <ConfirmProvider>
+        <UnsavedProvider>
+          <Frame siteHref={siteHref} pathname={pathname}>
+            {children}
+          </Frame>
+        </UnsavedProvider>
+      </ConfirmProvider>
+    </ToastProvider>
+  );
+}
+
+function Frame({
+  siteHref,
+  pathname,
+  children,
+}: {
+  siteHref: string;
+  pathname: string;
+  children: ReactNode;
+}) {
   const drawer = useRef<HTMLDialogElement>(null);
 
   // Choosing a link (or any navigation) closes the drawer.

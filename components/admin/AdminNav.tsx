@@ -14,7 +14,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
+import { useConfirm } from "./ConfirmDialog";
+import { useUnsavedGuard } from "./UnsavedGuard";
 import { cn } from "@/lib/cn";
 import { RESOURCES, type ResourceId } from "@/lib/admin/resources";
 
@@ -57,6 +60,30 @@ function isActive(pathname: string, href: string) {
 // current one gets a fill, a 2px bar on its left edge and `aria-current`.
 export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const confirm = useConfirm();
+  const unsaved = useUnsavedGuard();
+
+  // A screen with unsaved changes asks before the sidebar takes you away.
+  const leave = async (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!unsaved?.isDirty()) {
+      onNavigate?.();
+      return;
+    }
+    event.preventDefault();
+    if (
+      await confirm({
+        title: "Leave without saving?",
+        text: "Your changes to this entry will be lost.",
+        confirmLabel: "Discard changes",
+        tone: "primary",
+      })
+    ) {
+      unsaved?.clear();
+      onNavigate?.();
+      router.push(href);
+    }
+  };
 
   return (
     <nav aria-label="Admin" className="flex flex-col gap-6">
@@ -71,7 +98,7 @@ export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    onClick={onNavigate}
+                    onClick={(event) => leave(event, item.href)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "relative flex h-10 items-center gap-3 rounded-md px-3 text-[0.9375rem] font-medium text-muted transition-colors duration-150",

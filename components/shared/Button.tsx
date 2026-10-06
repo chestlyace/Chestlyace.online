@@ -21,7 +21,7 @@ import { isPagePath } from "@/lib/links";
 import { useFinePointer, usePrefersReducedMotion } from "@/lib/media";
 import { EASE_OUT, SPRING } from "@/lib/motion";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "destructive";
 type Size = "sm" | "md" | "lg";
 type IconNudge = "right" | "up-right" | "down" | "none";
 
@@ -35,6 +35,9 @@ const variants: Record<Variant, string> = {
     "bg-primary text-primary-foreground [--sheen:rgb(255_255_255/0.3)] not-data-disabled:hover:bg-primary-hover",
   secondary:
     "border border-border bg-tile text-foreground [--sheen:color-mix(in_srgb,var(--foreground)_12%,transparent)] not-data-disabled:hover:border-muted/40 not-data-disabled:hover:bg-tile-hover",
+  // Admin only (design.md §13.23): deleting.
+  destructive:
+    "bg-danger text-white [--sheen:rgb(255_255_255/0.25)] not-data-disabled:hover:bg-danger/85",
   ghost:
     "text-foreground [--sheen:color-mix(in_srgb,var(--foreground)_10%,transparent)] not-data-disabled:hover:bg-tile",
 };

@@ -31,7 +31,8 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-iconly": "^2.2.10",
-    "simple-icons": "^16.34.0"
+    "simple-icons": "^16.34.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
