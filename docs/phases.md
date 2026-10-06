@@ -12,8 +12,8 @@ before the phase starts.
 | # | Phase | Status | Blocking questions |
 |---|---|---|---|
 | 0 | Planning & workflow | Done | — |
-| 1 | Project scaffold | In review | Q2, Q3 (decided) |
-| 2 | Multi-tenant routing | Not started | — |
+| 1 | Project scaffold | Done | Q2, Q3 (decided) |
+| 2 | Multi-tenant routing | In review | — |
 | 3 | Design system & shared layout | Not started | Q13, Q18 |
 | 4 | Database | Not started | Q19 |
 | 5 | Main site homepage | Not started | Q4–Q11, Q22 |
@@ -37,7 +37,7 @@ the same foundation.
 
 **Done when:** both PRs are merged.
 
-## Phase 1 — Project scaffold — issue #5
+## Phase 1 — Project scaffold — issue #5, PR #6 (merged)
 
 **Goal:** an empty Next.js app that builds, lints, and deploys.
 
@@ -53,16 +53,17 @@ the same foundation.
 build is green.
 **Refs:** `architecture.md` §2, §4, §8, §9.
 
-## Phase 2 — Multi-tenant routing
+## Phase 2 — Multi-tenant routing — issue #7
 
 **Goal:** one app answers as three sites depending on the host.
 
 - `lib/sites.ts` with the three sites and URL helpers
-- `proxy.ts` rewriting to `app/_sites/<site>/`; unknown hosts → main
+- `proxy.ts` rewriting to `app/sites/<site>/` (D19); unknown hosts → main
 - `/api/*` and `/admin/*` return 404 on creatives and blog hosts
-- Placeholder root layout + page for each site, each with its own metadata
-- `*.localhost` local dev; `?site=` override on preview deployments only
-- Tests for host → site resolution
+- Placeholder root layout + page + 404 for each site, each with its own metadata
+- `*.localhost` local dev; `?site=` override on preview deployments only,
+  remembered in a cookie (D21)
+- Tests for host → site resolution and routing decisions, with Vitest (D20)
 
 **Done when:** `localhost:3000`, `creatives.localhost:3000`, and
 `blog.localhost:3000` each show their own placeholder, locally and on preview.
