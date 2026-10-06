@@ -14,7 +14,7 @@ before the phase starts.
 | 0 | Planning & workflow | Done | — |
 | 1 | Project scaffold | Done | Q2, Q3 (decided) |
 | 2 | Multi-tenant routing | Done | — |
-| 3 | Design system & shared layout | In review | Q13, Q18 (decided) |
+| 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
 | 4 | Database | Not started | Q19 |
 | 5 | Main site homepage | Not started | Q4–Q11, Q22 |
 | 6 | Admin panel | Not started | Q14, Q15, Q21 |
@@ -25,6 +25,13 @@ before the phase starts.
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
+
+**Design steps (D30).** Every phase that builds pages (5, 6, 9, 10) starts with a
+**design step** (`a`): a docs-only pull request that writes the specs into
+`design.md` §13–14 — components first, then sections — from the owner's
+references. The **build step** (`b`) starts only after the owner merges the
+design step. A design step may be split into several issues if the owner wants
+(e.g. one per component group). See `instructions.md` §8 and `design.md` §12.
 
 ---
 
@@ -69,9 +76,10 @@ build is green.
 `blog.localhost:3000` each show their own placeholder, locally and on preview.
 **Refs:** `architecture.md` §3, §4.
 
-## Phase 3 — Design system & shared layout — issue #9
+## Phase 3 — Design system & shared layout — issue #9, PR #10 (merged)
 
-**Goal:** the visual foundation every page is built from.
+**Goal:** the visual foundation every page is built from. Its visual values are
+a placeholder baseline (D30); the design steps of later phases replace them.
 
 - Colour tokens for light and dark (`design.md` §2), main-site accent (§4)
 - Fonts via `next/font` (§3, D22), type scale
@@ -105,6 +113,13 @@ and desktop widths, on all three hosts, and the theme carries across hosts.
 
 **Goal:** the full public homepage, reading from the database.
 
+**5a — Design (docs only).** Specs for every component the homepage uses —
+including the shared header, footer, buttons, links, and cards — then every
+section, from the owner's references. Tools the owner names (e.g. Framer Motion)
+are recorded here.
+
+**5b — Build**, after 5a is merged:
+
 - Sections in order: Hero, About, Skills, Services (+ creatives card),
   Projects, Experience, Volunteering, Contact, FAQ (`ia-content.md` §2)
 - Section components from `design.md` §9
@@ -123,6 +138,10 @@ This phase is large. Splitting it into sub-issues is an option for the owner.
 ## Phase 6 — Admin panel
 
 **Goal:** the owner can edit all main-site content without SQL.
+
+**6a — Design (docs only).** Specs for the admin's components and screens.
+
+**6b — Build**, after 6a is merged:
 
 - Login/logout, session cookie, rate limiting (per Q15)
 - Admin API for every resource (`content-schema.md` §2), Zod-validated
@@ -164,6 +183,12 @@ content, and the owner has checked it.
 
 **Goal:** blog.chestlyace.online with MDX posts.
 
+**9a — Design (docs only).** Specs for the blog's components (post card, post
+header, prose, code block, callout, table of contents) and pages, plus its accent
+colour (Q12).
+
+**9b — Build**, after 9a is merged:
+
 - MDX pipeline and frontmatter validation (`content-schema.md` §4, Q16)
 - Post list, post page, tag pages, RSS feed
 - Blog components (`design.md` §9) and accent colour (Q12)
@@ -174,6 +199,11 @@ content, and the owner has checked it.
 ## Phase 10 — Creatives site
 
 **Goal:** creatives.chestlyace.online with design and photography work.
+
+**10a — Design (docs only).** Specs for the creatives site's components (gallery,
+filters, lightbox, piece page) and pages, plus its accent colour (Q12).
+
+**10b — Build**, after 10a is merged:
 
 - CMS set up per Q1, with the content model from `content-schema.md` §5
 - Gallery with filters, piece pages, lightbox, services page

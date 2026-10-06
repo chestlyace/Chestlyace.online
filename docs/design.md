@@ -1,6 +1,16 @@
 # Design
 
+> **Status: placeholder baseline — no design is final (D30).**
+> The colours, fonts, type scale, and component styles below are the Phase 3
+> starting point, not the final design. The plumbing stays (theme switching,
+> token system, component structure, header/footer structure, `/design-system`
+> page); the visual values get replaced as the owner designs each page.
+> Nothing visual is built or restyled until its spec is written in this file and
+> approved by the owner (`instructions.md` §8). The process is in §12.
+
 ## 1. Direction
+
+_Baseline — superseded by the owner-led process in §12 (D30)._
 
 **Evolve the current site, don't replace it** (D13). The old site's bones stay:
 big condensed display headings, rounded cards, a royal-blue primary, deep-black
@@ -205,3 +215,56 @@ errors, image upload field with preview.
 - Tabs for Projects / Design / Events — main site has projects only.
 - "SEO FAQ" as a visible heading — it becomes plain "FAQ".
 - Tailwind via CDN, inline `onclick` handlers, three icon CDNs.
+
+## 12. Design process (D30)
+
+The design is led by the owner and built to the owner's taste.
+
+1. **Per page.** Each page is designed before it is built.
+2. **Components first.** For the page, design every component it uses, one at a
+   time: buttons, nav bars, links, cards, tags, form fields, and so on. Shared
+   components are designed once and reused.
+3. **Then sections.** With the components agreed, design the page section by
+   section.
+4. **The owner supplies the direction**: reference websites, screenshots, images
+   (e.g. from Instagram), and any skills or tools to install (e.g. Framer
+   Motion). Agents turn that into a written spec, propose options where the
+   references leave a choice open, and ask rather than guess.
+5. **Approval = merge.** Specs are added to this file in a docs-only pull
+   request. The owner merging it approves the spec. Only then is it built.
+6. **Specs replace the baseline.** When a spec changes a token, font, or
+   component, the baseline sections above are updated to match in the same PR.
+
+### What a component spec covers
+
+- **Purpose** — where and why it's used
+- **References** — the links and images the owner supplied
+- **Anatomy** — its parts (label, icon, container…)
+- **Variants and sizes**
+- **States** — default, hover, focus, active, disabled, loading, error (as relevant)
+- **Visual values** — colours (light and dark), typography, spacing, radius,
+  borders, shadows
+- **Motion** — what animates, duration, easing, the library used, and the
+  reduced-motion behaviour
+- **Responsive behaviour** — phone, tablet, desktop
+- **Accessibility** — keyboard, focus, labels, contrast, tap targets
+- **Approved in** — the PR that approved it
+
+### What a section spec covers
+
+- **Purpose and content** — what it says, and where the content comes from
+- **References** — the links and images the owner supplied
+- **Layout** — per breakpoint
+- **Components used** — linking to their specs
+- **Motion** — entrance, scroll, and interaction effects, with reduced-motion
+  behaviour
+- **Light and dark** — anything that differs between themes
+- **Approved in** — the PR that approved it
+
+## 13. Component specs
+
+_None approved yet._
+
+## 14. Page and section specs
+
+_None approved yet._

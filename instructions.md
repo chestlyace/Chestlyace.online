@@ -97,4 +97,24 @@ box can't be ticked honestly, stop and tell the owner instead of opening the PR.
 - [ ] Added no dependencies the docs don't name, unless approved
 - [ ] This PR closes exactly one issue
 - [ ] Quality bar (§6) met
+- [ ] Visual work follows an owner-approved design spec (§8), or the PR has no visual work
 ```
+
+## 8. Design is owner-led
+
+1. **No design is final.** Neither the old portfolio's look nor the current
+   colours, fonts, and components are fixed. What exists today (Phase 3) is a
+   **placeholder baseline**: the theming, token system, and component structure
+   stay; the visual values will be replaced.
+2. **Nothing visual is built or restyled without a design spec the owner has
+   approved.** A spec is approved when the owner merges the pull request that
+   adds it to `docs/design.md`.
+3. Design is done **per page**: **component by component first** (buttons, nav
+   bars, links, cards, …), **then section by section**. Every spec is written in
+   detail — see `docs/design.md` §12 for what a spec must cover.
+4. **The owner supplies the direction**: reference websites, screenshots, images
+   (e.g. from Instagram), and the skills and tools to install (e.g. Framer
+   Motion). Don't invent styles, choose references, or add animation or UI
+   libraries on your own. Propose options and ask.
+5. If a spec doesn't cover something you need while building, stop and ask —
+   don't fill the gap with your own taste.

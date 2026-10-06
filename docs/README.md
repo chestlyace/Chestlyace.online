@@ -41,7 +41,7 @@ every doc that depends on it.
 | D10 | **Volunteering is a new top-level section on the main site** | Same fields as a Journey entry, rendered in its own section |
 | D11 | **Shared header/footer across all three subdomains** | Each links to the other two |
 | D12 | **Existing copy and data carry over; the redesign is visual** | Copy that mentions design/photography still needs editing — see `ia-content.md` |
-| D13 | **Visual direction stays close to the current site** | Dark/light toggle kept, rounded cards, Tailwind — a polish and consistency pass |
+| D13 | ~~**Visual direction stays close to the current site**~~ | **Superseded by D30.** Dark/light toggle kept, rounded cards, Tailwind — a polish and consistency pass |
 | D14 | **Styling: Tailwind CSS v4** | Q3. Tokens in `app/globals.css` via `@theme` |
 | D15 | **Database access: Drizzle ORM** | Q2. With the Neon serverless driver; installed in Phase 4 |
 | D16 | **Tooling: Next.js 16, Node 24 LTS, pnpm 10** | pnpm 10 because it's the newest major Vercel supports without extra settings |
@@ -58,6 +58,7 @@ every doc that depends on it.
 | D27 | **`/design-system` showcase page, previews only** | Returns 404 in production |
 | D28 | **On Vercel previews, cross-site links stay on the preview via `?site=`** | `siteUrl()` uses `VERCEL_BRANCH_URL` when `VERCEL_ENV === "preview"` |
 | D29 | **StatusPill: "open" state only for now** | Other availability states decided with the profile data |
+| D30 | **Design is owner-led; no design is final** | Phase 3's look is a placeholder baseline. Each page is designed component by component, then section by section, from the owner's references and tools, written into `design.md` and approved by merge before anything is built. Supersedes D13. See `instructions.md` §8 |
 
 ## Status
 
