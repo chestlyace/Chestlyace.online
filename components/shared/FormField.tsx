@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 // Filled form fields (design.md §13.15): a soft fill, a faint inset edge, a
 // label above. The same box for inputs, the textarea and the select.
 export const fieldControl = cn(
-  "block w-full rounded-md bg-tile text-[1.0625rem] text-foreground",
+  "block w-full rounded-md bg-(--field-fill,var(--tile)) text-[1.0625rem] text-foreground",
   "shadow-[inset_0_0_0_1px_var(--border)] placeholder:text-muted",
   "transition-shadow duration-150 ease-out",
   "[@media(hover:hover)]:not-disabled:not-aria-invalid:hover:shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--muted)_50%,transparent)]",

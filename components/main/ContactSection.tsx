@@ -1,4 +1,8 @@
-import { CONTACT_HEADING, CONTACT_INTRO } from "@/content/copy";
+import {
+  CONTACT_FORM_TITLE,
+  CONTACT_HEADING,
+  CONTACT_INTRO,
+} from "@/content/copy";
 import {
   CallIcon,
   ChatIcon,
@@ -119,7 +123,10 @@ export function ContactSection({
           )}
         </div>
 
-        <div className="lg:col-span-6">
+        {/* The form sits on a card of its own; its fields take the opposite
+            tone, so they stay visible on it in both bands. */}
+        <div className="self-start rounded-xl bg-tile p-6 [--field-fill:var(--tile-hover)] md:p-8 lg:col-span-6">
+          <h3 className="mb-6 text-h3 text-foreground">{CONTACT_FORM_TITLE}</h3>
           <ContactForm whatsappNumber={profile.whatsappNumber} />
         </div>
       </Container>

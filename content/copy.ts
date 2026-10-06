@@ -60,6 +60,8 @@ export const VOLUNTEERING_INTRO =
 // PLACEHOLDER — the Contact section (design.md §14.8). The heading carries over
 // from the old site; the intro drops "design, or photography".
 export const CONTACT_HEADING = "Let's work together";
+// PLACEHOLDER — the title at the top of the form card.
+export const CONTACT_FORM_TITLE = "Send a message";
 export const CONTACT_INTRO =
   "Have a project in mind? Let's create something extraordinary.";
 

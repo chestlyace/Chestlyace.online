@@ -17,6 +17,8 @@ import { easeInOut } from "@/lib/motion";
 type SmoothScrollApi = {
   /** Scrolls to a section id (without "#"), or to the top for "top". */
   scrollToId: (id: string) => boolean;
+  /** Scrolls to a page position, with the same easing as `scrollToId`. */
+  scrollToY: (top: number) => void;
   /** Stops page scrolling (menus, modals). */
   lock: () => void;
   unlock: () => void;
@@ -24,6 +26,7 @@ type SmoothScrollApi = {
 
 const noop: SmoothScrollApi = {
   scrollToId: () => false,
+  scrollToY: () => {},
   lock: () => {},
   unlock: () => {},
 };
@@ -105,8 +108,22 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       return true;
     };
 
+    const scrollToY = (top: number) => {
+      const lenis = lenisRef.current;
+      if (lenis) {
+        lenis.scrollTo(top, {
+          duration: SCROLL_DURATION_SECONDS,
+          easing: easeInOut,
+          force: true,
+        });
+      } else {
+        window.scrollTo({ top, behavior: "auto" });
+      }
+    };
+
     return {
       scrollToId,
+      scrollToY,
       lock: () => {
         lenisRef.current?.stop();
         document.documentElement.style.overflow = "hidden";

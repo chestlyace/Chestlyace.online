@@ -143,7 +143,7 @@ export function ContactForm({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col items-start gap-4 rounded-lg bg-tile p-8"
+            className="flex flex-col items-start gap-4 py-4"
           >
             <CircleCheck className="size-8 text-secondary" aria-hidden="true" />
             <h3 className="text-h3 text-foreground">{CONTACT_SUCCESS.title}</h3>
