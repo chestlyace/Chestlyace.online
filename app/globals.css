@@ -223,6 +223,69 @@ html.lenis body {
 }
 
 @layer components {
+  /* FAQ item (design.md §13.16): a native <details>. The answer opens 0 → auto
+     where the browser supports ::details-content and interpolate-size; elsewhere
+     it just opens. */
+  .faq-item > summary {
+    list-style: none;
+  }
+
+  .faq-item > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-icon {
+    transition: rotate 300ms var(--ease-out);
+  }
+
+  .faq-item[open] .faq-icon {
+    rotate: 45deg;
+  }
+
+  .faq-answer {
+    opacity: 0;
+    translate: 0 -4px;
+    transition:
+      opacity 200ms var(--ease-out),
+      translate 200ms var(--ease-out);
+  }
+
+  .faq-item[open] .faq-answer {
+    opacity: 1;
+    translate: 0 0;
+    transition:
+      opacity 250ms var(--ease-out) 50ms,
+      translate 250ms var(--ease-out) 50ms;
+  }
+
+  @supports selector(::details-content) {
+    :root {
+      interpolate-size: allow-keywords;
+    }
+
+    .faq-item::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition:
+        block-size 200ms var(--ease-out),
+        content-visibility 200ms allow-discrete;
+    }
+
+    .faq-item[open]::details-content {
+      block-size: auto;
+      transition-duration: 300ms;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-answer,
+    .faq-item[open] .faq-answer,
+    .faq-item::details-content,
+    .faq-item[open]::details-content {
+      transition: none;
+    }
+  }
+
   /* Text roll (design.md §13.3): on hover or focus the label rolls up out of a
      one-line clip box while a copy rolls in from below, letter by letter. Pure
      CSS, so it works before hydration. --stagger is set per word. */

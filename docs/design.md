@@ -236,6 +236,7 @@ Packages are installed in Phase 5b when first used. GSAP uses its own free
 | Scroll reveals (GSAP) | `expo.out` / `power3.out` | Editorial reveals tied to scroll |
 | Spring — default | Motion `{ type: "spring", bounce: 0, duration: 0.4 }` | Anything the user touches (critically damped, Apple damping 1.0) |
 | Spring — momentum | `{ type: "spring", bounce: 0.2, duration: 0.4 }` | Only after a flick/drag that carried momentum |
+| Spring — button return | `{ type: "spring", bounce: 0.35, duration: 0.8 }` | Only the magnetic button springing back to rest (§13.1) |
 
 `ease-in` is never used for UI.
 
@@ -440,7 +441,9 @@ content components — PR #22 (issue #21).
 "Download Resume", "Send", project "Live" / "Source".
 
 **References.** Owner's choice: **magnetic pills** (2026-10-06). Apple's
-pill-shaped controls; anubi.io's cursor-aware buttons.
+pill-shaped controls; anubi.io's cursor-aware buttons. Motion revised from the
+owner's screen recording (2026-10-06): a strong pull from a distance, a floating
+label, a light that follows the pointer, and a springy return.
 
 **Anatomy.** Pill container → label → optional trailing icon (Lucide, e.g.
 `arrow-up-right`, `arrow-right`, `download`). Renders `<a>` when it has `href`,
@@ -488,13 +491,23 @@ otherwise `<button>`.
 
 **Motion** (Motion — `motion/react`):
 
-- **Magnetic pull.** While the pointer is within the button's box plus a
-  **24px** margin, the button moves toward the pointer by **35%** of the
-  pointer's offset from its centre, capped at **10px** in any direction. The label
-  moves a further **15%** in the same direction (a slight parallax that reads as
-  depth). Followed with a spring
-  `{ type: "spring", bounce: 0, duration: 0.3 }`; when the pointer leaves, it
-  returns with the default spring (`bounce: 0, duration: 0.4`). Interruptible —
+- **Magnetic pull** (revised 2026-10-06 from the owner's screen recording).
+  While the pointer is within the button's box plus a **100px** margin, the
+  button leans toward it by **30%** of the pointer's offset from the button's
+  centre, scaled from 40% at the edge of the zone to 100% over the button, and
+  capped at **40px**. The label travels a further **18%** (about 1.6× the pill's
+  travel), so it floats above the pill. The pill stretches along the pull
+  (`scale` +0.25% per px of pull along that axis) and squashes slightly across it
+  (−0.1% per px), never below 0.9. Followed with a spring
+  `{ type: "spring", bounce: 0, duration: 0.3 }`.
+- **Sheen.** A soft radial light follows the pointer across the button's face
+  (150px radius, centred on the pointer, clipped to the pill). Its opacity is the
+  pointer's closeness to the button — 0 at the edge of the zone, 1 over it. Colour
+  by variant: `primary` white at 30%; `secondary` and `ghost` `foreground` at 12%
+  and 10%.
+- **Return.** When the pointer leaves, everything springs back with a small
+  overshoot: `{ type: "spring", bounce: 0.35, duration: 0.8 }` (the one place a
+  spring bounces, §8; deliberate, owner's direction). Interruptible —
   re-entering mid-return picks up from the current position.
 - Only on `(hover: hover) and (pointer: fine)`. Off on touch, when disabled, and
   under reduced motion.
@@ -1006,52 +1019,50 @@ white text in light mode, light card with near-black text in dark mode).
 
 ### 13.13 Timeline item
 
-**Purpose.** One entry in Experience (`journey`) or Volunteering
-(`volunteering`) — the same component for both (D33).
+**Purpose.** Entries in Experience (`journey`) and Volunteering (`volunteering`)
+— the same component for both (D33).
 
-**References.** Owner's choice (2026-10-06): **a line that fills on scroll** — a
-vertical line with a dot per entry; the line fills with blue as the visitor
-scrolls, and each dot lights up as its entry reaches the middle of the screen.
+**References.** Owner's direction (2026-10-06, replacing the earlier "line that
+fills on scroll"): **a date-picker wheel.** Not a long list — one pinned section
+in which the entries roll past a fixed spotlight as the visitor scrolls, like
+choosing a date on a calendar app, until the last one has had its turn and the
+page moves on.
 
 **Anatomy.**
 
-- **Rail** (per timeline): a 2px vertical line in `border`, with a `primary`
-  fill on top of it.
-- **Dot** (per entry): on the rail, level with the entry's date.
-- **Content:** date range → role → organization (+ location) → description →
-  optional logo and "EDUCATION" tag.
+- **Wheel** (left, columns 1–5 from `lg`; on top on phones): one row per entry —
+  the dates in Bebas (`title` step, uppercase), the role beneath in `label` step
+  `muted`. The row nearest the spotlight is full size and colour; the rows above
+  and below shrink and fade with distance. The top and bottom edges fade out.
+- **Card** (right, columns 6–12; below the wheel on phones): `tile` fill, radius
+  `xl`, padding 24px / 32px. Counter ("03 / 06") and the "EDUCATION" Tag
+  (`journey.type = 'education'`) on top; then the logo (40px square, radius `md`;
+  the organization's first letter when there is none), dates, role (`h3`),
+  organization (+ location), description (`body`, `muted`, max 60ch). Organization
+  is a text-roll link with `↗` when `link_url` is set (§13.3).
 
 **Values.**
 
 | Property | Value |
 |---|---|
-| Rail column | 24px wide; line 2px, centred, radius `full` |
-| Rail → content | 32px desktop / 20px phone |
-| Between entries | 64px desktop / 48px phone |
-| Dot | 12px circle. Inactive: `background` fill, 2px `border` edge. Active: `primary` fill and edge, plus a 6px halo of `primary` at 20% |
-| Dates | `label` step, `muted` — `dates_label`, else built from `start_date` / `end_date` ("2024 — NOW") |
-| Role | `h3` step, `foreground` |
-| Organization | `body`, medium 500, `foreground`; a text-roll link with `↗` when `link_url` is set (§13.3). Location after it, `sm`, `muted` |
-| Description | `body`, `muted`, max 60ch, 12px above |
-| Logo | Optional 40px square, radius `md`, `surface` background, left of the role (desktop) |
-| Education | `journey.type = 'education'` adds a Tag (§13.4) "EDUCATION" after the dates |
+| Pin | The stage sticks 96px from the top (below the capsule) and is the viewport's height less 112px, min 30rem |
+| Scroll per entry | 60% of the viewport's height; the first and last entry are each held for a little before and after |
+| Row | 104px on desktop, 68px on phones |
+| Look at distance *d* rows | opacity `1 − 0.6·min(d, 1.5)` (at least 0.15); scale `1 − 0.1·min(d, 2)` |
 
-**Motion** (GSAP ScrollTrigger):
+**Motion** (GSAP ScrollTrigger, Motion):
 
-- The `primary` fill grows down the rail (`scaleY 0 → 1`, origin top), scrubbed
-  so its tip stays at the middle of the viewport while the timeline passes.
-- As the tip reaches a dot, the dot activates: fill and edge to `primary`,
-  `scale(0.8 → 1)`, halo fades in — 300ms `ease-out`. Scrolling back up
-  deactivates it the same way.
-- Each entry's content fades up 24px as it enters (650ms `power3.out`, once).
-- Reduced motion: the rail shows fully filled in `primary`, every dot is active,
-  and content shows in its final state.
+- The track is `(n − 1) × 60svh` taller than the stage; a scrubbed tween (0.4s
+  smoothing) moves the wheel, so it glides to a stop after the visitor does.
+- The card changes when the nearest row changes: the old one fades out and up
+  (10px), the new one fades in from below (14px), 220ms `ease-out`; the direction
+  follows the scroll.
+- Clicking a row scrolls to the position where that entry is in the spotlight.
+- Reduced motion, no JavaScript, or a single entry: no pin — a plain list of every
+  entry in the card's format.
 
-**Responsive.** The same single column at every width; the rail always sits on
-the left.
-
-**Accessibility.** An `<ol>` of `<li>` entries; role in an `<h3>`; dates in
-`<time datetime>`. The rail, fill, and dots are `aria-hidden`.
+**Accessibility.** An `<ol>` of buttons (the current one `aria-current="step"`);
+the card shows the current entry; dates in `<time datetime>` in the list version.
 
 ### 13.14 Contact tile
 
@@ -1697,16 +1708,15 @@ canvas is `aria-hidden`.
 
 **Purpose.** Work history and education (`journey`).
 
-**References.** Owner's choice (2026-10-06): the timeline that fills on scroll
-(§13.13).
+**References.** Owner's direction (2026-10-06): one pinned section with a scroll
+wheel (§13.13), not a long list.
 
 **Content.** `journey` rows (`type` work or education), newest first by
-`start_date`; one timeline, with an "EDUCATION" Tag on education entries
+`start_date`; one wheel, with an "EDUCATION" Tag on education entries
 (`ia-content.md` §2.6). Heading "05 — EXPERIENCE" (old: "Journey").
 
-**Layout** (narrow container, band `background-alt` in the normal order): heading,
-then the timeline (§13.13). Timeline items use `surface-raised` for logo frames on
-this band.
+**Layout** (narrow container, band per §14.0): heading, then the wheel (§13.13),
+pinned while the visitor scrolls through the entries.
 
 **Motion and accessibility.** As §13.13.
 
@@ -1719,7 +1729,7 @@ short intro line (new copy — owner's wording at 5b). **Hidden entirely** while
 entries are published (numbering closes up, §14.0).
 
 **Layout.** The same as Experience, in its own section: narrow container, the
-timeline (§13.13), band per §14.0 (normally `background`). A volunteering entry has
+wheel (§13.13), band per §14.0. A volunteering entry has
 no "EDUCATION" tag.
 
 **Motion and accessibility.** As §13.13.
@@ -1787,6 +1797,17 @@ the container. Several answers can be open at once.
 
 **Motion and accessibility.** As §13.16. The list fades in with the default
 entrance, 50ms stagger.
+
+#### Build notes (5b.5)
+
+Where the build differs from, or settles, what the specs above say:
+
+- **Experience wheel.** What the server renders is the plain list; with motion allowed and more than one entry, the pinned wheel replaces it on the client. The entries' order is the database order (newest first as seeded).
+- **FAQ.** The open/close animation is CSS only (`::details-content` with `interpolate-size`); a browser without them opens and closes instantly, as §13.16 allows.
+- **Contact form card.** The form sits on a card of its own (owner, 2026-10-06): `tile` fill, radius `xl`, a "Send a message" title; the fields inside take `tile-hover`, the opposite tone, so they stay visible on both bands.
+- **Contact form.** Posts to `/api/contact`; a quick submit waits until the form has been on screen for 3 seconds before sending. Error messages open with a grid-row transition (height + opacity, 200ms).
+- **Contact tiles.** The copy button only shows where `navigator.clipboard` exists. The WhatsApp QR button shows on `(hover: hover)` devices and the code is always black on white.
+- **Volunteering.** No entries are seeded, so the section is hidden and the numbers close up; the intro line is placeholder copy in `content/copy.ts`.
 
 ### 14.10 Project page
 

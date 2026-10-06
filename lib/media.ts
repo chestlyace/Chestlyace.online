@@ -16,6 +16,13 @@ export function usePrefersReducedMotion(): boolean {
   return useMediaQuery("(prefers-reduced-motion: reduce)", false);
 }
 
+// The opposite of the above, for features that only exist with motion (the
+// pinned experience wheel). False on the server and for the first client
+// render, so the markup matches before hydration.
+export function usePrefersMotion(): boolean {
+  return useMediaQuery("(prefers-reduced-motion: no-preference)", false);
+}
+
 // Hover effects (magnetic pull, parallax) only run on devices that can hover
 // with a precise pointer (design.md §13).
 export function useFinePointer(): boolean {

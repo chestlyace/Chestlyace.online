@@ -1,8 +1,12 @@
 import { AboutSection } from "@/components/main/AboutSection";
+import { ContactSection } from "@/components/main/ContactSection";
+import { ExperienceSection } from "@/components/main/ExperienceSection";
+import { FaqSection } from "@/components/main/FaqSection";
 import { Hero } from "@/components/main/Hero";
 import { ProjectsSection } from "@/components/main/ProjectsSection";
 import { ServicesSection } from "@/components/main/ServicesSection";
 import { SkillsSection } from "@/components/main/SkillsSection";
+import { VolunteeringSection } from "@/components/main/VolunteeringSection";
 import { getCachedHomepageData } from "@/lib/portfolio";
 import {
   sectionBands,
@@ -32,6 +36,10 @@ export default async function Home() {
     shown.push("skills");
   if (data.services.length > 0) shown.push("services");
   if (data.projects.length > 0) shown.push("projects");
+  if (data.experience.length > 0) shown.push("experience");
+  if (data.volunteering.length > 0) shown.push("volunteering");
+  shown.push("contact");
+  if (data.faqs.length > 0) shown.push("faq");
   const numbers = sectionNumbers(shown);
   const bands = sectionBands(shown);
 
@@ -66,6 +74,29 @@ export default async function Home() {
           index={numbers.projects}
           band={bands.projects}
         />
+      )}
+      {shown.includes("experience") && (
+        <ExperienceSection
+          entries={data.experience}
+          index={numbers.experience}
+          band={bands.experience}
+        />
+      )}
+      {shown.includes("volunteering") && (
+        <VolunteeringSection
+          entries={data.volunteering}
+          index={numbers.volunteering}
+          band={bands.volunteering}
+        />
+      )}
+      <ContactSection
+        profile={profile}
+        socials={data.socials}
+        index={numbers.contact}
+        band={bands.contact}
+      />
+      {shown.includes("faq") && (
+        <FaqSection faqs={data.faqs} index={numbers.faq} band={bands.faq} />
       )}
     </>
   );
