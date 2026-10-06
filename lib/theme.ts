@@ -9,7 +9,7 @@ export const THEME_LABELS: Record<ThemePreference, string> = {
   dark: "Dark",
 };
 
-export const THEME_COLORS = { light: "#F8FAFC", dark: "#0A0A0A" } as const;
+export const THEME_COLORS = { light: "#FFFFFF", dark: "#0A0A0A" } as const;
 
 const ROOT_DOMAIN = "chestlyace.online";
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;

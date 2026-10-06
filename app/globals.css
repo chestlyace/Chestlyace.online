@@ -6,21 +6,29 @@
 /* Colour tokens — docs/design.md §2. Components use these via Tailwind
    (bg-surface, text-muted…), never raw hex values. */
 :root {
-  --background: #f8fafc;
-  --background-alt: #f1f5f9;
-  --surface: #ffffff;
+  --background: #ffffff;
+  --background-alt: #f5f5f7;
+  --surface: #f5f5f7;
   --surface-raised: #ffffff;
-  --border: #e2e8f0;
-  --foreground: #0f172a;
-  --muted: #475569;
+  --border: #d2d2d7;
+  --foreground: #1d1d1f;
+  --muted: #6e6e73;
   --primary: #2563eb;
+  --primary-hover: #1d4ed8;
   --primary-foreground: #ffffff;
-  --primary-text: #1d4ed8;
+  --primary-text: #2563eb;
   --secondary: #10b981;
   --ring: #2563eb;
-  --danger: #dc2626;
-  --card-shadow:
-    0 1px 2px rgb(15 23 42 / 0.06), 0 4px 16px rgb(15 23 42 / 0.06);
+  --danger: #b91c1c;
+
+  /* Materials (design.md §2, §5): translucent chrome. */
+  --material-bar: rgb(255 255 255 / 0.72);
+  --material-blur: blur(20px) saturate(180%);
+
+  /* Floating elements only; dark mode has no shadows (§5). */
+  --float-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  --float-shadow-lifted:
+    0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px rgb(0 0 0 / 0.08);
 }
 
 .dark {
@@ -29,16 +37,31 @@
   --surface: #171717;
   --surface-raised: #1f1f1f;
   --border: #262626;
-  --foreground: #fafafa;
-  --muted: #a3a3a3;
+  --foreground: #f5f5f7;
+  --muted: #a1a1a6;
   --primary: #2563eb;
+  --primary-hover: #1d4ed8;
   --primary-foreground: #ffffff;
   --primary-text: #60a5fa;
   --secondary: #34d399;
   --ring: #60a5fa;
   --danger: #f87171;
-  /* Shadows don't read on near-black; dark cards rely on borders instead. */
-  --card-shadow: none;
+  --material-bar: rgb(10 10 10 / 0.72);
+  --float-shadow: none;
+  --float-shadow-lifted: none;
+}
+
+/* Tiles, cards, chips and fields sit on `surface`; on a background-alt band
+   they switch to `surface-raised` so they stay visible (design.md §14.0).
+   Bands set data-band="alt". */
+:root {
+  --tile: var(--surface);
+  --tile-hover: var(--surface-raised);
+}
+
+[data-band="alt"] {
+  --tile: var(--surface-raised);
+  --tile-hover: var(--surface);
 }
 
 /* Per-site accents (design.md §4) override only primary, primary-text and
@@ -49,42 +72,119 @@
   --color-background-alt: var(--background-alt);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-tile: var(--tile);
+  --color-tile-hover: var(--tile-hover);
   --color-border: var(--border);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-text: var(--primary-text);
   --color-secondary: var(--secondary);
   --color-ring: var(--ring);
   --color-danger: var(--danger);
 
-  /* design.md §3 */
+  /* design.md §3. Bebas for display, the system font (SF on Apple devices)
+     falling back to Inter for text, JetBrains Mono for labels and code. */
   --font-display: var(--font-bebas-neue), "Arial Narrow", sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-eyebrow: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", Roboto,
+    sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-  /* Type scale, fluid from a 375px phone to a 1280px desktop. */
-  --text-display-xl: clamp(4.5rem, 3.05rem + 6.19vw, 8rem);
+  /* Type scale (design.md §3), fluid from a 375px phone to a 1280px desktop. */
+  --text-display-2xl: clamp(5rem, 2.5138rem + 10.6077vw, 11rem);
+  --text-display-2xl--line-height: 0.85;
+  --text-display-xl: clamp(4rem, 2.3425rem + 7.0718vw, 8rem);
   --text-display-xl--line-height: 0.9;
-  --text-display-lg: clamp(3rem, 2.17rem + 3.54vw, 5rem);
+  --text-display-lg: clamp(3rem, 2.1713rem + 3.5359vw, 5rem);
   --text-display-lg--line-height: 0.95;
-  --text-h3: clamp(1.5rem, 1.34rem + 0.66vw, 1.875rem);
+  --text-title: clamp(2rem, 1.5856rem + 1.768vw, 3rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 600;
+  --text-h3: clamp(1.375rem, 1.2196rem + 0.663vw, 1.75rem);
   --text-h3--line-height: 1.2;
-  --text-body-lg: 1.125rem;
-  --text-body-lg--line-height: 1.75;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 600;
+  --text-lead: clamp(1.1875rem, 1.1357rem + 0.221vw, 1.3125rem);
+  --text-lead--line-height: 1.45;
+  --text-lead--letter-spacing: -0.005em;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.55;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.45;
 
-  /* design.md §5 */
+  /* Radius, design.md §5. */
   --radius-sm: 0.5rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --shadow-card: var(--card-shadow);
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  --shadow-float: var(--float-shadow);
+  --shadow-float-lifted: var(--float-shadow-lifted);
+
+  /* Curves, design.md §8. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --animate-pulse-ring: pulse-ring 2s var(--ease-out) infinite;
+}
+
+@keyframes pulse-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* The mono "label" step: eyebrows, dates, tags, counters (design.md §3). */
+@utility type-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Translucent chrome (design.md §5). Solid under reduced transparency or
+   increased contrast. */
+@utility material {
+  background-color: var(--material-bar);
+  -webkit-backdrop-filter: var(--material-blur);
+  backdrop-filter: var(--material-blur);
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--surface-raised);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  @media (prefers-contrast: more) {
+    background-color: var(--surface-raised);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-color: var(--foreground);
+  }
+}
+
+/* Anchored sections never sit under the header capsule (design.md §14.0). */
+section[id] {
+  scroll-margin-top: 96px;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
 }
 
 :focus-visible {
@@ -92,6 +192,152 @@ body {
   outline-offset: 2px;
 }
 
+/* Lenis smooth scrolling (the library's own recommended rules). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+@layer components {
+  /* Text roll (design.md §13.3): on hover or focus the label rolls up out of a
+     one-line clip box while a copy rolls in from below, letter by letter. Pure
+     CSS, so it works before hydration. --stagger is set per word. */
+  .roll {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    line-height: 1.3;
+  }
+
+  .roll-row {
+    display: inline-flex;
+    white-space: pre;
+  }
+
+  .roll-row--in {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .roll-char {
+    display: inline-block;
+    transition: transform 300ms var(--ease-out);
+    transition-delay: calc(var(--i) * var(--stagger, 15ms));
+  }
+
+  .roll-row--in .roll-char {
+    transform: translateY(100%);
+  }
+
+  .roll-icon {
+    display: inline-flex;
+    flex: none;
+    transition: translate 300ms var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .roll-host:hover .roll-row--out .roll-char {
+      transform: translateY(-100%);
+    }
+
+    .roll-host:hover .roll-row--in .roll-char {
+      transform: translateY(0);
+    }
+
+    .roll-host:hover .roll-icon {
+      translate: var(--nudge-x, 2px) var(--nudge-y, -2px);
+    }
+  }
+
+  .roll-host:focus-visible .roll-row--out .roll-char {
+    transform: translateY(-100%);
+  }
+
+  .roll-host:focus-visible .roll-row--in .roll-char {
+    transform: translateY(0);
+  }
+
+  .roll-host:focus-visible .roll-icon {
+    translate: var(--nudge-x, 2px) var(--nudge-y, -2px);
+  }
+
+  /* Touch has no hover: a quick dim on press instead. */
+  @media (hover: none) {
+    .roll-host:active {
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .roll-row--in {
+      display: none;
+    }
+
+    .roll-char,
+    .roll-icon {
+      transition: none;
+      transform: none !important;
+      translate: none !important;
+    }
+  }
+
+  /* Inline link (design.md §13.3): a faint resting underline, and a full one
+     that draws in left to right on hover or focus and leaves to the right. */
+  .link-inline {
+    color: var(--primary-text);
+    background-image:
+      linear-gradient(currentColor, currentColor),
+      linear-gradient(
+        color-mix(in srgb, currentColor 35%, transparent),
+        color-mix(in srgb, currentColor 35%, transparent)
+      );
+    background-repeat: no-repeat;
+    background-size:
+      0% 1px,
+      100% 1px;
+    background-position:
+      100% calc(100% - 0.08em),
+      0 calc(100% - 0.08em);
+    transition: background-size 250ms var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .link-inline:hover {
+      background-size:
+        100% 1px,
+        100% 1px;
+      background-position:
+        0 calc(100% - 0.08em),
+        0 calc(100% - 0.08em);
+    }
+  }
+
+  .link-inline:focus-visible {
+    background-size:
+      100% 1px,
+      100% 1px;
+    background-position:
+      0 calc(100% - 0.08em),
+      0 calc(100% - 0.08em);
+  }
+}
+
+/* Reduced motion (design.md §8): transitions and animations all but stop;
+   components with bigger motion handle it themselves. */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

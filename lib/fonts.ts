@@ -1,5 +1,8 @@
-import { Bebas_Neue, Inter, JetBrains_Mono, Outfit } from "next/font/google";
+import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
 
+// design.md §3: Bebas Neue (display), Inter as the fallback behind the system
+// font (SF on Apple devices), JetBrains Mono (labels and code). Outfit is
+// dropped (D38).
 const bebasNeue = Bebas_Neue({
   weight: "400",
   subsets: ["latin"],
@@ -13,12 +16,6 @@ const inter = Inter({
   display: "swap",
 });
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-});
-
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
@@ -28,6 +25,5 @@ const jetbrainsMono = JetBrains_Mono({
 export const fontVariables = [
   bebasNeue.variable,
   inter.variable,
-  outfit.variable,
   jetbrainsMono.variable,
 ].join(" ");

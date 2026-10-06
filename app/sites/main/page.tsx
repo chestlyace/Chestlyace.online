@@ -1,7 +1,7 @@
 export default function Home() {
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-24">
+    <div className="flex flex-1 items-center justify-center px-4 pt-32 pb-24">
       <p>chestlyace.online — rebuild in progress</p>
-    </main>
+    </div>
   );
 }
