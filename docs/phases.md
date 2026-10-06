@@ -18,7 +18,7 @@ before the phase starts.
 | 4 | Database | Done | Q19 (decided) |
 | 5 | Main site homepage | Done (5a: PRs #18–#24; 5b: PRs #26–#36). Q5 stays open: the About text is a placeholder | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
-| 7 | SEO & redirects | Not started | — |
+| 7 | SEO & redirects | 7.1 in review (issue #47); 7.2 not started | — |
 | 8 | Main site launch | Not started | Q17, Q20 |
 | 9 | Blog | Not started | Q12, Q16 |
 | 10 | Creatives site | Not started | Q1, Q12 |
@@ -196,6 +196,13 @@ shows on the public page.
 - Per-host `sitemap.xml` and `robots.txt`
 - Redirects for old URLs (`ia-content.md` §6); `/resume.pdf` route
 - Favicons and static files moved per `ia-content.md` §5
+
+Split into two PRs (owner, 2026-10-07):
+
+| Step | Covers | Status |
+|---|---|---|
+| 7.1 Metadata, structured data, sitemap, robots — issue #47 | Per-site metadata, canonical and Open Graph/Twitter tags; JSON-LD; per-host `sitemap.xml` and `robots.txt`; the `SITE_INDEXING` switch; `public/og/main.webp` | In review |
+| 7.2 Redirects and static files | Old-URL redirects, `/resume.pdf`, favicons and other static files, the `#work` / `#journey` anchors | Not started |
 
 **Done when:** every old URL redirects correctly and the structured data validates.
 **Refs:** `ia-content.md` §4–6.

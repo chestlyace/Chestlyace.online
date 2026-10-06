@@ -15,6 +15,7 @@ import { imageSource } from "@/lib/hero";
 import { isHttpUrl } from "@/lib/links";
 import { getCachedProject, getCachedProjectSlugs } from "@/lib/portfolio";
 import { caseStudyRows, galleryUrls, projectLinks } from "@/lib/projectPage";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateStaticParams() {
   return (await getCachedProjectSlugs()).map((slug) => ({ slug }));
@@ -26,10 +27,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const data = await getCachedProject(slug);
   if (!data) return {};
-  return {
+  return pageMetadata("main", {
+    path: `/projects/${slug}`,
     title: `${data.project.title} — Chestly Ace`,
     description: data.project.summary,
-  };
+    image: data.project.imageUrl,
+  });
 }
 
 // A project's case study (design.md §14.10): title, facts, the hero image (the
