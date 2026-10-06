@@ -7,10 +7,14 @@ import {
   certificationSchema,
   faqSchema,
   fieldErrors,
+  journeySchema,
+  profileSchema,
+  projectSchema,
   reorderSchema,
   serviceSchema,
   skillSchema,
   socialSchema,
+  volunteeringSchema,
 } from "./schemas";
 
 // The admin API's logic (content-schema.md §2), apart from HTTP: the route
@@ -27,6 +31,11 @@ type ResourceConfig = {
   schema: z.ZodObject;
   /** Has an `is_published` column: new entries start unpublished. */
   published: boolean;
+  /**
+   * What a new entry gets for the fields it may leave out. Not in the schema:
+   * an update that omits a list must leave it alone, not empty it.
+   */
+  defaults?: Record<string, unknown>;
 };
 
 const RESOURCES: Record<string, ResourceConfig> = {
@@ -39,6 +48,7 @@ const RESOURCES: Record<string, ResourceConfig> = {
     table: schema.services as unknown as AdminTable,
     schema: serviceSchema,
     published: true,
+    defaults: { items: [] },
   },
   certifications: {
     table: schema.certifications as unknown as AdminTable,
@@ -49,6 +59,22 @@ const RESOURCES: Record<string, ResourceConfig> = {
     table: schema.socials as unknown as AdminTable,
     schema: socialSchema,
     published: false,
+  },
+  projects: {
+    table: schema.projects as unknown as AdminTable,
+    schema: projectSchema,
+    published: true,
+    defaults: { techStack: [], galleryUrls: [] },
+  },
+  journey: {
+    table: schema.journey as unknown as AdminTable,
+    schema: journeySchema,
+    published: true,
+  },
+  volunteering: {
+    table: schema.volunteering as unknown as AdminTable,
+    schema: volunteeringSchema,
+    published: true,
   },
   faqs: {
     table: schema.faqs as unknown as AdminTable,
@@ -72,6 +98,23 @@ export type Failure =
     };
 
 const notFound: Failure = { ok: false, status: 404, error: "not-found" };
+
+// A project's address (slug) is unique: a clash comes back as a message on that
+// field, not a server error.
+function uniqueViolation(error: unknown): Failure | null {
+  const code = (e: unknown) =>
+    typeof e === "object" && e !== null && "code" in e
+      ? String((e as { code: unknown }).code)
+      : "";
+  const cause = (error as { cause?: unknown } | null)?.cause;
+  if (code(error) !== "23505" && code(cause) !== "23505") return null;
+  return {
+    ok: false,
+    status: 422,
+    error: "invalid",
+    fields: { slug: "Another project already uses that address." },
+  };
+}
 
 function resource(name: string): ResourceConfig {
   const config = Object.hasOwn(RESOURCES, name) ? RESOURCES[name] : undefined;
@@ -106,10 +149,14 @@ export async function createRow(
   name: string,
   input: unknown,
 ): Promise<{ ok: true; row: Row } | Failure> {
-  const { table, schema: shape, published } = resource(name);
+  const { table, schema: shape, published, defaults } = resource(name);
   const body =
-    published && typeof input === "object" && input !== null
-      ? { isPublished: false, ...(input as object) }
+    typeof input === "object" && input !== null
+      ? {
+          ...(published ? { isPublished: false } : {}),
+          ...defaults,
+          ...(input as object),
+        }
       : input;
   const parsed = shape.safeParse(body);
   if (!parsed.success) {
@@ -121,12 +168,20 @@ export async function createRow(
     };
   }
 
-  const [{ top }] = await db.select({ top: max(table.orderIndex) }).from(table);
-  const [row] = await db
-    .insert(table)
-    .values({ ...parsed.data, orderIndex: (Number(top) || 0) + 1 } as never)
-    .returning();
-  return { ok: true, row: row as Row };
+  try {
+    const [{ top }] = await db
+      .select({ top: max(table.orderIndex) })
+      .from(table);
+    const [row] = await db
+      .insert(table)
+      .values({ ...parsed.data, orderIndex: (Number(top) || 0) + 1 } as never)
+      .returning();
+    return { ok: true, row: row as Row };
+  } catch (error) {
+    const clash = uniqueViolation(error);
+    if (clash) return clash;
+    throw error;
+  }
 }
 
 export async function updateRow(
@@ -154,12 +209,18 @@ export async function updateRow(
     };
   }
 
-  const [row] = await db
-    .update(table)
-    .set(parsed.data as never)
-    .where(eq(table.id, id))
-    .returning();
-  return row ? { ok: true, row: row as Row } : notFound;
+  try {
+    const [row] = await db
+      .update(table)
+      .set(parsed.data as never)
+      .where(eq(table.id, id))
+      .returning();
+    return row ? { ok: true, row: row as Row } : notFound;
+  } catch (error) {
+    const clash = uniqueViolation(error);
+    if (clash) return clash;
+    throw error;
+  }
 }
 
 export async function deleteRow(
@@ -215,4 +276,43 @@ export async function reorderRows(
     }
     return { ok: true } as const;
   });
+}
+
+// The profile is one row (`id = 1`): read it, change it, never list, add or delete.
+export async function getProfile(db: Database): Promise<Row | null> {
+  const [row] = await db
+    .select()
+    .from(schema.profile)
+    .where(eq(schema.profile.id, 1))
+    .limit(1);
+  return (row as Row | undefined) ?? null;
+}
+
+export async function updateProfile(
+  db: Database,
+  input: unknown,
+): Promise<{ ok: true; row: Row } | Failure> {
+  const parsed = profileSchema.partial().safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      status: 422,
+      error: "invalid",
+      fields: fieldErrors(parsed.error),
+    };
+  }
+  if (Object.keys(parsed.data).length === 0) {
+    return {
+      ok: false,
+      status: 422,
+      error: "invalid",
+      fields: { _: "Nothing to change." },
+    };
+  }
+  const [row] = await db
+    .update(schema.profile)
+    .set(parsed.data as never)
+    .where(eq(schema.profile.id, 1))
+    .returning();
+  return row ? { ok: true, row: row as Row } : notFound;
 }

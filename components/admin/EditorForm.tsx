@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   adminConfig,
+  toValues,
   validate,
   type AdminConfig,
+  type AdminRow,
   type Values,
 } from "@/lib/admin/config";
+import { slugify } from "@/lib/admin/order";
 import { findResource } from "@/lib/admin/resources";
 import { AdminField } from "./fields";
 import { SaveBar } from "./SaveBar";
@@ -45,6 +48,16 @@ export function EditorForm({
   const formRef = useRef<HTMLFormElement>(null);
   const timer = useRef<number | undefined>(undefined);
 
+  // Editing an existing entry (or the profile, which always exists) sends only
+  // what changed; a new entry sends everything.
+  const editing = Boolean(itemId) || Boolean(config.single);
+
+  // A new project's address follows its title until it is typed in by hand.
+  const [slugTouched, setSlugTouched] = useState(editing);
+  const slugField = config.groups
+    .flatMap((group) => group.fields)
+    .find((field) => field.type === "slug");
+
   const dirty = !same(values, saved);
   useUnsavedChanges(dirty);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -60,6 +73,16 @@ export function EditorForm({
 
   const change = (name: string, value: string | boolean | string[]) => {
     const next = { ...values, [name]: value };
+    if (slugField?.type === "slug") {
+      if (name === slugField.name) setSlugTouched(true);
+      else if (
+        name === slugField.from &&
+        !slugTouched &&
+        typeof value === "string"
+      ) {
+        next[slugField.name] = slugify(value);
+      }
+    }
     setValues(next);
     // Once a field has shown an error it is re-checked as you type.
     if (errors[name]) check(name, next);
@@ -101,7 +124,7 @@ export function EditorForm({
     }
 
     // Editing sends what changed; a new entry sends everything.
-    const body = itemId
+    const body = editing
       ? Object.fromEntries(
           Object.entries(values).filter(
             ([key, value]) =>
@@ -117,25 +140,29 @@ export function EditorForm({
           ? `/api/admin/${resource.api}/${itemId}`
           : `/api/admin/${resource.api}`,
         {
-          method: itemId ? "PATCH" : "POST",
+          method: editing ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         },
       );
       const result = (await response.json().catch(() => ({}))) as {
-        item?: { id: number };
+        item?: AdminRow;
         fields?: Record<string, string>;
       };
 
       if (response.ok) {
-        setSaved(values);
+        // What the server kept (trimmed text, a WhatsApp number as digits) is
+        // what the form shows from now on.
+        const kept = result.item ? toValues(config, result.item) : values;
+        setSaved(kept);
+        setValues(kept);
         const live = !config.hasPublished || values.isPublished === true;
         toast.success(
           live
             ? "Saved. It's live on the site."
             : "Saved. It's a draft, so it isn't on the site yet.",
         );
-        if (itemId) {
+        if (editing) {
           setSavedRecently(true);
           window.clearTimeout(timer.current);
           timer.current = window.setTimeout(
@@ -176,7 +203,7 @@ export function EditorForm({
       ref={formRef}
       onSubmit={save}
       noValidate
-      aria-label={itemId ? `Edit ${resource.noun}` : `New ${resource.noun}`}
+      aria-label={editing ? `Edit ${resource.noun}` : `New ${resource.noun}`}
       onKeyDown={(event) => {
         if (
           (event.metaKey || event.ctrlKey) &&
@@ -210,11 +237,26 @@ export function EditorForm({
             {group.fields.map((field) => (
               <AdminField
                 key={field.name}
-                field={field}
+                field={
+                  field.type === "slug" && itemId
+                    ? {
+                        ...field,
+                        helper:
+                          "Changing the address breaks links to the old one.",
+                      }
+                    : field
+                }
                 value={values[field.name]}
                 error={errors[field.name]}
                 onChange={(value) => change(field.name, value)}
-                onBlur={() => check(field.name)}
+                onBlur={(fixed) =>
+                  check(
+                    field.name,
+                    fixed === undefined
+                      ? values
+                      : { ...values, [field.name]: fixed },
+                  )
+                }
               />
             ))}
           </div>

@@ -59,6 +59,8 @@ describe("skillSchema", () => {
       skillSchema.safeParse({ ...ok, iconUrl: "/devicon/react.svg" }).success,
     ).toBe(true);
     for (const bad of [
+      "https://not a url",
+      "https://",
       "javascript:alert(1)",
       "//evil.test/a.png",
       "/../etc/passwd",
