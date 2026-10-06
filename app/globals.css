@@ -611,11 +611,6 @@ html.lenis body {
     scale: 1.04;
   }
 
-  /* While the ripple canvas draws, the page's own image steps aside. */
-  .project-image[data-rippling] img {
-    opacity: 0;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .project-image {
       transition: none;

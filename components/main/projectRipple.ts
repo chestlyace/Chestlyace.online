@@ -48,7 +48,8 @@ const FRAGMENT = /* glsl */ `
       }
     }
     vec2 st = (uv + push - 0.5) * uCover + 0.5;
-    gl_FragColor = texture2D(uImage, st);
+    vec4 color = texture2D(uImage, st);
+    gl_FragColor = vec4(color.rgb * color.a, color.a); // canvas is premultiplied
   }
 `;
 
@@ -85,7 +86,6 @@ async function create(): Promise<Shared | null> {
       // Transparent images (a cut-out portrait, a PNG with an empty edge) must
       // stay transparent: the card's own background shows through them.
       alpha: true,
-      premultipliedAlpha: false,
       antialias: false,
       dpr: Math.min(window.devicePixelRatio || 1, 1.5),
     });
@@ -162,7 +162,6 @@ function dispose() {
   const state = shared;
   if (!state) return;
   cancelAnimationFrame(state.frame);
-  if (state.host) delete state.host.dataset.rippling;
   state.renderer.gl.getExtension("WEBGL_lose_context")?.loseContext();
   state.canvas.remove();
   shared = null;
@@ -185,16 +184,12 @@ function draw(now: number) {
     data[i * 4 + 3] = 1;
   });
   state.renderer.render({ scene: state.mesh });
-  // While the canvas draws, the page's own <img> is hidden (`data-rippling`), so
-  // a transparent image doesn't show a second, unmoved copy through it.
-  state.host.dataset.rippling = "";
   state.canvas.style.opacity = "1";
 
   if (state.ripples.length > 0) {
     state.frame = requestAnimationFrame(draw);
   } else {
-    delete state.host.dataset.rippling; // back to the page's own <img>
-    state.canvas.style.opacity = "0";
+    state.canvas.style.opacity = "0"; // back to the page's own <img>
   }
 }
 
@@ -215,7 +210,8 @@ export async function rippleEnter(host: HTMLElement, src: string) {
     state.canvas.style.opacity = "0";
   }
   state.host = host;
-  const { width, height } = host.getBoundingClientRect();
+  // Layout size, not the bounding box: the host is mid-zoom (scale 1.04) here.
+  const { clientWidth: width, clientHeight: height } = host;
   if (width === 0 || height === 0) return;
   state.hostAspect = width / height;
   state.renderer.setSize(width, height);
