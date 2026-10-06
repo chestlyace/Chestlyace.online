@@ -95,6 +95,7 @@ every doc that depends on it.
 | D64 | **Caching: `unstable_cache` with the `portfolio` tag** | Chosen over Cache Components to avoid a global rendering change. Key includes the deployment's commit; `next dev` skips it. `revalidateTag('portfolio', { expire: 0 })` from the admin. `architecture.md` §5 |
 | D65 | **The hero's rotating words live in `profile.headline_words`** | Editable in the admin without a deploy. `content-schema.md` §1.1 |
 | D66 | **No project `year` column; certifications seeded from the badge images** | The card label is the category only. Seven Google badges: names and issuers from the images, dates and links left empty; PNGs in `public/certs/`. `content-schema.md` §1.4, §1.5b |
+| D67 | **Hero built to the spec; the pages read the database from here on** | The hero is the first reader of the data. Icons: Devicon (sticker logos, LinkedIn) and Simple Icons (Instagram, GitHub, TikTok, WhatsApp) — Simple Icons has dropped LinkedIn and AWS. The portrait is `public/hero.webp`. A build needs `DATABASE_URL`; with a migrated but empty database the home page shows a notice. `design.md` §14.1 (build notes) |
 
 ## Status
 

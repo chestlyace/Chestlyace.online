@@ -19,3 +19,25 @@ export const FOOTER_DESCRIPTIONS: Record<SiteKey, string> = {
   creatives: "Design and photography by Chestly Ace.",
   blog: "Writing and notes from Chestly Ace.",
 };
+
+// PLACEHOLDER — the hero's tagline under the headline (design.md §14.1). The old
+// one named design and photography; this is software only.
+export const HERO_TAGLINE =
+  "Software engineer crafting modern digital experiences.";
+
+// PLACEHOLDER — the hero's paragraph. The names come from the profile.
+export function heroIntro(name: string, legalName: string | null): string {
+  const who =
+    legalName && legalName !== name
+      ? `${legalName}, known professionally as ${name},`
+      : name;
+  return `${who} builds fast, reliable websites and web applications.`;
+}
+
+// PLACEHOLDER — the speech-bubble quote card next to the portrait. The old text
+// was "Chill and relax, it's the weekend. Not you devs & designers, go complete
+// your client's projects."; "& designers" is dropped (software only).
+export const HERO_QUOTE = {
+  handle: "@Dev.Ace",
+  text: "Chill and relax, it's the weekend. Not you devs, go complete your client's projects.",
+};

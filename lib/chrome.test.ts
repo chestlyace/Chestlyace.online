@@ -41,6 +41,17 @@ describe("footerLinks", () => {
     ]);
   });
 
+  it("leaves out socials that are not web addresses", () => {
+    const { connect } = footerLinks({
+      profile: profile(),
+      socials: [
+        social("Bad", "javascript:alert(1)"),
+        social("GitHub", "https://github.com/chestlyace"),
+      ],
+    });
+    expect(connect.map((l) => l.label)).toEqual(["GitHub"]);
+  });
+
   it("builds Contact: email, WhatsApp, resume", () => {
     const { contact } = footerLinks({ profile: profile(), socials: [] });
     expect(contact).toEqual([

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { fontVariables } from "@/lib/fonts";
+import type { FooterLink } from "@/lib/chrome";
 import type { SiteKey } from "@/lib/sites";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { Providers } from "./Providers";
@@ -11,9 +12,12 @@ import { SkipLink } from "./SkipLink";
 // hydration, hence suppressHydrationWarning.
 export function SiteDocument({
   site,
+  footer,
   children,
 }: {
   site: SiteKey;
+  /** The footer's Connect and Contact columns (main only, from the database). */
+  footer?: { connect: readonly FooterLink[]; contact: readonly FooterLink[] };
   children: ReactNode;
 }) {
   return (
@@ -37,7 +41,11 @@ export function SiteDocument({
           >
             {children}
           </main>
-          <SiteFooter site={site} />
+          <SiteFooter
+            site={site}
+            connect={footer?.connect}
+            contact={footer?.contact}
+          />
         </Providers>
       </body>
     </html>
