@@ -26,3 +26,11 @@ export function useFinePointer(): boolean {
 export function useIsPhone(): boolean {
   return useMediaQuery("(max-width: 767.98px)", false);
 }
+
+// Read directly, for effects: the hook above reports "not reduced" for the first
+// client render (it must match the server's markup), which would make an effect
+// apply a start state and then have to undo it. An effect runs on the client, so
+// it can ask the browser straight away.
+export function prefersReducedMotionNow(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}

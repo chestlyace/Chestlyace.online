@@ -41,3 +41,14 @@ export const HERO_QUOTE = {
   handle: "@Dev.Ace",
   text: "Chill and relax, it's the weekend. Not you devs, go complete your client's projects.",
 };
+
+// PLACEHOLDER — the intro under the Services heading (from ia-content.md §2.4).
+export const SERVICES_INTRO =
+  "I help businesses, founders, and teams launch responsive websites and custom web applications, with attention to performance, maintainable code, and clean delivery.";
+
+// PLACEHOLDER — the Creatives card that ends the service stack (design.md §13.12).
+export const CREATIVES_CARD = {
+  label: "Creatives",
+  title: "Design & photography live on Creatives",
+  line: "Looking for design or photography? See my creative work.",
+};

@@ -31,9 +31,11 @@ export const seedData = {
     heroImageUrl: "/hero.webp",
     aboutQuote:
       "Blending logic with creativity to craft digital experiences that matter.",
+    // PLACEHOLDER — a software-only draft, until the owner writes their own
+    // (Q5). The old text described "a multi-disciplinary creative".
     aboutBody: [
-      "I am a multi-disciplinary creative based in the tech world. My journey started with a curiosity for how things work, leading me down the path of Software Engineering. Along the way, I discovered that function without form is incomplete, sparking my passion for Design and Photography.",
-      "Whether I'm writing clean code in Python or capturing a candid moment through my lens, my goal is always the same: to tell a story and solve a problem elegantly. I believe in the power of minimalism and the impact of bold choices.",
+      "I'm Chestly, a software engineer who builds fast, reliable products for the web. My journey started with curiosity about how things work, and I've been building backends, interfaces, and everything in between ever since.",
+      "I care about clear problems, simple solutions, and code that stays easy to change. Whether it's an API, a dashboard, or a mobile app, my goal is the same: ship something people can rely on.",
     ].join("\n\n"),
     resumeUrl: "resume.pdf",
     email: "chestlyace@gmail.com",
@@ -77,13 +79,46 @@ export const seedData = {
     },
   ],
 
+  // PLACEHOLDER — the four starting services from ia-content.md §2.4, with
+  // descriptions written by the agent until the owner supplies their wording.
+  // Icons are Iconly names (design.md §6).
   services: [
     {
-      title: "Software Development",
+      title: "Web Applications",
       description:
-        "Building robust, scalable, and efficient web and mobile applications tailored to your specific needs.",
-      icon: "code",
-      items: ["Full Stack Web Apps", "Mobile Applications", "API Integration"],
+        "Full-stack web applications, from dashboards to custom interfaces, built to be fast and easy to change.",
+      icon: "Category",
+      items: ["Full-stack web apps", "Dashboards", "Custom interfaces"],
+    },
+    {
+      title: "Websites & Landing Pages",
+      description:
+        "Business websites, landing pages, and portfolio sites that load fast, work on every screen, and are built to convert.",
+      icon: "Document",
+      items: [
+        "Business websites",
+        "Landing pages",
+        "Portfolio sites",
+        "Fast and responsive",
+      ],
+    },
+    {
+      title: "Backend & APIs",
+      description:
+        "Reliable backends: clean APIs, well-designed databases, and architecture that scales with the product.",
+      icon: "Setting",
+      items: [
+        "API design and integration",
+        "Databases",
+        "Scalable backend architecture",
+      ],
+    },
+    {
+      title: "Mobile Apps",
+      description:
+        "Cross-platform mobile apps that feel native, shipped from a single codebase.",
+      icon: "Call",
+      items: ["Flutter", "React Native"],
     },
   ],
 

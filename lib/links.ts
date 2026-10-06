@@ -19,3 +19,14 @@ export function isHttpUrl(href: string): boolean {
     return false;
   }
 }
+
+// profile.resume_url is either a full URL (Cloudinary) or a file name from the
+// old site ("resume.pdf"), which is served from the site root.
+export function resumeHref(resumeUrl: string): {
+  href: string;
+  external: boolean;
+} {
+  if (/^https?:\/\//i.test(resumeUrl))
+    return { href: resumeUrl, external: true };
+  return { href: `/${resumeUrl.replace(/^\/+/, "")}`, external: false };
+}
