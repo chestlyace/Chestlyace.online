@@ -16,7 +16,7 @@ before the phase starts.
 | 2 | Multi-tenant routing | Done | — |
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
 | 4 | Database | Done | Q19 (decided) |
-| 5 | Main site homepage | 5a.4 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
+| 5 | Main site homepage | 5a done; 5b.1 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
 | 6 | Admin panel | Not started | Q14, Q15, Q21 |
 | 7 | SEO & redirects | Not started | — |
 | 8 | Main site launch | Not started | Q17, Q20 |
@@ -126,33 +126,29 @@ are recorded here. Split into four PRs (owner, 2026-10-06):
 | 5a.1 Foundations — issue #15 | Direction, colour, type, spacing, depth, icons, theming, motion (`design.md` §1–§8) | Done (PR #18) |
 | 5a.2 Core components — issue #19 | Buttons, links, tags, header/nav, footer (`design.md` §13.1–13.9) | Done (PR #20) |
 | 5a.3 Content components — issue #21 | Project card, service card, timeline item, contact tiles, form fields, FAQ, certification item (`design.md` §13.10–13.17) | Done (PR #22) |
-| 5a.4 Sections — issue #23 | Every homepage section and the project detail page (`design.md` §14) | In review |
+| 5a.4 Sections — issue #23 | Every homepage section and the project detail page (`design.md` §14) | Done (PR #24) |
 
 Design skills (D36) were installed beforehand (issue #16, PR #17).
 
-**5b — Build**, after 5a is merged:
+**5b — Build**, after 5a is merged. Split into six PRs (owner, 2026-10-06):
 
-- Sections in order: Hero, About, Skills, Services (+ creatives card),
-  Projects, Experience, Volunteering, Contact, FAQ (`ia-content.md` §2)
-- Section components from `design.md` §9
-- Core and content components rebuilt to their specs (`design.md` §13): buttons,
-  links, tags, status pill, header capsule + Sites menu, giant-wordmark footer,
-  skip link, project card, service cards, timeline, contact tiles, form fields,
-  FAQ, certifications
-- Sections and the project page `/projects/[slug]` built to `design.md` §14
-  (hero motion, WebGL grid and ripple included)
-- Schema additions the specs need, proposed here and confirmed in the 5b PR:
-  a certifications table; `problem`, `approach`, `outcome`, and `gallery_urls`
-  on `projects`; where the hero's rotating words live (a `profile` field or code)
-  Header: main's key links. Footer: socials, email, WhatsApp, resume, per-site
-  descriptions (D26)
-- Install devicon and Simple Icons for Skills and socials (D24), `react-iconly`
-  (D40), and the motion stack — `motion`, `gsap`, `lenis`, `ogl`,
-  `@rive-app/react-canvas` (D39); apply the foundations (`design.md` §1–§8) to the
-  tokens and fonts
-- Caching with the `portfolio` tag
-- Contact form behaviour per Q10
-- Copy edits from `ia-content.md` §7, using the owner's wording
+| Step | Covers | Status |
+|---|---|---|
+| 5b.1 Foundations + core components — issue #25 | Packages (`motion`, `gsap`, `lenis`); tokens and fonts; smooth scroll; button, icon button, text link, tag, status pill, skip link, section heading; header capsule + Sites menu; giant-wordmark footer; `/design-system` (`design.md` §1–§8, §13.1–13.9, §14.0) | In review |
+| 5b.2 Data layer | Schema additions the specs need (certifications table; `problem`, `approach`, `outcome`, `gallery_urls` on `projects`; where the hero's rotating words live); migration; seed (Q6, Q7); queries and tests; footer and header data | Not started |
+| 5b.3 Hero | `design.md` §14.1, including the WebGL grid (installs `ogl`) | Not started |
+| 5b.4 About · Skills · Services · Projects | §13.10–13.12, §13.17, §14.2–14.5, including the project ripple; installs `react-iconly`, devicon and Simple Icons | Not started |
+| 5b.5 Experience · Volunteering · Contact · FAQ | §13.13–13.16, §14.6–14.9; email delivery and spam protection (Q10) need the owner's approval first | Not started |
+| 5b.6 Project page | §14.10, including the card → page morph | Not started |
+
+Also part of 5b, in the PR that needs it:
+
+- Caching with the `portfolio` tag (5b.2 onward)
+- Contact form behaviour per Q10 (5b.5)
+- Copy edits from `ia-content.md` §7 using the owner's wording. Until it arrives,
+  placeholder copy lives in one marked file, `content/copy.ts` (D63)
+- Each PR installs only the packages it uses (D24). `@rive-app/react-canvas` (D39)
+  is not installed unless a section spec calls for it; none does yet
 
 **Done when:** the homepage matches `ia-content.md` §2 with seeded data, in both
 themes and at all widths, and passes the accessibility checklist (`design.md` §10).

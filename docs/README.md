@@ -91,6 +91,7 @@ every doc that depends on it.
 | D60 | **Projects: staggered two-column grid + WebGL ripple on hover** | Right column offset 96px; featured projects full width; one shared ripple canvas. `design.md` §14.5 |
 | D61 | **Contact: two columns** | Heading, tiles, socials left; form right; QR popover on desktop (proposed). `design.md` §14.8 |
 | D62 | **Project pages: case-study layout, with card → page morph** | Title, facts, hero image, Problem / Approach / Outcome, gallery, next project. Resolves Q11. New fields proposed for 5b. `design.md` §14.10 |
+| D63 | **5b build split into six PRs; placeholder copy in one file** | Foundations + core components, data, hero, four sections, four sections, project page. Placeholder strings live in `content/copy.ts`, marked `PLACEHOLDER`, until the owner's wording arrives. Rive is not installed (no spec uses it). `phases.md` |
 
 ## Status
 

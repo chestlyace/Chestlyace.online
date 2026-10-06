@@ -2,23 +2,46 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
+type BrandProps = {
+  className?: string;
+  /** `md` is the header's 32px logo; `lg` the footer's 40px. */
+  size?: "md" | "lg";
+  /** Hide the wordmark below `lg` (the header between 768 and 1023px). */
+  wordmarkClassName?: string;
+};
+
 // The DA logo is a black circle whose lettering is transparent. In dark mode a
 // light backing keeps the letters readable and shows as a thin outline.
-export function Brand({ className }: { className?: string }) {
+export function Brand({
+  className,
+  size = "md",
+  wordmarkClassName,
+}: BrandProps) {
+  const logo = size === "md" ? 32 : 40;
   return (
     <Link
       href="/"
-      className={cn("inline-flex items-center gap-3 rounded-md", className)}
+      aria-label="Chestly Ace — home"
+      className={cn("inline-flex items-center gap-2 rounded-full", className)}
     >
       <Image
         src="/brand/logo.png"
         alt=""
-        width={40}
-        height={40}
+        width={logo}
+        height={logo}
         priority
-        className="size-10 rounded-full dark:bg-foreground"
+        className={cn(
+          "rounded-full dark:bg-foreground",
+          size === "md" ? "size-8" : "size-10",
+        )}
       />
-      <span className="font-display text-2xl leading-none tracking-wide text-foreground">
+      <span
+        className={cn(
+          "font-display leading-none tracking-wide text-foreground",
+          size === "md" ? "text-xl" : "text-2xl",
+          wordmarkClassName,
+        )}
+      >
         Chestly Ace
       </span>
     </Link>

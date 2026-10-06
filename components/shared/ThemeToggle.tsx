@@ -2,7 +2,6 @@
 
 import { Monitor, Moon, Sun, SunMoon } from "lucide-react";
 import { useSyncExternalStore } from "react";
-import { cn } from "@/lib/cn";
 import {
   THEME_LABELS,
   applyTheme,
@@ -11,6 +10,7 @@ import {
   writeThemePreference,
   type ThemePreference,
 } from "@/lib/theme";
+import { IconButton } from "./IconButton";
 
 const THEME_EVENT = "themechange";
 
@@ -34,9 +34,6 @@ const ICONS: Record<ThemePreference, typeof Sun> = {
   dark: Moon,
 };
 
-const buttonClasses =
-  "inline-flex size-11 items-center justify-center rounded-md text-foreground transition-colors hover:bg-surface-raised";
-
 export function ThemeToggle({ className }: { className?: string }) {
   const preference = useSyncExternalStore(
     subscribe,
@@ -44,16 +41,18 @@ export function ThemeToggle({ className }: { className?: string }) {
     () => null,
   );
 
+  // Until the cookie is readable on the client, render an inert placeholder
+  // so server and client markup match.
   if (preference === null) {
     return (
-      <button
-        type="button"
+      <IconButton
+        label="Theme"
+        iconKey="pending"
         disabled
-        aria-label="Theme"
-        className={cn(buttonClasses, className)}
+        className={className}
       >
-        <SunMoon className="size-5" aria-hidden="true" />
-      </button>
+        <SunMoon className="size-5" />
+      </IconButton>
     );
   }
 
@@ -62,18 +61,18 @@ export function ThemeToggle({ className }: { className?: string }) {
   const label = `Theme: ${THEME_LABELS[preference]}. Switch to ${THEME_LABELS[next]}.`;
 
   return (
-    <button
-      type="button"
-      aria-label={label}
+    <IconButton
+      label={label}
       title={label}
+      iconKey={preference}
       onClick={() => {
         writeThemePreference(next);
         applyTheme(next);
         window.dispatchEvent(new Event(THEME_EVENT));
       }}
-      className={cn(buttonClasses, className)}
+      className={className}
     >
-      <Icon className="size-5" aria-hidden="true" />
-    </button>
+      <Icon className="size-5" />
+    </IconButton>
   );
 }
