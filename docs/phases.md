@@ -16,7 +16,7 @@ before the phase starts.
 | 2 | Multi-tenant routing | Done | — |
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
 | 4 | Database | Done | Q19 (decided) |
-| 5 | Main site homepage | 5a.1 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
+| 5 | Main site homepage | 5a.2 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
 | 6 | Admin panel | Not started | Q14, Q15, Q21 |
 | 7 | SEO & redirects | Not started | — |
 | 8 | Main site launch | Not started | Q17, Q20 |
@@ -123,8 +123,8 @@ are recorded here. Split into four PRs (owner, 2026-10-06):
 
 | Step | Covers | Status |
 |---|---|---|
-| 5a.1 Foundations — issue #15 | Direction, colour, type, spacing, depth, icons, theming, motion (`design.md` §1–§8) | In review |
-| 5a.2 Core components | Buttons, links, tags, header/nav, footer | Not started |
+| 5a.1 Foundations — issue #15 | Direction, colour, type, spacing, depth, icons, theming, motion (`design.md` §1–§8) | Done (PR #18) |
+| 5a.2 Core components — issue #19 | Buttons, links, tags, header/nav, footer (`design.md` §13) | In review |
 | 5a.3 Content components | Project card, service card, timeline item, contact tiles, form fields, FAQ, certification item | Not started |
 | 5a.4 Sections | Every homepage section and the project detail page (Q11) | Not started |
 
@@ -135,7 +135,9 @@ Design skills (D36) were installed beforehand (issue #16, PR #17).
 - Sections in order: Hero, About, Skills, Services (+ creatives card),
   Projects, Experience, Volunteering, Contact, FAQ (`ia-content.md` §2)
 - Section components from `design.md` §9
-- Header: main's in-page links. Footer: socials, email, resume, per-site
+- Core components rebuilt to their specs (`design.md` §13): buttons, links,
+  tags, status pill, header capsule + Sites menu, giant-wordmark footer, skip link.
+  Header: main's key links. Footer: socials, email, WhatsApp, resume, per-site
   descriptions (D26)
 - Install devicon and Simple Icons for Skills and socials (D24), `react-iconly`
   (D40), and the motion stack — `motion`, `gsap`, `lenis`, `ogl`,
