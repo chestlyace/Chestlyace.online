@@ -34,12 +34,14 @@ close to it. Your general preference for separate `.scss` files would point to
 They can coexist, but picking one keeps the codebase consistent. Needs your call
 before any component is written.
 
-### Q14 — Upload storage · Proposed
+### Q14 — Upload storage · Decided 2026-10-06
+**Answer: Cloudinary.**
 Recommendation: **keep Cloudinary** — existing images are already there and it
 handles resizing/format conversion. Alternative: Vercel Blob (simpler, same
 platform, but no transforms).
 
-### Q15 — Admin authentication · Proposed
+### Q15 — Admin authentication · Decided 2026-10-06
+**Answer: password and a signed cookie** (as recommended; no Auth.js, no passkeys).
 Recommendation: single admin, bcrypt-hashed password in an env var, signed
 `httpOnly` session cookie, rate-limited login (`architecture.md` §6).
 Alternatives: Auth.js with GitHub sign-in restricted to your account (no password
@@ -56,8 +58,10 @@ to manage at all), or passkeys. GitHub sign-in is worth considering.
 ### Q17 — Analytics · Open
 Vercel Web Analytics (simplest, privacy-friendly), Plausible, or none.
 
-### Q21 — Where does the admin live? · Proposed
-Recommendation: `chestlyace.online/admin`. Alternative: `admin.chestlyace.online`
+### Q21 — Where does the admin live? · Decided 2026-10-06
+**Answer: `admin.chestlyace.online`** (not the recommended `/admin` path). It is
+a fourth host in the same app; see `architecture.md` §3 and §6.
+Recommendation was `chestlyace.online/admin`. Alternative: `admin.chestlyace.online`
 (cleaner separation, one more host to route).
 
 ---

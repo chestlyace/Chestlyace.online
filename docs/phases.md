@@ -16,8 +16,8 @@ before the phase starts.
 | 2 | Multi-tenant routing | Done | — |
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
 | 4 | Database | Done | Q19 (decided) |
-| 5 | Main site homepage | 5a done; 5b.1–5b.5 done; 5b.6 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
-| 6 | Admin panel | Not started | Q14, Q15, Q21 |
+| 5 | Main site homepage | Done (5a: PRs #18–#24; 5b: PRs #26–#36). Q5 stays open: the About text is a placeholder | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
+| 6 | Admin panel | 6a in review (issue #37) | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Not started | — |
 | 8 | Main site launch | Not started | Q17, Q20 |
 | 9 | Blog | Not started | Q12, Q16 |
@@ -139,7 +139,7 @@ Design skills (D36) were installed beforehand (issue #16, PR #17).
 | 5b.3 Hero — issue #29 | `design.md` §14.1 with all its motion and the WebGL grid; installs `ogl`, `devicon`, `simple-icons`, `react-iconly`; the homepage and the footer now read the database | Done (PR #30) |
 | 5b.4 About · Skills · Services · Projects — issue #31 | §13.10–13.12, §13.17, §14.2–14.5, including the project ripple; the Devicon sync script; page wiring (numbers and bands follow the sections shown); seed placeholders for services and About | Done (PR #32) |
 | 5b.5 Experience · Volunteering · Contact · FAQ — issue #33 | §13.13–13.16, §14.6–14.9; the contact route (Resend email; honeypot, minimum time and per-IP limit), WhatsApp QR (`qrcode`), logo images in `public/logos/` | Done (PR #34) |
-| 5b.6 Project page — issue #35 | §14.10, including the card → page morph (and back); `/projects/[slug]` for every published project | In review |
+| 5b.6 Project page — issue #35 | §14.10, including the card → page morph (and back); `/projects/[slug]` for every published project | Done (PR #36) |
 
 Also part of 5b, in the PR that needs it:
 
@@ -159,10 +159,15 @@ This phase is large. Splitting it into sub-issues is an option for the owner.
 
 **Goal:** the owner can edit all main-site content without SQL.
 
-**6a — Design (docs only).** Specs for the admin's components and screens.
+**6a — Design (docs only) — issue #37.** Specs for the admin's components and
+screens (`design.md` §13.18–13.26, §14.11), the owner's answers to Q14, Q15 and
+Q21 (decisions D71, D72), and the doc changes that follow from the admin moving to
+`admin.chestlyace.online`.
 
 **6b — Build**, after 6a is merged:
 
+- The `admin` host: site key, `lib/sites.ts` and `proxy.ts` routing (API routes
+  per host), its own root layout, `noindex`
 - Login/logout, session cookie, rate limiting (per Q15)
 - Admin API for every resource (`content-schema.md` §2), Zod-validated
 - Admin UI: list, create, edit, delete, reorder, publish toggle

@@ -10,6 +10,7 @@ request belongs to is decided by its **host name**, not its path.
 | `chestlyace.online` | **main** | Chestly as a software engineer: about, skills, services, projects, experience, volunteering, contact | Postgres (admin-edited) |
 | `creatives.chestlyace.online` | **creatives** | Graphic design, photography, event coverage | Headless CMS (TBD — `open-questions.md` Q1) |
 | `blog.chestlyace.online` | **blog** | Writing | MDX files in the repo |
+| `admin.chestlyace.online` | **admin** | The owner's panel for the main site's data (D71) | Postgres (reads and writes), Cloudinary (uploads) |
 
 ```
                         ┌────────────────────────── Vercel ───────────────────────────┐
@@ -65,6 +66,7 @@ sites from leaking into each other (see §3).
 // lib/sites.ts — single source of truth for hosts
 export const SITES = {
   main:      { host: 'chestlyace.online',           devHost: 'localhost:3000' },
+  admin:     { host: 'admin.chestlyace.online',     devHost: 'admin.localhost:3000' },
   creatives: { host: 'creatives.chestlyace.online', devHost: 'creatives.localhost:3000' },
   blog:      { host: 'blog.chestlyace.online',      devHost: 'blog.localhost:3000' },
 } as const;
@@ -83,9 +85,12 @@ export const SITES = {
   `notFound()`, which renders `app/sites/<site>/not-found.tsx` inside that site's
   layout with a 404 status. More specific routes (e.g. `[slug]`) take priority
   over the catch-all.
-- `/api/*` and `/admin/*` are **main-host only**. The proxy returns 404 for them on
-  the creatives and blog hosts. On main, `/api/*` passes through to `app/api/`
-  untouched and `/admin/*` is rewritten into `app/sites/main/admin/`.
+- API routes belong to one host each (D71). The proxy returns 404 for a route on
+  any other host, and lets it through to `app/api/` untouched on its own:
+  `/api/auth/*` and `/api/admin/*` on **admin**; `/api/contact` on **main**;
+  `/api/revalidate` (the creatives CMS webhook) is host-independent. The admin's
+  pages are the admin host's ordinary pages, rewritten into `app/sites/admin/`
+  like any other site; the old `/admin` path on main no longer exists.
 - Links that cross sites are always **absolute URLs** built from `lib/sites.ts`
   (`siteUrl('blog', '/some-post')`). Relative links stay within a site.
 - `www.chestlyace.online` permanently redirects to `chestlyace.online` (Vercel
@@ -124,7 +129,6 @@ chestlyace.online/
 │  │  │  ├─ not-found.tsx         # main's 404
 │  │  │  ├─ [...notFound]/page.tsx # unmatched paths → notFound()
 │  │  │  ├─ design-system/page.tsx # token/component showcase, 404 in production
-│  │  │  ├─ admin/                # admin panel (auth-gated)
 │  │  │  ├─ sitemap.xml/route.ts
 │  │  │  └─ robots.txt/route.ts
 │  │  ├─ creatives/
@@ -133,6 +137,7 @@ chestlyace.online/
 │  │  │  ├─ not-found.tsx, [...notFound]/page.tsx
 │  │  │  ├─ [slug]/page.tsx       # single piece
 │  │  │  └─ services/page.tsx
+│  │  ├─ admin/                   # admin host: its own root layout, login, screens (D71)
 │  │  └─ blog/
 │  │     ├─ layout.tsx
 │  │     ├─ page.tsx              # post list
@@ -198,7 +203,7 @@ chestlyace.online/
   cache outlives deployments, so a redeploy must not show an older deployment's
   data), and `next dev` skips the cache. `unstable_cache` is marked replaced by
   `use cache` in Next 16; moving to Cache Components later only changes that file.
-- **Writes**: only through `/api/admin/*` Route Handlers, all behind the admin
+- **Writes**: only through `/api/admin/*` Route Handlers (on the admin host), all behind the admin
   session check, all validating the body with Zod against an explicit field list.
   (The old API turned every key in the request body into a SQL column name — that
   pattern is banned.)
@@ -221,15 +226,17 @@ Full schema and endpoints: `content-schema.md`.
 
 ## 6. Admin
 
-- Lives at `chestlyace.online/admin` (main host only; `noindex` + disallowed in
-  `robots.txt`). Alternative location: `open-questions.md` Q21.
+- Lives at `admin.chestlyace.online` (Q21, D71): its own site key, root layout and
+  host; `noindex` (meta and `X-Robots-Tag`) and `robots.txt` disallows everything.
+  Screens: `design.md` §13.18–13.26 and §14.11.
 - Manages **main-site data only**. Blog posts are edited as files; creatives
   content is edited in the CMS's own studio.
 - **Auth** (replaces the old shared password compared with `===` and a JWT in
   `localStorage`):
   - single admin user; password stored as a bcrypt hash in `ADMIN_PASSWORD_HASH`
   - successful login sets an `httpOnly`, `Secure`, `SameSite=Lax` session cookie
-    signed with `SESSION_SECRET`
+    signed with `SESSION_SECRET`, with **no `Domain` attribute**, so the browser
+    sends it to the admin host only and never to the public sites
   - login endpoint is rate-limited
   - details: `open-questions.md` Q15
 

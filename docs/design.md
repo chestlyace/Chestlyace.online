@@ -2,7 +2,9 @@
 
 > **Status: foundations (D37–D41), core components (D42–D46), and content
 > components (D47–D53) approved in Phase 5a.1–5a.3; homepage section and project
-> page specs written in Phase 5a.4 (D54–D62, §14).** §1–§8 below are the
+> page specs written in Phase 5a.4 (D54–D62, §14); all built in Phase 5b. The
+> admin's component and screen specs (§13.18–13.26, §14.11; D72) are written in
+> Phase 6a and built in Phase 6b.** §1–§8 below are the
 > owner-approved foundations: direction, colour, typography, spacing, depth, icons,
 > theming, and motion. §13 holds the component specs and §14 the section and page
 > specs. Nothing visual is built until Phase 5b, after the owner merges the last
@@ -130,10 +132,11 @@ All three sites share every token. Each site may override **only** `primary`,
 | Site | Accent | Status |
 |---|---|---|
 | main | Blue `#2563EB` | Decided |
+| admin | The main blue (no override; D72) | Decided |
 | creatives | TBD — uses the main accent until decided | Q12 |
 | blog | TBD — uses the main accent until decided | Q12 |
 
-Applied by a `data-site="main|creatives|blog"` attribute on `<html>` set in each
+Applied by a `data-site="main|creatives|blog|admin"` attribute on `<html>` set in each
 site's root layout.
 
 ## 5. Space, layout, shape, depth
@@ -341,11 +344,23 @@ for MDX output in both themes), `CodeBlock` (syntax highlighting, copy button),
 shared components in both themes. It returns 404 in production
 (`VERCEL_ENV === "production"`), so it's only visible locally and on previews.
 
-### Admin (`app/sites/main/admin/`)
+### Admin (`app/sites/admin/`, `components/admin/`)
 
-Plain and functional, built from the same tokens: sidebar of resources, list
+Plain and functional, built from the same tokens (D72): sidebar of resources, list
 views with drag-to-reorder and publish toggles, edit forms with inline validation
-errors, image upload field with preview.
+errors, image upload field with preview. It is its own site on
+`admin.chestlyace.online` (D71). **Specs: §13.18–13.26 and §14.11.**
+
+| Component | Notes |
+|---|---|
+| `AdminShell` | §13.18 — sidebar / drawer, content area |
+| `ResourceList` | §13.19 — rows, drag-to-reorder, publish switch, delete |
+| `Switch` | §13.20 |
+| `AdminFields` | §13.21 — tag list, date, URL, slug, checkbox group, image list |
+| `UploadField` | §13.22 — direct-to-Cloudinary |
+| `ConfirmDialog` | §13.23 — also the `destructive` Button variant |
+| `Toast`, `SaveBar` | §13.24, §13.25 |
+| `LoginForm` | §13.26 |
 
 ## 10. Accessibility checklist
 
@@ -418,6 +433,9 @@ Shared components used by all three sites. Each spec follows the checklist in
 durations are from §8. **Approved in:** core components — PR #20 (issue #19);
 content components — PR #22 (issue #21).
 
+**Admin components (Phase 6a):** see [the admin block below](#1318-admin-shell)
+(§13.18–13.26).
+
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
 [Tag](#134-tag) · [Status pill](#135-status-pill) ·
@@ -456,6 +474,7 @@ otherwise `<button>`.
 | `primary` | `primary` | `primary-foreground` | none | `primary-hover` |
 | `secondary` | `surface` | `foreground` | 1px `border` | `surface-raised`, border `muted` at 40% |
 | `ghost` | transparent | `foreground` | none | `surface` |
+| `destructive` | `danger` | white | none | `danger` at 85% (admin only, §13.23) |
 
 - One `primary` per view (§2). `secondary` for the other actions next to it.
   `ghost` for low-emphasis actions inside cards and toolbars.
@@ -1248,6 +1267,319 @@ published flag (proposed; confirmed in the 5b PR).
 **Accessibility.** The badge is decorative (`alt=""`) because the name is text.
 A linked tile's name is "Name — Issuer, verify credential (opens in a new tab)".
 
+**Admin components (Phase 6a, issue #37):**
+[Admin shell](#1318-admin-shell) · [Resource list](#1319-resource-list) ·
+[Switch](#1320-switch) · [Admin form fields](#1321-admin-form-fields) ·
+[Upload field](#1322-upload-field) · [Confirm dialog](#1323-confirm-dialog) ·
+[Toast](#1324-toast) · [Save bar](#1325-save-bar) · [Login form](#1326-login-form)
+
+The admin (`admin.chestlyace.online`, D71) is **plain and functional** (D72): the
+same tokens, type and radii as the public sites, the main blue accent, and the
+core components (§13.1–13.5, §13.15). It has no smooth scrolling, no scroll-driven
+effects, and no magnetic buttons (`magnetic={false}` everywhere in it); motion is
+limited to state changes of 120–300ms with the curves in §8. Every screen works
+with a keyboard and on a phone. Light and dark follow the same toggle as the
+public sites.
+
+### 13.18 Admin shell
+
+**Purpose.** The frame around every admin screen after login: navigation between
+resources, the way back to the public site, and the sign-out.
+
+**References.** Owner's choice (2026-10-06): "plain and functional" (§9), on our
+tokens.
+
+**Anatomy.** Sidebar (`lg` and up) or top bar with a drawer (below `lg`) → content
+area.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Sidebar | 248px wide, fixed, full height; `surface` fill, 1px `border` on its right edge; padding 16px |
+| Brand | The `Brand` component (§9) with a mono `label` "ADMIN" under it; 24px below it the nav |
+| Nav | A list of links in two groups under mono `label` headings: **Overview** (Dashboard) and **Content** (Profile, Skills, Services, Projects, Experience, Volunteering, Certifications, Socials, FAQ). Each link: 40px tall, radius `md`, padding 0 12px, `body` 15px medium, `muted`; a 20px Lucide icon (16px gap 12px) before the label |
+| Active link | `foreground` text, `surface-raised` fill (on the sidebar's `surface`), a 2px `primary` bar on the left edge, `aria-current="page"` |
+| Hover (fine pointer) | `foreground` text, `surface-raised` at 60%, 150ms |
+| Footer of the sidebar | "View site ↗" (text link to the main site, new tab), the theme toggle (§13.2), "Sign out" (ghost button, `sm`) |
+| Top bar (< `lg`) | 56px; `material` bar (§5) with a bottom `border`; menu icon button, the current screen's title in `h3`, the theme toggle |
+| Drawer (< `lg`) | The sidebar slides in from the left over a scrim (`foreground` at 40%); 300ms `ease-drawer`; closes on scrim tap, Escape, or choosing a link; focus is trapped and returns to the menu button |
+| Content area | Fills the rest; `background`; padding 24px (phones 16px) / 32px (`lg`); content max 960px wide, left-aligned |
+| Page title | The screen's `<h1>` in `title` step, `foreground`, with a one-line `muted` description under it; 32px above the content |
+
+**States and motion.** Navigating between screens is a normal page change. The
+active bar does not animate (it is part of the link). Reduced motion: the drawer
+appears and disappears without sliding.
+
+**Responsive.** As in the table: sidebar from `lg`, drawer below.
+
+**Accessibility.** `<nav aria-label="Admin">` around the links; a skip link
+(§13.9) to `#main`; the drawer is a dialog (`role="dialog"`, `aria-modal`,
+labelled "Menu"); every icon has a text label (no icon-only nav). One `<h1>` per
+screen.
+
+### 13.19 Resource list
+
+**Purpose.** The list screen of every resource: see all entries in the order the
+public site shows them, hide or show them, reorder them, and open or delete them.
+
+**Anatomy.** Toolbar (count + "New" button) → rows → empty state. A row: drag
+handle → text block → status → switch → actions.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Toolbar | Left: "6 entries" (`muted`, `sm`); right: a `primary` `md` button "New <thing>" (e.g. "New project") with a `plus` icon; 24px below it the list |
+| List | A single bordered card: `surface` fill, radius `lg`, 1px `border` between rows; no outer padding |
+| Row | Min height 64px, padding 12px 16px, gap 12px; `body` text. Hover (fine pointer): `surface-raised` |
+| Drag handle | Lucide `grip-vertical`, 20px, `muted`, in a 44×44px hit area at the left; cursor `grab` |
+| Text block | Primary line `body`, medium 500, `foreground`, truncated to one line; secondary line `sm` `muted` (what it is — see §14.11 per resource). The whole text block is the link to the editor |
+| Status | A Tag (§13.4): "Published" (plain) or "Draft" (`muted` text on `border` outline); hidden below `md` (the switch carries the state) |
+| Switch | The publish switch (§13.20), labelled "Published: <title>" |
+| Actions | An icon button (§13.2) "Edit <title>" (`pencil`) and one "Delete <title>" (`trash-2`, `danger` on hover and focus). Below `md` they collapse into a single "More" (`ellipsis`) button opening a small menu |
+| Empty state | Centred in the card: a 40px icon, "Nothing here yet", one line of help, and the "New" button |
+
+**Reordering.**
+
+- **Pointer / touch:** press and drag the handle (Motion's `Reorder`); the dragged
+  row lifts (`shadow-float-lifted`, `scale(1.01)`), the others slide aside with
+  the default spring; dropping saves the new order at once
+  (`POST /api/admin/<resource>/reorder`).
+- **Keyboard:** focus the handle (it is a button, "Reorder <title>"); Space picks
+  the row up, ↑ / ↓ move it, Space drops it (saves), Escape cancels. A polite live
+  region announces "Picked up Alexdy, position 1 of 2", "Moved to position 2 of
+  2", "Dropped at position 2" and "Reorder cancelled".
+- **Optimistic:** the new order shows immediately; if the save fails the list
+  returns to the old order and a toast says so (§13.24).
+- Lists that show a subset (Experience's tabs) reorder within what is shown.
+- Where order does not matter to the public site the handle is not shown (none
+  today).
+
+**Publish switch.** Toggling saves at once (`PATCH /:id` with `isPublished`),
+optimistic with the same failure handling; the Status tag follows.
+
+**Delete.** Opens the confirm dialog (§13.23); on confirm the row collapses
+(height + opacity, 200ms) and a toast confirms.
+
+**Motion.** As above. Reduced motion: rows jump to their new place with no
+spring; the lift and the collapse are replaced by opacity changes.
+
+**Responsive.** Rows keep the same structure; below `md` the Status tag is hidden
+and the actions collapse into "More", leaving handle, text, switch, "More".
+
+**Accessibility.** The list is a `<ul>`; each row's link, switch and buttons have
+names that include the entry's title. Focus order within a row: handle, text link,
+switch, edit, delete. Colour is never the only signal for draft (the tag and the
+switch's label say it too).
+
+### 13.20 Switch
+
+**Purpose.** A two-state setting that takes effect or is saved as a field:
+"Published", "Featured", "Link is private".
+
+**Anatomy.** Track → knob (+ a visible label beside it in forms).
+
+**Values.** Track 44×26px, radius `full`; off: `border` fill; on: `primary` fill.
+Knob 20px, white, 3px inset, a soft shadow. A 44px-tall hit area. Label `body`
+`foreground` on the right in forms, `sm` text hidden visually in lists (the
+`aria-label` carries it).
+
+**States and motion.** The knob moves with the default spring and the fill
+cross-fades (150ms). Hover (fine pointer): the off track darkens to `muted` at
+50%. Pressed: the knob stretches to 24px wide. Focus: 2px `ring`, 2px offset,
+radius `full`. Disabled: 50% opacity. Reduced motion: the knob jumps; the fill
+still cross-fades.
+
+**Accessibility.** `role="switch"` on a `<button>` with `aria-checked`; Space and
+Enter toggle. Never relies on colour alone: the label or a visible "On / Off"
+accompanies it in forms.
+
+### 13.21 Admin form fields
+
+**Purpose.** The editor screens' fields. Text inputs, textarea, select and the
+field chrome are the form fields of §13.15 (filled style, label above, errors
+below, validation on blur, `aria-invalid`); this adds the types the admin needs.
+
+**Field types.**
+
+| Type | Use | Behaviour |
+|---|---|---|
+| Text | Names, titles, short strings | §13.15 text input; a character counter (`sm`, `muted`, right-aligned under the field) appears from 80% of the limit |
+| Long text | Descriptions, answers, the About text | §13.15 textarea, min height 160px, growing to 480px; supports blank lines between paragraphs, said in the helper text where it matters |
+| URL | Links | Text input, `inputmode="url"`; accepted values start with `https://` or `http://` (typed values without a scheme get `https://` on blur); invalid ones show "Enter a web address starting with https://" |
+| Date | Start / end / issued dates | Native `<input type="date">` in the same box; a "Clear" text button beside it where blank means "ongoing" or "unknown" |
+| Select | Category, type, availability, icon | §13.15 select |
+| Switch | Booleans | §13.20 with its label on the right and a one-line helper under it |
+| Checkbox group | `show_on` | Native checkboxes (20px, `primary` when checked) in a row, each with its label; at least one must be ticked |
+| Tag list | `tech_stack`, `items`, `headline_words` | A box that holds the entries as removable chips (Tag, §13.4, with an `x` button) and a text input; Enter or comma adds, Backspace on an empty input removes the last chip; chips can be reordered by dragging (same rules as §13.19) or with Alt+← / Alt+→ on a focused chip. Duplicates are refused with a message |
+| Image / file | Hero, logos, badges, project image, resume | The upload field (§13.22) |
+| Image list | `gallery_urls` | A stack of upload fields (§13.22, compact), reorderable like §13.19, with an "Add image" button |
+| Slug | `projects.slug` | A text input that follows the title until edited by hand; lowercase letters, numbers, hyphens; a helper shows the resulting address (`chestlyace.online/projects/<slug>`); a warning notes that changing it breaks links to the old address |
+
+**Layout of an editor screen.** One column, max 720px, fields 24px apart, grouped
+under `h2` group titles (`h3` step) with a 1px `border` line above each group;
+related short fields sit side by side from `sm` (e.g. start and end date). The
+Publish switch is the first field of every entry. The save bar (§13.25) is fixed
+to the bottom.
+
+**Errors.** The server returns `{ error: "invalid", fields: { <name>: "<message>" } }`
+(HTTP 422); each message shows under its field, and focus moves to the first
+invalid one. A top-of-form alert (`role="alert"`, `danger`, Lucide `circle-alert`)
+reports failures that are not tied to a field ("Couldn't save. Check your
+connection and try again."), keeping what was typed.
+
+**Accessibility.** Every control has a visible label; helper and error text are
+tied with `aria-describedby`; required fields say "(required)" in `muted` after the
+label — in the admin, where nearly everything is required, **optional** fields are
+the ones marked "(optional)", as in §13.15. Chips are buttons with names like
+"Remove Laravel".
+
+### 13.22 Upload field
+
+**Purpose.** Choosing an image or file for a field. Files go straight from the
+browser to Cloudinary using a short-lived signature
+(`POST /api/admin/upload-signature`, `content-schema.md` §3); the field stores the
+returned URL.
+
+**Anatomy.** Label → drop area → preview and details → buttons → helper/error.
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Empty | A dashed 1px `border` box, radius `md`, min height 140px, `surface` fill: an `upload` icon, "Drop a file here or **choose one**" (the second part is a text button), and the limits in `sm` `muted` ("JPG, PNG, WebP or AVIF · up to 10 MB") |
+| Drag over | The border becomes `primary`, the fill `primary` at 6%; 150ms |
+| Uploading | The preview area shows the file name and a 4px progress bar (`primary` on `border`); a "Cancel" text button; the field is busy (`aria-busy`) |
+| Filled | A preview (images: `object-contain` on `surface`, radius `md`, max 160px tall, 16:9 for project images, square for logos and badges; the resume shows a PDF icon, its name and a "View" link), the file name and size in `sm` `muted`, and two buttons: "Replace" (secondary `sm`) and "Remove" (ghost `sm`) |
+| Existing URL | A URL already in the database (from the old site) shows as filled; "Replace" works as normal |
+| Error | `danger` border and message with the reason ("That file is over 10 MB", "Upload failed — try again") and a "Try again" text button |
+
+A "Use an address instead" text link under the box swaps it for a URL input (§13.21)
+so a hosted image can be pasted; "Upload a file instead" swaps back.
+
+**Rules per use** (`content-schema.md` §3): project image `portfolio/projects`,
+journey logo `portfolio/journey`, profile hero and resume `portfolio/profile`;
+10 MB; the resume accepts PDF only. Replacing or removing a file changes the field
+only when the entry is saved; nothing is deleted from Cloudinary.
+
+**Motion.** Border and fill changes 150ms; the progress bar grows linearly; the
+preview fades in (200ms). Reduced motion: no fade.
+
+**Accessibility.** The drop area is also a real button (Enter or Space opens the
+file chooser); progress is announced politely in steps of 25%; the preview image
+has `alt=""` (the field's label and file name carry the meaning).
+
+### 13.23 Confirm dialog
+
+**Purpose.** Asking before something destructive or easy to lose: deleting an
+entry, leaving a form with unsaved changes.
+
+**Anatomy.** A native `<dialog>` opened with `showModal()` → title → one-line
+explanation → two buttons.
+
+**Values.** 440px wide (phones: full width minus 32px), radius `xl`, `surface-raised`
+fill, `shadow-float-lifted`, padding 24px; a `foreground` at 40% backdrop. Title
+`h3`; text `body` `muted`; buttons right-aligned, 12px apart: **Cancel** (secondary
+`md`, receives focus first) and the confirming action — **Delete** (the
+`destructive` Button variant, below) or **Discard changes** (`primary`).
+
+**Copy.** "Delete “Alexdy”?" / "This removes it from the site. You can't undo this."
+and "Leave without saving?" / "Your changes to this entry will be lost."
+
+**Destructive Button variant** (added to §13.1): `danger` fill, white text,
+`danger` at 85% on hover; same sizes, states and motion as `primary`; used only
+here and for "Sign out everywhere" if it is ever added.
+
+**Motion.** The dialog scales `0.96 → 1` and fades (200ms `ease-out`); the backdrop
+fades (200ms). Reduced motion: fade only.
+
+**Accessibility.** Native dialog behaviour: focus is trapped and returns to the
+trigger; Escape cancels; the title labels the dialog (`aria-labelledby`) and the
+text describes it (`aria-describedby`).
+
+### 13.24 Toast
+
+**Purpose.** Short feedback after an action that doesn't change the screen:
+"Saved", "Deleted", "Couldn't reorder".
+
+**Values.** Bottom-centre, 24px above the screen edge (above the save bar where
+there is one); max 420px wide; `material` background (§5), 1px `border` at 60%,
+radius `lg`, `shadow-float`, padding 12px 16px; a 20px icon (`circle-check` in
+`secondary` for success, `circle-alert` in `danger` for errors) and one line of
+`body` text; an optional text button ("Undo" is not offered — deletes are final).
+A close icon button on errors.
+
+**Behaviour.** Success toasts last 4 seconds; errors stay until dismissed. At most
+three stack; older ones are removed. Hovering or focusing pauses the timer.
+
+**Motion.** Enters from 12px below with opacity, 250ms `ease-out`; leaves with
+opacity, 150ms. Reduced motion: opacity only.
+
+**Accessibility.** Success: `role="status"` (polite). Errors: `role="alert"`
+(assertive). Never the only way to learn of a failure that affects the form: form
+failures also show the form's alert (§13.21).
+
+### 13.25 Save bar
+
+**Purpose.** Saving or discarding an editor screen's changes.
+
+**Values.** Fixed to the bottom of the content area, full width of it (not under
+the sidebar); `material` background, a 1px `border` on its top edge, padding
+12px 16px (`lg`: 12px 32px); content aligned to the same 720px column as the form.
+Left: a status in `sm` — "Unsaved changes" with a small `primary` dot, or "All
+changes saved" in `muted` (after a save, for 3 seconds, then blank). Right:
+**Cancel** (ghost `md`, returns to the list; asks to confirm when there are
+unsaved changes, §13.23) and **Save** (`primary` `md`; loading state while saving;
+disabled until something changed).
+
+**Behaviour.** The form is "dirty" once any field differs from what was loaded.
+Save validates, sends, then shows a success toast ("Saved. It's live on the site.")
+and stays on the screen (new entries move to their own edit address). Cmd/Ctrl+S
+saves. Leaving the page or closing the tab with unsaved changes shows the
+browser's own warning. On a failure the bar stays dirty and the form's alert
+explains.
+
+**Motion.** The status text cross-fades (150ms). Reduced motion: none needed.
+
+**Accessibility.** The status is in a polite live region; Save has `type="submit"`
+for the form so Enter in a text field submits.
+
+### 13.26 Login form
+
+**Purpose.** Signing in (Q15: one admin, a password, no username).
+
+**Anatomy.** Centred card → brand → "Sign in" → password field → button.
+
+**Values.** Card 400px wide (phones: full width minus 32px), `surface` fill, radius
+`xl`, padding 32px, centred vertically and horizontally on a `background` page; the
+`Brand` (§9) and a mono `label` "ADMIN" above an `h1` "Sign in" (`title` step).
+One password field (§13.15) labelled "Password", `type="password"`,
+`autocomplete="current-password"`, with a show/hide icon button (`eye` / `eye-off`,
+"Show password") inside its right edge; below it a `primary` `lg` full-width
+button "Sign in" (loading state while checking).
+
+**Errors.** A wrong password shows one message, "That password isn't right." — never
+which part was wrong. Too many attempts: "Too many attempts. Try again in 12
+minutes." with the real wait; the form is disabled until then. Network failure:
+the generic form alert (§13.21). The password stays typed after a failed attempt.
+
+**After signing in.** To the screen asked for (a safe path on the admin host) or
+the dashboard. Signing out returns here with "You've been signed out."; an expired
+session sends the visitor here with "Your session ended. Sign in again." and
+returns them to the screen they were on.
+
+**Proposed values (confirmed in 6b):** a session lasts 7 days from sign-in; 5 failed
+attempts per IP per 15 minutes, in memory like the contact form's limit (D69), with a
+short fixed delay on every attempt.
+
+**Motion.** The card enters with opacity and 12px rise, 300ms. Reduced motion:
+none.
+
+**Accessibility.** The error is tied to the field with `aria-describedby` and
+announced (`role="alert"`); the page `<title>` is "Sign in — Admin"; the browser's
+password manager can fill and save it.
+
 ## 14. Page and section specs
 
 The main site's homepage (`/`) and the project page (`/projects/[slug]`). Each
@@ -1261,6 +1593,8 @@ spec follows the section checklist in §12. Components are linked, not repeated.
 [Contact](#148-contact) · [FAQ](#149-faq)
 
 **Project page:** [Project page](#1410-project-page)
+
+**Admin (Phase 6a):** [Admin pages](#1411-admin-pages)
 
 ### 14.0 Page-wide rules
 
@@ -1880,3 +2214,184 @@ category, tags, then the buttons. The Next project block's title scales to
 text (the project name and what's shown). "← All projects" is the first link in the
 page after the skip link. Live and Source links that open a new tab say so to
 screen readers. The `title` and metadata are set per project (SEO — Phase 7).
+
+### 14.11 Admin pages
+
+**Purpose.** The owner edits everything the main site shows, without SQL
+(Phase 6). Components: §13.18–13.26, with the core components §13.1–13.5 and §13.15.
+**Approved in:** the Phase 6a PR (issue #37).
+
+**References.** Owner's choice (2026-10-06): plain and functional, on our tokens
+(§9, D72). Host: `admin.chestlyace.online` (Q21, D71).
+
+**Addresses** (on the admin host):
+
+| Screen | Address |
+|---|---|
+| Sign in | `/login` |
+| Dashboard | `/` |
+| Profile | `/profile` (one form; no list) |
+| A resource's list | `/skills`, `/services`, `/projects`, `/experience`, `/volunteering`, `/certifications`, `/socials`, `/faq` |
+| New entry | `/<resource>/new` |
+| An entry | `/<resource>/<id>` |
+
+- Every address except `/login` needs a valid session; without one it redirects to
+  `/login?next=<path>`. `/login` with a valid session redirects to `/`.
+- An unknown resource or id shows the admin's own 404 (inside the shell, with a
+  link back to the dashboard).
+- `noindex` on every page (meta and `X-Robots-Tag`); no sitemap; `robots.txt`
+  disallows everything.
+- Every successful write revalidates the public site (`content-schema.md` §2), so
+  the change shows on the next visit to the public page. The save toast says "It's
+  live on the site." only after the revalidation succeeded.
+- **Layout of every list screen:** the shell (§13.18), the page title and
+  description, the toolbar and list (§13.19). **Of every editor screen:** the
+  shell, a "← <Resource>" text link (§13.3) above the title, the title ("Edit
+  Alexdy" / "New project"), the form (§13.21) and the save bar (§13.25).
+  A new entry starts with **Published** off, so nothing half-written goes live;
+  the owner turns it on when ready.
+
+**Dashboard (`/`).**
+
+- Title "Dashboard", description "Everything on chestlyace.online, in one place."
+- A grid of one tile per resource (§13.14's tile look, `surface`, radius `lg`,
+  padding 20px, three columns from `lg`, two from `sm`, one on phones): the
+  resource name, the number of entries as `title`-step text, "x published · y
+  drafts" in `sm` `muted`, and "Last edited <relative time>"; the whole tile links
+  to the list. Hover as §13.14.
+- Under the grid, a "Site" group with: "View chestlyace.online ↗", and a notice
+  (`surface-raised`, `sm`) for anything the build needs that is missing — "Email
+  sending isn't set up (RESEND_API_KEY)", "Uploads aren't set up (Cloudinary)" —
+  shown only when true.
+- No charts and no analytics (Q17 belongs to Phase 8).
+
+**Resources.** For each: what a list row shows, then the editor's fields in
+order. "Req." means required. All text is trimmed. URLs follow §13.21.
+Every editor starts with the **Published** switch (Profile and Socials have none).
+
+**Profile** (`/profile`, the single row; `content-schema.md` §1.1). No list, no
+"New", no delete. Title "Profile".
+
+| Group | Field | Control | Req. | Notes |
+|---|---|---|---|---|
+| Identity | Name | Text | ✓ | The name shown in the header and hero, max 80 |
+| | Legal name | Text | | For search results; max 80 |
+| | Display name | Text | | The logo's wordmark; max 40 |
+| Hero | Headline | Text | ✓ | Two words split at the first space, e.g. "Software Engineer"; max 60 |
+| | Rotating words | Tag list | | The outlined line ("Backend", "Full-Stack"); the site adds the "& "; empty hides the line; max 8 words |
+| | Tagline | Text | | The status pill's text; max 60 |
+| | Availability | Select | | Open / Limited / Closed; only "Open" shows the pill |
+| | Hero image | Upload (image) | | `portfolio/profile` |
+| About | Quote | Text | | The scroll-lit statement; max 200 |
+| | Body | Long text | | Blank line between paragraphs; max 2000 |
+| | Résumé | Upload (PDF) | | `portfolio/profile` |
+| Contact | Email | Text | ✓ | Valid address |
+| | Phone | Text | | As shown, e.g. +237 676 940 247 |
+| | WhatsApp number | Text | | Digits only; helper shows the resulting link |
+| | Location | Text | | e.g. Yaoundé, Cameroon |
+
+**Skills** (`/skills`). Row: name; "<Category> · <icon name or 'no icon'>".
+
+| Field | Control | Req. | Notes |
+|---|---|---|---|
+| Name | Text | ✓ | max 60 |
+| Category | Select | ✓ | Language / Framework / Database / Cloud / Tool (the DB's `language`, `framework`, `database`, `cloud`, `tool`) |
+| Icon name | Text | | A Devicon name, e.g. `react`; helper links to devicon.dev; unknown names show a warning |
+| Icon image | Upload or URL | | Used when there is no Devicon name |
+
+**Services** (`/services`). Row: title; "<n> items · icon <name>".
+
+| Field | Control | Req. | Notes |
+|---|---|---|---|
+| Title | Text | ✓ | max 80 |
+| Description | Long text | ✓ | max 400 |
+| Icon | Select | ✓ | The Iconly names the site knows (the list lives in code; the select shows each icon beside its name) |
+| Items | Tag list | | The bullet list on the card; max 8 |
+
+**Projects** (`/projects`). Row: title; "<Category> · <n> tech · Featured / —". Featured
+projects are listed first on the site whatever the order here; the list shows a
+"Featured" Tag and a helper line says so.
+
+| Group | Field | Control | Req. | Notes |
+|---|---|---|---|---|
+| Basics | Title | Text | ✓ | max 80 |
+| | Slug | Slug | ✓ | Unique |
+| | Category label | Text | | e.g. Full Stack; max 30 |
+| | Featured | Switch | | Full-width row on the homepage |
+| | Summary | Long text | ✓ | The card and page summary; max 300 |
+| | Image | Upload (image) | | `portfolio/projects`; the card and the page's hero |
+| | Tech stack | Tag list | | Chips on the project page; max 12 |
+| Links | Live link | URL | | |
+| | Live link is private | Switch | | Shows a "Private" tag instead of a button |
+| | Source link | URL | | |
+| | Source link is private | Switch | | Same |
+| Case study | Description | Long text | | Shown when Problem, Approach and Outcome are all empty; max 3000 |
+| | Problem | Long text | | max 2000; empty hides the section |
+| | Approach | Long text | | Same |
+| | Outcome | Long text | | Same |
+| | Gallery | Image list | | `portfolio/projects`; shown under the sections |
+
+**Experience** (`/experience`; the `journey` table). The list has tabs — **All**,
+**Work**, **Education** — and rows read: role; "<Organization> · <dates> ·
+Education" (the last word only for education). Order is shared across tabs (it is
+the order on the public wheel).
+
+| Field | Control | Req. | Notes |
+|---|---|---|---|
+| Type | Select | ✓ | Work / Education; first field |
+| Role or degree | Text | ✓ | max 100 |
+| Organization | Text | ✓ | max 100 |
+| Location | Text | | |
+| Start date | Date | | |
+| End date | Date | | Blank = ongoing |
+| Dates text | Text | | Shown instead of the dates when filled, e.g. "Dec 2025 - Present"; helper shows what the dates alone would read |
+| Description | Long text | | max 600 |
+| Logo | Upload (image) | | `portfolio/journey`; the first letter shows when empty |
+| Link | URL | | The organization's site |
+
+**Volunteering** (`/volunteering`). Same row and fields as Experience, without Type.
+The public section stays hidden while no entry is published; the list says so in a
+`surface-raised` notice when that is the case.
+
+**Certifications** (`/certifications`). Row: name; "<Issuer> · <issued date or 'no date'>".
+
+| Field | Control | Req. | Notes |
+|---|---|---|---|
+| Name | Text | ✓ | max 120 |
+| Issuer | Text | ✓ | max 80 |
+| Issued on | Date | | |
+| Badge | Upload (image) | | Square; `portfolio/profile` |
+| Credential link | URL | | The tile links to it when set |
+
+**Socials** (`/socials`). Row: platform; the address.
+
+| Field | Control | Req. | Notes |
+|---|---|---|---|
+| Platform | Text | ✓ | e.g. GitHub; max 40 |
+| Address | URL | ✓ | |
+| Icon | Select | ✓ | Instagram / LinkedIn / GitHub / TikTok / WhatsApp / Link, each shown with its icon |
+| Show on | Checkbox group | ✓ | Main / Creatives / Blog |
+
+Socials have no Published switch (the table has no such column; `Show on` does that
+job), so their rows show no status or switch, and their editor starts with the
+fields above.
+
+**FAQ** (`/faq`). Row: the question; the first line of the answer.
+
+| Field | Control | Req. | Notes |
+|---|---|---|---|
+| Question | Text | ✓ | max 200 |
+| Answer | Long text | ✓ | max 1500; plain text |
+
+**Motion.** Only what the components specify; page changes are instant. Reduced
+motion as each component says.
+
+**Light and dark.** Both themes, from the tokens; nothing differs beyond them.
+
+**Responsive.** Editors are one column at every width; lists keep their rows (§13.19);
+the dashboard grid steps 3 → 2 → 1 columns. The save bar and toasts stay within
+the content area on phones, the toast sitting above the bar.
+
+**Accessibility.** One `<h1>` per screen (the title); focus moves to the `<h1>`
+after a page change; every control is reachable by keyboard; destructive actions
+always confirm; nothing depends on hover.
