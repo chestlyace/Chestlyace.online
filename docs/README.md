@@ -50,6 +50,14 @@ every doc that depends on it.
 | D19 | **Site folders are `app/sites/<site>/`, not `app/_sites/<site>/`** | Next.js excludes `_` folders from routing, so the original path could never render. No `app/layout.tsx`; each site is its own root layout with its own 404 |
 | D20 | **Tests: Vitest** | `pnpm test`; run locally before every PR |
 | D21 | **Preview `?site=` is remembered in a `preview-site` cookie** | Non-production only; `?site=main` switches back |
+| D22 | **Fonts: Bebas Neue, Inter, Outfit, JetBrains Mono** | Q13. Outfit = eyebrow labels / small uppercase text |
+| D23 | **Wordmark: "Chestly Ace" everywhere, beside the old DA logo** | Q18. Light backing behind the logo in dark mode |
+| D24 | **Icons installed when first needed** | Lucide in Phase 3; devicon + Simple Icons in Phase 5 |
+| D25 | **Site labels: Dev · Creatives · Blog** | Same in header and footer; replaces "Software" / "Main" |
+| D26 | **Header/footer: structure in Phase 3, data in Phase 5** | Main's in-page links, footer socials, email, resume, and per-site descriptions arrive with the homepage |
+| D27 | **`/design-system` showcase page, previews only** | Returns 404 in production |
+| D28 | **On Vercel previews, cross-site links stay on the preview via `?site=`** | `siteUrl()` uses `VERCEL_BRANCH_URL` when `VERCEL_ENV === "preview"` |
+| D29 | **StatusPill: "open" state only for now** | Other availability states decided with the profile data |
 
 ## Status
 

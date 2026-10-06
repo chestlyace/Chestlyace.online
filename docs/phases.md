@@ -13,8 +13,8 @@ before the phase starts.
 |---|---|---|---|
 | 0 | Planning & workflow | Done | — |
 | 1 | Project scaffold | Done | Q2, Q3 (decided) |
-| 2 | Multi-tenant routing | In review | — |
-| 3 | Design system & shared layout | Not started | Q13, Q18 |
+| 2 | Multi-tenant routing | Done | — |
+| 3 | Design system & shared layout | In review | Q13, Q18 (decided) |
 | 4 | Database | Not started | Q19 |
 | 5 | Main site homepage | Not started | Q4–Q11, Q22 |
 | 6 | Admin panel | Not started | Q14, Q15, Q21 |
@@ -53,7 +53,7 @@ the same foundation.
 build is green.
 **Refs:** `architecture.md` §2, §4, §8, §9.
 
-## Phase 2 — Multi-tenant routing — issue #7
+## Phase 2 — Multi-tenant routing — issue #7, PR #8 (merged)
 
 **Goal:** one app answers as three sites depending on the host.
 
@@ -69,18 +69,20 @@ build is green.
 `blog.localhost:3000` each show their own placeholder, locally and on preview.
 **Refs:** `architecture.md` §3, §4.
 
-## Phase 3 — Design system & shared layout
+## Phase 3 — Design system & shared layout — issue #9
 
 **Goal:** the visual foundation every page is built from.
 
 - Colour tokens for light and dark (`design.md` §2), main-site accent (§4)
-- Fonts via `next/font` (§3), type scale
+- Fonts via `next/font` (§3, D22), type scale
 - Radius, spacing, shadow rules (§5)
-- Icon setup: Lucide, devicon, Simple Icons (§6)
+- Icon setup: Lucide (§6, D24)
 - Theme: system / light / dark, no flash, cookie shared across subdomains (§7)
 - Shared components: `Container`, `Button`, `SectionHeading`, `Tag`,
-  `StatusPill`, `ThemeToggle`, `SiteHeader`, `SiteFooter` (§9)
-- Header and footer on all three placeholder sites, with cross-site links
+  `StatusPill` (open state, D29), `ThemeToggle`, `SiteHeader`, `SiteFooter` (§9)
+- Header and footer on all three placeholder sites, with cross-site links —
+  structure only (D26); preview links stay on the preview (D28)
+- `/design-system` showcase page, previews only (D27)
 
 **Done when:** the shared components render correctly in both themes at phone
 and desktop widths, on all three hosts, and the theme carries across hosts.
@@ -106,6 +108,9 @@ and desktop widths, on all three hosts, and the theme carries across hosts.
 - Sections in order: Hero, About, Skills, Services (+ creatives card),
   Projects, Experience, Volunteering, Contact, FAQ (`ia-content.md` §2)
 - Section components from `design.md` §9
+- Header: main's in-page links. Footer: socials, email, resume, per-site
+  descriptions (D26)
+- Install devicon and Simple Icons for Skills and socials (D24)
 - Caching with the `portfolio` tag
 - Contact form behaviour per Q10
 - Copy edits from `ia-content.md` §7, using the owner's wording

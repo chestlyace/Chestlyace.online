@@ -106,6 +106,12 @@ parameter (honoured only when `VERCEL_ENV !== 'production'`) to pick a site. The
 choice is remembered in a `preview-site` cookie so internal links stay on that
 site; `?site=main` switches back (D21). Production ignores both.
 
+`siteUrl()` follows the same model (D28): on a Vercel preview
+(`VERCEL_ENV === "preview"`) it returns the branch URL (`VERCEL_BRANCH_URL`) with
+`?site=<site>`, so cross-site links stay on the preview. Order of precedence:
+`NEXT_PUBLIC_*_URL` override → preview branch URL → `*.localhost` in development →
+production subdomains.
+
 ## 4. Folder layout
 
 ```
@@ -117,6 +123,7 @@ chestlyace.online/
 │  │  │  ├─ page.tsx              # homepage, all sections
 │  │  │  ├─ not-found.tsx         # main's 404
 │  │  │  ├─ [...notFound]/page.tsx # unmatched paths → notFound()
+│  │  │  ├─ design-system/page.tsx # token/component showcase, 404 in production
 │  │  │  ├─ admin/                # admin panel (auth-gated)
 │  │  │  ├─ sitemap.xml/route.ts
 │  │  │  └─ robots.txt/route.ts
@@ -140,7 +147,8 @@ chestlyace.online/
 │  │  └─ revalidate/route.ts       # CMS webhook for creatives
 │  └─ globals.css                  # Tailwind + design tokens
 ├─ components/
-│  ├─ shared/                      # SiteHeader, SiteFooter, ThemeToggle, Button…
+│  ├─ shared/                      # SiteDocument (html/head/body shell), SiteHeader,
+│  │                               # SiteFooter, Brand, MobileMenu, ThemeToggle, Button…
 │  ├─ main/                        # Hero, ProjectCard, TimelineItem…
 │  ├─ creatives/                   # Gallery, Lightbox…
 │  └─ blog/                        # PostCard, MDX components…
@@ -153,12 +161,16 @@ chestlyace.online/
 ├─ lib/
 │  ├─ sites.ts                     # site registry, host resolution, siteUrl, decideRoute
 │  ├─ sites.test.ts
+│  ├─ theme.ts                     # theme cookie, applyTheme, no-flash init script
+│  ├─ theme.test.ts
+│  ├─ fonts.ts                     # next/font setup
+│  ├─ cn.ts                        # class-name join helper
 │  ├─ db.ts
 │  ├─ auth.ts
 │  ├─ cloudinary.ts
 │  ├─ cms.ts                       # creatives CMS client
 │  └─ blog.ts                      # MDX loading + frontmatter validation
-├─ public/                         # favicons, resume, OG images
+├─ public/                         # brand/logo.png, favicons, resume, OG images
 ├─ docs/                           # these documents
 ├─ proxy.ts
 └─ vitest.config.mts
