@@ -13,6 +13,10 @@ export function createRateLimiter({
   const hits = new Map<string, number[]>();
 
   return {
+    // Forgets a key's hits (a successful login clears its failed attempts).
+    clear(key: string) {
+      hits.delete(key);
+    },
     check(key: string, now: number = Date.now()) {
       const recent = (hits.get(key) ?? []).filter(
         (time) => now - time < windowMs,

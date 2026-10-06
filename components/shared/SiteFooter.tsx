@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import { FOOTER_DESCRIPTIONS } from "@/content/copy";
 import type { FooterLink } from "@/lib/chrome";
-import { SITE_KEYS, SITE_LABELS, siteUrl, type SiteKey } from "@/lib/sites";
+import {
+  PUBLIC_SITE_KEYS,
+  SITE_LABELS,
+  siteUrl,
+  type PublicSiteKey,
+} from "@/lib/sites";
 import { Brand } from "./Brand";
 import { Container } from "./Container";
 import { FooterWordmark } from "./FooterWordmark";
@@ -31,7 +36,7 @@ export function SiteFooter({
   connect,
   contact,
 }: {
-  site: SiteKey;
+  site: PublicSiteKey;
   connect?: readonly FooterLink[];
   contact?: readonly FooterLink[];
 }) {
@@ -51,7 +56,7 @@ export function SiteFooter({
             className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-7"
           >
             <Column title="Sites">
-              {SITE_KEYS.map((key) => {
+              {PUBLIC_SITE_KEYS.map((key) => {
                 const current = key === site;
                 return (
                   <li key={key}>

@@ -6,6 +6,8 @@ describe("siteFromHost", () => {
     ["chestlyace.online", "main"],
     ["creatives.chestlyace.online", "creatives"],
     ["blog.chestlyace.online", "blog"],
+    ["admin.chestlyace.online", "admin"],
+    ["admin.localhost:3000", "admin"],
     ["localhost:3000", "main"],
     ["creatives.localhost:3000", "creatives"],
     ["blog.localhost:4000", "blog"],
@@ -61,10 +63,29 @@ describe("decideRoute", () => {
     });
   });
 
-  it.each(["/api", "/api/x", "/admin", "/admin/projects"])(
-    "returns 404 for %s on creatives and blog",
+  it.each(["/api", "/api/x", "/api/contact", "/api/portfolio"])(
+    "returns 404 for %s on creatives, blog and admin",
     (pathname) => {
       for (const host of [
+        "creatives.chestlyace.online",
+        "blog.chestlyace.online",
+        "admin.chestlyace.online",
+      ]) {
+        expect(decideRoute({ ...base, host, pathname })).toEqual({
+          kind: "not-found",
+        });
+      }
+    },
+  );
+
+  it.each(["/api/auth/login", "/api/auth/logout", "/api/admin/skills"])(
+    "serves %s on the admin host only",
+    (pathname) => {
+      expect(
+        decideRoute({ ...base, host: "admin.chestlyace.online", pathname }),
+      ).toEqual({ kind: "pass-through", site: "admin" });
+      for (const host of [
+        "chestlyace.online",
         "creatives.chestlyace.online",
         "blog.chestlyace.online",
       ]) {
@@ -75,9 +96,39 @@ describe("decideRoute", () => {
     },
   );
 
+  it("serves /api/revalidate on every host", () => {
+    for (const host of [
+      "chestlyace.online",
+      "creatives.chestlyace.online",
+      "admin.chestlyace.online",
+    ]) {
+      expect(
+        decideRoute({ ...base, host, pathname: "/api/revalidate" }),
+      ).toMatchObject({ kind: "pass-through" });
+    }
+  });
+
+  it("keeps the admin's pages on the admin host", () => {
+    expect(
+      decideRoute({
+        ...base,
+        host: "admin.chestlyace.online",
+        pathname: "/login",
+      }),
+    ).toEqual({
+      kind: "rewrite",
+      site: "admin",
+      pathname: "/sites/admin/login",
+    });
+    expect(
+      decideRoute({ ...base, host: "admin.chestlyace.online" }),
+    ).toMatchObject({ pathname: "/sites/admin" });
+  });
+
   it("passes /api through untouched on main", () => {
     expect(decideRoute({ ...base, pathname: "/api/portfolio" })).toEqual({
       kind: "pass-through",
+      site: "main",
     });
   });
 
@@ -135,14 +186,32 @@ describe("decideRoute", () => {
 
     it("ignores invalid values", () => {
       expect(
-        decideRoute({ ...preview, siteParam: "admin", siteCookie: "nope" }),
+        decideRoute({ ...preview, siteParam: "nope", siteCookie: "nope" }),
       ).toMatchObject({ site: "main" });
     });
 
-    it("applies main-only rules to the overridden site", () => {
+    it("can preview the admin", () => {
+      expect(decideRoute({ ...preview, siteParam: "admin" })).toMatchObject({
+        site: "admin",
+        pathname: "/sites/admin",
+      });
+    });
+
+    it("applies each API route's host rule to the overridden site", () => {
       expect(
-        decideRoute({ ...preview, siteParam: "blog", pathname: "/admin" }),
+        decideRoute({
+          ...preview,
+          siteParam: "blog",
+          pathname: "/api/contact",
+        }),
       ).toEqual({ kind: "not-found" });
+      expect(
+        decideRoute({
+          ...preview,
+          siteParam: "admin",
+          pathname: "/api/auth/login",
+        }),
+      ).toEqual({ kind: "pass-through", site: "admin" });
     });
   });
 

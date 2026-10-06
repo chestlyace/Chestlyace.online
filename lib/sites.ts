@@ -5,16 +5,29 @@ export const SITES = {
     devHost: "creatives.localhost:3000",
   },
   blog: { host: "blog.chestlyace.online", devHost: "blog.localhost:3000" },
+  // The owner's panel (D71): a host of its own, never listed in the public
+  // Sites menu or footer.
+  admin: {
+    host: "admin.chestlyace.online",
+    devHost: "admin.localhost:3000",
+  },
 } as const;
 
 export type SiteKey = keyof typeof SITES;
 
 export const SITE_KEYS = Object.keys(SITES) as SiteKey[];
 
+// The sites visitors can go to: what the Sites menu and the footer list.
+export type PublicSiteKey = Exclude<SiteKey, "admin">;
+export const PUBLIC_SITE_KEYS = SITE_KEYS.filter(
+  (key): key is PublicSiteKey => key !== "admin",
+);
+
 export const SITE_LABELS: Record<SiteKey, string> = {
   main: "Dev",
   creatives: "Creatives",
   blog: "Blog",
+  admin: "Admin",
 };
 
 export const PREVIEW_SITE_COOKIE = "preview-site";
@@ -43,6 +56,7 @@ const URL_OVERRIDES: Record<SiteKey, string | undefined> = {
   main: process.env.NEXT_PUBLIC_MAIN_URL,
   creatives: process.env.NEXT_PUBLIC_CREATIVES_URL,
   blog: process.env.NEXT_PUBLIC_BLOG_URL,
+  admin: process.env.NEXT_PUBLIC_ADMIN_URL,
 };
 
 export function siteUrl(site: SiteKey, path = "/"): string {
@@ -74,7 +88,7 @@ export type RoutingInput = {
 
 export type RoutingDecision =
   | { kind: "not-found" }
-  | { kind: "pass-through" }
+  | { kind: "pass-through"; site: SiteKey }
   | {
       kind: "rewrite";
       site: SiteKey;
@@ -82,7 +96,22 @@ export type RoutingDecision =
       setPreviewCookie?: SiteKey;
     };
 
-const MAIN_ONLY_PREFIXES = ["/api", "/admin"];
+// Every API route answers on one host (D71); on any other host it is a 404.
+// Anything not listed here is main's. `/api/revalidate` (the creatives CMS
+// webhook) is the one that doesn't care which host it arrives on.
+const API_OWNERS: [prefix: string, owner: SiteKey | "any"][] = [
+  ["/api/auth", "admin"],
+  ["/api/admin", "admin"],
+  ["/api/revalidate", "any"],
+  ["/api/contact", "main"],
+];
+
+function apiOwner(pathname: string): SiteKey | "any" {
+  for (const [prefix, owner] of API_OWNERS) {
+    if (startsWithSegment(pathname, prefix)) return owner;
+  }
+  return "main";
+}
 
 function startsWithSegment(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -101,12 +130,11 @@ export function decideRoute(input: RoutingInput): RoutingDecision {
     }
   }
 
-  const mainOnly = MAIN_ONLY_PREFIXES.some((prefix) =>
-    startsWithSegment(input.pathname, prefix),
-  );
-  if (mainOnly && site !== "main") return { kind: "not-found" };
-  if (startsWithSegment(input.pathname, "/api"))
-    return { kind: "pass-through" };
+  if (startsWithSegment(input.pathname, "/api")) {
+    const owner = apiOwner(input.pathname);
+    if (owner !== "any" && owner !== site) return { kind: "not-found" };
+    return { kind: "pass-through", site };
+  }
 
   const pathname =
     input.pathname === "/"

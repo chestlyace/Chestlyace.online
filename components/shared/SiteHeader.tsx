@@ -1,12 +1,17 @@
-import { SITE_KEYS, SITE_LABELS, siteUrl, type SiteKey } from "@/lib/sites";
+import {
+  PUBLIC_SITE_KEYS,
+  SITE_LABELS,
+  siteUrl,
+  type PublicSiteKey,
+} from "@/lib/sites";
 import { MAIN_NAV } from "@/lib/sections";
 import { SITE_MENU_DESCRIPTIONS } from "@/content/copy";
 import { HeaderBar, type HeaderSite } from "./HeaderBar";
 
 // Floating capsule header (design.md §13.6). Main has its key links; the
 // creatives and blog links are decided in their own design steps.
-export function SiteHeader({ site }: { site: SiteKey }) {
-  const sites: HeaderSite[] = SITE_KEYS.map((key) => ({
+export function SiteHeader({ site }: { site: PublicSiteKey }) {
+  const sites: HeaderSite[] = PUBLIC_SITE_KEYS.map((key) => ({
     key,
     label: SITE_LABELS[key],
     description: SITE_MENU_DESCRIPTIONS[key],
