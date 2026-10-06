@@ -1505,6 +1505,29 @@ adds nothing the `<h1>` doesn't already say.
 sized, WebP/AVIF. The entrance uses CSS only. Total JavaScript for the hero
 effects loads after first paint; the WebGL chunk is separate and lazy.
 
+**Build notes (Phase 5b.3).** Where the build interprets or adjusts the spec above:
+
+- **Frame shape.** The old frame's CSS (`border-radius: 14rem 14rem 9999px 9999px`)
+  never rendered as an arch: CSS shrinks all four radii by the same factor so the
+  9999px bottom corners fit, which leaves the top corners almost square. The result
+  — a flat-topped shield with a U-shaped bottom — is what the old site showed and
+  what is built. A true arch is a one-line change if wanted.
+- **Headline size** is also capped at 19% of the screen height, so the buttons stay
+  on the first screen of a laptop; taller screens get the full type-scale size.
+- **Outlined line.** A text outline can't be drawn stroke by stroke, so the line
+  fades in as its letters land.
+- **Cursor parallax** follows and returns over 0.5s (one setting for both).
+- **WebGL grid.** Dots near the cursor blend fully to the accent blue; every dot is
+  drawn at 60% opacity.
+- **Offsets.** The quote card and the TypeScript sticker stop at the container's
+  gutter instead of leaving the screen; on phones the TypeScript sticker sits lower
+  so the quote card doesn't cover it.
+- **AWS sticker** keeps a white backing in dark mode (its wordmark is dark), as the
+  brand logo does.
+- **Status pill** shows only when `availability` is `open` (D29).
+- **Icons.** Sticker logos come from Devicon; social icons from Simple Icons, except
+  LinkedIn (dropped by Simple Icons), which uses Devicon's path (D67).
+
 ### 14.2 About
 
 **Purpose.** A short statement of who Chestly is, plus the resume.

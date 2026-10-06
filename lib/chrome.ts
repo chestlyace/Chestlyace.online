@@ -1,4 +1,5 @@
 import type { HomepageData } from "@/lib/db";
+import { isHttpUrl } from "@/lib/links";
 
 // A link in a footer column (design.md §13.8).
 export type FooterLink = { label: string; href: string; external?: boolean };
@@ -20,11 +21,13 @@ export function footerLinks(data: Pick<HomepageData, "profile" | "socials">): {
 } {
   const { profile, socials } = data;
 
-  const connect = socials.map((social) => ({
-    label: social.platform,
-    href: social.url,
-    external: true,
-  }));
+  const connect = socials
+    .filter((social) => isHttpUrl(social.url))
+    .map((social) => ({
+      label: social.platform,
+      href: social.url,
+      external: true,
+    }));
 
   const contact: FooterLink[] = [];
   if (profile) {

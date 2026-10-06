@@ -2,6 +2,7 @@ import { ArrowDown, ArrowRight, ArrowUp, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { isPagePath } from "@/lib/links";
 import { RollText } from "./RollText";
 
 type IconName = "up-right" | "up" | "right" | "down";
@@ -57,10 +58,6 @@ type TextLinkProps = {
     }
 ) &
   Omit<ComponentProps<"a">, "href" | "children" | "className">;
-
-function isInternalPath(href: string): boolean {
-  return href.startsWith("/") && !href.startsWith("//");
-}
 
 export function TextLink({
   href,
@@ -126,7 +123,7 @@ export function TextLink({
     );
   }
 
-  if (isInternalPath(href)) {
+  if (isPagePath(href)) {
     return (
       <Link href={href} className={classes} {...newTab} {...anchorProps}>
         {content}

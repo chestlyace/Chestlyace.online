@@ -28,7 +28,7 @@ export const seedData = {
     headlineWords: ["Backend", "Full-Stack", "Mobile"] as string[],
     tagline: "Open to Remote Roles",
     availability: "open",
-    heroImageUrl: "684d5ff7-8d68-46ce-a5eb-5b0dabd64850.png",
+    heroImageUrl: "/hero.webp",
     aboutQuote:
       "Blending logic with creativity to craft digital experiences that matter.",
     aboutBody: [
