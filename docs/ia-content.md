@@ -98,12 +98,14 @@ Section intro (adapted from the old page): "I help businesses, founders, and tea
 launch responsive websites and custom web applications, with attention to
 performance, maintainable code, and clean delivery."
 
-**Creatives card** (fixed component): "Looking for design or photography? → See my
-creative work at creatives.chestlyace.online".
+**Creatives card** (fixed component, the last card of the service stack —
+`design.md` §13.12): "Looking for design or photography? → See my creative work at
+creatives.chestlyace.online".
 
 ### 2.5 Projects — `#projects`
 
 - Grid of `ProjectCard`s from `projects` (published, ordered; featured first).
+- Each card opens its project page, `/projects/[slug]` (Q11).
 - No tabs — design and events moved out (D8).
 - Heading: "Projects" (old: "Work").
 
