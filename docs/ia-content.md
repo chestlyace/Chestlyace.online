@@ -152,6 +152,10 @@ From `faqs`. Rendered as `FAQPage` JSON-LD. Starting content:
 `Home · About · Skills · Services · Projects · Experience · Volunteering · Contact`
 then a divider, then `Creatives ↗` `Blog ↗`, then the theme toggle.
 
+Site labels are **Dev · Creatives · Blog** everywhere (D25). The in-page links
+arrive in Phase 5 with the sections; until then the header shows the cross-site
+links and theme toggle only (D26).
+
 On mobile the in-page links collapse into a menu; the cross-site links and theme
 toggle stay in the menu too. Volunteering drops out of the nav when the section
 is hidden.
@@ -159,7 +163,7 @@ is hidden.
 ### Header — creatives and blog
 
 Site's own links (e.g. `Work · Services · Contact` / `Posts · Tags`), then
-`Software ↗` (main site) and the other subdomain, then the theme toggle.
+`Dev ↗` (main site) and the other subdomain, then the theme toggle.
 
 The old header also showed a "chestlyace.online" globe link pointing at itself —
 drop it.
@@ -169,10 +173,13 @@ drop it.
 | Column | Content |
 |---|---|
 | Brand | Logo, "DEV.ACE", one-line description (old: "Crafting digital experiences with precision code and creative design…" — **edit** per site) |
-| Sites | Main, Creatives, Blog |
+| Sites | Dev, Creatives, Blog |
 | Quick links | The current site's own nav |
 | Connect | Socials filtered by `show_on`, email |
 | Bottom bar | © year Chestly Ace · Resume |
+
+Phase 3 builds the brand, Sites column, and © line. The description, quick links,
+socials, email, and resume link arrive in Phase 5 (D26).
 
 Dropped from the old footer: the newsletter "Subscribe" box (it wasn't wired to
 anything; Q16 covers a blog newsletter), and the "Privacy Policy" / "Terms of

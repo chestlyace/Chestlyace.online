@@ -172,4 +172,25 @@ describe("siteUrl", () => {
     vi.unstubAllEnvs();
     vi.resetModules();
   });
+
+  it("stays on the branch URL with ?site= on Vercel previews", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("VERCEL_BRANCH_URL", "app-git-feature-me.vercel.app");
+    const { siteUrl } = await import("@/lib/sites");
+    expect(siteUrl("blog")).toBe(
+      "https://app-git-feature-me.vercel.app/?site=blog",
+    );
+    expect(siteUrl("creatives", "/work")).toBe(
+      "https://app-git-feature-me.vercel.app/work?site=creatives",
+    );
+    vi.unstubAllEnvs();
+  });
+
+  it("ignores the branch URL outside previews", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("VERCEL_BRANCH_URL", "app-git-main-me.vercel.app");
+    const { siteUrl } = await import("@/lib/sites");
+    expect(siteUrl("blog")).toBe("https://blog.chestlyace.online/");
+    vi.unstubAllEnvs();
+  });
 });

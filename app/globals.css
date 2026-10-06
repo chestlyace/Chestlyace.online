@@ -1,1 +1,104 @@
 @import "tailwindcss";
+
+/* Dark mode follows the .dark class set by lib/theme.ts, not the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Colour tokens — docs/design.md §2. Components use these via Tailwind
+   (bg-surface, text-muted…), never raw hex values. */
+:root {
+  --background: #f8fafc;
+  --background-alt: #f1f5f9;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+  --muted: #475569;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --primary-text: #1d4ed8;
+  --secondary: #10b981;
+  --ring: #2563eb;
+  --danger: #dc2626;
+  --card-shadow:
+    0 1px 2px rgb(15 23 42 / 0.06), 0 4px 16px rgb(15 23 42 / 0.06);
+}
+
+.dark {
+  --background: #0a0a0a;
+  --background-alt: #121212;
+  --surface: #171717;
+  --surface-raised: #1f1f1f;
+  --border: #262626;
+  --foreground: #fafafa;
+  --muted: #a3a3a3;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --primary-text: #60a5fa;
+  --secondary: #34d399;
+  --ring: #60a5fa;
+  --danger: #f87171;
+  /* Shadows don't read on near-black; dark cards rely on borders instead. */
+  --card-shadow: none;
+}
+
+/* Per-site accents (design.md §4) override only primary, primary-text and
+   ring under [data-site="…"]. Creatives and blog use the main accent until Q12. */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-alt: var(--background-alt);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-text: var(--primary-text);
+  --color-secondary: var(--secondary);
+  --color-ring: var(--ring);
+  --color-danger: var(--danger);
+
+  /* design.md §3 */
+  --font-display: var(--font-bebas-neue), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-eyebrow: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Type scale, fluid from a 375px phone to a 1280px desktop. */
+  --text-display-xl: clamp(4.5rem, 3.05rem + 6.19vw, 8rem);
+  --text-display-xl--line-height: 0.9;
+  --text-display-lg: clamp(3rem, 2.17rem + 3.54vw, 5rem);
+  --text-display-lg--line-height: 0.95;
+  --text-h3: clamp(1.5rem, 1.34rem + 0.66vw, 1.875rem);
+  --text-h3--line-height: 1.2;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.75;
+
+  /* design.md §5 */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --shadow-card: var(--card-shadow);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

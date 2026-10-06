@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SiteDocument } from "@/components/shared/SiteDocument";
 import "../../globals.css";
 
 export const metadata: Metadata = {
@@ -7,9 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function MainLayout({ children }: LayoutProps<"/sites/main">) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+  return <SiteDocument site="main">{children}</SiteDocument>;
 }

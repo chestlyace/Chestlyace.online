@@ -48,12 +48,14 @@ and `surface` in both themes. Check every new token pair before adding it.
 
 | Role | Font | Notes |
 |---|---|---|
-| Display | **Bebas Neue** | Section titles ("ABOUT ME", "LET'S WORK TOGETHER"), hero name. Uppercase, tight leading. Never for body text. |
+| Display | **Bebas Neue** | Section titles ("ABOUT ME", "LET'S WORK TOGETHER"), hero name, the "Chestly Ace" wordmark. Uppercase, tight leading. Never for body text. |
 | Body / UI | **Inter** | Paragraphs, nav, buttons, forms |
-| Code | **JetBrains Mono** (proposed) | Blog code blocks, tech-stack tags |
+| Eyebrow | **Outfit** | Small uppercase text: eyebrow labels above section titles, the status pill, taglines (as on the old site) |
+| Code | **JetBrains Mono** | Blog code blocks, tech-stack tags |
 
-The old site also loaded **Outfit**; dropping it is proposed (`open-questions.md`
-Q13). Fonts are self-hosted through `next/font` — no Google Fonts request at runtime.
+All four fonts are kept (Q13, D22). Fonts are self-hosted through `next/font`
+(`lib/fonts.ts`) — no Google Fonts request at runtime. Tailwind classes:
+`font-display`, `font-sans` (default), `font-eyebrow`, `font-mono`.
 
 Type scale (rem, mobile → desktop):
 
@@ -75,8 +77,8 @@ All three sites share every token. Each site may override **only** `primary`,
 | Site | Accent | Status |
 |---|---|---|
 | main | Royal blue `#2563EB` | Decided |
-| creatives | TBD | Q12 |
-| blog | TBD | Q12 |
+| creatives | TBD — uses the main accent until decided | Q12 |
+| blog | TBD — uses the main accent until decided | Q12 |
 
 Applied by a `data-site="main|creatives|blog"` attribute on `<html>` set in each
 site's root layout.
@@ -106,6 +108,9 @@ from three CDNs. The new site uses:
 
 `services.icon` and `socials.icon` in the database store names from these sets.
 
+Installed when first needed (D24): `lucide-react` in Phase 3; devicon and Simple
+Icons in Phase 5, with Skills and the footer socials.
+
 ## 7. Theming (dark/light)
 
 - Three states: **system** (default), light, dark. The toggle cycles through them.
@@ -113,8 +118,10 @@ from three CDNs. The new site uses:
   system setting.
 - **No flash of the wrong theme**: a tiny inline script in `<head>` reads the
   preference before first paint.
-- The preference is stored in a cookie on `.chestlyace.online` so it carries across
-  all three subdomains (`architecture.md` §7).
+- The preference is stored in a `theme` cookie on `.chestlyace.online` so it carries
+  across all three subdomains (`architecture.md` §7). On `*.localhost` and Vercel
+  preview hosts the cookie is host-only — browsers don't share cookies across
+  `localhost` subdomains. Logic lives in `lib/theme.ts`.
 - `meta[name=theme-color]` updates with the theme (`#F8FAFC` / `#0A0A0A`).
 
 ## 8. Motion
@@ -131,13 +138,14 @@ from three CDNs. The new site uses:
 
 | Component | Notes |
 |---|---|
-| `SiteHeader` | Logo + wordmark, in-page links (main only), cross-site links (Creatives ↗, Blog ↗), theme toggle, mobile menu. Sticky, blurred background on scroll. |
-| `SiteFooter` | Copyright, socials (filtered by `show_on`), links to all three sites, resume link |
+| `SiteHeader` | Logo + "Chestly Ace" wordmark (D23), in-page links (main only — added in Phase 5), cross-site links to the other two sites (Dev ↗ · Creatives ↗ · Blog ↗, D25), theme toggle, mobile menu. Sticky, translucent background with backdrop blur. |
+| `SiteFooter` | Logo + wordmark, links to all three sites (current one highlighted), © line. Added in Phase 5: socials (filtered by `show_on`), email, resume link, per-site description. |
+| `Brand` | The old DA logo (`public/brand/logo.png`) + "Chestly Ace" wordmark in Bebas Neue. The logo's lettering is transparent, so dark mode puts a light backing behind it, which also reads as an outline. |
 | `ThemeToggle` | system / light / dark, accessible label that states the current mode |
 | `Button` | Variants: `primary`, `secondary` (outline), `ghost`, `link`. Sizes `sm`/`md`/`lg`. Optional trailing icon. Renders `<a>` when given `href`. |
 | `SectionHeading` | Eyebrow label + Bebas display title + optional intro paragraph |
 | `Tag` | Small pill for tech stack, blog tags |
-| `StatusPill` | "Open to Remote Roles" with pulsing dot; colour from `profile.availability` |
+| `StatusPill` | "Open to Remote Roles" with pulsing green dot. Only the "open" state exists for now; other `profile.availability` states are decided when that data arrives |
 | `Container` | `max-w-7xl` + gutters |
 
 ### Main site (`components/main/`)
@@ -167,7 +175,13 @@ counter).
 for MDX output in both themes), `CodeBlock` (syntax highlighting, copy button),
 `Callout`, `TableOfContents`.
 
-### Admin (`app/_sites/main/admin/`)
+### Design system showcase (`app/sites/main/design-system/`)
+
+`/design-system` on the main site shows every token, the type scale, and the
+shared components in both themes. It returns 404 in production
+(`VERCEL_ENV === "production"`), so it's only visible locally and on previews.
+
+### Admin (`app/sites/main/admin/`)
 
 Plain and functional, built from the same tokens: sidebar of resources, list
 views with drag-to-reorder and publish toggles, edit forms with inline validation

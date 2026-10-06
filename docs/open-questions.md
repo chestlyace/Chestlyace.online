@@ -130,11 +130,15 @@ Main is royal blue `#2563EB`. Each other site overrides only the accent
 (`design.md` §4). Ideas: creatives → warm (amber/orange) to feel expressive;
 blog → emerald (the old `secondary`) or keep blue for one family feel.
 
-### Q13 — Drop the Outfit font? · Proposed
+### Q13 — Drop the Outfit font? · Decided 2026-10-06 (D22)
+**Answer: keep all three old fonts and add JetBrains Mono.** Outfit is used for
+eyebrow labels and small uppercase text, as on the old site.
 The old site loaded three fonts (Bebas Neue, Inter, Outfit). Recommendation: keep
 Bebas Neue + Inter, drop Outfit, add a monospace for code.
 
-### Q18 — Brand wordmark · Open
+### Q18 — Brand wordmark · Decided 2026-10-06 (D23)
+**Answer: "Chestly Ace" on all three sites**, next to the old DA logo (light
+backing in dark mode so it stays visible).
 The logo wordmark is "DEV.ACE" (and "Dev.ACE · Since 2023" in the footer). Keep it
 for all three sites, or use "Chestly Ace" on creatives/blog where "DEV" fits less?
 
