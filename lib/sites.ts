@@ -11,6 +11,12 @@ export type SiteKey = keyof typeof SITES;
 
 export const SITE_KEYS = Object.keys(SITES) as SiteKey[];
 
+export const SITE_LABELS: Record<SiteKey, string> = {
+  main: "Dev",
+  creatives: "Creatives",
+  blog: "Blog",
+};
+
 export const PREVIEW_SITE_COOKIE = "preview-site";
 
 export function isSiteKey(value: unknown): value is SiteKey {
@@ -40,11 +46,21 @@ const URL_OVERRIDES: Record<SiteKey, string | undefined> = {
 };
 
 export function siteUrl(site: SiteKey, path = "/"): string {
+  const override = URL_OVERRIDES[site];
+  if (override) return new URL(path, override).toString();
+
+  // Vercel previews serve every site from one branch URL, selected by ?site=.
+  const branchUrl = process.env.VERCEL_BRANCH_URL;
+  if (process.env.VERCEL_ENV === "preview" && branchUrl) {
+    const url = new URL(path, `https://${branchUrl}`);
+    url.searchParams.set("site", site);
+    return url.toString();
+  }
+
   const base =
-    URL_OVERRIDES[site] ||
-    (process.env.NODE_ENV === "development"
+    process.env.NODE_ENV === "development"
       ? `http://${SITES[site].devHost}`
-      : `https://${SITES[site].host}`);
+      : `https://${SITES[site].host}`;
   return new URL(path, base).toString();
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SiteDocument } from "@/components/shared/SiteDocument";
 import "../../globals.css";
 
 export const metadata: Metadata = {
@@ -9,9 +10,5 @@ export const metadata: Metadata = {
 export default function CreativesLayout({
   children,
 }: LayoutProps<"/sites/creatives">) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+  return <SiteDocument site="creatives">{children}</SiteDocument>;
 }
