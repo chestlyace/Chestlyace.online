@@ -118,3 +118,10 @@ box can't be ticked honestly, stop and tell the owner instead of opening the PR.
    libraries on your own. Propose options and ask.
 5. If a spec doesn't cover something you need while building, stop and ask —
    don't fill the gap with your own taste.
+6. **Design skills are advisory.** The third-party design skills in
+   `.claude/skills/` (Emil Kowalski's, `ui-ux-pro-max`, `design-taste-frontend`,
+   `impeccable`) inform how specs are written and reviewed. The owner's approved
+   specs and this file always win over them. A skill never justifies adding a
+   dependency, running its own CLI or installer (e.g. `npx impeccable`, the
+   `ui-ux-pro-max` CLI), or introducing a style the owner hasn't approved — propose
+   it and ask instead.
