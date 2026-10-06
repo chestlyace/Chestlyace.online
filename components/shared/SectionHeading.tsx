@@ -10,8 +10,8 @@ import { prefersReducedMotionNow, usePrefersReducedMotion } from "@/lib/media";
 type SectionHeadingProps = {
   /** "02" — assigned from the sections shown (lib/sections.ts). */
   index?: string;
-  /** The mono label next to the index, e.g. "SKILLS". */
-  label: string;
+  /** The mono label next to the index, e.g. "SKILLS". Left out, the title stands alone. */
+  label?: string;
   title: ReactNode;
   intro?: ReactNode;
   as?: "h1" | "h2";
@@ -96,10 +96,12 @@ export function SectionHeading({
 
   return (
     <div ref={rootRef} className={cn("max-w-3xl", className)}>
-      <p data-heading-extra className="type-label mb-4 text-muted">
-        {index ? `${index} — ` : ""}
-        {label}
-      </p>
+      {(label || index) && (
+        <p data-heading-extra className="type-label mb-4 text-muted">
+          {index ? `${index} — ` : ""}
+          {label}
+        </p>
+      )}
       <Heading
         ref={titleRef}
         tabIndex={-1}

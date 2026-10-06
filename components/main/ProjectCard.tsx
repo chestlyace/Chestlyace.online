@@ -4,11 +4,12 @@ import { ArrowUpRight } from "lucide-react";
 import { motion, useMotionValue, useSpring } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { cn } from "@/lib/cn";
 import type { HomepageData } from "@/lib/db";
 import { imageSource } from "@/lib/hero";
 import { useFinePointer, usePrefersReducedMotion } from "@/lib/media";
+import { boxOf, setMorph } from "@/lib/morph";
 import { EASE_OUT } from "@/lib/motion";
 import { rippleEnter, rippleLeave, rippleMove } from "./projectRipple";
 
@@ -79,18 +80,42 @@ export function ProjectCard({
     rippleLeave();
   };
 
+  // Leaves a note for the project page, which morphs this image into its own
+  // (design.md §14.10). Only for a plain click with a precise pointer and motion.
+  const onOpen = (event: MouseEvent<HTMLAnchorElement>) => {
+    const media = mediaRef.current;
+    if (
+      !media ||
+      image.kind === "none" ||
+      !interactive ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+    setMorph({
+      kind: "open",
+      slug: project.slug,
+      box: boxOf(media),
+      radius: 20,
+      src: image.src,
+    });
+  };
+
   const imageClasses = "size-full object-cover";
 
   return (
     <li
       data-card
+      data-slug={project.slug}
       className={cn(featured && "md:col-span-2", offset && "md:translate-y-24")}
     >
       <Link
         href={`/projects/${project.slug}`}
-        // The project page arrives in a later phase (5b.6); until then there is
-        // nothing to prefetch.
-        prefetch={false}
+        onClick={onOpen}
         className="project-card group/card block rounded-lg outline-none transition-transform duration-[120ms] ease-out active:scale-[0.98]"
       >
         <div

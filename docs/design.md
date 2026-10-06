@@ -1811,6 +1811,8 @@ Where the build differs from, or settles, what the specs above say:
 
 ### 14.10 Project page
 
+> **Build notes (5b.6).** The morph is a fixed, cover-fitted copy of the image that flies between the card's box and the hero's box (the spec left the technique to the build); the reverse runs only when the card is on screen. Title letters rise in both cases (the spec's "fade up" after a morph applies to the facts row only). The summary is left-aligned with the title rather than centred. A private link shows as a "Live · Private" / "Source · Private" tag. With no Problem / Approach / Outcome the description appears as one "Overview" row.
+
 **Purpose.** A case study for one project — the depth the card can't show
 (Q11). Route: `/projects/[slug]`; an unknown slug shows the main site's 404.
 
