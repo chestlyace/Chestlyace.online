@@ -132,8 +132,9 @@ Main is royal blue `#2563EB`. Each other site overrides only the accent
 (`design.md` §4). Ideas: creatives → warm (amber/orange) to feel expressive;
 blog → emerald (the old `secondary`) or keep blue for one family feel.
 
-### Q13 — Drop the Outfit font? · Decided 2026-10-06 (D22)
-**Answer: keep all three old fonts and add JetBrains Mono.** Outfit is used for
+### Q13 — Drop the Outfit font? · Decided 2026-10-06 (D38, revised)
+**Final answer (Phase 5a.1): drop Outfit** — Bebas Neue + system UI/Inter +
+JetBrains Mono (D38). Earlier answer, superseded: keep all three old fonts and add JetBrains Mono. Outfit was used for
 eyebrow labels and small uppercase text, as on the old site.
 The old site loaded three fonts (Bebas Neue, Inter, Outfit). Recommendation: keep
 Bebas Neue + Inter, drop Outfit, add a monospace for code.

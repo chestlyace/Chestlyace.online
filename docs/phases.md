@@ -15,8 +15,8 @@ before the phase starts.
 | 1 | Project scaffold | Done | Q2, Q3 (decided) |
 | 2 | Multi-tenant routing | Done | — |
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
-| 4 | Database | In review | Q19 (decided) |
-| 5 | Main site homepage | Not started | Q4–Q11, Q22 |
+| 4 | Database | Done | Q19 (decided) |
+| 5 | Main site homepage | 5a.1 in review | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
 | 6 | Admin panel | Not started | Q14, Q15, Q21 |
 | 7 | SEO & redirects | Not started | — |
 | 8 | Main site launch | Not started | Q17, Q20 |
@@ -96,7 +96,7 @@ a placeholder baseline (D30); the design steps of later phases replace them.
 and desktop widths, on all three hosts, and the theme carries across hosts.
 **Refs:** `design.md`, `ia-content.md` §3.
 
-## Phase 4 — Database — issue #13
+## Phase 4 — Database — issue #13, PR #14 (merged)
 
 **Goal:** the main site's data layer, empty but ready.
 
@@ -119,7 +119,16 @@ and desktop widths, on all three hosts, and the theme carries across hosts.
 **5a — Design (docs only).** Specs for every component the homepage uses —
 including the shared header, footer, buttons, links, and cards — then every
 section, from the owner's references. Tools the owner names (e.g. Framer Motion)
-are recorded here.
+are recorded here. Split into four PRs (owner, 2026-10-06):
+
+| Step | Covers | Status |
+|---|---|---|
+| 5a.1 Foundations — issue #15 | Direction, colour, type, spacing, depth, icons, theming, motion (`design.md` §1–§8) | In review |
+| 5a.2 Core components | Buttons, links, tags, header/nav, footer | Not started |
+| 5a.3 Content components | Project card, service card, timeline item, contact tiles, form fields, FAQ, certification item | Not started |
+| 5a.4 Sections | Every homepage section and the project detail page (Q11) | Not started |
+
+Design skills (D36) were installed beforehand (issue #16, PR #17).
 
 **5b — Build**, after 5a is merged:
 
@@ -128,7 +137,10 @@ are recorded here.
 - Section components from `design.md` §9
 - Header: main's in-page links. Footer: socials, email, resume, per-site
   descriptions (D26)
-- Install devicon and Simple Icons for Skills and socials (D24)
+- Install devicon and Simple Icons for Skills and socials (D24), `react-iconly`
+  (D40), and the motion stack — `motion`, `gsap`, `lenis`, `ogl`,
+  `@rive-app/react-canvas` (D39); apply the foundations (`design.md` §1–§8) to the
+  tokens and fonts
 - Caching with the `portfolio` tag
 - Contact form behaviour per Q10
 - Copy edits from `ia-content.md` §7, using the owner's wording
