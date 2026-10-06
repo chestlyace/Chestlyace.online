@@ -4,7 +4,7 @@ Three content sources, one per site (decisions D3, D6, D7):
 
 | Site | Source | Edited through |
 |---|---|---|
-| main | Postgres (Neon) | Admin panel at `chestlyace.online/admin` |
+| main | Postgres (Prisma Postgres, D31) | Admin panel at `chestlyace.online/admin` |
 | blog | MDX files in `content/blog/` | Git commits |
 | creatives | Headless CMS (TBD) | The CMS's own editor |
 
@@ -20,7 +20,9 @@ seed data, and `DROP TABLE`, so re-running it wiped production.
 Conventions for every table:
 
 - `id` — `serial` primary key
-- `created_at`, `updated_at` — `timestamptz`, set by the database
+- `created_at`, `updated_at` — `timestamptz NOT NULL DEFAULT now()` on **every**
+  table (D34), not repeated in each definition below. The
+  `set_updated_at()` trigger refreshes `updated_at` on every `UPDATE`.
 - `order_index` — `integer`, ascending = shown first, wherever order matters
 - `is_published` — `boolean default true`, so entries can be hidden without
   deleting them
@@ -120,12 +122,12 @@ Changed: renamed because it holds only software projects now (D8). Dropped
 `type`, `highlights`, `design_tool`, `client_name` (design/event only). Added
 `slug`, `summary`, `is_featured`. Placeholder links (`'#'`) become `NULL`.
 
-### 1.5 `journey` (experience, education, volunteering)
+### 1.5 `journey` (experience and education)
 
 ```sql
 CREATE TABLE journey (
   id           serial PRIMARY KEY,
-  type         text NOT NULL CHECK (type IN ('work','education','volunteer')),
+  type         text NOT NULL CHECK (type IN ('work','education')),
   role         text NOT NULL,
   organization text NOT NULL,        -- was 'company'
   location     text,
@@ -140,12 +142,31 @@ CREATE TABLE journey (
 );
 ```
 
-- **Volunteering is stored here** with `type = 'volunteer'` and shown in its own
-  section (D10). One table means one admin form and one timeline component; the
-  homepage just runs two filtered queries. Alternative (separate table):
-  `open-questions.md` Q19.
 - Free-text `dates` is replaced by real dates plus an optional label, so "Present"
   and ordering stop depending on hand-typed strings.
+
+### 1.5a `volunteering` (new)
+
+```sql
+CREATE TABLE volunteering (
+  id           serial PRIMARY KEY,
+  role         text NOT NULL,
+  organization text NOT NULL,
+  location     text,
+  start_date   date,
+  end_date     date,                 -- NULL = present
+  dates_label  text,
+  description  text,
+  logo_url     text,
+  link_url     text,
+  order_index  integer NOT NULL DEFAULT 0,
+  is_published boolean NOT NULL DEFAULT true
+);
+```
+
+- Its own table (Q19, D33), shown in its own section (D10). Same columns as
+  `journey` without `type`, so the same timeline component renders both. Extra
+  fields (cause, hours, photos) can be added here later without touching `journey`.
 
 ### 1.6 `socials`
 
@@ -193,6 +214,7 @@ Every successful write calls `revalidateTag('portfolio')`.
 | `services` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `projects` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `journey` | ✓ (`?type=`) | ✓ | ✓ | ✓ | ✓ |
+| `volunteering` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `socials` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `faqs` | ✓ | ✓ | ✓ | ✓ | ✓ |
 
@@ -293,6 +315,7 @@ Source is the **live** EC2 database, not `db/neon_setup.sql` (see
 | `works` `type='project'` | `projects` | Copy; generate `slug`; `'#'` links → `NULL`; first sentence → `summary` |
 | `works` `type='design'`, `type='event'` | creatives `piece` | Export to JSON for CMS import. Seed rows are Unsplash placeholders — check live data. |
 | `journey` `type='work'`/`'education'` | `journey` | Copy; `company` → `organization`; parse `dates` into `start_date`/`end_date` |
-| `journey` 'Photographer/Designer — CEY2 Youth Church', 'Graphic Designer — Kris Kitchen' | ? | Q6 |
+| `journey` 'Photographer/Designer — CEY2 Youth Church', 'Graphic Designer — Kris Kitchen' | `journey`, `volunteering`, or creatives site | Q6. The dev seed keeps them in `journey` for now |
+| — | `volunteering` | No volunteering entries exist in the old data |
 | `socials` | `socials` | Copy; set `show_on` — Q8 |
 | FAQ (hardcoded in `index.html`) | `faqs` | Keep software questions; design/photo questions move to the creatives site |

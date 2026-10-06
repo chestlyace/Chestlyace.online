@@ -16,7 +16,7 @@ request belongs to is decided by its **host name**, not its path.
  chestlyace.online ───▶ │                                                              │
  creatives.… ─────────▶ │  proxy.ts ── reads Host ──▶ rewrite to /sites/<site>/<path>  │
  blog.… ──────────────▶ │                                                              │
-                        │   app/sites/main ───────▶ Postgres (Neon) + Cloudinary       │
+                        │   app/sites/main ───────▶ Prisma Postgres + Cloudinary       │
                         │   app/sites/creatives ──▶ Headless CMS API                   │
                         │   app/sites/blog ───────▶ content/blog/*.mdx (build time)    │
                         └──────────────────────────────────────────────────────────────┘
@@ -34,8 +34,8 @@ sites from leaking into each other (see §3).
 | Runtime | Node.js 24 LTS (`.nvmrc`, `engines`) | Decided (D16) |
 | Language | TypeScript, `strict: true` | Decided |
 | Styling | Tailwind CSS (v4, tokens in CSS via `@theme`) | Decided (D14) |
-| Database | PostgreSQL on Neon, provisioned through the Vercel Marketplace | Decided (D2) |
-| DB access | Drizzle ORM + `@neondatabase/serverless` driver | Decided (D15) — installed in Phase 4 |
+| Database | Prisma Postgres, provisioned through the Vercel Marketplace | Decided (D2, D31) |
+| DB access | Drizzle ORM + `pg` (node-postgres) driver; migrations with Drizzle Kit | Decided (D15, D32) |
 | Validation | Zod (request bodies, MDX frontmatter, CMS responses) | Proposed |
 | Image/file uploads | Cloudinary (existing assets already live there) | Proposed — Q14 |
 | Blog | MDX compiled at build time | Decided (D7); tooling — Q16 |
@@ -180,8 +180,17 @@ chestlyace.online/
 
 ### main — Postgres
 
-- **Reads**: Server Components query the database directly through `lib/db.ts`.
-  They do not call the app's own API over HTTP.
+- **Reads**: Server Components query the database directly through `lib/db.ts`
+  (`getHomepageData()`). They do not call the app's own API over HTTP.
+- **Connection**: `lib/db.ts` creates one `pg` pool per server instance from
+  `DATABASE_URL`, lazily on first use. Query functions accept the database as a
+  parameter, so tests can pass a PGlite database instead (D35).
+- **Schema and migrations**: `db/schema.ts` (Drizzle) → `db/migrations/`. Every
+  table has `created_at`/`updated_at`; a trigger keeps `updated_at` current (D34).
+- **Commands**: `pnpm db:generate` (new migration after a schema change),
+  `pnpm db:migrate` (apply; uses `DIRECT_URL` if set, else `DATABASE_URL`),
+  `pnpm db:seed` (dev only — wipes the tables and loads the old site's data;
+  refuses to run in production). All read `.env.local`.
 - **Caching**: homepage queries are cached and tagged (e.g. `portfolio`). Every
   admin write calls `revalidateTag('portfolio')`, so the public page is static
   until something changes.
@@ -234,7 +243,8 @@ Full schema and endpoints: `content-schema.md`.
 
 | Variable | Used by | Notes |
 |---|---|---|
-| `DATABASE_URL` | main | Neon pooled connection string; set by the Vercel–Neon integration |
+| `DATABASE_URL` | main | Prisma Postgres connection string; set by the Vercel–Prisma integration |
+| `DIRECT_URL` | `pnpm db:migrate`, `db:seed` | Optional direct (unpooled) Prisma Postgres connection; falls back to `DATABASE_URL` |
 | `ADMIN_PASSWORD_HASH` | admin | bcrypt hash, never the plain password |
 | `SESSION_SECRET` | admin | 32+ random bytes |
 | `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | admin uploads | |
@@ -244,8 +254,11 @@ Full schema and endpoints: `content-schema.md`.
 
 - `.env.example` is committed with every key and no values. Real values live in
   Vercel project settings and a git-ignored `.env.local`.
-- **Preview deployments use a separate Neon branch**, never the production
-  database. (On the old site any non-localhost hostname hit the live database.)
+- **Two databases (D31):** one Prisma Postgres database connected to the
+  **Production** environment, and a second one connected to **Preview** and
+  **Development** (local dev pulls it with `vercel env pull .env.local`). Previews
+  and local dev never touch production data. (On the old site any non-localhost
+  hostname hit the live database.)
 
 ## 9. Deployment
 
@@ -253,7 +266,8 @@ Full schema and endpoints: `content-schema.md`.
   other branch → preview.
 - Domains attached to the project: `chestlyace.online`, `www.chestlyace.online`
   (redirect), `creatives.chestlyace.online`, `blog.chestlyace.online`.
-- Database migrations run with Drizzle Kit as an explicit step, not on app boot.
+- Database migrations run with Drizzle Kit as an explicit step (`pnpm db:migrate`
+  against each database), not on app boot or during the Vercel build.
 - CI: Vercel's build on every pull request is the only automated check (D17) —
   it compiles and typechecks. Lint, format, and tests are run locally before
   opening a PR (`instructions.md` §6). Tests where logic warrants them (host
@@ -269,7 +283,8 @@ not the seed.
 2. Transform it into the new schema with a one-off script (mapping in
    `content-schema.md` §6). Design/event `works` rows are exported to a file for
    loading into the creatives CMS later.
-3. Load into a Neon branch, check it, promote to production.
+3. Load into the preview/dev Prisma Postgres database, check it, then load into
+   the production database.
 4. Move files that database rows point to by bare filename (`resume.pdf`, the
    hero image, journey logos) into `public/` or Cloudinary and update the rows.
 5. Deploy to Vercel on the preview URL; verify all three hosts.

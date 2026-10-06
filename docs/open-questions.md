@@ -20,8 +20,9 @@ Needed before building the creatives site, not before the main site.
 Content model to satisfy: `content-schema.md` §5.
 
 ### Q2 — Database access layer · Decided 2026-10-05 (D15)
-**Answer: Drizzle ORM.**
-Recommendation: **Drizzle ORM** with the Neon serverless driver. Type-safe,
+**Answer: Drizzle ORM**, with the `pg` driver on Prisma Postgres (D31, D32 —
+updated 2026-10-06 when Neon was dropped).
+Original recommendation: **Drizzle ORM** with the Neon serverless driver. Type-safe,
 schema in TypeScript, plain-SQL feel, small. Alternative: Prisma (heavier,
 slower cold starts on serverless).
 
@@ -111,8 +112,9 @@ in admin (needs spam protection, e.g. Turnstile). Subject options proposed in
 showing engineering depth and for SEO; more writing per project. Schema already
 supports it (`slug`, `description`). Could launch without and add later.
 
-### Q19 — Volunteering storage · Proposed
-Recommendation: same `journey` table with `type = 'volunteer'` (one admin form,
+### Q19 — Volunteering storage · Decided 2026-10-06 (D33)
+**Answer: a separate `volunteering` table.**
+Original recommendation: same `journey` table with `type = 'volunteer'` (one admin form,
 one component). Alternative: a separate `volunteering` table — only worth it if
 volunteering later needs fields Journey doesn't (cause, hours, photos).
 
