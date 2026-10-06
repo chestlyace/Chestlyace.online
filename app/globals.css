@@ -240,6 +240,55 @@
   }
 }
 
+/* The admin's confirm dialog (design.md §13.23): scales 0.96 → 1 and fades,
+   200ms; the backdrop fades. Reduced motion: fade only. */
+.confirm-dialog {
+  opacity: 0;
+  scale: 0.96;
+  transition:
+    opacity 200ms var(--ease-out),
+    scale 200ms var(--ease-out),
+    display 200ms allow-discrete,
+    overlay 200ms allow-discrete;
+}
+
+.confirm-dialog[open] {
+  opacity: 1;
+  scale: 1;
+}
+
+@starting-style {
+  .confirm-dialog[open] {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+.confirm-dialog::backdrop {
+  background-color: color-mix(in srgb, var(--foreground) 40%, transparent);
+  opacity: 0;
+  transition:
+    opacity 200ms var(--ease-out),
+    display 200ms allow-discrete,
+    overlay 200ms allow-discrete;
+}
+
+.confirm-dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .confirm-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirm-dialog {
+    scale: 1;
+  }
+}
+
 /* Anchored sections never sit under the header capsule (design.md §14.0). */
 section[id] {
   scroll-margin-top: 96px;

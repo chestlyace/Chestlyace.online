@@ -1,0 +1,37 @@
+// The Iconly icons a service can use (design.md §14.11): names the site's
+// ServiceIcon knows, shown in the admin's select. services.icon holds the name.
+export const SERVICE_ICONS = [
+  "Category",
+  "Document",
+  "Setting",
+  "Call",
+  "Message",
+  "Chat",
+  "Work",
+  "Star",
+  "Heart",
+  "Home",
+  "Bag",
+  "Graph",
+  "Chart",
+  "Discovery",
+  "Lock",
+  "Camera",
+  "Image",
+  "Video",
+  "Activity",
+  "Paper",
+  "Wallet",
+  "Ticket",
+  "Location",
+  "Calendar",
+  "Edit",
+  "Search",
+  "Send",
+  "Swap",
+  "Upload",
+  "Download",
+  "User",
+] as const;
+
+export type ServiceIconName = (typeof SERVICE_ICONS)[number];

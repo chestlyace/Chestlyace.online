@@ -17,6 +17,8 @@ export type Resource = {
   label: string;
   /** Address on the admin host. */
   href: string;
+  /** Name in `/api/admin/<api>` (content-schema.md §2). */
+  api: string;
   /** What the screen's page title says under its name. */
   description: string;
   /** Singular, for "New project". */
@@ -26,6 +28,7 @@ export type Resource = {
 export const RESOURCES: readonly Resource[] = [
   {
     id: "profile",
+    api: "profile",
     label: "Profile",
     href: "/profile",
     description: "Your name, headline, About text, résumé and contact details.",
@@ -33,6 +36,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "skills",
+    api: "skills",
     label: "Skills",
     href: "/skills",
     description: "The languages, frameworks and tools shown as logos.",
@@ -40,6 +44,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "services",
+    api: "services",
     label: "Services",
     href: "/services",
     description: "The cards in the Services section.",
@@ -47,6 +52,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "projects",
+    api: "projects",
     label: "Projects",
     href: "/projects",
     description: "Projects on the home page and their own pages.",
@@ -54,6 +60,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "experience",
+    api: "journey",
     label: "Experience",
     href: "/experience",
     description: "Work and education, newest first.",
@@ -61,6 +68,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "volunteering",
+    api: "volunteering",
     label: "Volunteering",
     href: "/volunteering",
     description: "Community and volunteer work.",
@@ -68,6 +76,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "certifications",
+    api: "certifications",
     label: "Certifications",
     href: "/certifications",
     description: "Badges and credentials under Skills.",
@@ -75,6 +84,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "socials",
+    api: "socials",
     label: "Socials",
     href: "/socials",
     description: "Links to your profiles.",
@@ -82,6 +92,7 @@ export const RESOURCES: readonly Resource[] = [
   },
   {
     id: "faq",
+    api: "faqs",
     label: "FAQ",
     href: "/faq",
     description: "Questions and answers at the end of the page.",
