@@ -149,37 +149,43 @@ From `faqs`. Rendered as `FAQPage` JSON-LD. Starting content:
 
 ### Header — main site
 
-`Home · About · Skills · Services · Projects · Experience · Volunteering · Contact`
-then a divider, then `Creatives ↗` `Blog ↗`, then the theme toggle.
+Owner's choice (Phase 5a.2): **key links + a Sites chip**, in a floating capsule
+(`design.md` §13.6):
 
-Site labels are **Dev · Creatives · Blog** everywhere (D25). The in-page links
-arrive in Phase 5 with the sections; until then the header shows the cross-site
-links and theme toggle only (D26).
+`About · Projects · Experience · Contact` · `Sites ▾` · theme toggle
 
-On mobile the in-page links collapse into a menu; the cross-site links and theme
-toggle stay in the menu too. Volunteering drops out of the nav when the section
-is hidden.
+The Sites chip opens a small menu with **Dev · Creatives · Blog** (D25), the
+current site marked (`design.md` §13.7). Home is the brand link. Skills,
+Services, Volunteering, and FAQ are not in the header; they are reached by
+scrolling, and the active link follows the section in view.
+
+On phones the capsule expands into the menu: the key links, then the three sites.
 
 ### Header — creatives and blog
 
-Site's own links (e.g. `Work · Services · Contact` / `Posts · Tags`), then
-`Dev ↗` (main site) and the other subdomain, then the theme toggle.
+Same capsule. Each site's own key links (e.g. `Work · Services · Contact` /
+`Posts · Tags`) are decided in its design step; the Sites chip and theme toggle
+stay.
 
 The old header also showed a "chestlyace.online" globe link pointing at itself —
-drop it.
+dropped; the Sites chip replaces it.
 
 ### Footer — all sites
 
-| Column | Content |
-|---|---|
-| Brand | Logo, "DEV.ACE", one-line description (old: "Crafting digital experiences with precision code and creative design…" — **edit** per site) |
-| Sites | Dev, Creatives, Blog |
-| Quick links | The current site's own nav |
-| Connect | Socials filtered by `show_on`, email |
-| Bottom bar | © year Chestly Ace · Resume |
+Owner's choice (Phase 5a.2): **giant wordmark footer** (`design.md` §13.8).
 
-Phase 3 builds the brand, Sites column, and © line. The description, quick links,
-socials, email, and resume link arrive in Phase 5 (D26).
+| Part | Content |
+|---|---|
+| Brand | Logo, "Chestly Ace" (D23), one-line description (old: "Crafting digital experiences with precision code and creative design…" — **edit** per site) |
+| Sites | Dev, Creatives, Blog |
+| Connect | Socials filtered by `show_on` |
+| Contact | Email, WhatsApp, Resume |
+| Wordmark | Full-width "CHESTLY ACE" |
+| Bottom bar | © year Chestly Ace · Back to top |
+
+The old "Quick links" column is dropped: the header's key links cover it.
+Phase 3 built the brand, Sites column, and © line. The description, socials,
+contact links, and resume link arrive in Phase 5 (D26).
 
 Dropped from the old footer: the newsletter "Subscribe" box (it wasn't wired to
 anything; Q16 covers a blog newsletter), and the "Privacy Policy" / "Terms of

@@ -70,6 +70,11 @@ every doc that depends on it.
 | D39 | **Motion stack: Motion + GSAP (ScrollTrigger, SplitText, Flip) + Lenis + OGL/Rive** | Each with one job; installed in Phase 5b. Curves, durations, principles, reduced motion in `design.md` §8 |
 | D40 | **Icons: Lucide (functional) + free Iconly v2 Light (featured)** | Amends D24: `react-iconly` joins devicon and Simple Icons in Phase 5b. `design.md` §6 |
 | D41 | **Direction: airy, minimal, Apple-like, with signature smooth motion** | References: anubi.io (home, lab, work) and Apple. Supersedes the baseline direction. `design.md` §1 |
+| D42 | **Buttons: magnetic pills** | Pull toward the cursor (fine pointers only), spring back; `primary` / `secondary` / `ghost`; new `primary-hover` token. `design.md` §13.1 |
+| D43 | **Links: text roll; inline links draw an underline** | Text roll for nav, footer, standalone links; links in running text keep a faint underline and draw a full one on hover. `design.md` §13.3 |
+| D44 | **Header: floating glass capsule in the old site's shape and position** | Centred, 16px from the top, max 896px, `rounded-full`. Key links + "Sites" chip (replaces the header's separate cross-site links); expands into the menu on phones. `design.md` §13.6–13.7, `ia-content.md` §3 |
+| D45 | **Footer: giant wordmark** | Sites, Connect, Contact columns and a full-width "CHESTLY ACE" revealed on scroll; Quick links column dropped. `design.md` §13.8, `ia-content.md` §3 |
+| D46 | **Tags: mono label chips** | JetBrains Mono `label` step, `sm` radius, neutral fill. `design.md` §13.4 |
 
 ## Status
 
