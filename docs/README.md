@@ -50,7 +50,7 @@ every doc that depends on it.
 | D19 | **Site folders are `app/sites/<site>/`, not `app/_sites/<site>/`** | Next.js excludes `_` folders from routing, so the original path could never render. No `app/layout.tsx`; each site is its own root layout with its own 404 |
 | D20 | **Tests: Vitest** | `pnpm test`; run locally before every PR |
 | D21 | **Preview `?site=` is remembered in a `preview-site` cookie** | Non-production only; `?site=main` switches back |
-| D22 | **Fonts: Bebas Neue, Inter, Outfit, JetBrains Mono** | Q13. Outfit = eyebrow labels / small uppercase text |
+| D22 | ~~**Fonts: Bebas Neue, Inter, Outfit, JetBrains Mono**~~ | **Superseded by D38.** Q13. Outfit = eyebrow labels / small uppercase text |
 | D23 | **Wordmark: "Chestly Ace" everywhere, beside the old DA logo** | Q18. Light backing behind the logo in dark mode |
 | D24 | **Icons installed when first needed** | Lucide in Phase 3; devicon + Simple Icons in Phase 5 |
 | D25 | **Site labels: Dev · Creatives · Blog** | Same in header and footer; replaces "Software" / "Main" |
@@ -64,6 +64,12 @@ every doc that depends on it.
 | D33 | **Volunteering has its own table** | Q19. Same columns as `journey`, without `type` |
 | D34 | **`created_at` / `updated_at` on every table; a DB trigger keeps `updated_at` current** | Correct even for edits made outside the app |
 | D35 | **DB tests run on PGlite** | Real migrations and queries against in-process Postgres; no database needed to run `pnpm test` |
+| D36 | **Design skills vendored in `.claude/skills/`, advisory only** | Emil Kowalski's web skills, `ui-ux-pro-max`, `design-taste-frontend`, `impeccable` (PR #17). Owner specs win; skills never add dependencies or styles (`instructions.md` §8.6) |
+| D37 | **Palette: black, white, greys + blue accent** | The old site's colours with Apple-like neutral greys; blue `#2563EB` is the only accent. `design.md` §2 |
+| D38 | **Fonts: Bebas Neue (display) + system UI → Inter (text) + JetBrains Mono (labels, code)** | SF on Apple devices via the system font. Outfit dropped. Supersedes D22. `design.md` §3 |
+| D39 | **Motion stack: Motion + GSAP (ScrollTrigger, SplitText, Flip) + Lenis + OGL/Rive** | Each with one job; installed in Phase 5b. Curves, durations, principles, reduced motion in `design.md` §8 |
+| D40 | **Icons: Lucide (functional) + free Iconly v2 Light (featured)** | Amends D24: `react-iconly` joins devicon and Simple Icons in Phase 5b. `design.md` §6 |
+| D41 | **Direction: airy, minimal, Apple-like, with signature smooth motion** | References: anubi.io (home, lab, work) and Apple. Supersedes the baseline direction. `design.md` §1 |
 
 ## Status
 
