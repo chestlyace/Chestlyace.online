@@ -82,6 +82,15 @@ every doc that depends on it.
 | D51 | **Contact: tiles with copy** | Email, phone, WhatsApp; copy buttons with "Copied" feedback. `design.md` §13.14 |
 | D52 | **Form fields: filled (Apple style), label above** | Soft inset edge; `muted` edge under `prefers-contrast: more`. `design.md` §13.15 |
 | D53 | **FAQ: hairline accordion; certifications: badge grid** | Native `<details>`; several answers open at once. `design.md` §13.16–13.17 |
+| D54 | **Hero: the old portfolio's hero, kept, with motion added** | Giant stacked headline + arched portrait + stickers + quote card + glow. Headline "SOFTWARE / ENGINEER" with a rotating outlined line; camera sticker swapped for a software one; purple glow dropped. `design.md` §14.1 |
+| D55 | **Hero motion: CSS letter entrance, cursor parallax, WebGL dot grid, scroll exit** | The entrance is pure CSS so LCP is never delayed; the OGL grid is lazy with a static fallback; touch devices colour the portrait on scroll. `design.md` §14.1 |
+| D56 | **Section headings: mono index + Bebas title** | "02 — SKILLS" over a `display-xl` title with a letter reveal; indices computed from visible sections. `design.md` §14.0 |
+| D57 | **Alternating bands, counted up from the footer** | `background` / `background-alt`; `surface` becomes `surface-raised` on alt bands. `design.md` §14.0 |
+| D58 | **About: scroll-lit statement + facts list** | Words light up as you scroll; the facts list (location, role, status) is a proposal. `design.md` §14.2 |
+| D59 | **Skills: grouped logo grid, certifications beneath** | Logos mono → colour on hover. Resolves Q22 (certifications added). `design.md` §14.3 |
+| D60 | **Projects: staggered two-column grid + WebGL ripple on hover** | Right column offset 96px; featured projects full width; one shared ripple canvas. `design.md` §14.5 |
+| D61 | **Contact: two columns** | Heading, tiles, socials left; form right; QR popover on desktop (proposed). `design.md` §14.8 |
+| D62 | **Project pages: case-study layout, with card → page morph** | Title, facts, hero image, Problem / Approach / Outcome, gallery, next project. Resolves Q11. New fields proposed for 5b. `design.md` §14.10 |
 
 ## Status
 

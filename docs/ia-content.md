@@ -15,7 +15,7 @@ which no longer belongs on the main site (D4).
 | `/admin` | Admin panel (`noindex`, auth-gated) |
 | `/resume.pdf` | Redirect to `profile.resume_url` so the link never changes |
 | `/sitemap.xml`, `/robots.txt` | Generated |
-| `/projects/[slug]` | **Maybe later** — project detail pages (`open-questions.md` Q11) |
+| `/projects/[slug]` | Project detail pages — decided (Q11); spec in `design.md` §14.10 |
 
 ### `creatives.chestlyace.online`
 
@@ -50,15 +50,16 @@ to it.
 |---|---|---|
 | Status pill "Open to Remote Roles" | `profile.tagline` + `availability` | carry over |
 | Name "Chestly Ace" | `profile.name` | carry over |
-| Headline (was "Developer / Designer / & PHOTOGRAPHER") | `profile.headline` | **edit** — Q4 |
+| Headline (was "Developer / Designer / & PHOTOGRAPHER") | `profile.headline`, split into two big lines ("SOFTWARE / ENGINEER"), plus a rotating outlined third line | **edit** — Q4 decided; rotating words are placeholders (`design.md` §14.1) |
 | Intro line (was "Software developer, graphic designer, and photographer crafting modern digital experiences.") | `profile.about_quote` or new field | **edit** |
 | SEO line "Amahndong Chestly, known professionally as Chestly Ace, builds…" | static | **edit** — drop "brand visuals and photography-driven" |
 | CTAs: View Projects → `#projects`, Get In Touch → `#contact` | static | carry over ("View My Work" → "View Projects") |
 | Phone, email, socials row | `profile`, `socials` | carry over |
 | Portrait | `profile.hero_image_url` | carry over |
 
-The old hero's floating icons included a camera — replace with software-only
-icons or remove.
+The old hero's floating icons included a camera — replaced by a software icon
+(TypeScript, placeholder). The hero keeps the old design, with motion added
+(`design.md` §14.1).
 
 ### 2.2 About — `#about`
 
@@ -67,6 +68,7 @@ icons or remove.
 | Heading "ABOUT ME" | static | carry over |
 | Quote "Blending logic with creativity to craft digital experiences that matter." | `profile.about_quote` | carry over (works for an engineer) |
 | Body | `profile.about_body` | **edit** — currently "a multidisciplinary creator blending software development, graphic design, and photography". Q5 |
+| Facts list (Based in / Role / Status) | `profile.location`, `headline`, `availability` | new — proposed in `design.md` §14.2 |
 | Download resume button | `profile.resume_url` | carry over |
 
 ### 2.3 Skills — `#skills`
@@ -80,6 +82,7 @@ Was "My Arsenal" inside About; becomes its own section so it can be linked.
 | Databases | `category='database'` (new group) |
 | Cloud & DevOps | `category='cloud'` (new group) |
 | Tools | `category='tool'` — minus creative tools (Q7) |
+| Certifications (Q22) | New block under the skills groups (`design.md` §13.17, §14.3) |
 
 ### 2.4 Services — `#services`
 
