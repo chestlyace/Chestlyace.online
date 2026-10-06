@@ -236,6 +236,7 @@ Packages are installed in Phase 5b when first used. GSAP uses its own free
 | Scroll reveals (GSAP) | `expo.out` / `power3.out` | Editorial reveals tied to scroll |
 | Spring — default | Motion `{ type: "spring", bounce: 0, duration: 0.4 }` | Anything the user touches (critically damped, Apple damping 1.0) |
 | Spring — momentum | `{ type: "spring", bounce: 0.2, duration: 0.4 }` | Only after a flick/drag that carried momentum |
+| Spring — button return | `{ type: "spring", bounce: 0.35, duration: 0.8 }` | Only the magnetic button springing back to rest (§13.1) |
 
 `ease-in` is never used for UI.
 
@@ -440,7 +441,9 @@ content components — PR #22 (issue #21).
 "Download Resume", "Send", project "Live" / "Source".
 
 **References.** Owner's choice: **magnetic pills** (2026-10-06). Apple's
-pill-shaped controls; anubi.io's cursor-aware buttons.
+pill-shaped controls; anubi.io's cursor-aware buttons. Motion revised from the
+owner's screen recording (2026-10-06): a strong pull from a distance, a floating
+label, a light that follows the pointer, and a springy return.
 
 **Anatomy.** Pill container → label → optional trailing icon (Lucide, e.g.
 `arrow-up-right`, `arrow-right`, `download`). Renders `<a>` when it has `href`,
@@ -488,13 +491,23 @@ otherwise `<button>`.
 
 **Motion** (Motion — `motion/react`):
 
-- **Magnetic pull.** While the pointer is within the button's box plus a
-  **24px** margin, the button moves toward the pointer by **35%** of the
-  pointer's offset from its centre, capped at **10px** in any direction. The label
-  moves a further **15%** in the same direction (a slight parallax that reads as
-  depth). Followed with a spring
-  `{ type: "spring", bounce: 0, duration: 0.3 }`; when the pointer leaves, it
-  returns with the default spring (`bounce: 0, duration: 0.4`). Interruptible —
+- **Magnetic pull** (revised 2026-10-06 from the owner's screen recording).
+  While the pointer is within the button's box plus a **100px** margin, the
+  button leans toward it by **30%** of the pointer's offset from the button's
+  centre, scaled from 40% at the edge of the zone to 100% over the button, and
+  capped at **40px**. The label travels a further **18%** (about 1.6× the pill's
+  travel), so it floats above the pill. The pill stretches along the pull
+  (`scale` +0.25% per px of pull along that axis) and squashes slightly across it
+  (−0.1% per px), never below 0.9. Followed with a spring
+  `{ type: "spring", bounce: 0, duration: 0.3 }`.
+- **Sheen.** A soft radial light follows the pointer across the button's face
+  (150px radius, centred on the pointer, clipped to the pill). Its opacity is the
+  pointer's closeness to the button — 0 at the edge of the zone, 1 over it. Colour
+  by variant: `primary` white at 30%; `secondary` and `ghost` `foreground` at 12%
+  and 10%.
+- **Return.** When the pointer leaves, everything springs back with a small
+  overshoot: `{ type: "spring", bounce: 0.35, duration: 0.8 }` (the one place a
+  spring bounces, §8; deliberate, owner's direction). Interruptible —
   re-entering mid-return picks up from the current position.
 - Only on `(hover: hover) and (pointer: fine)`. Off on touch, when disabled, and
   under reduced motion.

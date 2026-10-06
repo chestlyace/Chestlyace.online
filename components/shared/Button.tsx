@@ -1,7 +1,13 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
-import { animate, motion, useMotionValue, useTransform } from "motion/react";
+import {
+  animate,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useTransform,
+} from "motion/react";
 import Link from "next/link";
 import {
   useEffect,
@@ -23,12 +29,14 @@ type IconNudge = "right" | "up-right" | "down" | "none";
 const base =
   "group relative inline-flex select-none items-center justify-center gap-2 rounded-full font-medium tracking-[-0.005em] whitespace-nowrap transition-colors duration-150 data-disabled:cursor-not-allowed data-disabled:opacity-40";
 
+// `--sheen` is the colour of the light that follows the pointer (see Button).
 const variants: Record<Variant, string> = {
   primary:
-    "bg-primary text-primary-foreground not-data-disabled:hover:bg-primary-hover",
+    "bg-primary text-primary-foreground [--sheen:rgb(255_255_255/0.3)] not-data-disabled:hover:bg-primary-hover",
   secondary:
-    "border border-border bg-tile text-foreground not-data-disabled:hover:border-muted/40 not-data-disabled:hover:bg-tile-hover",
-  ghost: "text-foreground not-data-disabled:hover:bg-tile",
+    "border border-border bg-tile text-foreground [--sheen:color-mix(in_srgb,var(--foreground)_12%,transparent)] not-data-disabled:hover:border-muted/40 not-data-disabled:hover:bg-tile-hover",
+  ghost:
+    "text-foreground [--sheen:color-mix(in_srgb,var(--foreground)_10%,transparent)] not-data-disabled:hover:bg-tile",
 };
 
 // sm is 36px tall; ::before extends the tap target to 44px (design.md §10).
@@ -45,14 +53,21 @@ const nudges: Record<IconNudge, string> = {
   none: "",
 };
 
-// Magnetic pull (design.md §13.1): within 24px of the button, it moves toward
-// the pointer by 35% of the offset, at most 10px; the label moves a further
-// 15%. A spring brings it back when the pointer leaves.
-const MARGIN = 24;
-const PULL = 0.35;
-const MAX_OFFSET = 10;
-const LABEL_PULL = 0.15;
+// Magnetic pull (design.md §13.1): within 100px of the button, it leans toward
+// the pointer by 30% of the offset, at most 40px, and stretches a little along
+// the pull; the label travels 1.6× as far, so it floats above the pill. A light
+// sheen follows the pointer across the face. A springy return (a small
+// overshoot) brings everything back when the pointer leaves.
+const MARGIN = 100;
+const PULL = 0.3;
+const MAX_OFFSET = 40;
+const LABEL_PULL = 0.18; // the label's extra share: 0.3 + 0.18 ≈ 1.6×
+const STRETCH = 0.0025; // scale per px of pull along the axis…
+const SQUASH = 0.001; // …and the loss across it
 const PULL_SPRING = { type: "spring", bounce: 0, duration: 0.3 } as const;
+const RETURN_SPRING = { type: "spring", bounce: 0.35, duration: 0.8 } as const;
+const GLOW_SPRING = { type: "spring", bounce: 0, duration: 0.35 } as const;
+const SHEEN_RADIUS = 150;
 
 function clamp(value: number, limit: number) {
   return Math.max(-limit, Math.min(limit, value));
@@ -103,6 +118,18 @@ export function Button({
   const y = useMotionValue(0);
   const labelX = useTransform(x, (value) => (value * LABEL_PULL) / PULL);
   const labelY = useTransform(y, (value) => (value * LABEL_PULL) / PULL);
+  // Stretch along the pull, squash across it.
+  const scaleX = useTransform([x, y], ([dx, dy]: number[]) =>
+    Math.max(0.9, 1 + Math.abs(dx) * STRETCH - Math.abs(dy) * SQUASH),
+  );
+  const scaleY = useTransform([x, y], ([dx, dy]: number[]) =>
+    Math.max(0.9, 1 + Math.abs(dy) * STRETCH - Math.abs(dx) * SQUASH),
+  );
+  // The sheen: where the pointer is on the button, and how close it is.
+  const sheenX = useMotionValue(0);
+  const sheenY = useMotionValue(0);
+  const glow = useMotionValue(0);
+  const sheen = useMotionTemplate`radial-gradient(circle ${SHEEN_RADIUS}px at ${sheenX}px ${sheenY}px, var(--sheen), transparent 70%)`;
 
   const disabledProp = "disabled" in rest && Boolean(rest.disabled);
   const disabled = disabledProp || loading;
@@ -115,8 +142,9 @@ export function Button({
     const release = () => {
       if (!pulled) return;
       pulled = false;
-      animate(x, 0, SPRING);
-      animate(y, 0, SPRING);
+      animate(x, 0, RETURN_SPRING);
+      animate(y, 0, RETURN_SPRING);
+      animate(glow, 0, GLOW_SPRING);
     };
 
     const onMove = (event: PointerEvent) => {
@@ -126,27 +154,41 @@ export function Button({
       const box = element.getBoundingClientRect();
       const left = box.left - x.get();
       const top = box.top - y.get();
-      const near =
-        event.clientX >= left - MARGIN &&
-        event.clientX <= left + box.width + MARGIN &&
-        event.clientY >= top - MARGIN &&
-        event.clientY <= top + box.height + MARGIN;
+      // How far the pointer is outside the button's box (0 when over it).
+      const gapX = Math.max(
+        left - event.clientX,
+        0,
+        event.clientX - (left + box.width),
+      );
+      const gapY = Math.max(
+        top - event.clientY,
+        0,
+        event.clientY - (top + box.height),
+      );
+      const gap = Math.hypot(gapX, gapY);
 
-      if (!near) {
+      if (gap > MARGIN) {
         release();
         return;
       }
       pulled = true;
+      sheenX.set(event.clientX - left);
+      sheenY.set(event.clientY - top);
+      // 1 over the button, 0 at the edge of the zone: the sheen follows it,
+      // and the pull eases in from 40% so it doesn't snap on at the edge.
+      const closeness = 1 - gap / MARGIN;
+      animate(glow, closeness, GLOW_SPRING);
+      const strength = 0.4 + 0.6 * closeness;
       const centreX = left + box.width / 2;
       const centreY = top + box.height / 2;
       animate(
         x,
-        clamp((event.clientX - centreX) * PULL, MAX_OFFSET),
+        clamp((event.clientX - centreX) * PULL * strength, MAX_OFFSET),
         PULL_SPRING,
       );
       animate(
         y,
-        clamp((event.clientY - centreY) * PULL, MAX_OFFSET),
+        clamp((event.clientY - centreY) * PULL * strength, MAX_OFFSET),
         PULL_SPRING,
       );
     };
@@ -159,7 +201,7 @@ export function Button({
       x.set(0);
       y.set(0);
     };
-  }, [pulls, x, y]);
+  }, [pulls, x, y, glow, sheenX, sheenY]);
 
   const classes = cn(base, variants[variant], sizes[size], className);
   const state = {
@@ -167,7 +209,7 @@ export function Button({
     "aria-busy": loading || undefined,
   };
   const motionProps = {
-    style: { x, y },
+    style: { x, y, scaleX, scaleY },
     whileTap: disabled
       ? undefined
       : { scale: 0.97, transition: { duration: 0.12, ease: EASE_OUT } },
@@ -176,9 +218,20 @@ export function Button({
 
   const inner = (
     <>
+      {pulls && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
+        >
+          <motion.span
+            style={{ opacity: glow, backgroundImage: sheen }}
+            className="absolute inset-0"
+          />
+        </span>
+      )}
       <motion.span
         style={pulls ? { x: labelX, y: labelY } : undefined}
-        className="inline-flex items-center gap-[inherit]"
+        className="relative inline-flex items-center gap-[inherit]"
       >
         {children}
       </motion.span>
