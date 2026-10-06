@@ -171,7 +171,12 @@ describe("seed", () => {
       headlineWords: ["Backend", "Full-Stack", "Mobile"],
     });
     expect(data.skills).toHaveLength(seedData.skills.length);
-    expect(data.services.map((s) => s.title)).toEqual(["Software Development"]);
+    expect(data.services.map((s) => s.title)).toEqual([
+      "Web Applications",
+      "Websites & Landing Pages",
+      "Backend & APIs",
+      "Mobile Apps",
+    ]);
     expect(data.projects.map((p) => p.slug)).toEqual([
       "alexdy",
       "lens-and-life",
@@ -181,6 +186,20 @@ describe("seed", () => {
     expect(data.socials).toHaveLength(4);
     expect(data.faqs).toHaveLength(2);
     expect(data.certifications).toHaveLength(7);
+  });
+
+  it("seeds a software-only About text and valid Iconly service icons", async () => {
+    await seed(db);
+    const { profile, services } = await getHomepageData(db);
+    expect(profile?.aboutBody).not.toMatch(
+      /graphic design|photograph|creative/i,
+    );
+    expect(profile?.aboutBody?.split("\n\n")).toHaveLength(2);
+    const iconly = await import("react-iconly");
+    for (const service of services) {
+      expect(Object.hasOwn(iconly, service.icon)).toBe(true);
+      expect(service.items.length).toBeGreaterThan(0);
+    }
   });
 
   it("leaves out the creative roles, tools, and FAQs (Q6, Q7)", async () => {

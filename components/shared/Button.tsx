@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/cn";
+import { isPagePath } from "@/lib/links";
 import { useFinePointer, usePrefersReducedMotion } from "@/lib/media";
 import { EASE_OUT, SPRING } from "@/lib/motion";
 
@@ -206,26 +207,43 @@ export function Button({
     const newTab = external
       ? { target: "_blank", rel: "noopener noreferrer" }
       : {};
+    const shared = {
+      ...linkRest,
+      ...newTab,
+      ...state,
+      ...motionProps,
+      "aria-disabled": disabled || undefined,
+      tabIndex: disabled ? -1 : linkRest.tabIndex,
+      onClick: (event: MouseEvent<HTMLAnchorElement>) => {
+        if (disabled) {
+          event.preventDefault();
+          return;
+        }
+        onClick?.(event);
+      },
+      className: classes,
+    };
+    const hint = external && (
+      <span className="sr-only"> (opens in a new tab)</span>
+    );
+
+    // Files (a resume PDF) and hash links are plain anchors: <Link> would try to
+    // prefetch a file as if it were a page.
+    if (!isPagePath(linkRest.href as string)) {
+      return (
+        <motion.a
+          {...(shared as ComponentProps<typeof motion.a>)}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+        >
+          {inner}
+          {hint}
+        </motion.a>
+      );
+    }
     return (
-      <MotionLink
-        {...linkRest}
-        {...newTab}
-        {...state}
-        {...motionProps}
-        ref={ref as React.Ref<HTMLAnchorElement>}
-        aria-disabled={disabled || undefined}
-        tabIndex={disabled ? -1 : linkRest.tabIndex}
-        onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-          if (disabled) {
-            event.preventDefault();
-            return;
-          }
-          onClick?.(event);
-        }}
-        className={classes}
-      >
+      <MotionLink {...shared} ref={ref as React.Ref<HTMLAnchorElement>}>
         {inner}
-        {external && <span className="sr-only"> (opens in a new tab)</span>}
+        {hint}
       </MotionLink>
     );
   }

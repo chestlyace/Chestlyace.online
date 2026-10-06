@@ -67,6 +67,13 @@
 [data-band="alt"] {
   --tile: var(--surface-raised);
   --tile-hover: var(--surface);
+  --band-bg: var(--background-alt);
+}
+
+/* The colour of the band a section sits on (the stack's dimming overlay uses it
+   so a covered card fades into the page, not into black). */
+:root {
+  --band-bg: var(--background);
 }
 
 /* Per-site accents (design.md §4) override only primary, primary-text and
@@ -563,6 +570,52 @@ html.lenis body {
   .hero-glow,
   .hero-bob {
     animation: none;
+  }
+}
+
+/* Services stack (design.md §13.11). Cards stick below the header, each 16px
+   lower than the one before, and the next slides over. Only where there is
+   room (640px of height) and motion is allowed; otherwise a plain list. */
+@layer components {
+  .stack-card {
+    position: relative;
+    transform-origin: top center;
+  }
+
+  @media (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+    .stack-card {
+      position: sticky;
+      top: var(--stack-top-sm);
+    }
+  }
+
+  @media (min-height: 640px) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .stack-card {
+      top: var(--stack-top);
+    }
+  }
+
+  /* Project media (design.md §13.10): a slow zoom on hover — a separate
+     property from the transform GSAP animates, so the two never fight. */
+  .project-image {
+    transition: scale 600ms var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .project-card:hover .project-image {
+      scale: 1.04;
+    }
+  }
+
+  .project-card:focus-visible .project-image {
+    scale: 1.04;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-image {
+      transition: none;
+      scale: 1 !important;
+    }
   }
 }
 

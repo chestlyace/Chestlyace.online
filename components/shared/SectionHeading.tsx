@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
-import { usePrefersReducedMotion } from "@/lib/media";
+import { prefersReducedMotionNow, usePrefersReducedMotion } from "@/lib/media";
 
 type SectionHeadingProps = {
   /** "02" — assigned from the sections shown (lib/sections.ts). */
@@ -43,7 +43,7 @@ export function SectionHeading({
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     const heading = titleRef.current;
-    if (reduced || !root || !heading) return;
+    if (reduced || prefersReducedMotionNow() || !root || !heading) return;
     gsap.registerPlugin(ScrollTrigger, SplitText);
 
     const extras = root.querySelectorAll("[data-heading-extra]");

@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { usePrefersReducedMotion } from "@/lib/media";
+import { prefersReducedMotionNow, usePrefersReducedMotion } from "@/lib/media";
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -22,7 +22,7 @@ export function FooterWordmark() {
   useIsomorphicLayoutEffect(() => {
     const wrapper = wrapperRef.current;
     const text = textRef.current;
-    if (reduced || !wrapper || !text) return;
+    if (reduced || prefersReducedMotionNow() || !wrapper || !text) return;
     gsap.registerPlugin(ScrollTrigger, SplitText);
 
     let context: gsap.Context | undefined;
