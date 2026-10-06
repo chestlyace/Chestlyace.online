@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import type { UploadUse } from "@/lib/cloudinary";
 import { timelineDates } from "@/lib/timeline";
 import { SERVICE_ICONS } from "./serviceIcons";
 import type { ResourceId } from "./resources";
@@ -35,13 +36,13 @@ export type FieldDef =
   | (Base & { type: "text"; max: number; placeholder?: string })
   | (Base & { type: "long"; max: number })
   | (Base & { type: "url" })
-  | (Base & { type: "image" })
+  | (Base & { type: "image"; use: UploadUse })
   | (Base & { type: "date" })
   | (Base & { type: "select"; options: Options })
   | (Base & { type: "switch" })
   | (Base & { type: "checks"; options: Options })
   | (Base & { type: "tags"; itemLabel: string; max: number })
-  | (Base & { type: "images"; max: number })
+  | (Base & { type: "images"; max: number; use: UploadUse })
   | (Base & { type: "slug"; from: string; prefix: string });
 
 export type Values = Record<string, string | boolean | string[]>;
@@ -117,6 +118,7 @@ const skills: AdminConfig = {
         {
           type: "image",
           name: "iconUrl",
+          use: "icon",
           label: "Icon image",
           optional: true,
           helper: "Used when there is no icon name.",
@@ -195,6 +197,7 @@ const certifications: AdminConfig = {
         {
           type: "image",
           name: "badgeUrl",
+          use: "badge",
           label: "Badge",
           optional: true,
           helper: "A square image.",
@@ -327,6 +330,7 @@ const timelineFields = (withType: boolean): FieldDef[] => [
   {
     type: "image",
     name: "logoUrl",
+    use: "logo",
     label: "Logo",
     optional: true,
     helper: "The organization's first letter shows when there is none.",
@@ -414,6 +418,7 @@ const projects: AdminConfig = {
         {
           type: "image",
           name: "imageUrl",
+          use: "project",
           label: "Image",
           optional: true,
           helper: "The card's image and the page's main image.",
@@ -489,6 +494,7 @@ const projects: AdminConfig = {
         {
           type: "images",
           name: "galleryUrls",
+          use: "project",
           label: "Gallery",
           max: 12,
           optional: true,
@@ -609,6 +615,7 @@ const profile: AdminConfig = {
         {
           type: "image",
           name: "heroImageUrl",
+          use: "profile",
           label: "Hero image",
           optional: true,
         },
@@ -636,6 +643,7 @@ const profile: AdminConfig = {
         {
           type: "image",
           name: "resumeUrl",
+          use: "resume",
           label: "Résumé",
           optional: true,
           helper: "A PDF.",

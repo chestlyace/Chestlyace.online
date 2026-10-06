@@ -17,7 +17,7 @@ before the phase starts.
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
 | 4 | Database | Done | Q19 (decided) |
 | 5 | Main site homepage | Done (5a: PRs #18–#24; 5b: PRs #26–#36). Q5 stays open: the About text is a placeholder | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
-| 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 in review | Q14, Q15, Q21 (decided) |
+| 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Not started | — |
 | 8 | Main site launch | Not started | Q17, Q20 |
 | 9 | Blog | Not started | Q12, Q16 |
@@ -170,8 +170,8 @@ Q21 (decisions D71, D72), and the doc changes that follow from the admin moving 
 |---|---|---|
 | 6b.1 Host, login, shell — issue #39 | The `admin` host and per-host API routing; login/logout, session cookie, rate limit; the shell, dashboard and admin 404; `pnpm admin:hash` | Done (PR #40) |
 | 6b.2 API and simple resources — issue #41 | `/api/admin/*` with Zod; the list, editor, switch, field, dialog, toast and save-bar components; skills, services, certifications, socials, FAQ; revalidation | Done (PR #42) |
-| 6b.3 Projects, experience, volunteering, profile — issue #43 | The remaining resources, with the slug and gallery fields, the Experience tabs, and the profile editor | In review |
-| 6b.4 Uploads | Cloudinary signature route and the upload field wired into every image and file field | Not started |
+| 6b.3 Projects, experience, volunteering, profile — issue #43 | The remaining resources, with the slug and gallery fields, the Experience tabs, and the profile editor | Done (PR #44) |
+| 6b.4 Uploads — issue #45 | Cloudinary signature route and the upload field wired into every image and file field | In review |
 
 The whole of 6b covers:
 

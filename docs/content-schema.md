@@ -275,9 +275,12 @@ returned URL. This avoids pushing large files through a serverless function.
 | Project image | `portfolio/projects` | max 1600×1600, WebP/AVIF auto |
 | Journey logo | `portfolio/journey` | max 600×600 |
 | Profile hero | `portfolio/profile` | max 1600×1600 |
+| Certification badge, skill icon | `portfolio/profile` | max 600×600 (skill icons may also be SVG) |
 | Resume | `portfolio/profile` | raw PDF |
 
-Limit 10 MB. Images render through `next/image` (Cloudinary loader), replacing the
+Limit 10 MB. Images are JPG, PNG, WebP or AVIF; the résumé is a PDF. The stored
+address gets `f_auto,q_auto` after `/image/upload/`, so Cloudinary serves each
+browser the best format. Images render through `next/image` (Cloudinary loader), replacing the
 old `optimizeCloudinaryImage()` string rewriting.
 
 ---

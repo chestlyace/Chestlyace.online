@@ -250,3 +250,34 @@ describe("/api/admin/<resource>/reorder", () => {
     ).toBe(404);
   });
 });
+
+describe("/api/admin/upload-signature", () => {
+  const sign = async (body: unknown) => {
+    const { POST } = await import("@/app/api/admin/upload-signature/route");
+    return POST(call("/api/admin/upload-signature", "POST", body));
+  };
+
+  it("needs a session", async () => {
+    signedIn = false;
+    expect((await sign({ use: "project" })).status).toBe(401);
+  });
+
+  it("says 503 when Cloudinary isn't set up", async () => {
+    vi.stubEnv("CLOUDINARY_CLOUD_NAME", "");
+    expect((await sign({ use: "project" })).status).toBe(503);
+  });
+
+  it("signs an upload without revealing the secret, and refuses unknown uses", async () => {
+    vi.stubEnv("CLOUDINARY_CLOUD_NAME", "demo");
+    vi.stubEnv("CLOUDINARY_API_KEY", "123");
+    vi.stubEnv("CLOUDINARY_API_SECRET", "topsecret");
+    const response = await sign({ use: "logo" });
+    expect(response.status).toBe(200);
+    const text = JSON.stringify(await response.json());
+    expect(text).toContain("portfolio/journey");
+    expect(text).not.toContain("topsecret");
+    expect((await sign({ use: "../../etc" })).status).toBe(422);
+    expect((await sign({ use: "logo", folder: "x" })).status).toBe(422);
+    expect(revalidate).not.toHaveBeenCalled();
+  });
+});
