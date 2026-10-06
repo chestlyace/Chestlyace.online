@@ -52,3 +52,27 @@ export const CREATIVES_CARD = {
   title: "Design & photography live on Creatives",
   line: "Looking for design or photography? See my creative work.",
 };
+
+// PLACEHOLDER — the intro under the Volunteering heading (design.md §14.7).
+export const VOLUNTEERING_INTRO =
+  "Time given to communities and causes outside of paid work.";
+
+// PLACEHOLDER — the Contact section (design.md §14.8). The heading carries over
+// from the old site; the intro drops "design, or photography".
+export const CONTACT_HEADING = "Let's work together";
+export const CONTACT_INTRO =
+  "Have a project in mind? Let's create something extraordinary.";
+
+// PLACEHOLDER — the form's thank-you panel and its error messages
+// (design.md §13.15).
+export const CONTACT_SUCCESS = {
+  title: "Message sent",
+  text: "Thanks for reaching out. I'll reply by email as soon as I can.",
+  whatsapp: "Continue on WhatsApp",
+};
+export const CONTACT_ERRORS = {
+  failed:
+    "Your message didn't go through. Please try again, or use the email or WhatsApp links.",
+  rateLimited:
+    "You've sent a few messages already. Please try again a little later, or use the email or WhatsApp links.",
+};

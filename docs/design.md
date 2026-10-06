@@ -1788,6 +1788,16 @@ the container. Several answers can be open at once.
 **Motion and accessibility.** As §13.16. The list fades in with the default
 entrance, 50ms stagger.
 
+#### Build notes (5b.5)
+
+Where the build differs from, or settles, what the specs above say:
+
+- **Timeline.** The markup is the finished state (rail filled, every dot lit); with motion, an effect empties it and the scroll refills it, so reduced motion and no-JavaScript get the finished state. An entry with no logo shows the organization's first letter in the 40px square so the text of every entry lines up.
+- **FAQ.** The open/close animation is CSS only (`::details-content` with `interpolate-size`); a browser without them opens and closes instantly, as §13.16 allows.
+- **Contact form.** Posts to `/api/contact`; a quick submit waits until the form has been on screen for 3 seconds before sending. Error messages open with a grid-row transition (height + opacity, 200ms).
+- **Contact tiles.** The copy button only shows where `navigator.clipboard` exists. The WhatsApp QR button shows on `(hover: hover)` devices and the code is always black on white.
+- **Volunteering.** No entries are seeded, so the section is hidden and the numbers close up; the intro line is placeholder copy in `content/copy.ts`.
+
 ### 14.10 Project page
 
 **Purpose.** A case study for one project — the depth the card can't show

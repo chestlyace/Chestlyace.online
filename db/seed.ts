@@ -164,7 +164,7 @@ export const seedData = {
       datesLabel: "Dec 2025 - Present",
       description:
         "Building tech solutions for the healthcare, sector in Cameroon focusing on scalable backend architecture.",
-      logoUrl: "ets_nhahealthtech_logo.jpeg",
+      logoUrl: "logos/ets_nhahealthtech_logo.jpeg",
     },
     {
       type: "work",
@@ -175,7 +175,7 @@ export const seedData = {
       datesLabel: "Jun 2025 - Present",
       description:
         "Building tech solutions for clients, focusing on scalable backend architecture.",
-      logoUrl: "digimark.jpeg",
+      logoUrl: "logos/digimark.jpeg",
     },
     {
       type: "education",
@@ -186,7 +186,7 @@ export const seedData = {
       datesLabel: "2025 - Present",
       description:
         "Continuing advanced studies in Software Engineering and Business.",
-      logoUrl: "yibs.png",
+      logoUrl: "logos/yibs.png",
     },
     {
       type: "work",
@@ -197,7 +197,7 @@ export const seedData = {
       datesLabel: "Sep 2024 - Oct 2024",
       description:
         "Developed responsive and interactive UI for hospital consultation systems.",
-      logoUrl: "logoNGcodeX.png",
+      logoUrl: "logos/logoNGcodeX.png",
     },
     {
       type: "work",
