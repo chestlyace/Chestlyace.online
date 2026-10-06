@@ -14,11 +14,11 @@ request belongs to is decided by its **host name**, not its path.
 ```
                         ┌────────────────────────── Vercel ───────────────────────────┐
  chestlyace.online ───▶ │                                                              │
- creatives.… ─────────▶ │  proxy.ts ── reads Host ──▶ rewrite to /_sites/<site>/<path> │
+ creatives.… ─────────▶ │  proxy.ts ── reads Host ──▶ rewrite to /sites/<site>/<path>  │
  blog.… ──────────────▶ │                                                              │
-                        │   app/_sites/main ──────▶ Postgres (Neon) + Cloudinary       │
-                        │   app/_sites/creatives ─▶ Headless CMS API                   │
-                        │   app/_sites/blog ──────▶ content/blog/*.mdx (build time)    │
+                        │   app/sites/main ───────▶ Postgres (Neon) + Cloudinary       │
+                        │   app/sites/creatives ──▶ Headless CMS API                   │
+                        │   app/sites/blog ───────▶ content/blog/*.mdx (build time)    │
                         └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -43,17 +43,23 @@ sites from leaking into each other (see §3).
 | Hosting | Vercel | Decided (D2) |
 | Package manager | pnpm 10 (pinned in `packageManager`; newest major Vercel supports) | Decided (D16) |
 | Lint / format | ESLint (`eslint-config-next`) + Prettier (Markdown excluded) | Decided |
+| Tests | Vitest (`pnpm test`), `*.test.ts` next to the code | Decided (D20) |
 
 ## 3. Multi-tenant routing
 
 ### How a request is resolved
 
 1. `proxy.ts` at the project root (Next.js 16+; called `middleware.ts` in older
-   versions) runs on every request except static assets.
-2. It reads the `Host` header and maps it to a site key using `lib/sites.ts`.
-3. It **rewrites** (not redirects) the request to `/_sites/<site>/<original path>`.
+   versions) runs on every request except `_next/static`, `_next/image`, and
+   image/font/PDF files. (`.xml`/`.txt` paths do go through it, because
+   `sitemap.xml`, `robots.txt`, and `rss.xml` are per-site routes.)
+2. It reads the `Host` header and maps it to a site key using `lib/sites.ts`
+   (matching on host name, ignoring the port).
+3. It **rewrites** (not redirects) the request to `/sites/<site>/<original path>`.
    The visitor's URL bar never changes.
 4. Unknown hosts fall through to `main`.
+5. The decision itself is a pure function, `decideRoute()` in `lib/sites.ts`, so
+   it is unit-tested without a server; `proxy.ts` only applies it.
 
 ```ts
 // lib/sites.ts — single source of truth for hosts
@@ -66,12 +72,20 @@ export const SITES = {
 
 ### Rules that keep sites separate
 
-- Folders under `app/_sites/` are prefixed with `_` so they can never be reached
-  directly by path; only the rewrite reaches them.
-- Each site has its **own root layout** (`app/_sites/<site>/layout.tsx`) with its
-  own metadata, so `<title>`, canonical URLs, and Open Graph tags never mix.
+- Site folders live in `app/sites/<site>/` (D19). They can't be reached directly
+  by path: the proxy always adds the `/sites/<site>` prefix, so a request for
+  `/sites/blog` on the main host becomes `/sites/main/sites/blog` and 404s.
+  (Folders starting with `_` can't be used — Next.js excludes them from routing.)
+- There is **no `app/layout.tsx`**. Each site has its **own root layout**
+  (`app/sites/<site>/layout.tsx`) with its own metadata, so `<title>`, canonical
+  URLs, and Open Graph tags never mix.
+- Each site has its **own 404**: `app/sites/<site>/[...notFound]/page.tsx` calls
+  `notFound()`, which renders `app/sites/<site>/not-found.tsx` inside that site's
+  layout with a 404 status. More specific routes (e.g. `[slug]`) take priority
+  over the catch-all.
 - `/api/*` and `/admin/*` are **main-host only**. The proxy returns 404 for them on
-  the creatives and blog hosts.
+  the creatives and blog hosts. On main, `/api/*` passes through to `app/api/`
+  untouched and `/admin/*` is rewritten into `app/sites/main/admin/`.
 - Links that cross sites are always **absolute URLs** built from `lib/sites.ts`
   (`siteUrl('blog', '/some-post')`). Relative links stay within a site.
 - `www.chestlyace.online` permanently redirects to `chestlyace.online` (Vercel
@@ -88,28 +102,34 @@ Browsers resolve `*.localhost` to `127.0.0.1`, so no hosts-file edits are needed
 | `http://blog.localhost:3000` | blog |
 
 Vercel preview deployments get one URL. Previews use a `?site=creatives` query
-parameter (honoured only when `VERCEL_ENV !== 'production'`) to pick a site.
+parameter (honoured only when `VERCEL_ENV !== 'production'`) to pick a site. The
+choice is remembered in a `preview-site` cookie so internal links stay on that
+site; `?site=main` switches back (D21). Production ignores both.
 
 ## 4. Folder layout
 
 ```
 chestlyace.online/
 ├─ app/
-│  ├─ _sites/
+│  ├─ sites/                       # no app/layout.tsx — each site is a root layout
 │  │  ├─ main/
-│  │  │  ├─ layout.tsx            # main metadata, header/footer
+│  │  │  ├─ layout.tsx            # main root layout + metadata, header/footer
 │  │  │  ├─ page.tsx              # homepage, all sections
+│  │  │  ├─ not-found.tsx         # main's 404
+│  │  │  ├─ [...notFound]/page.tsx # unmatched paths → notFound()
 │  │  │  ├─ admin/                # admin panel (auth-gated)
 │  │  │  ├─ sitemap.xml/route.ts
 │  │  │  └─ robots.txt/route.ts
 │  │  ├─ creatives/
 │  │  │  ├─ layout.tsx
 │  │  │  ├─ page.tsx              # gallery
+│  │  │  ├─ not-found.tsx, [...notFound]/page.tsx
 │  │  │  ├─ [slug]/page.tsx       # single piece
 │  │  │  └─ services/page.tsx
 │  │  └─ blog/
 │  │     ├─ layout.tsx
 │  │     ├─ page.tsx              # post list
+│  │     ├─ not-found.tsx, [...notFound]/page.tsx
 │  │     ├─ [slug]/page.tsx
 │  │     ├─ tags/[tag]/page.tsx
 │  │     └─ rss.xml/route.ts
@@ -131,7 +151,8 @@ chestlyace.online/
 │  ├─ migrations/
 │  └─ seed.ts                      # dev seed only, never run against prod
 ├─ lib/
-│  ├─ sites.ts
+│  ├─ sites.ts                     # site registry, host resolution, siteUrl, decideRoute
+│  ├─ sites.test.ts
 │  ├─ db.ts
 │  ├─ auth.ts
 │  ├─ cloudinary.ts
@@ -139,7 +160,8 @@ chestlyace.online/
 │  └─ blog.ts                      # MDX loading + frontmatter validation
 ├─ public/                         # favicons, resume, OG images
 ├─ docs/                           # these documents
-└─ proxy.ts
+├─ proxy.ts
+└─ vitest.config.mts
 ```
 
 ## 5. Data flow per site

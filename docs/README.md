@@ -47,6 +47,9 @@ every doc that depends on it.
 | D16 | **Tooling: Next.js 16, Node 24 LTS, pnpm 10** | pnpm 10 because it's the newest major Vercel supports without extra settings |
 | D17 | **CI: Vercel's build on each PR only — no GitHub Actions** | Lint, format, and tests run locally before every PR |
 | D18 | **Keep Next.js's managed block in `AGENTS.md`** | Points agents to the bundled Next.js 16 docs; `next dev` re-adds it anyway |
+| D19 | **Site folders are `app/sites/<site>/`, not `app/_sites/<site>/`** | Next.js excludes `_` folders from routing, so the original path could never render. No `app/layout.tsx`; each site is its own root layout with its own 404 |
+| D20 | **Tests: Vitest** | `pnpm test`; run locally before every PR |
+| D21 | **Preview `?site=` is remembered in a `preview-site` cookie** | Non-production only; `?site=main` switches back |
 
 ## Status
 
