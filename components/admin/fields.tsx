@@ -8,6 +8,7 @@ import { IconButton } from "@/components/shared/IconButton";
 import { cn } from "@/lib/cn";
 import type { FieldDef } from "@/lib/admin/config";
 import { Switch } from "./Switch";
+import { UploadField } from "./UploadField";
 
 // The admin's field types (design.md §13.21): text, long text, URL, image
 // address, date, select, switch, checkbox group and tag list, all in the filled
@@ -270,34 +271,42 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
             </button>
           )}
         </div>
+      ) : field.type === "image" ? (
+        <UploadField
+          id={id}
+          name={field.name}
+          use={field.use}
+          value={text}
+          onChange={onChange}
+          onBlur={() => {
+            const fixed = imageWithScheme(text.trim());
+            if (fixed !== text) onChange(fixed);
+            onBlur(fixed);
+          }}
+          invalid={Boolean(error)}
+          describedBy={describedBy}
+        />
       ) : (
         <>
           <input
             id={id}
             name={field.name}
             type="text"
-            inputMode={
-              field.type === "url" || field.type === "image" ? "url" : undefined
-            }
+            inputMode={field.type === "url" ? "url" : undefined}
             autoComplete="off"
             spellCheck={field.type === "text" ? undefined : false}
             placeholder={
               field.type === "text"
                 ? field.placeholder
-                : field.type === "image"
+                : field.type === "url"
                   ? "https://…"
-                  : field.type === "url"
-                    ? "https://…"
-                    : undefined
+                  : undefined
             }
             value={text}
             onChange={(event) => onChange(event.target.value)}
             onBlur={() => {
-              if (field.type === "url" || field.type === "image") {
-                const fixed =
-                  field.type === "image"
-                    ? imageWithScheme(text.trim())
-                    : withScheme(text.trim());
+              if (field.type === "url") {
+                const fixed = withScheme(text.trim());
                 if (fixed !== text) onChange(fixed);
                 onBlur(fixed);
                 return;
@@ -447,7 +456,8 @@ function TagList({
 }
 
 // The gallery (design.md §13.21): one address per image, in the order the page
-// shows them; each can move up or down or be removed. (Uploading arrives with 6b.4.)
+// shows them; each is an upload box (or an address) and can move up or down or
+// be removed.
 function ImageList({
   id,
   field,
@@ -485,27 +495,24 @@ function ImageList({
     >
       <ul className="flex flex-col gap-3">
         {value.map((item, index) => (
-          <li key={index} className="flex items-center gap-2">
-            <input
-              id={index === 0 ? id : undefined}
-              name={field.name}
-              type="text"
-              inputMode="url"
-              autoComplete="off"
-              spellCheck={false}
-              placeholder="https://…"
-              aria-label={`Image ${index + 1}`}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={describedBy}
-              value={item}
-              onChange={(event) => set(index, event.target.value)}
-              onBlur={() => {
-                const fixed = imageWithScheme(item.trim());
-                if (fixed !== item) set(index, fixed);
-                onBlur();
-              }}
-              className={cn(fieldControl, "h-12 min-w-0 flex-1 px-4")}
-            />
+          <li key={index} className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <UploadField
+                id={index === 0 ? id : `${id}-${index}`}
+                name={field.name}
+                use={field.use}
+                value={item}
+                compact
+                onChange={(next) => set(index, next)}
+                onBlur={() => {
+                  const fixed = imageWithScheme(item.trim());
+                  if (fixed !== item) set(index, fixed);
+                  onBlur();
+                }}
+                invalid={Boolean(error)}
+                describedBy={describedBy}
+              />
+            </div>
             <IconButton
               label={`Move image ${index + 1} up`}
               iconKey="up"
