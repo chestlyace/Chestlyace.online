@@ -15,7 +15,7 @@ before the phase starts.
 | 1 | Project scaffold | Done | Q2, Q3 (decided) |
 | 2 | Multi-tenant routing | Done | — |
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
-| 4 | Database | Not started | Q19 |
+| 4 | Database | In review | Q19 (decided) |
 | 5 | Main site homepage | Not started | Q4–Q11, Q22 |
 | 6 | Admin panel | Not started | Q14, Q15, Q21 |
 | 7 | SEO & redirects | Not started | — |
@@ -96,15 +96,18 @@ a placeholder baseline (D30); the design steps of later phases replace them.
 and desktop widths, on all three hosts, and the theme carries across hosts.
 **Refs:** `design.md`, `ia-content.md` §3.
 
-## Phase 4 — Database
+## Phase 4 — Database — issue #13
 
 **Goal:** the main site's data layer, empty but ready.
 
-- Neon database via the Vercel integration; separate branch for previews
-- Drizzle schema for all tables in `content-schema.md` §1
-- Migrations and the command to run them
-- Typed query functions for the homepage (read only)
+- Prisma Postgres via the Vercel Marketplace (D31): one database for
+  Production, one for Preview + Development — provisioned by the owner
+- Drizzle schema for all tables in `content-schema.md` §1, incl. `volunteering`
+  (D33) and timestamps + `updated_at` trigger on every table (D34)
+- Migrations and the commands to run them (`db:generate`, `db:migrate`)
+- Typed query functions for the homepage (read only), over `pg` (D32)
 - Dev-only seed script using the old site's data, adapted to the new schema
+- Tests against PGlite (D35)
 
 **Done when:** migrations run cleanly on a fresh database and the seed loads.
 **Refs:** `content-schema.md` §1, §6; `architecture.md` §5.
@@ -171,7 +174,7 @@ shows on the public page.
 **Goal:** chestlyace.online runs on the new app with real data.
 
 - One-off migration script: live EC2 database → new schema (`content-schema.md` §6)
-- Load into Neon; move files referenced by bare filenames
+- Load into Prisma Postgres; move files referenced by bare filenames
 - Analytics per Q17
 - Domains on Vercel; DNS cutover; old server shutdown plan (Q20)
 

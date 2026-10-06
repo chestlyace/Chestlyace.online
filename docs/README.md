@@ -30,7 +30,7 @@ every doc that depends on it.
 | # | Decision | Notes |
 |---|---|---|
 | D1 | **Monorepo, single Next.js app, multi-tenant routing by host** | `chestlyace.online`, `creatives.chestlyace.online`, `blog.chestlyace.online` all served by one app |
-| D2 | **Hosted on Vercel**; EC2 + nginx retired | Postgres moves to a managed provider (Neon) |
+| D2 | **Hosted on Vercel**; EC2 + nginx retired | Postgres moves to a managed provider — **Prisma Postgres** (D31; was Neon) |
 | D3 | **Main site stays database-driven** | Same Postgres approach as before, rebuilt with Next.js Route Handlers and a rebuilt admin panel |
 | D4 | **Main site sells Chestly as a software engineer only** | No design or photography work on it |
 | D5 | **Design + photography move to `creatives.chestlyace.online`** | Own content source, separate from the main database |
@@ -43,7 +43,7 @@ every doc that depends on it.
 | D12 | **Existing copy and data carry over; the redesign is visual** | Copy that mentions design/photography still needs editing — see `ia-content.md` |
 | D13 | ~~**Visual direction stays close to the current site**~~ | **Superseded by D30.** Dark/light toggle kept, rounded cards, Tailwind — a polish and consistency pass |
 | D14 | **Styling: Tailwind CSS v4** | Q3. Tokens in `app/globals.css` via `@theme` |
-| D15 | **Database access: Drizzle ORM** | Q2. With the Neon serverless driver; installed in Phase 4 |
+| D15 | **Database access: Drizzle ORM** | Q2. With the standard `pg` driver (D32; was the Neon serverless driver) |
 | D16 | **Tooling: Next.js 16, Node 24 LTS, pnpm 10** | pnpm 10 because it's the newest major Vercel supports without extra settings |
 | D17 | **CI: Vercel's build on each PR only — no GitHub Actions** | Lint, format, and tests run locally before every PR |
 | D18 | **Keep Next.js's managed block in `AGENTS.md`** | Points agents to the bundled Next.js 16 docs; `next dev` re-adds it anyway |
@@ -59,6 +59,11 @@ every doc that depends on it.
 | D28 | **On Vercel previews, cross-site links stay on the preview via `?site=`** | `siteUrl()` uses `VERCEL_BRANCH_URL` when `VERCEL_ENV === "preview"` |
 | D29 | **StatusPill: "open" state only for now** | Other availability states decided with the profile data |
 | D30 | **Design is owner-led; no design is final** | Phase 3's look is a placeholder baseline. Each page is designed component by component, then section by section, from the owner's references and tools, written into `design.md` and approved by merge before anything is built. Supersedes D13. See `instructions.md` §8 |
+| D31 | **Database: Prisma Postgres via the Vercel Marketplace (replaces Neon)** | Free plan: 500 MB, 200k operations/month, no sleeping. One database for Production, a second shared by Preview + local Development |
+| D32 | **Driver: `pg` (node-postgres) with Drizzle** | As Prisma's and Drizzle's docs recommend. `DATABASE_URL` at runtime; migrations use `DIRECT_URL` when set |
+| D33 | **Volunteering has its own table** | Q19. Same columns as `journey`, without `type` |
+| D34 | **`created_at` / `updated_at` on every table; a DB trigger keeps `updated_at` current** | Correct even for edits made outside the app |
+| D35 | **DB tests run on PGlite** | Real migrations and queries against in-process Postgres; no database needed to run `pnpm test` |
 
 ## Status
 

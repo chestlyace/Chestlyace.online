@@ -116,7 +116,7 @@ creative work at creatives.chestlyace.online".
 
 ### 2.7 Volunteering — `#volunteering` (new)
 
-- Timeline from `journey` where `type = 'volunteer'`, same `TimelineItem` component.
+- Timeline from the `volunteering` table (D33), same `TimelineItem` component.
 - Short intro line (new copy needed).
 - No volunteering entries exist in the old data. Candidates: CEY2 Youth Church
   (Q6), plus anything new you add.
