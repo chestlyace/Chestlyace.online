@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { prefersReducedMotionNow, usePrefersReducedMotion } from "@/lib/media";
+import { boxOf, createOverlay, flyOverlay, takeMorph } from "@/lib/morph";
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -29,12 +30,58 @@ export function ProjectsGrid({
     if (reduced || prefersReducedMotionNow() || !list) return;
     gsap.registerPlugin(ScrollTrigger);
 
+    // Coming back from a project page: its image flies into this project's card
+    // (design.md §14.10). That card skips its own entrance.
+    const back = takeMorph("close");
+    let overlay: HTMLElement | undefined;
+    let flight: gsap.core.Tween | undefined;
+    let settle = 0;
+    if (back) {
+      overlay = createOverlay(back.src, back.box, back.radius);
+      // The page scrolls to #projects as it arrives; wait for the card to stop
+      // moving, then fly. A card that isn't on screen just gets a fade.
+      const target = () =>
+        list.querySelector<HTMLElement>(
+          `[data-card][data-slug="${CSS.escape(back.slug)}"] [data-card-media]`,
+        );
+      let last = "";
+      let still = 0;
+      const started = performance.now();
+      const watch = () => {
+        const media = target();
+        const key = media ? JSON.stringify(boxOf(media)) : "";
+        still = key === last ? still + 1 : 0;
+        last = key;
+        const timedOut = performance.now() - started > 900;
+        if (media && (still >= 3 || timedOut)) {
+          const box = boxOf(media);
+          const visible = box.y < window.innerHeight && box.y + box.height > 0;
+          if (visible && overlay) {
+            flight = flyOverlay(overlay, box, 20, () => {});
+          } else if (overlay) {
+            flight = gsap.to(overlay, {
+              opacity: 0,
+              duration: 0.3,
+              onComplete: () => overlay?.remove(),
+            });
+          }
+          return;
+        }
+        if (timedOut) {
+          overlay?.remove();
+          return;
+        }
+        settle = requestAnimationFrame(watch);
+      };
+      settle = requestAnimationFrame(watch);
+    }
+
     let context: gsap.Context | undefined;
     try {
       context = gsap.context(() => {
         const cards = Array.from(
           list.querySelectorAll<HTMLElement>("[data-card]"),
-        );
+        ).filter((card) => !back || card.dataset.slug !== back.slug);
         const parts = (card: HTMLElement) => ({
           media: card.querySelector<HTMLElement>("[data-card-media]"),
           image: card.querySelector<HTMLElement>("[data-card-image]"),
@@ -118,9 +165,16 @@ export function ProjectsGrid({
     } catch (error) {
       console.error("Projects grid motion failed", error);
       context?.revert();
+      cancelAnimationFrame(settle);
+      overlay?.remove();
       return;
     }
-    return () => context?.revert();
+    return () => {
+      cancelAnimationFrame(settle);
+      flight?.kill();
+      overlay?.remove();
+      context?.revert();
+    };
   }, [reduced]);
 
   return (
