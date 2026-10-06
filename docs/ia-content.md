@@ -12,7 +12,7 @@ which no longer belongs on the main site (D4).
 | Route | Purpose |
 |---|---|
 | `/` | Single-page portfolio, all sections below |
-| `/admin` | Admin panel (`noindex`, auth-gated) |
+| — | The admin panel is no longer on this host: it lives at `admin.chestlyace.online` (D71, Q21) |
 | `/resume.pdf` | Redirect to `profile.resume_url` so the link never changes |
 | `/sitemap.xml`, `/robots.txt` | Generated |
 | `/projects/[slug]` | Project detail pages — decided (Q11); spec in `design.md` §14.10 |
@@ -249,7 +249,7 @@ Old URLs are indexed. All redirects are permanent (308) and live in
 | `chestlyace.online/software-development.html` | `chestlyace.online/#services` |
 | `chestlyace.online/graphic-design.html` | `creatives.chestlyace.online/services` |
 | `chestlyace.online/photography.html` | `creatives.chestlyace.online/services` |
-| `chestlyace.online/admin/` and `/admin/index.html` | `chestlyace.online/admin` |
+| `chestlyace.online/admin/` and `/admin/index.html` | `admin.chestlyace.online` |
 | `chestlyace.online/#work` | can't redirect (fragment); keep an empty `id="work"` anchor on Projects |
 | `chestlyace.online/#journey` | same — keep `id="journey"` anchor on Experience |
 | `www.chestlyace.online/*` | `chestlyace.online/*` |
