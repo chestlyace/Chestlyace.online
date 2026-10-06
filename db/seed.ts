@@ -4,8 +4,12 @@
 //
 //   pnpm db:seed
 //
-// Creative tools and roles are kept as-is until Q6/Q7 are decided (Phase 5).
-// Design/event works and the creative services are left out (D8, D9).
+// Design/event works and the creative services are left out (D8, D9). So are
+// the creative roles (Q6), the creative tools (Q7, Figma stays), and the two
+// design/photography FAQs (ia-content.md §2.9): they belong to the creatives
+// site. The seven certifications are read from the badge images in the old
+// repo's assets/certs/; their dates and credential links are not in the images,
+// so they are left empty.
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import * as schema from "./schema.ts";
 
@@ -19,7 +23,9 @@ export const seedData = {
     name: "Chestly Ace",
     legalName: "Amahndong Chestly",
     displayName: "DEV.ACE",
-    headline: "Developer, Designer, Photographer",
+    headline: "Software Engineer",
+    // PLACEHOLDER — the hero's rotating words, until the owner supplies them.
+    headlineWords: ["Backend", "Full-Stack", "Mobile"] as string[],
     tagline: "Open to Remote Roles",
     availability: "open",
     heroImageUrl: "684d5ff7-8d68-46ce-a5eb-5b0dabd64850.png",
@@ -30,7 +36,7 @@ export const seedData = {
       "Whether I'm writing clean code in Python or capturing a candid moment through my lens, my goal is always the same: to tell a story and solve a problem elegantly. I believe in the power of minimalism and the impact of bold choices.",
     ].join("\n\n"),
     resumeUrl: "resume.pdf",
-    email: "developerace0@gmail.com",
+    email: "chestlyace@gmail.com",
     phone: "+237 676 940 247",
     whatsappNumber: "237676940247",
     location: null,
@@ -57,11 +63,7 @@ export const seedData = {
     { name: "Figma", category: "tool", ...devicon("figma") },
     { name: "Git", category: "tool", ...devicon("git") },
     { name: "VS Code", category: "tool", ...devicon("vscode") },
-    { name: "Ps", category: "tool", ...devicon("photoshop") },
     { name: "Linux", category: "tool", ...devicon("linux") },
-    // Icons for these two are chosen in Phase 5 with the rest of Skills.
-    { name: "Canva", category: "tool", iconSlug: null, iconUrl: null },
-    { name: "Lr", category: "tool", iconSlug: null, iconUrl: null },
     { name: "MongoDB", category: "database", ...devicon("mongodb") },
     { name: "MySQL", category: "database", ...devicon("mysql") },
     { name: "PostgreSQL", category: "database", ...devicon("postgresql") },
@@ -174,28 +176,6 @@ export const seedData = {
       logoUrl: null,
     },
     {
-      type: "work",
-      role: "Photographer/Designer",
-      organization: "CEY2 Youth Church",
-      startDate: "2024-01-01",
-      endDate: null,
-      datesLabel: "2024 - Present",
-      description:
-        "Capturing moments during services and designing posters for events and programs.",
-      logoUrl: null,
-    },
-    {
-      type: "work",
-      role: "Graphic Designer",
-      organization: "Kris Kitchen",
-      startDate: "2024-01-01",
-      endDate: null,
-      datesLabel: "2024 - Present",
-      description:
-        "Creating visually appealing designs for social media and marketing materials.",
-      logoUrl: null,
-    },
-    {
       type: "education",
       role: "HND in Software Engineering",
       organization: "University Institute of Sci. & Tech.",
@@ -207,6 +187,31 @@ export const seedData = {
       logoUrl: null,
     },
   ],
+
+  // Name and issuer as printed on each badge. Display order is the order here.
+  certifications: [
+    ["Introduction to Generative AI", "Google Cloud", "intro-generative-ai"],
+    [
+      "Introduction to Large Language Models",
+      "Google Cloud",
+      "intro-large-language-models",
+    ],
+    ["Introduction to Responsible AI", "Google Cloud", "intro-responsible-ai"],
+    ["Google Cloud Essentials", "Google Cloud", "google-cloud-essentials"],
+    [
+      "Introduction to Gemini for Google Workspace",
+      "Google Workspace",
+      "intro-gemini-google-workspace",
+    ],
+    ["Gemini in Gmail", "Google Workspace", "gemini-in-gmail"],
+    ["Gemini in Google Docs", "Google Workspace", "gemini-in-google-docs"],
+  ].map(([name, issuer, file]) => ({
+    name,
+    issuer,
+    issuedOn: null,
+    badgeUrl: `/certs/${file}.png`,
+    credentialUrl: null,
+  })),
 
   socials: [
     {
@@ -231,23 +236,14 @@ export const seedData = {
     },
   ],
 
-  // The old homepage FAQ, verbatim.
+  // The old homepage FAQ, minus the design and photography questions. "Can
+  // clients hire you remotely?" still mentions design and digital content: the
+  // owner rewrites it (ia-content.md §2.9).
   faqs: [
     {
       question: "What kind of software development projects do you handle?",
       answer:
         "I build responsive websites, portfolio sites, business landing pages, dashboards, and custom web applications with a focus on performance, usability, and maintainable code.",
-    },
-    {
-      question:
-        "Do you offer graphic design services for brands and businesses?",
-      answer:
-        "Yes. I design logos, brand assets, promotional graphics, social media visuals, and interface layouts that align with the business message and audience.",
-    },
-    {
-      question: "Are you available for photography and event coverage?",
-      answer:
-        "Yes. I handle portraits, event coverage, creative shoots, and branded visual storytelling for individuals, communities, and businesses.",
     },
     {
       question: "Can clients hire you remotely?",
@@ -265,6 +261,7 @@ export async function seed(db: Database) {
     for (const table of [
       schema.faqs,
       schema.socials,
+      schema.certifications,
       schema.volunteering,
       schema.journey,
       schema.projects,
@@ -292,6 +289,9 @@ export async function seed(db: Database) {
         ),
       );
     await tx.insert(schema.journey).values(withOrder(seedData.journey));
+    await tx
+      .insert(schema.certifications)
+      .values(withOrder(seedData.certifications));
     await tx.insert(schema.socials).values(withOrder(seedData.socials));
     await tx.insert(schema.faqs).values(withOrder(seedData.faqs));
   });

@@ -92,6 +92,9 @@ every doc that depends on it.
 | D61 | **Contact: two columns** | Heading, tiles, socials left; form right; QR popover on desktop (proposed). `design.md` §14.8 |
 | D62 | **Project pages: case-study layout, with card → page morph** | Title, facts, hero image, Problem / Approach / Outcome, gallery, next project. Resolves Q11. New fields proposed for 5b. `design.md` §14.10 |
 | D63 | **5b build split into six PRs; placeholder copy in one file** | Foundations + core components, data, hero, four sections, four sections, project page. Placeholder strings live in `content/copy.ts`, marked `PLACEHOLDER`, until the owner's wording arrives. Rive is not installed (no spec uses it). `phases.md` |
+| D64 | **Caching: `unstable_cache` with the `portfolio` tag** | Chosen over Cache Components to avoid a global rendering change. Key includes the deployment's commit; `next dev` skips it. `revalidateTag('portfolio', { expire: 0 })` from the admin. `architecture.md` §5 |
+| D65 | **The hero's rotating words live in `profile.headline_words`** | Editable in the admin without a deploy. `content-schema.md` §1.1 |
+| D66 | **No project `year` column; certifications seeded from the badge images** | The card label is the category only. Seven Google badges: names and issuers from the images, dates and links left empty; PNGs in `public/certs/`. `content-schema.md` §1.4, §1.5b |
 
 ## Status
 

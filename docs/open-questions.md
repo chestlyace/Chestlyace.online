@@ -64,7 +64,8 @@ Recommendation: `chestlyace.online/admin`. Alternative: `admin.chestlyace.online
 
 ## Content
 
-### Q4 — Main-site hero headline · Open
+### Q4 — Main-site hero headline · Decided 2026-10-06
+**Answer: Software Engineer.** Hero headline lines are "SOFTWARE / ENGINEER" plus a rotating outlined line (`design.md` §14.1, D54).
 Old: "Developer / Designer / & PHOTOGRAPHER". The main site is software-only now.
 Some directions:
 - "Software Engineer" (plain, recruiter-friendly)
@@ -78,36 +79,42 @@ development, graphic design, and photography". Options: rewrite as engineer-only
 or keep one sentence acknowledging the creative side with a link to the
 creatives site. The quote ("Blending logic with creativity…") can stay either way.
 
-### Q6 — Creative roles in the experience timeline · Open
+### Q6 — Creative roles in the experience timeline · Decided 2026-10-06
+**Answer: both creative roles move to the creatives site.** Removed from the main dev seed.
 - **Photographer/Designer — CEY2 Youth Church** (2024–Present)
 - **Graphic Designer — Kris Kitchen** (2024–Present)
 
 Options for each: keep on main Experience, move to main **Volunteering** (CEY2
 sounds like volunteer work), or move to the creatives site only.
 
-### Q7 — Creative tools in Skills · Open
+### Q7 — Creative tools in Skills · Decided 2026-10-06
+**Answer: keep Figma on main; Photoshop, Lightroom, and Canva move to the creatives site.**
 Photoshop, Lightroom, Canva → creatives site? Figma is common for engineers too —
 keep on main?
 
-### Q8 — Which socials appear on the main site? · Open
+### Q8 — Which socials appear on the main site? · Decided 2026-10-06
+**Answer: all four socials (Instagram, LinkedIn, GitHub, TikTok) show on the main site.**
 Current: Instagram, LinkedIn, GitHub, TikTok. Suggestion: main shows GitHub +
 LinkedIn (+ X/email); Instagram and TikTok show on creatives. Handled by
 `socials.show_on`.
 
-### Q9 — Which email address? · Open
+### Q9 — Which email address? · Decided 2026-10-06
+**Answer: `chestlyace@gmail.com`.**
 The old site is inconsistent: the visible text and database say
 `developerace0@gmail.com`, but the contact tile's `mailto:` link points to
 `chestlyace@gmail.com`. Which is canonical? (A custom-domain address like
 `hello@chestlyace.online` is also an option now that the domain is on Vercel.)
 
-### Q10 — Contact form behaviour · Open
+### Q10 — Contact form behaviour · Decided 2026-10-06
+**Answer: email plus WhatsApp.** The email service and spam protection still need the owner's approval before they are built (Phase 5b.5).
 Currently opens WhatsApp with the message prefilled — nothing is stored or emailed.
 Options: keep WhatsApp only; add email delivery (e.g. Resend) as the primary path
 with WhatsApp as an alternative; also store messages in a `messages` table viewable
 in admin (needs spam protection, e.g. Turnstile). Subject options proposed in
 `ia-content.md` §2.8.
 
-### Q11 — Project detail pages? · Open
+### Q11 — Project detail pages? · Decided 2026-10-06
+**Answer: project pages at launch** (`/projects/[slug]`, `design.md` §14.10).
 `/projects/[slug]` with screenshots, problem/approach/outcome, stack. Better for
 showing engineering depth and for SEO; more writing per project. Schema already
 supports it (`slug`, `description`). Could launch without and add later.
@@ -118,7 +125,8 @@ Original recommendation: same `journey` table with `type = 'volunteer'` (one adm
 one component). Alternative: a separate `volunteering` table — only worth it if
 volunteering later needs fields Journey doesn't (cause, hours, photos).
 
-### Q22 — Certifications section? · Open
+### Q22 — Certifications section? · Decided 2026-10-06
+**Answer: add a Certifications block under Skills** (`design.md` §13.17, §14.3; seven Google badges seeded).
 `assets/certs/` holds Google certification badges (Gen AI, LLM, Responsible AI,
 Google Workspace, …) that the old site never displayed. Add a Certifications
 block (e.g. under Skills), or leave them out?
