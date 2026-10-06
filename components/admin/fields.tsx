@@ -1,8 +1,10 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { Button } from "@/components/shared/Button";
 import { FormField, fieldControl } from "@/components/shared/FormField";
+import { IconButton } from "@/components/shared/IconButton";
 import { cn } from "@/lib/cn";
 import type { FieldDef } from "@/lib/admin/config";
 import { Switch } from "./Switch";
@@ -16,7 +18,7 @@ type Props = {
   value: string | boolean | string[];
   error?: string | null;
   onChange: (value: string | boolean | string[]) => void;
-  onBlur: () => void;
+  onBlur: (fixed?: string) => void;
 };
 
 // "(optional)" after the label marks the optional fields; the rest need a value.
@@ -50,6 +52,11 @@ const withScheme = (value: string) =>
   value && !/^[a-z][a-z0-9+.-]*:/i.test(value) && !value.startsWith("/")
     ? `https://${value}`
     : value;
+
+// Image fields also take paths on this site (`logos/a.png`, `resume.pdf`), so
+// only something that starts like a host ("example.com/a.png") gets the scheme.
+const imageWithScheme = (value: string) =>
+  /^[a-z0-9-]+(\.[a-z0-9-]+)+\//i.test(value) ? withScheme(value) : value;
 
 export function AdminField({ field, value, error, onChange, onBlur }: Props) {
   const uid = useId();
@@ -112,7 +119,7 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
                       : chosen.filter((item) => item !== optionValue),
                   )
                 }
-                onBlur={onBlur}
+                onBlur={() => onBlur()}
                 className="size-5 accent-primary"
               />
               {optionLabel}
@@ -132,6 +139,20 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
     );
   }
 
+  if (field.type === "images") {
+    return (
+      <ImageList
+        id={id}
+        field={field}
+        value={Array.isArray(value) ? value : []}
+        error={error}
+        describedBy={describedBy}
+        onChange={onChange}
+        onBlur={() => onBlur()}
+      />
+    );
+  }
+
   if (field.type === "tags") {
     return (
       <TagList
@@ -141,7 +162,7 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
         error={error}
         describedBy={describedBy}
         onChange={onChange}
-        onBlur={onBlur}
+        onBlur={() => onBlur()}
       />
     );
   }
@@ -163,7 +184,7 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
             name={field.name}
             value={text}
             onChange={(event) => onChange(event.target.value)}
-            onBlur={onBlur}
+            onBlur={() => onBlur()}
             aria-invalid={invalid}
             aria-describedby={describedBy}
             rows={5}
@@ -180,7 +201,7 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
           name={field.name}
           value={text}
           onChange={(event) => onChange(event.target.value)}
-          onBlur={onBlur}
+          onBlur={() => onBlur()}
           aria-invalid={invalid}
           aria-describedby={describedBy}
           className={cn(fieldControl, "h-12 px-4", !text && "text-muted")}
@@ -198,6 +219,34 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
             </option>
           ))}
         </select>
+      ) : field.type === "slug" ? (
+        <>
+          <div className="flex items-center rounded-md bg-(--field-fill,var(--tile)) shadow-[inset_0_0_0_1px_var(--border)] focus-within:shadow-none focus-within:outline-2 focus-within:outline-ring [&:has([aria-invalid=true])]:shadow-[inset_0_0_0_1px_var(--danger)]">
+            <span
+              aria-hidden="true"
+              className="hidden pl-4 text-[1.0625rem] text-muted select-none sm:block"
+            >
+              {field.prefix}
+            </span>
+            <input
+              id={id}
+              name={field.name}
+              type="text"
+              autoComplete="off"
+              spellCheck={false}
+              value={text}
+              onChange={(event) => onChange(event.target.value)}
+              onBlur={() => onBlur()}
+              aria-invalid={invalid}
+              aria-describedby={describedBy}
+              className="h-12 min-w-0 flex-1 bg-transparent px-4 text-[1.0625rem] text-foreground outline-none sm:pl-0"
+            />
+          </div>
+          <p className="mt-1.5 text-sm break-all text-muted">
+            {field.prefix}
+            {text || "…"}
+          </p>
+        </>
       ) : field.type === "date" ? (
         <div className="flex items-center gap-3">
           <input
@@ -206,7 +255,7 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
             type="date"
             value={text}
             onChange={(event) => onChange(event.target.value)}
-            onBlur={onBlur}
+            onBlur={() => onBlur()}
             aria-invalid={invalid}
             aria-describedby={describedBy}
             className={cn(fieldControl, "h-12 max-w-56 px-4")}
@@ -245,8 +294,13 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
             onChange={(event) => onChange(event.target.value)}
             onBlur={() => {
               if (field.type === "url" || field.type === "image") {
-                const fixed = withScheme(text.trim());
+                const fixed =
+                  field.type === "image"
+                    ? imageWithScheme(text.trim())
+                    : withScheme(text.trim());
                 if (fixed !== text) onChange(fixed);
+                onBlur(fixed);
+                return;
               }
               onBlur();
             }}
@@ -387,6 +441,110 @@ function TagList({
         <p role="status" className="mt-1.5 text-sm text-muted">
           {notice}
         </p>
+      )}
+    </FormField>
+  );
+}
+
+// The gallery (design.md §13.21): one address per image, in the order the page
+// shows them; each can move up or down or be removed. (Uploading arrives with 6b.4.)
+function ImageList({
+  id,
+  field,
+  value,
+  error,
+  describedBy,
+  onChange,
+  onBlur,
+}: {
+  id: string;
+  field: Extract<FieldDef, { type: "images" }>;
+  value: string[];
+  error?: string | null;
+  describedBy?: string;
+  onChange: (value: string[]) => void;
+  onBlur: () => void;
+}) {
+  const set = (index: number, next: string) =>
+    onChange(value.map((item, i) => (i === index ? next : item)));
+  const move = (index: number, by: -1 | 1) => {
+    const target = index + by;
+    if (target < 0 || target >= value.length) return;
+    const next = [...value];
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(next);
+  };
+
+  return (
+    <FormField
+      id={id}
+      label={field.label}
+      optional={field.optional}
+      helper={field.helper}
+      error={error}
+    >
+      <ul className="flex flex-col gap-3">
+        {value.map((item, index) => (
+          <li key={index} className="flex items-center gap-2">
+            <input
+              id={index === 0 ? id : undefined}
+              name={field.name}
+              type="text"
+              inputMode="url"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="https://…"
+              aria-label={`Image ${index + 1}`}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={describedBy}
+              value={item}
+              onChange={(event) => set(index, event.target.value)}
+              onBlur={() => {
+                const fixed = imageWithScheme(item.trim());
+                if (fixed !== item) set(index, fixed);
+                onBlur();
+              }}
+              className={cn(fieldControl, "h-12 min-w-0 flex-1 px-4")}
+            />
+            <IconButton
+              label={`Move image ${index + 1} up`}
+              iconKey="up"
+              disabled={index === 0}
+              onClick={() => move(index, -1)}
+            >
+              <ArrowUp className="size-[1.125rem]" />
+            </IconButton>
+            <IconButton
+              label={`Move image ${index + 1} down`}
+              iconKey="down"
+              disabled={index === value.length - 1}
+              onClick={() => move(index, 1)}
+            >
+              <ArrowDown className="size-[1.125rem]" />
+            </IconButton>
+            <IconButton
+              label={`Remove image ${index + 1}`}
+              iconKey="remove"
+              onClick={() => onChange(value.filter((_, i) => i !== index))}
+              className="hover:text-danger"
+            >
+              <X className="size-[1.125rem]" />
+            </IconButton>
+          </li>
+        ))}
+      </ul>
+      {value.length < field.max && (
+        <Button
+          variant="secondary"
+          size="sm"
+          magnetic={false}
+          trailingIcon={<Plus />}
+          iconNudge="none"
+          onClick={() => onChange([...value, ""])}
+          className={value.length > 0 ? "mt-3" : undefined}
+        >
+          Add image
+        </Button>
       )}
     </FormField>
   );

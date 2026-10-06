@@ -4,34 +4,16 @@ import { RESOURCES } from "./resources";
 
 describe("adminConfig", () => {
   it("exists for the five simple resources and no others yet", () => {
-    for (const id of [
-      "skills",
-      "services",
-      "certifications",
-      "socials",
-      "faq",
-    ]) {
-      expect(adminConfig(id)).toBeDefined();
-    }
-    for (const id of ["projects", "profile", "toString", "__proto__"]) {
-      expect(adminConfig(id)).toBeUndefined();
-    }
-  });
-
-  it("lists every schema field in the editor, and only those", () => {
-    for (const id of [
-      "skills",
-      "services",
-      "certifications",
-      "socials",
-      "faq",
-    ]) {
+    for (const { id } of RESOURCES) {
       const config = adminConfig(id)!;
       const editor = config.groups
         .flatMap((g) => g.fields.map((f) => f.name))
         .sort();
       expect(editor).toEqual(Object.keys(config.schema.shape).sort());
-      expect(Object.keys(config.defaults).sort()).toEqual(editor);
+      // the profile's values come from its row; the others start from defaults
+      if (!config.single) {
+        expect(Object.keys(config.defaults).sort()).toEqual(editor);
+      }
       expect(RESOURCES.some((r) => r.id === id)).toBe(true);
     }
   });
@@ -114,5 +96,45 @@ describe("toValues and validate", () => {
       credentialUrl: "nope",
     });
     expect(Object.keys(errors).sort()).toEqual(["credentialUrl", "name"]);
+  });
+});
+
+describe("the new row texts", () => {
+  it("follow design.md §14.11", () => {
+    expect(
+      adminConfig("projects")!.row({
+        id: 1,
+        title: "Alexdy",
+        categoryLabel: "Full Stack",
+        techStack: ["a", "b"],
+        isFeatured: true,
+      }),
+    ).toEqual({ title: "Alexdy", subtitle: "Full Stack · 2 tech · Featured" });
+    expect(
+      adminConfig("experience")!.row({
+        id: 1,
+        role: "Dev",
+        organization: "Acme",
+        type: "education",
+        startDate: "2023-01-01",
+        endDate: "2025-01-01",
+        datesLabel: null,
+      }).subtitle,
+    ).toBe("Acme · 2023 — 2025 · Education");
+    expect(
+      adminConfig("volunteering")!.row({
+        id: 1,
+        role: "Mentor",
+        organization: "Club",
+        datesLabel: "2024",
+        startDate: null,
+        endDate: null,
+      }).subtitle,
+    ).toBe("Club · 2024");
+    expect(adminConfig("experience")!.tabs?.options.map(([v]) => v)).toEqual([
+      "all",
+      "work",
+      "education",
+    ]);
   });
 });

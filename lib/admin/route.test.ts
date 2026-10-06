@@ -92,7 +92,7 @@ describe("/api/admin/<resource>", () => {
     );
     expect(ok.status).toBe(200);
     expect(((await ok.json()) as { items: unknown[] }).items).toHaveLength(2);
-    for (const resource of ["nope", "projects", "__proto__"]) {
+    for (const resource of ["nope", "profile", "__proto__"]) {
       expect(
         (
           await GET(

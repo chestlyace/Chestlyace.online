@@ -13,6 +13,7 @@ import {
   type AdminRow,
 } from "@/lib/admin/config";
 import { findResource } from "@/lib/admin/resources";
+import { mergeSubset } from "@/lib/admin/order";
 import { cn } from "@/lib/cn";
 import { useConfirm } from "./ConfirmDialog";
 import { Switch } from "./Switch";
@@ -59,6 +60,13 @@ export function ResourceList({
   }, [items]);
   const dragStart = useRef<number[]>([]);
 
+  // Experience has tabs (All / Work / Education): the list shows one of them and
+  // reorders within it.
+  const [tab, setTab] = useState("all");
+  const inTab = (item: AdminRow) =>
+    tab === "all" || !config.tabs || item[config.tabs.field] === tab;
+  const visible = items.filter(inTab);
+
   // New data from the server (after a refresh) replaces the local copy.
   const [seen, setSeen] = useState(initial);
   if (seen !== initial) {
@@ -66,7 +74,7 @@ export function ResourceList({
     setItems(initial);
   }
 
-  const ids = (list: AdminRow[]) => list.map((item) => item.id);
+  const ids = (list: AdminRow[]) => list.filter(inTab).map((item) => item.id);
 
   const persistOrder = async (before: number[]) => {
     const after = ids(latest.current);
@@ -76,8 +84,9 @@ export function ResourceList({
     });
     if (!ok) {
       setItems((current) =>
-        [...current].sort(
-          (a, b) => before.indexOf(a.id) - before.indexOf(b.id),
+        mergeSubset(
+          current,
+          before.flatMap((id) => current.filter((row) => row.id === id)),
         ),
       );
       toast.error("Couldn't reorder. The list is back as it was.");
@@ -127,9 +136,34 @@ export function ResourceList({
 
   return (
     <>
+      {config.tabs && (
+        <div
+          role="tablist"
+          aria-label={`${resource.label} filter`}
+          className="mb-6 inline-flex rounded-full bg-surface p-1"
+        >
+          {config.tabs.options.map(([value, text]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={tab === value}
+              onClick={() => setTab(value)}
+              className={cn(
+                "h-9 rounded-full px-4 text-sm font-medium transition-colors duration-150",
+                tab === value
+                  ? "bg-surface-raised text-foreground shadow-sm"
+                  : "text-muted [@media(hover:hover)]:hover:text-foreground",
+              )}
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="mb-6 flex items-center justify-between gap-4">
         <p className="text-sm text-muted">
-          {items.length} {items.length === 1 ? "entry" : "entries"}
+          {visible.length} {visible.length === 1 ? "entry" : "entries"}
         </p>
         <Button
           href={`${resource.href}/new`}
@@ -141,7 +175,7 @@ export function ResourceList({
         </Button>
       </div>
 
-      {items.length === 0 ? (
+      {visible.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg bg-surface px-6 py-16 text-center">
           <p className="text-h3">Nothing here yet</p>
           <p className="max-w-[36ch] text-sm text-muted">
@@ -159,17 +193,19 @@ export function ResourceList({
         <Reorder.Group
           as="ul"
           axis="y"
-          values={items}
-          onReorder={setItems}
+          values={visible}
+          onReorder={(next) =>
+            setItems((current) => mergeSubset(current, next))
+          }
           className="overflow-hidden rounded-lg bg-surface"
         >
           <AnimatePresence initial={false}>
-            {items.map((item, index) => (
+            {visible.map((item, index) => (
               <Row
                 key={item.id}
                 item={item}
                 index={index}
-                total={items.length}
+                total={visible.length}
                 config={config}
                 href={`${resource.href}/${item.id}`}
                 onDragStart={() => (dragStart.current = ids(latest.current))}
@@ -179,14 +215,14 @@ export function ResourceList({
                 onMove={(to, commit) => {
                   const before = ids(latest.current);
                   setItems((current) => {
-                    const next = [...current];
-                    const [moved] = next.splice(index, 1);
-                    next.splice(to, 0, moved);
-                    return next;
+                    const shown = current.filter(inTab);
+                    const [moved] = shown.splice(index, 1);
+                    shown.splice(to, 0, moved);
+                    return mergeSubset(current, shown);
                   });
                   if (commit)
                     setAnnouncement(
-                      `Moved to position ${to + 1} of ${items.length}`,
+                      `Moved to position ${to + 1} of ${visible.length}`,
                     );
                   return before;
                 }}

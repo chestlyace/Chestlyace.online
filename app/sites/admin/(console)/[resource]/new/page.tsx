@@ -19,7 +19,7 @@ export default async function NewEntryPage({
   const id = (await params).resource;
   const config = adminConfig(id);
   const resource = findResource(id);
-  if (!config || !resource) notFound();
+  if (!config || !resource || config.single) notFound();
 
   return (
     <>
