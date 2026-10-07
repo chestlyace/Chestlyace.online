@@ -7,10 +7,20 @@ import { siteUrl, type PublicSiteKey } from "@/lib/sites";
 // descriptions, canonical URLs and Open Graph tags; JSON-LD built from the
 // database rows; and the text of each host's sitemap.xml and robots.txt.
 
-// Nothing is indexable until the owner turns indexing on at launch (Phase 8) by
-// setting SITE_INDEXING=on. Vercel previews never are, whatever the variable says.
-export function indexingEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.SITE_INDEXING === "on" && env.VERCEL_ENV !== "preview";
+// Nothing is indexable until the owner turns indexing on at launch (Phase 8):
+// SITE_INDEXING=main (or "main,blog") opens those sites, "on" or "all" opens
+// every public site. Vercel previews never are, whatever the variable says.
+export function indexingEnabled(
+  site: PublicSiteKey,
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  if (env.VERCEL_ENV === "preview") return false;
+  const value = (env.SITE_INDEXING ?? "").toLowerCase();
+  if (value === "on" || value === "all") return true;
+  return value
+    .split(",")
+    .map((name) => name.trim())
+    .includes(site);
 }
 
 export const PERSON_NAME = "Chestly Ace";
@@ -50,8 +60,11 @@ export function imagePath(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `/${url.replace(/^\/+/, "")}`;
 }
 
-export function robotsMeta(env: NodeJS.ProcessEnv = process.env) {
-  return indexingEnabled(env)
+export function robotsMeta(
+  site: PublicSiteKey,
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  return indexingEnabled(site, env)
     ? { index: true, follow: true }
     : { index: false, follow: false };
 }
@@ -68,7 +81,7 @@ export function siteMetadata(site: PublicSiteKey): Metadata {
     title,
     description,
     alternates: { canonical: "/" },
-    robots: robotsMeta(),
+    robots: robotsMeta(site),
     openGraph: {
       type: "website",
       siteName: PERSON_NAME,
@@ -208,7 +221,7 @@ export function robotsTxt(
   site: PublicSiteKey,
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  if (!indexingEnabled(env)) {
+  if (!indexingEnabled(site, env)) {
     return "User-agent: *\nDisallow: /\n";
   }
   return `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${siteUrl(site, "/sitemap.xml")}\n`;

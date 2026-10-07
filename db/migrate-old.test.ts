@@ -234,7 +234,9 @@ describe("transform of the old site's data", () => {
   });
 });
 
-describe("load", () => {
+// Each test starts a fresh in-process Postgres, which is slow when the whole
+// suite runs in parallel.
+describe("load", { timeout: 30_000 }, () => {
   it("fills an empty database: migrated tables plus the seed's other content", async () => {
     const db = await newDatabase();
     await load(db, transform(old, options));

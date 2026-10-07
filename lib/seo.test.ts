@@ -15,18 +15,43 @@ afterEach(() => vi.unstubAllEnvs());
 const env = (vars: Record<string, string>) => vars as NodeJS.ProcessEnv;
 
 describe("indexingEnabled", () => {
-  it("is off unless SITE_INDEXING=on", () => {
-    expect(indexingEnabled(env({}))).toBe(false);
-    expect(indexingEnabled(env({ SITE_INDEXING: "off" }))).toBe(false);
-    expect(indexingEnabled(env({ SITE_INDEXING: "on" }))).toBe(true);
+  it("is off unless SITE_INDEXING names the site or is on/all", () => {
+    expect(indexingEnabled("main", env({}))).toBe(false);
+    expect(indexingEnabled("main", env({ SITE_INDEXING: "" }))).toBe(false);
+    expect(indexingEnabled("main", env({ SITE_INDEXING: "off" }))).toBe(false);
+    expect(indexingEnabled("main", env({ SITE_INDEXING: "on" }))).toBe(true);
+    expect(indexingEnabled("blog", env({ SITE_INDEXING: "ALL" }))).toBe(true);
+  });
+
+  it("opens only the sites it lists", () => {
+    const only = env({ SITE_INDEXING: "main" });
+    expect(indexingEnabled("main", only)).toBe(true);
+    expect(indexingEnabled("creatives", only)).toBe(false);
+    expect(indexingEnabled("blog", only)).toBe(false);
+    const two = env({ SITE_INDEXING: " Main , blog " });
+    expect(indexingEnabled("main", two)).toBe(true);
+    expect(indexingEnabled("blog", two)).toBe(true);
+    expect(indexingEnabled("creatives", two)).toBe(false);
   });
 
   it("is never on in a Vercel preview", () => {
     expect(
-      indexingEnabled(env({ SITE_INDEXING: "on", VERCEL_ENV: "preview" })),
+      indexingEnabled(
+        "main",
+        env({ SITE_INDEXING: "on", VERCEL_ENV: "preview" }),
+      ),
     ).toBe(false);
     expect(
-      indexingEnabled(env({ SITE_INDEXING: "on", VERCEL_ENV: "production" })),
+      indexingEnabled(
+        "main",
+        env({ SITE_INDEXING: "main", VERCEL_ENV: "preview" }),
+      ),
+    ).toBe(false);
+    expect(
+      indexingEnabled(
+        "main",
+        env({ SITE_INDEXING: "on", VERCEL_ENV: "production" }),
+      ),
     ).toBe(true);
   });
 });
@@ -49,6 +74,19 @@ describe("siteMetadata", () => {
     });
     vi.stubEnv("SITE_INDEXING", "on");
     expect(siteMetadata("blog").robots).toEqual({ index: true, follow: true });
+  });
+
+  it("follows the per-site list: main open, creatives and blog still closed", () => {
+    vi.stubEnv("SITE_INDEXING", "main");
+    expect(siteMetadata("main").robots).toEqual({ index: true, follow: true });
+    expect(siteMetadata("creatives").robots).toEqual({
+      index: false,
+      follow: false,
+    });
+    expect(siteMetadata("blog").robots).toEqual({
+      index: false,
+      follow: false,
+    });
   });
 
   it("has Open Graph and Twitter tags on every site", () => {
@@ -209,5 +247,13 @@ describe("robotsTxt", () => {
     expect(text).toContain("Allow: /\n");
     expect(text).toContain("Disallow: /api/");
     expect(text).toMatch(/Sitemap: https?:\/\/[^\s]+\/sitemap\.xml/);
+  });
+
+  it("opens only the listed sites", () => {
+    const only = env({ SITE_INDEXING: "main" });
+    expect(robotsTxt("main", only)).toContain("Allow: /\n");
+    for (const site of ["creatives", "blog"] as const) {
+      expect(robotsTxt(site, only)).toBe("User-agent: *\nDisallow: /\n");
+    }
   });
 });
