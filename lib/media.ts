@@ -41,3 +41,9 @@ export function useIsPhone(): boolean {
 export function prefersReducedMotionNow(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
+
+// From the `xl` breakpoint (1280px): where the blog editor shows Write and
+// Preview side by side.
+export function useIsWide(): boolean {
+  return useMediaQuery("(min-width: 80rem)", false);
+}

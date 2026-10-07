@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { hasSession } from "./auth";
 import { isSameOrigin } from "./request";
 import { isAdminApiResource, type Failure } from "./api";
+import { BLOG_TAG } from "@/lib/blog/cache";
 import { PORTFOLIO_TAG } from "@/lib/portfolio";
 
 // What every /api/admin route does first and last (content-schema.md §2).
@@ -54,4 +55,9 @@ export function failure(result: Failure): Response {
 // (`{ expire: 0 }`: the next visit waits for the new data, not the old page).
 export function published() {
   revalidateTag(PORTFOLIO_TAG, { expire: 0 });
+}
+
+// A post written, published or deleted makes the blog read fresh data (D74).
+export function publishedBlog() {
+  revalidateTag(BLOG_TAG, { expire: 0 });
 }

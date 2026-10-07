@@ -315,6 +315,92 @@ export const reorderSchema = z
   .strict();
 
 // Shared by the API: the first message for each field of a failed parse.
+// ---- blog posts (design.md §13.48, content-schema.md §4) ---------------------------
+
+/** Paths the blog uses itself: a post can't take one as its address. */
+export const RESERVED_BLOG_SLUGS = [
+  "tags",
+  "privacy",
+  "newsletter",
+  "rss.xml",
+  "sitemap.xml",
+  "robots.txt",
+  "api",
+] as const;
+
+const blogTag = z
+  .string()
+  .trim()
+  .min(1)
+  .max(30, "Keep each tag under 30 characters.")
+  .regex(
+    /^[a-z0-9]+(-[a-z0-9]+)*$/,
+    "Tags use lowercase letters, numbers and single hyphens, like web-dev.",
+  );
+
+export const blogPostSchema = z
+  .object({
+    title: text("title", 120),
+    slug: z
+      .string({ error: "Enter the address." })
+      .trim()
+      .min(1, "Enter the address.")
+      .max(80, "Keep the address under 80 characters.")
+      .regex(
+        /^[a-z0-9]+(-[a-z0-9]+)*$/,
+        "Use lowercase letters, numbers and single hyphens, like my-post.",
+      )
+      .refine(
+        (value) => !(RESERVED_BLOG_SLUGS as readonly string[]).includes(value),
+        "That address is used by the blog itself. Choose another.",
+      ),
+    // A draft may have none yet; publishing asks for it.
+    description: z
+      .string({ error: "Enter the description." })
+      .trim()
+      .max(300, "Keep the description under 300 characters."),
+    content: z
+      .string({ error: "The post's text is missing." })
+      .max(200_000, "The post is too long."),
+    coverUrl: optionalImage,
+    coverAlt: z.preprocess(
+      clean,
+      z
+        .string()
+        .trim()
+        .max(200, "Keep the cover's description under 200 characters.")
+        .nullable(),
+    ),
+    tags: z
+      .array(blogTag)
+      .max(8, "Add at most 8 tags.")
+      .refine(
+        (list) => new Set(list).size === list.length,
+        "Each tag can be added once.",
+      ),
+    status: z.enum(["draft", "published"], {
+      error: "Choose draft or published.",
+    }),
+    publishedAt: z.preprocess(
+      clean,
+      z
+        .string()
+        .refine((value) => !Number.isNaN(Date.parse(value)), "Enter a date.")
+        .nullable(),
+    ),
+    commentsEnabled: z.boolean({ error: "Choose on or off." }),
+    canonicalUrl: optionalUrl,
+    series: z.preprocess(
+      clean,
+      z
+        .string()
+        .trim()
+        .max(80, "Keep the series name under 80 characters.")
+        .nullable(),
+    ),
+  })
+  .strict();
+
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const fields: Record<string, string> = {};
   for (const issue of error.issues) {

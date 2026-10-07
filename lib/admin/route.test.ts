@@ -281,3 +281,81 @@ describe("/api/admin/upload-signature", () => {
     expect(revalidate).not.toHaveBeenCalled();
   });
 });
+
+describe("/api/admin/blog", () => {
+  const posts = async () => await import("@/app/api/admin/blog/route");
+  const post = async () => await import("@/app/api/admin/blog/[id]/route");
+  const copy = async () =>
+    await import("@/app/api/admin/blog/[id]/duplicate/route");
+
+  it("needs a session and a same-origin write", async () => {
+    const { GET, POST } = await posts();
+    signedIn = false;
+    expect((await GET(call("/api/admin/blog", "GET"))).status).toBe(401);
+    signedIn = true;
+    const foreign = await POST(
+      call(
+        "/api/admin/blog",
+        "POST",
+        { title: "A", slug: "a" },
+        { origin: "https://evil.example" },
+      ),
+    );
+    expect(foreign.status).toBe(403);
+    expect(revalidate).not.toHaveBeenCalled();
+  });
+
+  it("creates, lists, updates, duplicates and deletes, revalidating the blog", async () => {
+    const { GET, POST } = await posts();
+    const created = await POST(
+      call("/api/admin/blog", "POST", {
+        title: "Hello again",
+        slug: "hello-again",
+      }),
+    );
+    expect(created.status).toBe(201);
+    const { item } = (await created.json()) as { item: { id: number } };
+    expect(revalidate).toHaveBeenCalledWith("blog", { expire: 0 });
+
+    const listed = (await (
+      await GET(call("/api/admin/blog", "GET"))
+    ).json()) as {
+      items: { slug: string }[];
+    };
+    expect(listed.items.map((p) => p.slug)).toContain("hello-again");
+
+    const { GET: read, PATCH, DELETE } = await post();
+    const target = ctx({ id: String(item.id) }) as never;
+    expect((await read(call("/api/admin/blog/1", "GET"), target)).status).toBe(
+      200,
+    );
+    const bad = await PATCH(
+      call("/api/admin/blog/1", "PATCH", { slug: "api" }),
+      target,
+    );
+    expect(bad.status).toBe(422);
+    const ok = await PATCH(
+      call("/api/admin/blog/1", "PATCH", { title: "Renamed" }),
+      target,
+    );
+    expect(ok.status).toBe(200);
+
+    const { POST: duplicate } = await copy();
+    const dup = await duplicate(
+      call("/api/admin/blog/1/duplicate", "POST"),
+      target,
+    );
+    expect(dup.status).toBe(201);
+
+    expect(
+      (await DELETE(call("/api/admin/blog/1", "DELETE"), target)).status,
+    ).toBe(200);
+    expect(
+      (await DELETE(call("/api/admin/blog/1", "DELETE"), target)).status,
+    ).toBe(404);
+    expect(
+      (await read(call("/api/admin/blog/x", "GET"), ctx({ id: "x" }) as never))
+        .status,
+    ).toBe(404);
+  });
+});
