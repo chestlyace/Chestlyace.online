@@ -1,7 +1,5 @@
+import { ComingSoon } from "@/components/shared/ComingSoon";
+
 export default function BlogHome() {
-  return (
-    <div className="flex flex-1 items-center justify-center px-4 pt-32 pb-24">
-      <p>blog.chestlyace.online — rebuild in progress</p>
-    </div>
-  );
+  return <ComingSoon site="blog" />;
 }
