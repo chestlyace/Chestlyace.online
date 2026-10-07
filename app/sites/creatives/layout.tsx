@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { SiteDocument } from "@/components/shared/SiteDocument";
+import { siteMetadata } from "@/lib/seo";
 import "../../globals.css";
 
-export const metadata: Metadata = {
-  title: "Chestly Ace — Design & Photography",
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = siteMetadata("creatives");
 
 export default function CreativesLayout({
   children,

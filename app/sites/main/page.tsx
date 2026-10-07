@@ -7,7 +7,9 @@ import { ProjectsSection } from "@/components/main/ProjectsSection";
 import { ServicesSection } from "@/components/main/ServicesSection";
 import { SkillsSection } from "@/components/main/SkillsSection";
 import { VolunteeringSection } from "@/components/main/VolunteeringSection";
+import { JsonLd } from "@/components/shared/JsonLd";
 import { getCachedHomepageData } from "@/lib/portfolio";
+import { mainJsonLd } from "@/lib/seo";
 import {
   sectionBands,
   sectionNumbers,
@@ -45,6 +47,7 @@ export default async function Home() {
 
   return (
     <>
+      <JsonLd data={mainJsonLd(data)} />
       <Hero profile={profile} socials={data.socials} />
       {shown.includes("about") && (
         <AboutSection
