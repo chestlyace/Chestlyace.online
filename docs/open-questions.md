@@ -47,7 +47,11 @@ Recommendation: single admin, bcrypt-hashed password in an env var, signed
 Alternatives: Auth.js with GitHub sign-in restricted to your account (no password
 to manage at all), or passkeys. GitHub sign-in is worth considering.
 
-### Q16 — Blog tooling and features · Open
+### Q16 — Blog tooling and features · Decided 2026-10-07
+**Answer (D82):** Velite content layer with Shiki highlighting at build time;
+tag pages; table of contents and a copy button on code; Giscus comments in a new
+public repository; a newsletter (Resend Audiences, double opt-in). Categories:
+tags only (proposed in the 9a PR, not asked). Original options:
 - MDX pipeline: `@next/mdx` vs. a content layer (Velite / Content Collections)
   that gives typed frontmatter for free. Leaning content layer.
 - Syntax highlighting: Shiki (build-time, zero JS) — proposed.
@@ -140,7 +144,8 @@ block (e.g. under Skills), or leave them out?
 
 ## Design
 
-### Q12 — Accent colours for creatives and blog · Open
+### Q12 — Accent colours for creatives and blog · Blog decided 2026-10-07; creatives open
+**Blog: keep the main blue** (no override, `design.md` §4; D82). Creatives still open.
 Main is royal blue `#2563EB`. Each other site overrides only the accent
 (`design.md` §4). Ideas: creatives → warm (amber/orange) to feel expressive;
 blog → emerald (the old `secondary`) or keep blue for one family feel.

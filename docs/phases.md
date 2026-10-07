@@ -20,7 +20,7 @@ before the phase starts.
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
-| 9 | Blog | Not started | Q12, Q16 |
+| 9 | Blog | 9a in review (issue #61) | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | Not started | Q1, Q12 |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
@@ -245,6 +245,20 @@ colour (Q12).
 - Post list, post page, tag pages, RSS feed
 - Blog components (`design.md` §9) and accent colour (Q12)
 - Blog SEO: metadata, `BlogPosting` JSON-LD, sitemap
+
+Split into two steps (owner, 2026-10-07):
+
+| Step | Covers | Status |
+|---|---|---|
+| 9a Design — issue #61 | Docs only: blog components `design.md` §13.27–13.35, pages §14.13–14.17, the blog accent, D82 | In review |
+| 9b Build | After 9a is merged; may be split into several PRs (MDX pipeline and pages, then newsletter, then comments) | Not started |
+
+**Dependencies 9b adds** (named here so merging 9a approves them, D82): `velite`
+(content layer; brings its own `zod`), `@shikijs/rehype` + `shiki` (build-time
+highlighting), `rehype-slug` and `remark-gfm` (heading ids, tables). Giscus is
+loaded from its own script (no package). Newsletter uses Resend's HTTP API
+through `fetch`, as the contact form does. New environment variables:
+`RESEND_AUDIENCE_ID` and `NEWSLETTER_SECRET` (signs the confirmation links).
 
 **Done when:** a sample post builds, renders in both themes, and appears in RSS.
 

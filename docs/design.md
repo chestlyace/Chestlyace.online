@@ -4,7 +4,8 @@
 > components (D47–D53) approved in Phase 5a.1–5a.3; homepage section and project
 > page specs written in Phase 5a.4 (D54–D62, §14); all built in Phase 5b. The
 > admin's component and screen specs (§13.18–13.26, §14.11; D72) are written in
-> Phase 6a and built in Phase 6b.** §1–§8 below are the
+> Phase 6a and built in Phase 6b; the blog's (§13.27–13.35, §14.13–14.17; D82) are
+> written in Phase 9a.** §1–§8 below are the
 > owner-approved foundations: direction, colour, typography, spacing, depth, icons,
 > theming, and motion. §13 holds the component specs and §14 the section and page
 > specs. Nothing visual is built until Phase 5b, after the owner merges the last
@@ -134,7 +135,7 @@ All three sites share every token. Each site may override **only** `primary`,
 | main | Blue `#2563EB` | Decided |
 | admin | The main blue (no override; D72) | Decided |
 | creatives | TBD — uses the main accent until decided | Q12 |
-| blog | TBD — uses the main accent until decided | Q12 |
+| blog | The main blue (no override) | Decided (Q12, 2026-10-07) |
 
 Applied by a `data-site="main|creatives|blog|admin"` attribute on `<html>` set in each
 site's root layout.
@@ -335,9 +336,17 @@ counter).
 
 ### Blog (`components/blog/`)
 
-`PostCard`, `PostHeader` (title, date, reading time, tags), `Prose` (typography
-for MDX output in both themes), `CodeBlock` (syntax highlighting, copy button),
-`Callout`, `TableOfContents`.
+| Component | Notes |
+|---|---|
+| `PostRow` | **Spec: §13.27.** One post in the editorial index (date, Bebas title, description, tags), with the dimming hover and the floating cover preview. Replaces the earlier `PostCard`. |
+| `PostHeader` | **Spec: §13.28.** Back link, meta row (date, reading time, updated), title, description, tags |
+| `Prose` | **Spec: §13.29.** Typography for MDX output in both themes |
+| `CodeBlock` | **Spec: §13.30.** Shiki-highlighted code with a header row and a copy button |
+| `Callout` | **Spec: §13.31.** `note`, `tip`, `warning` |
+| `TableOfContents` | **Spec: §13.32.** Sticky rail on `lg+`, native disclosure below |
+| `PostNavigation` | **Spec: §13.33.** Previous and next post |
+| `NewsletterBox` | **Spec: §13.34.** Email signup (Resend Audience, double opt-in) |
+| `Comments` | **Spec: §13.35.** Giscus (GitHub Discussions) |
 
 ### Design system showcase (`app/sites/main/design-system/`)
 
@@ -436,6 +445,13 @@ content components — PR #22 (issue #21).
 
 **Admin components (Phase 6a):** see [the admin block below](#1318-admin-shell)
 (§13.18–13.26).
+
+**Blog components (Phase 9a):** [Post row](#1327-post-row) ·
+[Post header](#1328-post-header) · [Prose](#1329-prose) ·
+[Code block](#1330-code-block) · [Callout](#1331-callout) ·
+[Table of contents](#1332-table-of-contents) ·
+[Post navigation](#1333-post-navigation) · [Newsletter box](#1334-newsletter-box) ·
+[Comments](#1335-comments) (§13.27–13.35)
 
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
@@ -1581,6 +1597,350 @@ none.
 announced (`role="alert"`); the page `<title>` is "Sign in — Admin"; the browser's
 password manager can fill and save it.
 
+### 13.27 Post row
+
+**Purpose.** One post in a list: the blog home (§14.13) and the tag pages
+(§14.15).
+
+**References.** Owner's choice (2026-10-07): **editorial index** — one post per
+row, like a table of contents. anubi.io's list hover.
+
+**Anatomy.** A row of three parts, the whole row being one link: **date** (mono
+`label`, `muted`, `2026-10-20` in a `<time datetime>`), **title and description**
+(Bebas title, `lead`-step description), **tags** (linked Tags, §13.4) with an
+`arrow-up-right` at the far right.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Container | Wide (§5); rows separated by a 1px `border` line on top (the last row also has one below) |
+| Padding | 32px top and bottom (24px on phones) |
+| Grid (≥ `lg`) | Date columns 1–2; title and description columns 3–9; tags columns 10–11, right-aligned and wrapping; arrow column 12, right-aligned |
+| Title | Bebas, `display-lg` step, uppercase, `foreground`; any number of lines (no clamping) |
+| Description | `lead` step, `muted`, max 60ch, 12px below the title; cut at two lines on phones |
+| Tags | Linked Tags (§13.4), 8px gap; on a `background-alt` band they use `surface-raised` as §13.4 says |
+| Link | The title is the row's link, stretched over the whole row (`::after` covering it); the tags are separate links above it (`position: relative`), so there are no links inside links |
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Hover (fine pointer) | The other rows in the list dim to 45% opacity (150ms `ease-out`, `:has(:hover)` on the list); the hovered row stays at full strength; the arrow nudges 4px up and right; the title turns `primary-text` |
+| Focus | 2px `ring` around the row (radius `md`), same dimming as hover |
+| Pressed (touch) | The row dims to 60% for 100ms |
+| No cover | Nothing extra |
+
+**Cover preview** (fine pointer, posts with a `cover` only): a 280 × 175px preview
+of the cover (radius `lg`, `object-fit: cover`) follows the pointer across the list
+with a lag (GSAP `quickTo`, 450ms `power3.out`), 24px right of and 24px below the
+pointer, fading and scaling in (`opacity 0 → 1`, `scale 0.95 → 1`, 200ms
+`ease-out`) when the pointer enters a row that has a cover and out when it leaves.
+`pointer-events: none`, `aria-hidden` and decorative. It never covers the viewport
+edge (it flips to the left of the pointer near the right edge).
+
+**Motion.** Rows use the default entrance (§14.0): fade up 24px, 650ms `power3.out`,
+80ms stagger, batched, once. Reduced motion: no entrance, no cover preview; the
+dimming and colour changes stay (150ms, no movement).
+
+**Responsive.**
+
+| Width | Layout |
+|---|---|
+| ≥ `lg` | The grid above |
+| `sm`–`lg` | Date above the title (mono, 8px gap); description under it; tags below, left-aligned; arrow at the top right |
+| < `sm` | Same stack; title at `display-lg` minimum size; arrow hidden |
+
+**Accessibility.** The row is a link whose accessible name is the title (the date
+and tags are read as part of the row's text). The `<time>` carries the ISO date.
+Rows are `<li>` in an `<ol>` (newest first). Dimming never removes content, and
+nothing depends on hover.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.28 Post header
+
+**Purpose.** The top of a post page (§14.14): what it is, when, how long, and
+what it's about.
+
+**Anatomy** (top to bottom): back link → meta row → title → description → tags.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Back link | "← All posts", text roll (§13.3, standalone), to `/`; 112px below the top of the viewport (clears the capsule) |
+| Meta row | Mono `label`, `muted`: `<time>` `2026-10-20` · "6 MIN READ" (reading time, computed: words ÷ 200, rounded up, minimum 1); when the post has `updated`, " · UPDATED 2026-11-02" follows. 24px below the back link |
+| Title | The section heading's look (§14.0): Bebas at `display-lg`, uppercase, `foreground`, letters rising on load; max 20ch per line break; the page's one `<h1>` |
+| Description | `lead` step, `muted`, max 52ch, 24px below the title |
+| Tags | Linked Tags (§13.4), 8px gap, 24px below the description |
+
+**Motion.** The title's letters rise as in the section heading (§14.0), once on
+load; the meta row, description and tags fade up 16px, 100ms later. Reduced
+motion: final state.
+
+**Responsive.** The title scales with `display-lg` (3 → 5rem); the meta row wraps
+onto two lines on phones with the same separators.
+
+**Accessibility.** The back link is the first link after the skip link. The meta
+row is plain text with a `<time>`; "6 MIN READ" is read as "6 minute read" through
+an `aria-label` on the element.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.29 Prose
+
+**Purpose.** The typography for a post's body, written in MDX, in both themes.
+Everything an author can write without a component.
+
+**Values** (the reading column is at most 68ch, §3; sizes below are **proposed
+for review**, built from the existing steps):
+
+| Element | Treatment |
+|---|---|
+| Paragraph | `body` step (17px), leading **1.7** (longer than the 1.55 default, for reading), `foreground`, 24px between paragraphs |
+| `h2` | Text semibold, **1.75 → 2.25rem**, leading 1.15, tracking `-0.02em`; 64px above, 16px below |
+| `h3` | The `h3` step (1.375 → 1.75rem); 40px above, 12px below |
+| `h4` | `body` semibold; 32px above, 8px below |
+| Heading anchor | A mono `#` (`muted`) appears 8px left of `h2`–`h4` on hover and focus-within (150ms); it is a link to the heading's own address; headings have `id`s and `scroll-margin-top: 96px` |
+| Link | Inline underline (§13.3); external links add the `↗` |
+| Strong, emphasis | Semibold 600; italic |
+| Lists | Bullets and numbers in `muted`; 8px between items; 24px indent; nested lists 16px more |
+| Blockquote | A 2px `border` rule on the left, 20px of padding, `foreground` at 80%, italic; no background |
+| Inline code | JetBrains Mono at 0.9em, `surface` fill (`surface-raised` on `background-alt`), padding 2px 6px, radius `sm` |
+| Horizontal rule | 1px `border`, 48px above and below |
+| Image / figure | Full column width, radius `lg`, `surface` fill while loading; a caption in `sm`, `muted`, 12px below; images may be wider than the column up to the wide container on `lg+` when marked `wide` |
+| Table | In a wrapper that scrolls sideways; header row in mono `label` `muted`; 1px `border` lines between rows; cells padded 12px 16px; no zebra stripes |
+| Footnotes | Not supported at launch |
+
+- Code blocks are §13.30; callouts §13.31; both are MDX components.
+- Light and dark use the same tokens; nothing is a raw colour.
+
+**Motion.** Prose does not animate on its own; images and figures fade in as they
+load (200ms). The heading anchor's `#` fades (150ms).
+
+**Responsive.** The same sizes; images, tables and code blocks never push the
+page sideways (they scroll inside themselves).
+
+**Accessibility.** Headings keep their order (`h2` under the page's `h1`); the
+build warns about a skipped level. Images need `alt` text (the build fails on an
+image with none, unless it is marked decorative). Links never rely on colour alone.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.30 Code block
+
+**Purpose.** Code in a post, highlighted at build time (Shiki, no JavaScript sent
+for the colours).
+
+**Anatomy.** A frame → a header row (file name or language on the left, copy
+button on the right) → the code.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Frame | `surface` (`surface-raised` on `background-alt`), 1px `border`, radius `lg`, 24px between it and the prose |
+| Header row | 40px tall, 16px padding; the file name from the code fence's `title` (e.g. ` ```ts title="proxy.ts" `) or, without one, the language, in mono `label` `muted`; a 1px `border` line below |
+| Code | JetBrains Mono, 0.875rem, leading 1.65, padding 16px 20px; no wrapping: the block scrolls sideways inside the frame |
+| Colours | Shiki with two themes at once, switched by the site's light/dark class: **`github-light`** and **`github-dark`** (neutral greys and a blue that sit with our tokens), with the theme's background replaced by the frame's `surface`. Every token pair must meet 4.5:1 on its background; the build step checks them and changes a theme colour that fails |
+| Line numbers | Off by default; on with `showLineNumbers` on the fence: `muted`, right-aligned in a 32px gutter, not selectable |
+| Line highlight | ` ```ts {2,4-6} `: those lines get a `primary` tint at 8% and a 2px `primary` rule on the left |
+| Copy button | An icon button (§13.2) at 32px (44px hit area), Lucide `copy` 16px that becomes `check` 16px for 2s after copying; `aria-label` "Copy code" and an `aria-live="polite"` region that says "Copied" |
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Copy button, fine pointer | Hidden until the block is hovered or has focus inside (opacity, 150ms); always visible on touch and when focused |
+| Hover on the button | `surface-raised` background |
+| Focus | The scrolling code area is focusable (`tabindex="0"`, `role="region"`, labelled by the file name/language) so it can be scrolled with the keyboard; 2px `ring` |
+
+**Motion.** The copy icon swap uses the icon-button cross-fade (§13.2, 200ms).
+Reduced motion: opacity only.
+
+**Responsive.** The same everywhere; the header row's text is truncated with an
+ellipsis, never wraps.
+
+**Accessibility.** Selecting and copying by hand works as usual (line numbers are
+not selectable). Colour is never the only way to see a highlighted line (the
+rule). The copy result is announced.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.31 Callout
+
+**Purpose.** A short aside inside a post, written `<Callout type="tip" title="…">`
+in MDX.
+
+**Variants.**
+
+| Type | Icon (Lucide, 20px) | Label (mono) | Icon colour |
+|---|---|---|---|
+| `note` | `info` | NOTE | `primary-text` |
+| `tip` | `lightbulb` | TIP | `primary-text` |
+| `warning` | `triangle-alert` | WARNING | `danger` |
+
+**Values.** `surface` fill (`surface-raised` on `background-alt`), radius `lg`,
+padding 20px (24px from `sm`), no border; icon and mono label on one line, the
+optional `title` in semibold `body` below it, then the content in `body` at the
+prose leading. 32px above and below. A callout never holds a code block taller
+than 12 lines (the build warns).
+
+**Motion.** None.
+
+**Responsive.** The same everywhere.
+
+**Accessibility.** The label is text, so the type is never conveyed by colour or
+icon alone. A callout is a `<aside>` with `role="note"`; it does not interrupt
+reading order.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.32 Table of contents
+
+**Purpose.** Lets a reader see the shape of a long post and jump to a part of it.
+
+**Anatomy.** A mono `label` "ON THIS PAGE" (`muted`) and a list of the post's `h2`
+headings, with their `h3`s indented. Shown only when the post has **at least 3**
+headings.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Desktop (≥ `lg`) | A sticky rail in columns 10–12 (§14.14), `top: 112px`, max height `100dvh − 144px` with its own scroll |
+| Items | `sm` step, leading 1.45, 8px between items; `h3` items indented 16px; `muted` |
+| Active item | The heading nearest the top of the viewport: `foreground`, and a 2px `primary` rule on the left of the list that **moves** to it (a shared-layout animation, default spring, §8) |
+| Hover (fine pointer) | `foreground`, 150ms |
+| Phones and tablets (< `lg`) | A native `<details>`/`<summary>` under the header: `surface` fill, radius `md`, 48px summary row "On this page" with a Lucide `chevron-down` that turns 180° when open; the open list is the same items |
+
+**Motion.** Clicking an item scrolls to the heading through Lenis (`ease-in-out`,
+1.2s, §14.0) and moves focus to it (`tabindex="-1"`). The active rule moves with
+the spring. Reduced motion: an instant jump; the rule moves without the spring.
+
+**Accessibility.** `<nav aria-label="On this page">`; the active item has
+`aria-current="location"`; the disclosure is keyboard-operable by default; links
+are real anchors to the headings' `id`s.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.33 Post navigation
+
+**Purpose.** The way on from a post: the previous (older) and next (newer) post.
+
+**Anatomy.** Two blocks side by side from `md`: **Previous** on the left, **Next**
+on the right (right-aligned). Each: a mono `label` ("PREVIOUS" / "NEXT") with a
+Lucide `arrow-left` / `arrow-right`, then the post's title in the `h3` step.
+Each block is one link.
+
+**Values.** Wide container; a 1px `border` line above and below the pair;
+padding 32px; the blocks sit in a 2-column grid with a 1px `border` line between
+them. With only one neighbour, it takes its own side and the other is empty.
+Posts are ordered by `date`; the first post has no Previous and the latest has no
+Next (it does not wrap).
+
+**States.** Hover (fine pointer): the title turns `primary-text` and the arrow
+nudges 4px toward its direction (150ms `ease-out`). Focus: 2px `ring`, radius `md`.
+
+**Responsive.** Below `md` the blocks stack, Previous above Next, separated by a
+1px `border` line.
+
+**Accessibility.** `<nav aria-label="More posts">`; each link's name is "Previous
+post: <title>" / "Next post: <title>".
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.34 Newsletter box
+
+**Purpose.** Lets a reader subscribe to new posts by email (Q16). It appears under
+the post list on the blog home and under every post. Subscribers are held in a
+Resend Audience; the list is sent to from Resend (D82).
+
+**Anatomy.** A panel: mono `label` "NEWSLETTER" → title → one line of text → the
+form (email field + submit) → a helper line.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Panel | `surface` (`surface-raised` on `background-alt`), radius `xl`, padding 32px (24px phones); wide container, content max 36rem |
+| Title | Text semibold at the `title` step (2 → 3rem), `foreground`, 8px below the label |
+| Text | `body`, `muted`, 12px below the title |
+| Field | Email input, filled (§13.15), 48px, label "Email" above (visible); no other fields |
+| Button | `primary` `md` Button "Subscribe" (§13.1), beside the field from `sm` (8px gap), full width below it on phones |
+| Helper | `sm`, `muted`, 12px below: a line about unsubscribing |
+| Spam protection | A honeypot field hidden from people, plus the rate limit the contact form has (D69); no CAPTCHA |
+
+**Copy** (placeholder wording, for the owner to approve here; it lives in
+`content/copy.ts`):
+
+| | Text |
+|---|---|
+| Title | "New posts, in your inbox" |
+| Text | "A short email when I publish something new. Nothing else." |
+| Helper | "You can unsubscribe at any time. Prefer a feed? Use the RSS link in the footer." |
+| Success | "Check your inbox. I've sent you a link to confirm your address." |
+| Error | "That didn't work. Please try again in a moment." |
+| Invalid email | "Enter a valid email address." |
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Default | As above |
+| Field | The filled-field states of §13.15 (hover, focus, error with `circle-alert` and `aria-invalid`) |
+| Sending | The button's loading state (§13.1); the field is disabled |
+| Success | The form cross-fades (300ms) into a message with Lucide `circle-check` in `secondary` and the success copy; the address is not shown again |
+| Error | An alert above the field (`danger` text, `circle-alert`, `role="alert"`), the typed address kept |
+| Already subscribed | Looks like success (the answer must not reveal who is on the list) |
+
+**How it works** (a build note, not visual): the form posts to the blog's own API;
+the address is **not** added to the Audience until the reader opens the
+confirmation link in the email (double opt-in). The link goes to the page in
+§14.16. Resend's broadcast emails carry their own unsubscribe link.
+
+**Motion.** The panel uses the default entrance (§14.0); the success cross-fade as
+above. Reduced motion: no entrance, instant swap.
+
+**Responsive.** Field and button side by side from `sm`; stacked below.
+
+**Accessibility.** A visible `<label>`; the helper and errors are tied with
+`aria-describedby`; the status message is in a `role="status"` region; the
+success message receives focus. The honeypot is `aria-hidden`, `tabindex="-1"`,
+`autocomplete="off"`.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.35 Comments
+
+**Purpose.** Readers can comment on a post (Q16). Comments are stored as GitHub
+Discussions in a public repository (`chestlyace/blog-comments`, created by the
+owner) and shown with **Giscus**.
+
+**Anatomy.** A heading "Comments" (`h3` step) → one line of explanation (`sm`,
+`muted`: "Comments use GitHub Discussions, so you need a GitHub account to write
+one.") → the Giscus embed.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Spacing | 96px above (64px on phones), after the newsletter box |
+| Embed | Giscus configured with `mapping=pathname`, reactions on, the comment box above the comments, the repository's "Announcements"-type category, English; it takes the full reading width (max 68ch is not applied; the wide container's columns 1–8 on `lg+`) |
+| Theme | Follows the site's light/dark mode: it starts in the current theme and is told to switch (`postMessage` `setConfig`) when the theme toggle changes; a custom Giscus stylesheet matching our tokens is a build detail |
+| Loading | Lazy: the script is added only when the section is within 400px of the viewport; until then (and without JavaScript) the explanation line stays with a link "Open the discussion on GitHub" |
+| Off | A post can turn comments off with `comments: false` in its frontmatter; the whole block, heading included, is then left out |
+
+**Motion.** None of its own; the embed fades in (200ms) when loaded. Reduced
+motion: no fade.
+
+**Accessibility.** The heading and the explanation line are in the page; the embed
+is a third-party iframe with its own accessibility. It is the last landmark of the
+post (`<section aria-labelledby>`).
+
+**Approved in:** the Phase 9a PR (issue #61).
+
 ## 14. Page and section specs
 
 The main site's homepage (`/`) and the project page (`/projects/[slug]`). Each
@@ -1598,6 +1958,10 @@ spec follows the section checklist in §12. Components are linked, not repeated.
 **Admin (Phase 6a):** [Admin pages](#1411-admin-pages)
 
 **Launch (Phase 8.4):** [Coming-soon page](#1412-coming-soon-page-creatives-and-blog)
+
+**Blog (Phase 9a):** [Blog home](#1413-blog-home) · [Post page](#1414-post-page) ·
+[Tags](#1415-tags) · [Newsletter confirmation](#1416-newsletter-confirmation) ·
+[Header and footer additions](#1417-blog-header-and-footer-additions)
 
 ### 14.0 Page-wide rules
 
@@ -2458,3 +2822,144 @@ load; the label, lead and button fade up 16px, 100ms later, 650ms `power3.out`,
 text. The page has the skip link and landmarks of every page (§13.9).
 
 **Approved in:** the Phase 8.4a PR (issue #57).
+
+### 14.13 Blog home
+
+**Purpose.** The blog's front page (`/` on `blog.chestlyace.online`): every post,
+newest first.
+
+**References.** Owner's choice (2026-10-07): **editorial index** (§13.27).
+
+**Content.** The posts in `content/blog/` (drafts left out of production),
+newest first by `date`. The heading's intro is the blog's description
+(`ia-content.md` §4). **With no published post the page is the coming-soon page
+(§14.12)**, so launching before the first post looks the same as today.
+
+**Layout** (one `background` section, so the page alternates correctly with the
+footer's `background-alt`, §14.0):
+
+1. **Heading** (§14.0, as the page's `<h1>`): mono label "BLOG", the title "Blog"
+   in Bebas `display-xl`, and the intro ("Writing on software engineering, web
+   development, and building things."). 112px below the top of the viewport.
+2. **Post list:** an `<ol>` of Post rows (§13.27), 64px below the heading (48px
+   on phones).
+3. **Newsletter box** (§13.34), 128px below the last row (96px on phones).
+
+**Motion.** The heading's reveal and the rows' entrance as specified in §14.0 and
+§13.27; the newsletter box's entrance.
+
+**Responsive.** As the components. The title scales with `display-xl`.
+
+**Accessibility.** One `<h1>`; the list is an ordered list of links; the page's
+`<title>` and description are the site's (`ia-content.md` §4).
+
+**Pagination and search.** None at launch: all posts on one page. When there are
+more than 30 posts, pagination is designed then.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.14 Post page
+
+**Purpose.** One post (`/[slug]`). An unknown slug, or a draft in production,
+shows the blog's 404.
+
+**References.** Owner's choice (2026-10-07): **prose with a sticky contents
+rail**.
+
+**Content.** The post's `.mdx` file: its frontmatter (`content-schema.md` §4) and
+body.
+
+**Layout** (one `background` section; wide container, 12 columns on `lg+`):
+
+1. **Post header** (§13.28), columns 1–10.
+2. **Cover** (when the post has one): columns 1–12, aspect `16 / 9`, radius `xl`,
+   `surface` fill, 48px below the header. Its `alt` is `coverAlt` (empty if the
+   post gives none, so it is decorative).
+3. **Contents disclosure** (§13.32, below `lg` only, when the post has 3 or more
+   headings): 32px below the cover or header.
+4. **Body and rail** (48px below): the **prose** (§13.29) in columns 1–8, at most
+   68ch, and on `lg+` the **table of contents** (§13.32) as a sticky rail in
+   columns 10–12 next to it. Without a contents list the prose stays in columns
+   1–8.
+5. **Post navigation** (§13.33), 96px below the prose (64px on phones), full
+   width.
+6. **Newsletter box** (§13.34), 96px below.
+7. **Comments** (§13.35), unless the post turns them off.
+
+**Motion.** The header's title reveal, the default entrance for the cover and the
+newsletter box (§14.0), the contents rail's moving rule. Prose does not animate.
+
+**Responsive.** Below `lg` everything is one column in the order above, with the
+contents disclosure after the header. The cover keeps its `16 / 9` ratio; below
+`sm` its radius becomes `lg`.
+
+**Accessibility.** One `<h1>` (the title); the body is an `<article>`; headings
+keep their order; the skip link goes to `#main`. Each post sets its own `<title>`,
+description, canonical (`canonical` in frontmatter when cross-posted) and Open
+Graph image (the cover, else the site's), and `BlogPosting` structured data
+(Phase 9b, SEO).
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.15 Tags
+
+**Purpose.** Browse posts by topic: an index of all tags (`/tags`) and one page
+per tag (`/tags/[tag]`).
+
+**Tags index.** The section heading (§14.0): label "TAGS", title "Tags", intro
+"Browse posts by topic." Below it, every tag as a **linked Tag** (§13.4) enlarged
+to 32px tall with its count after the name ("NEXTJS · 4"), sorted by count
+(highest first), then alphabetically; wrapping with a 12px gap. Tags with no
+published post do not appear.
+
+**Tag page.** The section heading: label "TAG", the title is the tag in Bebas
+(`display-xl`, uppercase), the intro is the count ("4 posts" / "1 post"). Below,
+the Post rows (§13.27) for that tag, then a standalone text link "All tags →"
+(§13.3) 64px below the list. An unknown tag, or one with no published post, shows
+the blog's 404.
+
+Both pages are one `background` section with the newsletter box (§13.34) 128px
+below the content, like the home (§14.13). Motion, responsive and accessibility
+follow the components used; each has one `<h1>`.
+
+**SEO.** Tag pages are indexable with their own title ("Posts tagged nextjs —
+Chestly Ace") and canonical; the tags index is too.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.16 Newsletter confirmation
+
+**Purpose.** Where the link in the confirmation email lands
+(`/newsletter/confirm?token=…`); it confirms the address on the server and shows
+the result.
+
+**Layout and look.** Exactly the coming-soon page (§14.12): label, Bebas title,
+lead, one `primary` Button back to the blog home. Not indexed (`noindex`).
+
+**Copy** (placeholder wording for the owner to approve; in `content/copy.ts`):
+
+| | Confirmed | Link didn't work |
+|---|---|---|
+| Label | "SUBSCRIBED" | "LINK EXPIRED" |
+| Title | "You're on the list" | "That link didn't work" |
+| Lead | "Thanks for confirming. You'll get an email when there's a new post." | "It may have expired or already been used. You can subscribe again from the bottom of any post." |
+| Button | "Read the blog" | "Go to the blog" |
+
+**Accessibility.** As §14.12; the status is the page's `<h1>`.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.17 Blog header and footer additions
+
+**Header key links** (§13.6): **Posts** (`/`) and **Tags** (`/tags`), as text rolls
+(§13.3). The active dot follows the route: Posts on `/` and on post pages, Tags
+on `/tags` and tag pages. The phone menu lists the same two as Bebas rows above
+the Sites rows. The Sites chip and theme toggle stay.
+
+**Footer** (§13.8): the blog's Connect column gets an **RSS** link (Lucide `rss`
+16px, text roll) to `/rss.xml`, after the socials shown on the blog
+(`socials.show_on`). The page `<head>` also carries the feed's `alternate` link.
+
+**Accent.** The blog keeps the main blue (§4, Q12): no override.
+
+**Approved in:** the Phase 9a PR (issue #61).

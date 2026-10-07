@@ -297,13 +297,17 @@ date: 2026-10-20                                # required, publish date
 updated: 2026-11-02                             # optional
 tags: [nextjs, architecture]                    # optional, lowercase kebab-case
 cover: /blog/multi-tenant/cover.webp            # optional, path under public/
+coverAlt: "Diagram of three hosts, one app"     # optional, alt text for the cover; empty = decorative
+comments: true                                  # optional, default true; false hides the Giscus comments
 draft: false                                    # optional, drafts excluded from production builds
 canonical: https://…                            # optional, when cross-posted
 ---
 ```
 
 Validated with Zod at build time. Reading time is computed, not stored. Post
-images live in `public/blog/<slug>/`.
+images live in `public/blog/<slug>/`. Tags are lowercase kebab-case; there are no
+categories (Q16). Every image in a post body needs `alt` text (or is marked
+decorative) or the build fails (`design.md` §13.29).
 
 ---
 
