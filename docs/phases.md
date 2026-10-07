@@ -19,7 +19,7 @@ before the phase starts.
 | 5 | Main site homepage | Done (5a: PRs #18–#24; 5b: PRs #26–#36). Q5 stays open: the About text is a placeholder | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
-| 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a in review (issue #57); 8.4b next; then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
+| 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
 | 9 | Blog | Not started | Q12, Q16 |
 | 10 | Creatives site | Not started | Q1, Q12 |
 
@@ -223,8 +223,8 @@ Split into PRs (owner, 2026-10-07; Q17 and Q20 answered; 8.4 added for the launc
 | 8.1 Migration from the old live database — issue #51 | `pnpm migrate:old` (dry run by default, `--write` to load), tests, the runbook `docs/migration.md` | Done (PR #52) |
 | 8.2 Analytics — issue #53 | Vercel Web Analytics on the public sites (not the admin) | Done (PR #54) |
 | 8.3 Launch runbook — issue #55 | Per-site `SITE_INDEXING`; `docs/launch.md`: accounts, environment variables, preview checks, DNS and Vercel domains for main + admin, verification, the 14-day grace period and shutdown of the old EC2 site | Done (PR #56) |
-| 8.4a Placeholder design and launch decisions — issue #57 | Docs only: `design.md` §14.12 (the coming-soon page for creatives and blog), `docs/launch.md` (creatives and blog at cutover and indexed; `hello@chestlyace.online` on Zoho Mail), D81, Q23 | In review |
-| 8.4b Placeholder pages | Build §14.12: the `ComingSoon` page on creatives (`/` and `/services`) and blog | Not started (after 8.4a is merged) |
+| 8.4a Placeholder design and launch decisions — issue #57 | Docs only: `design.md` §14.12 (the coming-soon page for creatives and blog), `docs/launch.md` (creatives and blog at cutover and indexed; `hello@chestlyace.online` on Zoho Mail), D81, Q23 | Done (PR #58) |
+| 8.4b Placeholder pages — issue #59 | Build §14.12: the `ComingSoon` page on creatives (`/` and `/services`) and blog | In review |
 
 **Done when:** chestlyace.online is served by Vercel with the owner's real
 content, and the owner has checked it. (The cutover itself is the owner's,

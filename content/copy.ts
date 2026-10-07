@@ -78,3 +78,22 @@ export const CONTACT_ERRORS = {
   rateLimited:
     "You've sent a few messages already. Please try again a little later, or use the email or WhatsApp links.",
 };
+
+// PLACEHOLDER — the coming-soon page on the creatives and blog hosts until
+// Phases 9–10 build them (design.md §14.12). The creatives lead keeps both name
+// forms (ia-content.md §4).
+export const COMING_SOON_LABEL = "Coming soon";
+export const COMING_SOON_BUTTON = "Visit chestlyace.online";
+export const COMING_SOON: Record<
+  Exclude<PublicSiteKey, "main">,
+  { title: string; lead: string }
+> = {
+  creatives: {
+    title: "Design & Photography",
+    lead: "Graphic design, branding, and photography by Chestly Ace (Amahndong Chestly). A new home for the work is on its way.",
+  },
+  blog: {
+    title: "Blog",
+    lead: "Writing on software engineering, web development, and building things. The first posts are on their way.",
+  },
+};
