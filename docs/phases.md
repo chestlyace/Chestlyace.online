@@ -18,8 +18,8 @@ before the phase starts.
 | 4 | Database | Done | Q19 (decided) |
 | 5 | Main site homepage | Done (5a: PRs #18–#24; 5b: PRs #26–#36). Q5 stays open: the About text is a placeholder | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
-| 7 | SEO & redirects | 7.1 done (PR #48); 7.2 in review (issue #49) | — |
-| 8 | Main site launch | Not started | Q17, Q20 |
+| 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
+| 8 | Main site launch | 8.1 in review (issue #51) | Q17, Q20 (answered 2026-10-07) |
 | 9 | Blog | Not started | Q12, Q16 |
 | 10 | Creatives site | Not started | Q1, Q12 |
 
@@ -202,7 +202,7 @@ Split into two PRs (owner, 2026-10-07):
 | Step | Covers | Status |
 |---|---|---|
 | 7.1 Metadata, structured data, sitemap, robots — issue #47 | Per-site metadata, canonical and Open Graph/Twitter tags; JSON-LD; per-host `sitemap.xml` and `robots.txt`; the `SITE_INDEXING` switch; `public/og/main.webp` | Done (PR #48) |
-| 7.2 Redirects and static files — issue #49 | Old-URL redirects (308), `www` → apex, `/resume.pdf`, favicons, the `#work` / `#journey` anchors | In review |
+| 7.2 Redirects and static files — issue #49 | Old-URL redirects (308), `www` → apex, `/resume.pdf`, favicons, the `#work` / `#journey` anchors | Done (PR #50) |
 
 **Done when:** every old URL redirects correctly and the structured data validates.
 **Refs:** `ia-content.md` §4–6.
@@ -215,6 +215,14 @@ Split into two PRs (owner, 2026-10-07):
 - Load into Prisma Postgres; move files referenced by bare filenames
 - Analytics per Q17
 - Domains on Vercel; DNS cutover; old server shutdown plan (Q20)
+
+Split into three PRs (owner, 2026-10-07; Q17 and Q20 answered):
+
+| Step | Covers | Status |
+|---|---|---|
+| 8.1 Migration from the old live database — issue #51 | `pnpm migrate:old` (dry run by default, `--write` to load), tests, the runbook `docs/migration.md` | In review |
+| 8.2 Analytics | Vercel Web Analytics on the public sites (not the admin) | Not started |
+| 8.3 Launch runbook | Per-site indexing, DNS and Vercel domains for main + admin, the 14-day grace period for the old EC2 site and its shutdown | Not started |
 
 **Done when:** chestlyace.online is served by Vercel with the owner's real
 content, and the owner has checked it.
