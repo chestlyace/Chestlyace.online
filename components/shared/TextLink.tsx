@@ -1,17 +1,24 @@
-import { ArrowDown, ArrowRight, ArrowUp, ArrowUpRight } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ArrowUpRight,
+} from "lucide-react";
 import Link from "next/link";
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { isPagePath } from "@/lib/links";
 import { RollText } from "./RollText";
 
-type IconName = "up-right" | "up" | "right" | "down";
+type IconName = "up-right" | "up" | "right" | "down" | "left";
 
 const ICONS = {
   "up-right": ArrowUpRight,
   up: ArrowUp,
   right: ArrowRight,
   down: ArrowDown,
+  left: ArrowLeft,
 } as const;
 
 // Each arrow nudges 2px in the direction it points.
@@ -20,6 +27,7 @@ const NUDGE: Record<IconName, [string, string]> = {
   up: ["0px", "-2px"],
   right: ["2px", "0px"],
   down: ["0px", "2px"],
+  left: ["-2px", "0px"],
 };
 
 // Where a roll link sits decides its type and colours (design.md §13.3).

@@ -4,12 +4,13 @@ import {
   siteUrl,
   type PublicSiteKey,
 } from "@/lib/sites";
+import { BLOG_NAV } from "@/lib/blog/nav";
 import { MAIN_NAV } from "@/lib/sections";
 import { SITE_MENU_DESCRIPTIONS } from "@/content/copy";
 import { HeaderBar, type HeaderSite } from "./HeaderBar";
 
-// Floating capsule header (design.md §13.6). Main has its key links; the
-// creatives and blog links are decided in their own design steps.
+// Floating capsule header (design.md §13.6). Main and the blog have their key
+// links; creatives' are decided in its own design step.
 export function SiteHeader({ site }: { site: PublicSiteKey }) {
   const sites: HeaderSite[] = PUBLIC_SITE_KEYS.map((key) => ({
     key,
@@ -19,5 +20,11 @@ export function SiteHeader({ site }: { site: PublicSiteKey }) {
     current: key === site,
   }));
 
-  return <HeaderBar links={site === "main" ? MAIN_NAV : []} sites={sites} />;
+  return (
+    <HeaderBar
+      links={site === "main" ? MAIN_NAV : site === "blog" ? BLOG_NAV : []}
+      activeBy={site === "blog" ? "blog" : "section"}
+      sites={sites}
+    />
+  );
 }

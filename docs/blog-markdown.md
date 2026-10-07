@@ -218,9 +218,11 @@ separately (`agent_sessions`, uploaded and redacted in the editor).
 ### Images
 
 `![alt text](https://…/image.webp "Optional caption")`. Add `#wide` to the address
-(`…/image.webp#wide`) to let it break out of the reading column on wide screens
-(the renderer removes the `#wide`). An image without alt text fails validation
-unless it is marked decorative with empty alt `![]( … )` on purpose.
+(`…/image.webp#wide`) to let it break out of the reading column on wide screens.
+An image needs alt text; a purely decorative one says so with `#decorative`
+(`![](…/image.webp#decorative)`), and its alt text is then empty. The renderer
+removes both marks from the address. An image with neither alt text nor
+`#decorative` fails the editor's check.
 
 ## 3. Importing from DEV
 

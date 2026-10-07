@@ -20,7 +20,7 @@ before the phase starts.
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
-| 9 | Blog | 9a (revised) in review (issue #61); 9b.1–9b.7 after it | Q12 (blog: decided), Q16 (decided) |
+| 9 | Blog | 9a done (PR #62); 9b.1 in review (issue #63); 9b.2–9b.7 after it | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | Not started | Q1, Q12 |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
@@ -248,8 +248,8 @@ reviewed and merged before the next:
 
 | Step | Covers | Status |
 |---|---|---|
-| 9a Design | The specs above | In review |
-| 9b.1 Database and public blog | `blog_*` tables and migration; the markdown renderer (CommonMark + GFM, Shiki, heading ids, the plain blocks: callout, image, code); blog home, post page, tags, RSS, sitemap, `BlogPosting` JSON-LD, header/footer, the coming-soon fallback; a sample post by seed | Not started |
+| 9a Design | The specs above | Done (PR #62) |
+| 9b.1 Database and public blog | `blog_*` tables and migration; the markdown renderer (CommonMark + GFM, Shiki, heading ids, the plain blocks: callout, image, code); blog home, post page, tags, RSS, sitemap, `BlogPosting` JSON-LD, header/footer, the coming-soon fallback; a sample post by seed | In review (issue #63) |
 | 9b.2 Rich blocks | Steps, compare, file tree, typewriter, code group, diff, terminal, flow canvas, quiz | Not started |
 | 9b.3 Admin block editor | The Blog group in the admin: posts list, the block editor with forms, flow-canvas editor, preview, Markdown tab, autosave, cover and image uploads | Not started |
 | 9b.4 DEV import and export | Import dialog, "Publish to DEV", the conversions of `docs/blog-markdown.md` §3–§4 | Not started |

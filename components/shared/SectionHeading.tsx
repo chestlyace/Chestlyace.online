@@ -11,10 +11,12 @@ type SectionHeadingProps = {
   /** "02" — assigned from the sections shown (lib/sections.ts). */
   index?: string;
   /** The mono label next to the index, e.g. "SKILLS". Left out, the title stands alone. */
-  label?: string;
+  label?: ReactNode;
   title: ReactNode;
   intro?: ReactNode;
   as?: "h1" | "h2";
+  /** The title's size: `xl` (default) or the smaller `lg` (a blog post's title). */
+  size?: "xl" | "lg";
   className?: string;
 };
 
@@ -34,6 +36,7 @@ export function SectionHeading({
   title,
   intro,
   as: Heading = "h2",
+  size = "xl",
   className,
 }: SectionHeadingProps) {
   const reduced = usePrefersReducedMotion();
@@ -106,7 +109,10 @@ export function SectionHeading({
         ref={titleRef}
         tabIndex={-1}
         data-section-heading
-        className="font-display text-display-xl text-foreground uppercase outline-none"
+        className={cn(
+          "font-display text-foreground uppercase outline-none",
+          size === "xl" ? "text-display-xl" : "text-display-lg",
+        )}
       >
         {title}
       </Heading>

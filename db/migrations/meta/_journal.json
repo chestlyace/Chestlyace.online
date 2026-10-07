@@ -29,6 +29,13 @@
       "when": 1791292723873,
       "tag": "0003_certifications_updated_at_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791378637512,
+      "tag": "0004_blog_posts",
+      "breakpoints": true
     }
   ]
 }

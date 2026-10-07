@@ -354,7 +354,9 @@ The newsletter's subscribers are not stored here: they are a **Resend Audience**
 **Images.** Uploaded through the admin to Cloudinary (§3 above uses the same
 signature route, with a `blog` folder, `portfolio/blog`, max 1600×1600).
 
-**Validation.** Zod on every write (as D74): `slug` unique, at most 8 tags,
+**Validation.** Zod on every write (as D74): `slug` unique and not one of the
+blog's own paths (`tags`, `privacy`, `newsletter`, `rss.xml`, `sitemap.xml`,
+`robots.txt`, `api`), at most 8 tags,
 `title` ≤ 120 characters, `description` ≤ 300; the editor also checks each block
 (`docs/blog-markdown.md`) before a post can be published, including that every
 image has alt text.
