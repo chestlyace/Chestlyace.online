@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import type { CalloutType, Components } from "@/lib/blog/markdown";
 import { TextLink } from "@/components/shared/TextLink";
+import { Block } from "./blocks/Block";
 import { Callout } from "./Callout";
 import { CodeBlock } from "./CodeBlock";
 
@@ -162,4 +163,5 @@ export const proseComponents: Components = {
   ),
   pre: CodeBlock,
   aside: PostCallout,
+  "x-block": Block,
 } as unknown as Components;

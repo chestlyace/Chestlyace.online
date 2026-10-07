@@ -54,7 +54,7 @@ describe("renderMarkdown", { timeout: 30_000 }, () => {
   });
 
   it("shows an unknown language as plain text instead of failing", async () => {
-    const out = await html("```steps\n## One\n---\n## Two\n```");
+    const out = await html("```madeup\n## One\n---\n## Two\n```");
     expect(out).toContain("<pre");
     expect(out).toContain("## One");
   });
@@ -103,6 +103,26 @@ describe("renderMarkdown", { timeout: 30_000 }, () => {
   });
 });
 
+describe("rich blocks", { timeout: 30_000 }, () => {
+  it("turns a valid block into an x-block carrying its parsed data", async () => {
+    const out = await html("```quiz\nQ: One?\n) no\n*) yes\n```\n");
+    expect(out).toContain("<x-block");
+    expect(out).toContain('data-kind="quiz"');
+    expect(out).toContain("One?");
+    expect(out).not.toContain("<pre");
+  });
+
+  it("keeps a block that does not parse as plain code", async () => {
+    const out = await html("```quiz\nQ: One?\n) no\n) also no\n```\n");
+    expect(out).not.toContain("<x-block");
+    expect(out).toContain("<pre");
+  });
+
+  it("leaves a block-named fence alone when it is not that block's language", async () => {
+    expect(await html("```ts\nconst a = 1;\n```\n")).not.toContain("<x-block");
+  });
+});
+
 describe("findProblems", () => {
   it("flags an image with no alt text, unless it is decorative", () => {
     expect(findProblems("![](https://x.test/a.png)")).toEqual([
@@ -127,5 +147,15 @@ describe("findProblems", () => {
       level: "error",
     });
     expect(findProblems("```callout type=tip\nHi\n```")).toEqual([]);
+  });
+});
+
+describe("findProblems and rich blocks", () => {
+  it("reports a block that can't be read, and accepts one that can", () => {
+    const bad = findProblems("```quiz\nQ: One?\n) no\n) also no\n```\n");
+    expect(bad).toHaveLength(1);
+    expect(bad[0].level).toBe("error");
+    expect(bad[0].message).toContain("quiz");
+    expect(findProblems("```quiz\nQ: One?\n) no\n*) yes\n```\n")).toEqual([]);
   });
 });

@@ -847,3 +847,49 @@ html.lenis body {
   color: var(--muted);
   user-select: none;
 }
+
+/* Blog blocks: the typing caret (design.md §13.41, §13.44). */
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Diagram and diff colours (design.md §13.43, §13.45): each at least 3:1 on its
+   background as an icon or sign; text stays `foreground`. */
+:root {
+  --diagram-blue: #2563eb;
+  --diagram-green: #047857;
+  --diagram-orange: #c2410c;
+  --diagram-purple: #7c3aed;
+  --diagram-teal: #0f766e;
+  --diagram-red: #dc2626;
+  --diagram-gray: #6e6e73;
+  --diff-add: #047857;
+}
+
+.dark {
+  --diagram-blue: #60a5fa;
+  --diagram-green: #34d399;
+  --diagram-orange: #fb923c;
+  --diagram-purple: #a78bfa;
+  --diagram-teal: #2dd4bf;
+  --diagram-red: #f87171;
+  --diagram-gray: #a1a1a6;
+  --diff-add: #34d399;
+}
+
+/* The quiz's question change and explanation (design.md §13.46). */
+@keyframes quiz-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+@keyframes quiz-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}

@@ -61,13 +61,13 @@ Visual: `design.md` §13.38.
 
 ### `compare`
 
-An optional `title:` line, then table rows with the header first. `highlight: 2`
-(optional, a line before the rows) marks the 2nd column as the recommended one.
+An optional `title:` line, then table rows with the header first. `highlight: 3`
+(optional, a line before the rows) marks the 3rd column (counting the first, label column) as the recommended one.
 
 ````text
 ```compare
 title: Manual switching vs routing by directory
-highlight: 2
+highlight: 3
 | Aspect | Aliases | Directory routing |
 | Commands to remember | Two or more | Just `claude` |
 | Mental overhead | Constant | None |
