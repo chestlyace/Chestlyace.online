@@ -9,7 +9,7 @@ request belongs to is decided by its **host name**, not its path.
 |---|---|---|---|
 | `chestlyace.online` | **main** | Chestly as a software engineer: about, skills, services, projects, experience, volunteering, contact | Postgres (admin-edited) |
 | `creatives.chestlyace.online` | **creatives** | Graphic design, photography, event coverage | Headless CMS (TBD — `open-questions.md` Q1) |
-| `blog.chestlyace.online` | **blog** | Writing | MDX files in the repo |
+| `blog.chestlyace.online` | **blog** | Writing, with readers' likes and comments | Postgres (admin-written posts, D83) |
 | `admin.chestlyace.online` | **admin** | The owner's panel for the main site's data (D71) | Postgres (reads and writes), Cloudinary (uploads) |
 
 ```
@@ -19,7 +19,7 @@ request belongs to is decided by its **host name**, not its path.
  blog.… ──────────────▶ │                                                              │
                         │   app/sites/main ───────▶ Prisma Postgres + Cloudinary       │
                         │   app/sites/creatives ──▶ Headless CMS API                   │
-                        │   app/sites/blog ───────▶ content/blog/*.mdx (build time)    │
+                        │   app/sites/blog ───────▶ Prisma Postgres (posts, comments)   │
                         └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -37,9 +37,9 @@ sites from leaking into each other (see §3).
 | Styling | Tailwind CSS (v4, tokens in CSS via `@theme`) | Decided (D14) |
 | Database | Prisma Postgres, provisioned through the Vercel Marketplace | Decided (D2, D31) |
 | DB access | Drizzle ORM + `pg` (node-postgres) driver; migrations with Drizzle Kit | Decided (D15, D32) |
-| Validation | Zod (request bodies, MDX frontmatter, CMS responses) | Proposed |
+| Validation | Zod (request bodies, post fields, CMS responses) | Proposed |
 | Image/file uploads | Cloudinary (existing assets already live there) | Proposed — Q14 |
-| Blog | MDX compiled at build time | Decided (D7); tooling — Q16 |
+| Blog | Posts in Postgres, written in the admin's block editor as custom markdown; rendered on the server (unified/remark/rehype + Shiki), cached with the `blog` tag | Decided (D83, supersedes D7) |
 | Creatives content | Headless CMS | CMS choice open — Q1 |
 | Hosting | Vercel | Decided (D2) |
 | Package manager | pnpm 10 (pinned in `packageManager`; newest major Vercel supports) | Decided (D16) |
@@ -156,9 +156,9 @@ chestlyace.online/
 │  │                               # SiteFooter, Brand, MobileMenu, ThemeToggle, Button…
 │  ├─ main/                        # Hero, ProjectCard, TimelineItem…
 │  ├─ creatives/                   # Gallery, Lightbox…
-│  └─ blog/                        # PostCard, MDX components…
+│  └─ blog/                        # PostItem, Prose, rich blocks, Comments…
 ├─ content/
-│  └─ blog/                        # *.mdx posts
+│  └─ copy.ts                      # placeholder copy
 ├─ db/
 │  ├─ schema.ts                    # Drizzle schema
 │  ├─ migrations/
@@ -174,7 +174,7 @@ chestlyace.online/
 │  ├─ auth.ts
 │  ├─ cloudinary.ts
 │  ├─ cms.ts                       # creatives CMS client
-│  └─ blog.ts                      # MDX loading + frontmatter validation
+│  └─ blog/                        # markdown parsing/rendering, DEV client, session parser
 ├─ public/                         # brand/logo.png, favicons, resume, OG images
 ├─ docs/                           # these documents
 ├─ proxy.ts
@@ -218,19 +218,28 @@ Full schema and endpoints: `content-schema.md`.
   the affected pages.
 - CMS images are served through the CMS's own image CDN.
 
-### blog — MDX
+### blog — database and block editor (D83)
 
-- Posts live in `content/blog/<slug>.mdx`.
-- Frontmatter is validated with Zod at build time; a bad post fails the build.
-- All post pages, tag pages, and the RSS feed are statically generated.
+- Posts are rows in `blog_posts` (`content-schema.md` §4), written in the admin's
+  block editor (`design.md` §13.48), stored as custom markdown
+  (`docs/blog-markdown.md`).
+- Post pages, tag pages, the list and `rss.xml` are rendered on the server and
+  cached with a `blog` tag; publishing, editing and hiding a comment revalidate it
+  (as `portfolio` for the main site, D74). Likes and comments load after the page
+  from the blog's own API (`/api/blog/*`), so the page itself stays cacheable.
+- **Readers** sign in with GitHub or Google through Better Auth, on the blog host
+  only (`/api/reader/*`, its own cookie; never the admin's). Commenting and liking
+  comments need an account; liking a post does not.
+- DEV import/export and agent-session upload are admin API routes
+  (`/api/admin/blog/*`); the DEV API key (`DEVTO_API_KEY`) is a server secret.
 
 ## 6. Admin
 
 - Lives at `admin.chestlyace.online` (Q21, D71): its own site key, root layout and
   host; `noindex` (meta and `X-Robots-Tag`) and `robots.txt` disallows everything.
   Screens: `design.md` §13.18–13.26 and §14.11.
-- Manages **main-site data only**. Blog posts are edited as files; creatives
-  content is edited in the CMS's own studio.
+- Manages the **main site's data and the blog** (posts, comments, imports);
+  creatives content is edited in the CMS's own studio.
 - **Auth** (replaces the old shared password compared with `===` and a JWT in
   `localStorage`):
   - single admin user; password stored as a bcrypt hash in `ADMIN_PASSWORD_HASH`

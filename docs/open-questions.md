@@ -47,13 +47,16 @@ Recommendation: single admin, bcrypt-hashed password in an env var, signed
 Alternatives: Auth.js with GitHub sign-in restricted to your account (no password
 to manage at all), or passkeys. GitHub sign-in is worth considering.
 
-### Q16 — Blog tooling and features · Open
-- MDX pipeline: `@next/mdx` vs. a content layer (Velite / Content Collections)
-  that gives typed frontmatter for free. Leaning content layer.
-- Syntax highlighting: Shiki (build-time, zero JS) — proposed.
-- Comments? (Giscus = GitHub Discussions, free) — open.
-- Newsletter? The old footer had a non-functional Subscribe box — open.
-- Categories as well as tags? — open.
+### Q16 — Blog tooling and features · Decided 2026-10-07 (revised)
+**Answer (D82–D85):** posts are written in the admin's block editor and stored in
+Postgres as custom markdown; Shiki highlighting; tag pages; table of contents and a
+copy button on code; **readers' own comments and likes** with GitHub/Google sign-in
+(Better Auth), replacing Giscus; a newsletter (Resend Audience, double opt-in);
+dev.to import/export; rich blocks and agent-session embeds. Categories: tags only
+(proposed, not asked). *First answer, superseded the same day:* Velite content layer
+and Giscus.
+Original options: `@next/mdx` vs. a content layer (Velite / Content Collections);
+Shiki; comments (Giscus); newsletter; categories.
 
 ### Q17 — Analytics · Decided 2026-10-07
 **Answer: Vercel Web Analytics** (D79).
@@ -140,7 +143,8 @@ block (e.g. under Skills), or leave them out?
 
 ## Design
 
-### Q12 — Accent colours for creatives and blog · Open
+### Q12 — Accent colours for creatives and blog · Blog decided 2026-10-07; creatives open
+**Blog: keep the main blue** (no override, `design.md` §4; D82). Creatives still open.
 Main is royal blue `#2563EB`. Each other site overrides only the accent
 (`design.md` §4). Ideas: creatives → warm (amber/orange) to feel expressive;
 blog → emerald (the old `secondary`) or keep blue for one family feel.

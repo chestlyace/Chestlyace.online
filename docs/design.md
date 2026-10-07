@@ -4,7 +4,8 @@
 > components (D47–D53) approved in Phase 5a.1–5a.3; homepage section and project
 > page specs written in Phase 5a.4 (D54–D62, §14); all built in Phase 5b. The
 > admin's component and screen specs (§13.18–13.26, §14.11; D72) are written in
-> Phase 6a and built in Phase 6b.** §1–§8 below are the
+> Phase 6a and built in Phase 6b; the blog's (§13.27–13.50, §14.13–14.19; D82–D85) are
+> written in Phase 9a.** §1–§8 below are the
 > owner-approved foundations: direction, colour, typography, spacing, depth, icons,
 > theming, and motion. §13 holds the component specs and §14 the section and page
 > specs. Nothing visual is built until Phase 5b, after the owner merges the last
@@ -134,7 +135,7 @@ All three sites share every token. Each site may override **only** `primary`,
 | main | Blue `#2563EB` | Decided |
 | admin | The main blue (no override; D72) | Decided |
 | creatives | TBD — uses the main accent until decided | Q12 |
-| blog | TBD — uses the main accent until decided | Q12 |
+| blog | The main blue (no override) | Decided (Q12, 2026-10-07) |
 
 Applied by a `data-site="main|creatives|blog|admin"` attribute on `<html>` set in each
 site's root layout.
@@ -335,9 +336,21 @@ counter).
 
 ### Blog (`components/blog/`)
 
-`PostCard`, `PostHeader` (title, date, reading time, tags), `Prose` (typography
-for MDX output in both themes), `CodeBlock` (syntax highlighting, copy button),
-`Callout`, `TableOfContents`.
+| Component | Notes |
+|---|---|
+| `PostItem` | **Spec: §13.27.** One post in the list: big cover, mono meta, Bebas title, description (Linear-style, D82) |
+| `PostHeader` | **Spec: §13.28.** Back link, meta row (date, reading time, updated), title, description, tags |
+| `Prose` | **Spec: §13.29.** Typography for a post's rendered markdown, in both themes |
+| `CodeBlock` | **Spec: §13.30.** Shiki-highlighted code with a header row and a copy button |
+| `Callout` | **Spec: §13.31.** `note`, `tip`, `warning` |
+| `TableOfContents` | **Spec: §13.32.** Sticky rail on `lg+`, native disclosure below |
+| `PostNavigation` | **Spec: §13.33.** Previous and next post |
+| `NewsletterBox` | **Spec: §13.34.** Email signup (Resend Audience, double opt-in) |
+| `ReactionBar` | **Spec: §13.35.** Like (no account needed) and share |
+| `ReaderSignIn` | **Spec: §13.36.** GitHub / Google sign-in panel and the signed-in chip |
+| `Comments` | **Spec: §13.37.** Readers' own comments, replies, likes, reports |
+| `Steps`, `Compare`, `FileTree`, `Typewriter`, `CodeGroup`, `Diff`, `Terminal`, `FlowCanvas`, `Quiz`, `AgentSession` | **Specs: §13.38–13.47.** The rich blocks, from `docs/blog-markdown.md` |
+| `components/admin/blog/` | **Specs: §13.48–13.50.** The block editor, DEV import/export dialogs, comment moderation |
 
 ### Design system showcase (`app/sites/main/design-system/`)
 
@@ -436,6 +449,21 @@ content components — PR #22 (issue #21).
 
 **Admin components (Phase 6a):** see [the admin block below](#1318-admin-shell)
 (§13.18–13.26).
+
+**Blog components (Phase 9a):** [Post item](#1327-post-item) ·
+[Post header](#1328-post-header) · [Prose](#1329-prose) ·
+[Code block](#1330-code-block) · [Callout](#1331-callout) ·
+[Table of contents](#1332-table-of-contents) ·
+[Post navigation](#1333-post-navigation) · [Newsletter box](#1334-newsletter-box) ·
+[Reaction bar](#1335-reaction-bar) · [Reader sign-in](#1336-reader-sign-in) ·
+[Comments](#1337-comments) (§13.27–13.37); **rich blocks** (§13.38–13.47):
+[Steps](#1338-steps) · [Compare](#1339-compare) · [File tree](#1340-file-tree) ·
+[Typewriter code](#1341-typewriter-code) · [Code group](#1342-code-group) ·
+[Diff](#1343-diff) · [Terminal](#1344-terminal) · [Flow canvas](#1345-flow-canvas) ·
+[Quiz](#1346-quiz) · [Agent session](#1347-agent-session); **admin** (§13.48–13.50):
+[Blog editor](#1348-blog-editor) · [DEV import and export](#1349-dev-import-and-export) ·
+[Comment moderation](#1350-comment-moderation). The custom markdown they read and
+write is in [`blog-markdown.md`](./blog-markdown.md).
 
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
@@ -1581,6 +1609,926 @@ none.
 announced (`role="alert"`); the page `<title>` is "Sign in — Admin"; the browser's
 password manager can fill and save it.
 
+### 13.27 Post item
+
+**Purpose.** One post in a list: the blog home (§14.13) and the tag pages
+(§14.15).
+
+**References.** Owner's choice (2026-10-07): the minimalism of
+[linear.app/blog](https://linear.app/blog) — one column, a big cover per post,
+a bold title, a small date and arrow, **separated by space rather than borders** —
+in our own type, tokens and motion.
+
+**Anatomy.** The whole item is one link: **cover** → **meta line** (mono `label`:
+`2026-10-20` in a `<time datetime>`, then "6 MIN READ", then the post's first tag
+as plain text) → **title row** (Bebas title, `arrow-up-right` at the right edge)
+→ **description**.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Cover frame | Aspect `16 / 9`, radius `xl` (28px; `lg` on phones), `surface` fill, image `object-fit: cover` |
+| No cover | The `surface` frame with the post's title in Bebas `display-lg`, `muted`, centred (as the project card, §13.10) |
+| Cover → meta | 20px |
+| Meta line | `label` step, `muted`, parts separated by " · " |
+| Meta → title | 8px |
+| Title | Bebas, `display-lg` step, uppercase, `foreground`, up to three lines; arrow 24px, `muted`, top-aligned with the first line |
+| Description | `lead` step, `muted`, max 52ch, 12px below the title; two lines on phones |
+| Between items | 96px (64px on phones); no divider lines |
+| **Latest post** | The first item is larger: it uses the wide container (§5) and its title is `display-xl`; every other item sits in the narrow container (980px), so the list steps in after the first |
+
+**States and motion** (Motion for hover, GSAP for scroll; the same moves as the
+project card):
+
+| State | Treatment |
+|---|---|
+| Hover (fine pointer) | The cover scales `1 → 1.04` inside its frame (600ms `ease-out`); the arrow turns `foreground` and nudges 4px up and right; the title turns `primary-text` (150ms) |
+| Focus | 2px `ring` around the whole item (radius `lg`) |
+| Pressed (touch) | The item dims to 60% for 100ms |
+| Entrance | The cover reveals upward (a clip from the bottom, 900ms `expo.out`) and the meta, title and description fade up 24px, 650ms `power3.out`, 80ms stagger, once, at 85% down the viewport (§14.0) |
+
+Reduced motion: no scale, no entrance (shown in the final state); colour changes
+stay.
+
+**Responsive.** Same stack everywhere; titles scale with `display-lg` /
+`display-xl`; on phones the latest post's title drops to `display-lg`.
+
+**Accessibility.** The link's accessible name is the title; the date, reading time
+and tag are read as part of the item. The cover is decorative (`alt=""`; the title
+names the post). Items are `<li>` in an `<ol>` (newest first). Tags are not links
+inside the item (no links inside links); they are linked on the post and tag pages.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.28 Post header
+
+**Purpose.** The top of a post page (§14.14): what it is, when, how long, and
+what it's about.
+
+**Anatomy** (top to bottom): back link → meta row → title → description → tags.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Back link | "← All posts", text roll (§13.3, standalone), to `/`; 112px below the top of the viewport (clears the capsule) |
+| Meta row | Mono `label`, `muted`: `<time>` `2026-10-20` · "6 MIN READ" (reading time, computed: words ÷ 200, rounded up, minimum 1); when the post has `updated`, " · UPDATED 2026-11-02" follows. 24px below the back link |
+| Title | The section heading's look (§14.0): Bebas at `display-lg`, uppercase, `foreground`, letters rising on load; max 20ch per line break; the page's one `<h1>` |
+| Description | `lead` step, `muted`, max 52ch, 24px below the title |
+| Tags | Linked Tags (§13.4), 8px gap, 24px below the description |
+
+**Motion.** The title's letters rise as in the section heading (§14.0), once on
+load; the meta row, description and tags fade up 16px, 100ms later. Reduced
+motion: final state.
+
+**Responsive.** The title scales with `display-lg` (3 → 5rem); the meta row wraps
+onto two lines on phones with the same separators.
+
+**Accessibility.** The back link is the first link after the skip link. The meta
+row is plain text with a `<time>`; "6 MIN READ" is read as "6 minute read" through
+an `aria-label` on the element.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.29 Prose
+
+**Purpose.** The typography for a post's body, written in MDX, in both themes.
+Everything an author can write without a component.
+
+**Values** (the reading column is at most 68ch, §3; sizes below are **proposed
+for review**, built from the existing steps):
+
+| Element | Treatment |
+|---|---|
+| Paragraph | `body` step (17px), leading **1.7** (longer than the 1.55 default, for reading), `foreground`, 24px between paragraphs |
+| `h2` | Text semibold, **1.75 → 2.25rem**, leading 1.15, tracking `-0.02em`; 64px above, 16px below |
+| `h3` | The `h3` step (1.375 → 1.75rem); 40px above, 12px below |
+| `h4` | `body` semibold; 32px above, 8px below |
+| Heading anchor | A mono `#` (`muted`) appears 8px left of `h2`–`h4` on hover and focus-within (150ms); it is a link to the heading's own address; headings have `id`s and `scroll-margin-top: 96px` |
+| Link | Inline underline (§13.3); external links add the `↗` |
+| Strong, emphasis | Semibold 600; italic |
+| Lists | Bullets and numbers in `muted`; 8px between items; 24px indent; nested lists 16px more |
+| Blockquote | A 2px `border` rule on the left, 20px of padding, `foreground` at 80%, italic; no background |
+| Inline code | JetBrains Mono at 0.9em, `surface` fill (`surface-raised` on `background-alt`), padding 2px 6px, radius `sm` |
+| Horizontal rule | 1px `border`, 48px above and below |
+| Image / figure | Full column width, radius `lg`, `surface` fill while loading; a caption in `sm`, `muted`, 12px below; images may be wider than the column up to the wide container on `lg+` when marked wide (`#wide`) |
+| Table | In a wrapper that scrolls sideways; header row in mono `label` `muted`; 1px `border` lines between rows; cells padded 12px 16px; no zebra stripes |
+| Footnotes | Not supported at launch |
+
+- Code blocks are §13.30; callouts §13.31; the rich blocks are §13.38–13.47 — all are custom blocks of `docs/blog-markdown.md`.
+- Light and dark use the same tokens; nothing is a raw colour.
+
+**Motion.** Prose does not animate on its own; images and figures fade in as they
+load (200ms). The heading anchor's `#` fades (150ms).
+
+**Responsive.** The same sizes; images, tables and code blocks never push the
+page sideways (they scroll inside themselves).
+
+**Accessibility.** Headings keep their order (`h2` under the page's `h1`); the
+build warns about a skipped level. Images need `alt` text (the build fails on an
+image with none, unless it is marked decorative). Links never rely on colour alone.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.30 Code block
+
+**Purpose.** Code in a post, highlighted at build time (Shiki, no JavaScript sent
+for the colours).
+
+**Anatomy.** A frame → a header row (file name or language on the left, copy
+button on the right) → the code.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Frame | `surface` (`surface-raised` on `background-alt`), 1px `border`, radius `lg`, 24px between it and the prose |
+| Header row | 40px tall, 16px padding; the file name from the code fence's `title` (e.g. ` ```ts title="proxy.ts" `) or, without one, the language, in mono `label` `muted`; a 1px `border` line below |
+| Code | JetBrains Mono, 0.875rem, leading 1.65, padding 16px 20px; no wrapping: the block scrolls sideways inside the frame |
+| Colours | Shiki with two themes at once, switched by the site's light/dark class: **`github-light`** and **`github-dark`** (neutral greys and a blue that sit with our tokens), with the theme's background replaced by the frame's `surface`. Every token pair must meet 4.5:1 on its background; the build step checks them and changes a theme colour that fails |
+| Line numbers | Off by default; on with `showLineNumbers` on the fence: `muted`, right-aligned in a 32px gutter, not selectable |
+| Line highlight | ` ```ts {2,4-6} `: those lines get a `primary` tint at 8% and a 2px `primary` rule on the left |
+| Copy button | An icon button (§13.2) at 32px (44px hit area), Lucide `copy` 16px that becomes `check` 16px for 2s after copying; `aria-label` "Copy code" and an `aria-live="polite"` region that says "Copied" |
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Copy button, fine pointer | Hidden until the block is hovered or has focus inside (opacity, 150ms); always visible on touch and when focused |
+| Hover on the button | `surface-raised` background |
+| Focus | The scrolling code area is focusable (`tabindex="0"`, `role="region"`, labelled by the file name/language) so it can be scrolled with the keyboard; 2px `ring` |
+
+**Motion.** The copy icon swap uses the icon-button cross-fade (§13.2, 200ms).
+Reduced motion: opacity only.
+
+**Responsive.** The same everywhere; the header row's text is truncated with an
+ellipsis, never wraps.
+
+**Accessibility.** Selecting and copying by hand works as usual (line numbers are
+not selectable). Colour is never the only way to see a highlighted line (the
+rule). The copy result is announced.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.31 Callout
+
+**Purpose.** A short aside inside a post, written `<Callout type="tip" title="…">`
+in MDX.
+
+**Variants.**
+
+| Type | Icon (Lucide, 20px) | Label (mono) | Icon colour |
+|---|---|---|---|
+| `note` | `info` | NOTE | `primary-text` |
+| `tip` | `lightbulb` | TIP | `primary-text` |
+| `warning` | `triangle-alert` | WARNING | `danger` |
+
+**Values.** `surface` fill (`surface-raised` on `background-alt`), radius `lg`,
+padding 20px (24px from `sm`), no border; icon and mono label on one line, the
+optional `title` in semibold `body` below it, then the content in `body` at the
+prose leading. 32px above and below. A callout never holds a code block taller
+than 12 lines (the build warns).
+
+**Motion.** None.
+
+**Responsive.** The same everywhere.
+
+**Accessibility.** The label is text, so the type is never conveyed by colour or
+icon alone. A callout is a `<aside>` with `role="note"`; it does not interrupt
+reading order.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.32 Table of contents
+
+**Purpose.** Lets a reader see the shape of a long post and jump to a part of it.
+
+**Anatomy.** A mono `label` "ON THIS PAGE" (`muted`) and a list of the post's `h2`
+headings, with their `h3`s indented. Shown only when the post has **at least 3**
+headings.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Desktop (≥ `lg`) | A sticky rail in columns 10–12 (§14.14), `top: 112px`, max height `100dvh − 144px` with its own scroll |
+| Items | `sm` step, leading 1.45, 8px between items; `h3` items indented 16px; `muted` |
+| Active item | The heading nearest the top of the viewport: `foreground`, and a 2px `primary` rule on the left of the list that **moves** to it (a shared-layout animation, default spring, §8) |
+| Hover (fine pointer) | `foreground`, 150ms |
+| Phones and tablets (< `lg`) | A native `<details>`/`<summary>` under the header: `surface` fill, radius `md`, 48px summary row "On this page" with a Lucide `chevron-down` that turns 180° when open; the open list is the same items |
+
+**Motion.** Clicking an item scrolls to the heading through Lenis (`ease-in-out`,
+1.2s, §14.0) and moves focus to it (`tabindex="-1"`). The active rule moves with
+the spring. Reduced motion: an instant jump; the rule moves without the spring.
+
+**Accessibility.** `<nav aria-label="On this page">`; the active item has
+`aria-current="location"`; the disclosure is keyboard-operable by default; links
+are real anchors to the headings' `id`s.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.33 Post navigation
+
+**Purpose.** The way on from a post: the previous (older) and next (newer) post.
+
+**Anatomy.** Two blocks side by side from `md`: **Previous** on the left, **Next**
+on the right (right-aligned). Each: a mono `label` ("PREVIOUS" / "NEXT") with a
+Lucide `arrow-left` / `arrow-right`, then the post's title in the `h3` step.
+Each block is one link.
+
+**Values.** Wide container; a 1px `border` line above and below the pair;
+padding 32px; the blocks sit in a 2-column grid with a 1px `border` line between
+them. With only one neighbour, it takes its own side and the other is empty.
+Posts are ordered by `date`; the first post has no Previous and the latest has no
+Next (it does not wrap).
+
+**States.** Hover (fine pointer): the title turns `primary-text` and the arrow
+nudges 4px toward its direction (150ms `ease-out`). Focus: 2px `ring`, radius `md`.
+
+**Responsive.** Below `md` the blocks stack, Previous above Next, separated by a
+1px `border` line.
+
+**Accessibility.** `<nav aria-label="More posts">`; each link's name is "Previous
+post: <title>" / "Next post: <title>".
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.34 Newsletter box
+
+**Purpose.** Lets a reader subscribe to new posts by email (Q16). It appears under
+the post list on the blog home and under every post. Subscribers are held in a
+Resend Audience; the list is sent to from Resend (D82, 9b.7).
+
+**Anatomy.** A panel: mono `label` "NEWSLETTER" → title → one line of text → the
+form (email field + submit) → a helper line.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Panel | `surface` (`surface-raised` on `background-alt`), radius `xl`, padding 32px (24px phones); wide container, content max 36rem |
+| Title | Text semibold at the `title` step (2 → 3rem), `foreground`, 8px below the label |
+| Text | `body`, `muted`, 12px below the title |
+| Field | Email input, filled (§13.15), 48px, label "Email" above (visible); no other fields |
+| Button | `primary` `md` Button "Subscribe" (§13.1), beside the field from `sm` (8px gap), full width below it on phones |
+| Helper | `sm`, `muted`, 12px below: a line about unsubscribing |
+| Spam protection | A honeypot field hidden from people, plus the rate limit the contact form has (D69); no CAPTCHA |
+
+**Copy** (placeholder wording, for the owner to approve here; it lives in
+`content/copy.ts`):
+
+| | Text |
+|---|---|
+| Title | "New posts, in your inbox" |
+| Text | "A short email when I publish something new. Nothing else." |
+| Helper | "You can unsubscribe at any time. Prefer a feed? Use the RSS link in the footer." |
+| Success | "Check your inbox. I've sent you a link to confirm your address." |
+| Error | "That didn't work. Please try again in a moment." |
+| Invalid email | "Enter a valid email address." |
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Default | As above |
+| Field | The filled-field states of §13.15 (hover, focus, error with `circle-alert` and `aria-invalid`) |
+| Sending | The button's loading state (§13.1); the field is disabled |
+| Success | The form cross-fades (300ms) into a message with Lucide `circle-check` in `secondary` and the success copy; the address is not shown again |
+| Error | An alert above the field (`danger` text, `circle-alert`, `role="alert"`), the typed address kept |
+| Already subscribed | Looks like success (the answer must not reveal who is on the list) |
+
+**How it works** (a build note, not visual): the form posts to the blog's own API;
+the address is **not** added to the Audience until the reader opens the
+confirmation link in the email (double opt-in). The link goes to the page in
+§14.16. Resend's broadcast emails carry their own unsubscribe link.
+
+**Motion.** The panel uses the default entrance (§14.0); the success cross-fade as
+above. Reduced motion: no entrance, instant swap.
+
+**Responsive.** Field and button side by side from `sm`; stacked below.
+
+**Accessibility.** A visible `<label>`; the helper and errors are tied with
+`aria-describedby`; the status message is in a `role="status"` region; the
+success message receives focus. The honeypot is `aria-hidden`, `tabindex="-1"`,
+`autocomplete="off"`.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.35 Reaction bar
+
+**Purpose.** Like and share a post, directly under its text (§14.14).
+
+**Anatomy.** A row: a **Like** button (Lucide `heart` 20px and the count in mono),
+then a **Share** button (`secondary` pill, `sm`, Lucide `share-2`, label "Share").
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Like | A pill button, 40px tall, `surface` fill, 1px `border`, `foreground` heart and count (`label` step); liked: heart filled in `primary-text`, border `primary` at 40% |
+| Share | A `secondary` Button (§13.1), size `sm`, `magnetic={false}` |
+| Bar | 32px below the post's text, a 1px `border` line above it, 16px padding, gap 12px |
+
+**Behaviour.**
+
+- **Like needs no account** (owner, 2026-10-07): one like per browser, kept in a
+  first-party cookie that the server stores only as a hash; repeated clicks toggle
+  it. The count updates at once and is corrected from the server's answer. The
+  server rate-limits likes.
+- **Share:** on devices with the system share sheet (`navigator.share`), Share
+  opens it with the post's title and address; elsewhere it opens a small menu
+  (a popover of `surface-raised`, radius `md`, §13.7's materials): **Copy link**,
+  **Share on X**, **LinkedIn**, **WhatsApp**, **Email**, each a text link with its
+  icon. Copy link turns its label into "Link copied" for 2s (a `role="status"`
+  region announces it).
+- Shared addresses are the post's canonical address (no tracking parameters).
+
+**Motion.** Liking pops the heart: `scale 1 → 1.25 → 1` with the default spring
+(`bounce: 0.3`, 400ms) and the count rolls to its new value (200ms). The share
+menu materializes as the Sites menu does (§13.7). Reduced motion: no pop, no roll.
+
+**Accessibility.** The Like button is a toggle (`aria-pressed`) named "Like this
+post" with the count in its label ("12 likes"); the Share menu follows the menu
+pattern (Escape closes, focus returns to the button).
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.36 Reader sign-in
+
+**Purpose.** Readers sign in with **GitHub or Google** to comment and to like
+comments (Q16, D83). It is the only account a visitor ever has; the owner's admin
+sign-in is separate (D71).
+
+**Anatomy.** Two parts: the **sign-in panel** and the **signed-in chip**.
+
+**Sign-in panel** (in the comments, §13.37, and in a native `<dialog>` when a
+signed-out reader tries to like a comment or reply):
+
+| Part | Value |
+|---|---|
+| Panel | `surface` (`surface-raised` on `background-alt`), radius `lg`, padding 24px |
+| Title | "Sign in to comment" in the `h3` step; the dialog's title is the same |
+| Text | `sm`, `muted`: "We use your name and picture from GitHub or Google. Your email is never shown." with a link to the privacy page (§14.18) |
+| Buttons | Two `secondary` Buttons, size `md`, each with the provider's logo (Simple Icons, 18px) and "Continue with GitHub" / "Continue with Google"; side by side from `sm`, stacked on phones |
+
+**Signed-in chip.** An avatar (28px, radius `full`, the provider's picture, else
+the initial on `surface`) and the reader's name (`sm`, medium 500) with a ghost
+`sm` button "Sign out"; a "Delete my account" text link inside a small menu on the
+name (it removes the account and anonymises the reader's comments as "Deleted
+user", after a confirm dialog, §13.23's pattern).
+
+**Flow.** The buttons start the provider's sign-in; the reader comes back to the
+same post at the same place (the address is kept through the sign-in). A cancelled
+or failed sign-in shows an alert above the buttons (`danger` text, `circle-alert`,
+`role="alert"`): "Sign-in didn't complete. Please try again."
+
+**Motion.** The dialog scales in as the other dialogs do (§13.23, 200ms
+`ease-out`). Reduced motion: fade only.
+
+**Accessibility.** The dialog is a native `<dialog>` (focus trapped, Escape
+closes, focus returns to the control that opened it); the provider buttons say
+what they do ("Continue with GitHub"); the logos are decorative.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.37 Comments
+
+**Purpose.** Readers discuss a post under it (owner, 2026-10-07: sign in to
+comment; comments appear at once and are moderated afterwards).
+
+**Anatomy.** A heading "Comments" with the count (`h3` step, mono count) → the
+**composer** (or the sign-in panel, §13.36) → the **list**.
+
+**Composer** (signed in): the reader's avatar (36px) beside a textarea (filled,
+§13.15: min height 96px, grows to 240px) labelled "Add a comment", a word counter
+(`sm`, `muted`; turns `danger` over the limit) and a `primary` `sm` "Post comment"
+Button. Plain text only; line breaks kept; web addresses become links with
+`rel="nofollow ugc noopener"`; HTML is never rendered. **Limit: `COMMENT_MAX_WORDS`
+(placeholder 120, the owner's to set)**, a rate limit per reader, and one
+unanswered duplicate is refused.
+
+**A comment:** avatar (32px) · name (semibold) and, for the owner's own account, a
+mono Tag "AUTHOR" · the time (`sm`, `muted`, relative, "3 days ago", with the full
+date in a `title` and `<time datetime>`) · the text (`body`) · actions in a row
+(`sm`, `muted`, 12px gap): **Like** (heart + count, as §13.35 but small), **Reply**,
+**Report** (Lucide `flag`; signed-in only; opens a confirm that sends one report),
+**Delete** (own comments only, with a confirm). A **reply** is indented 40px, one
+level deep (a reply to a reply attaches to the same parent).
+
+**List.** Newest first, 20 at a time with a ghost "Load more comments" button; a
+reply thread is collapsed behind "Show 3 replies" when it has more than 2.
+
+| State | Treatment |
+|---|---|
+| No comments | "No comments yet. Be the first." in `muted` |
+| Loading | Three skeleton rows (`surface` bars) |
+| Error | An alert (`danger`, `circle-alert`, `role="alert"`) with a "Try again" text link; the post is unaffected |
+| Posting | The Post button's loading state; the textarea is disabled |
+| Posted | The comment appears at the top with a 300ms fade; the composer clears; focus stays in the composer |
+| Hidden by the owner | A comment with replies shows "This comment was removed." in `muted`; one without disappears |
+| Comments off (`comments_enabled = false`) | The whole section is left out |
+
+**Moderation.** The owner hides, shows or deletes any comment, and can ban a
+reader, in the admin (§13.50); the owner is emailed about each new comment
+(Resend, the contact form's pattern).
+
+**Motion.** New comments fade in; counts roll (§13.35). Reduced motion: none.
+
+**Responsive.** Replies are indented 24px on phones; actions wrap.
+
+**Accessibility.** The list is a list (`<ul>`), each comment an `<article>` with
+the author's name as its label; the composer has a visible label; the counter is
+tied with `aria-describedby`; errors use `role="alert"`; nothing depends on
+hover.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+**Rich blocks (§13.38–13.47).** The custom blocks a post can contain beyond plain
+prose, written in the format of `docs/blog-markdown.md` (§2) and **entered in the
+block editor with forms, never typed by hand** (§13.48). They share these rules:
+
+- They sit in the reading column (§14.14) unless a spec says otherwise, 40px above
+  and below.
+- Their entrance runs **once**, when the block is 70% into the viewport (§14.0's
+  trigger); the content is in the HTML from the start and is only revealed by the
+  animation, so search engines and screen readers get all of it.
+- **Reduced motion:** every block shows its final state at once; replay controls
+  stay, and the replay uses no movement.
+- Colours are tokens (§2) except where a spec says otherwise; every text colour
+  meets 4.5:1 on its background in both themes.
+- A block that fails to parse shows its source as a plain code block and, in the
+  editor, an error on the block.
+
+### 13.38 Steps
+
+**Purpose.** A story or procedure told as a vertical timeline that fills in as the
+reader scrolls (`steps`).
+
+**References.** Owner's reference posts (yokwejuste.me): step-by-step processes.
+In our motion language (§8, §14.6).
+
+**Anatomy.** An ordered list: a **rail** on the left (a 2px `border` line) and for
+each step a **marker** (a 40px circle holding a 20px Lucide icon, or the step
+number when no icon), a mono `label` "STEP 01", the **title** (`h3` step) and the
+**text** (`body`, inline markdown).
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Layout | Markers centred on the rail; text column 24px to the right of it; 48px between steps |
+| Marker | `surface` fill, 1px `border`, icon `muted` (inactive) |
+| Active marker | `primary` fill, `primary-foreground` icon, scaled `1 → 1.08 → 1` with the default spring |
+| Rail fill | A 2px `primary` line that grows down the rail as the reader scrolls (scrubbed), reaching each marker as its step becomes active |
+
+**Motion.** GSAP ScrollTrigger: each step fades up 16px (650ms `power3.out`) as it
+enters; the rail's fill is **scrubbed** to scroll; a step is *active* while it is
+the nearest to 40% down the viewport, and earlier steps stay filled. Reduced
+motion: all markers filled, no fade.
+
+**Responsive.** Marker 32px on phones; the same layout.
+
+**Accessibility.** An `<ol>`; markers and the rail are `aria-hidden`; the number is
+in the label text, so the order never depends on the animation.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.39 Compare
+
+**Purpose.** A titled comparison table with an optional recommended column
+(`compare`).
+
+**Anatomy.** A card: a title row (mono `label` "COMPARE" and the title in the
+semibold `body`), then a table: a header row and body rows; the first column names
+the row.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Card | `surface` (`surface-raised` on `background-alt`), radius `lg`, padding 20px (24px from `sm`) |
+| Header row | Mono `label`, `muted`; a 1px `border` line below |
+| Rows | Cells padded 12px 16px; 1px `border` lines between rows; first column `foreground` medium 500, the rest `muted` → `foreground` on hover |
+| Recommended column | Its header carries a mono Tag "RECOMMENDED" (§13.4) and a 2px `primary` rule under it; its cells have a `primary` tint at 6% |
+| Hover row (fine pointer) | `surface-raised` background, 150ms |
+
+**Motion.** Rows fade up 8px with a 60ms stagger when the block enters (400ms
+`ease-out`); the recommended column's tint fades in after the last row (300ms).
+
+**Responsive.** The table scrolls sideways inside the card on phones with the first
+column sticky and a soft fade at the scrolling edge.
+
+**Accessibility.** A real `<table>` with `<th scope>`; the scroll area is focusable
+(`tabindex="0"`) and labelled by the title; "Recommended" is text.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.40 File tree
+
+**Purpose.** A folder structure with notes on its entries (`filetree`).
+
+**Anatomy.** A `surface` frame (radius `lg`, padding 16px 20px) holding a tree:
+rows of **icon** (Lucide `folder` / `folder-open` / `file`, `file-code`,
+`file-json` by extension, 16px, `muted`), the **name** (JetBrains Mono, 0.875rem)
+and an optional **note** (mono `sm`, `muted`).
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Row | 32px tall, indent 20px per level, radius `sm` |
+| Highlighted entry (`+`) | Name in `primary-text`, row tinted `primary` at 6% |
+| Notes | A second column from `sm` (aligned across rows); on phones under the name |
+| Hover (fine pointer) | Row `surface-raised` at 70%, 150ms |
+
+**Behaviour.** Folders with children are toggles (open by default): clicking the
+row, or Enter/Space, collapses it (the chevron turns 90°, 200ms; children height-
+animate); arrow keys move between rows as in the tree pattern.
+
+**Motion.** On entering, rows reveal top to bottom: `opacity 0 → 1`, `x −8 → 0`,
+30ms stagger, 400ms `ease-out`.
+
+**Accessibility.** `role="tree"` with `treeitem`s, `aria-expanded` on folders;
+notes are part of each item's text; icons are decorative.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.41 Typewriter code
+
+**Purpose.** Code that types itself out with captions on chosen lines
+(`typewriter`): for walking through a snippet.
+
+**Anatomy.** A code frame as §13.30 (header row with the file name, copy button)
+plus a **replay** icon button (Lucide `rotate-ccw`) and, while it types, a ghost
+`sm` **Skip** button. Captions sit on their own rows under their line.
+
+**Values.** Code as §13.30 (Shiki colours, mono 0.875rem, leading 1.65). A caption
+row: `sm`, `muted`, a 14px Lucide `corner-down-right` before the text, 8px above the
+next code line; **space for every caption is reserved from the start**, so nothing
+below ever jumps. The line being typed has a `primary` tint at 6% and a 2px
+`primary` rule at its left; a block caret (`primary`, 2px wide) follows the typing.
+
+**Motion.** Starts when the block is 70% in view: 18ms per character, 120ms between
+lines; a caption fades in (200ms) when its line finishes. Skip, a click on the
+block, or the replay button's second press completes it at once; replay clears and
+types again. Reduced motion: complete from the start, captions visible, no caret.
+
+**Accessibility.** All the code and captions are in the page from the start (the
+animation only reveals them); the caret and tint are decorative; the controls have
+labels; copy copies the whole code, not just what has typed.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.42 Code group
+
+**Purpose.** Several files or variants in one frame, as tabs (`codegroup`).
+
+**Anatomy.** The code frame of §13.30 whose header row holds a **tab list** (mono
+`label` tabs named after each file, else the language) with the copy button at the
+right.
+
+**Values.** Tabs 40px tall, 12px padding; the selected tab is `foreground` with a
+2px `primary` underline; others `muted`. The underline moves with a shared layout
+animation (default spring); the code swaps with a 150ms cross-fade. Copy copies the
+selected tab. A group with one tab is a plain code block.
+
+**Accessibility.** The tab pattern: `role="tablist"`, `tab`, `tabpanel`, arrow keys
+between tabs, the panel is focusable for scrolling (§13.30).
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.43 Diff
+
+**Purpose.** A before-and-after view of code (`diff`).
+
+**Anatomy.** The code frame of §13.30 with a gutter column of `+`, `−` or a space.
+
+**Values.** Added lines: a `secondary` tint at 12% and a `+` in `secondary`;
+removed lines: a `danger` tint at 10% and a `−` in `danger`; unchanged lines plain.
+The signs make the meaning independent of colour (§10). (**Proposed:** this uses
+`secondary` and `danger` outside §2's stated uses, for what they mean here —
+success and error — and is flagged for review.) The copy button copies the **new**
+version (added and unchanged lines), labelled "Copy new code".
+
+**Motion.** On entering, added lines flash in (the tint 0 → 12%, 400ms, 60ms
+stagger) and removed lines fade to 55% opacity. Reduced motion: final state.
+
+**Accessibility.** Each line's sign is real text (not selectable) with an
+`aria-label` of "added" / "removed" on the gutter cell.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.44 Terminal
+
+**Purpose.** A terminal session: commands typed, output printed (`terminal`).
+
+**Anatomy.** A window: a title bar (the `title`, or "terminal", in mono `label`; a
+copy button and a replay button at the right) and the body.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Window | Radius `lg`, 1px `border`; **always dark**, in both themes (a terminal reads as dark): fill `#0A0A0A`, text `#F5F5F7`, output `#A1A1A6`, comments `#8E8E93` italic, the `$` prompt `#60A5FA`; JetBrains Mono 0.875rem, leading 1.65, padding 16px 20px |
+| Title bar | 40px, `#171717`, 1px line below `#262626`, label `#A1A1A6` |
+| Caret | A block, `#60A5FA`, blinking at 1s (steps); static in reduced motion |
+
+**Motion.** At 70% in view each `$` command types (22ms per character); its output
+then appears line by line (40ms apart, after a 120ms pause); the next command
+follows after 400ms. Replay re-runs it; Skip or a click completes it. Reduced
+motion: complete from the start.
+
+**Behaviour.** The prompt `$` is not selectable; **copy puts only the commands on
+the clipboard**, each on its own line.
+
+**Accessibility.** The whole session is in the page from the start; the window is
+a `role="region"` labelled by its title; the controls have labels; the animation
+adds nothing that isn't already text.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.45 Flow canvas
+
+**Purpose.** An architecture or process diagram: boxes, groups and arrows
+(`flow`).
+
+**Anatomy.** A frame (`surface`, radius `xl`) holding an SVG canvas: **nodes**
+(rounded boxes with an icon chip, a label and an optional description), **groups**
+(dashed containers with a mono label) and **arrows** (curved or elbow paths with
+heads and optional labels).
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Node | `surface-raised`, 1px `border`, radius `md`, padding 12px 16px; label semibold `sm`, description `sm` `muted`; an icon chip (28px, radius `sm`) tinted with the node's style colour at 14% and the icon in that colour |
+| Group | 1px dashed `border`, radius `lg`, a mono `label` at its top left; its children laid out by `dir` |
+| Arrow | 1.5px `muted` stroke, a small arrowhead; its label sits in a pill (`surface`, `label` step) at the middle |
+| Style colours | `blue` (`primary`), `green` (`secondary`), plus **diagram tints** `orange #F97316`, `purple #8B5CF6`, `teal #14B8A6`, `red #EF4444`, `gray` (`muted`); dark mode lightens each by one step (**proposed values**; they only tint chips and icons, text stays `foreground`, so contrast holds) |
+| Size | The canvas keeps its drawn proportions (a viewBox) and scales to the column; the frame never goes below 640px wide |
+
+**Motion.** At 70% in view the nodes fade in with `scale 0.96 → 1` (60ms stagger,
+400ms `ease-out`), then the arrows **draw themselves** in the order they were
+written (stroke-dashoffset, 600ms `ease-in-out` each, 120ms apart), their labels
+fading in as they finish. **Hover or focus on a node** lights its arrows
+(`primary`) and dims the rest to 40% (150ms). Reduced motion: complete from the
+start; the highlight still works without movement.
+
+**Responsive.** Below 640px the frame scrolls sideways (soft fade at the edges) so
+the diagram stays legible.
+
+**Accessibility.** The SVG has `role="img"` and a label ("Diagram: …" from the
+block's title or its first node); a visually hidden list under it spells out every
+arrow ("Organization → Folders: contains"); nodes are focusable (`tabindex="0"`)
+for the highlight.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.46 Quiz
+
+**Purpose.** A short multiple-choice quiz that checks the reader got the point
+(`quiz`).
+
+**Anatomy.** A card (`surface`, radius `lg`, padding 24px / 32px from `sm`): a
+mono `label` "QUESTION 1 / 3" → the question (`h3` step) → the options → the
+explanation → a Next button; after the last question, the result.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Option | A button row, 48px tall minimum, radius `md`, `surface-raised` fill, 1px `border`, a mono letter badge (A–D) at the left, text `body`; 8px apart |
+| Hover (fine pointer) | Border `muted` at 50%, 150ms |
+| Chosen, right | Border `secondary`, a Lucide `circle-check` in `secondary`, and "Correct" in text |
+| Chosen, wrong | Border `danger`, `circle-x` in `danger` and "Not quite"; the right option is then also marked |
+| Explanation | The `E:` text in `body`, in a `surface-raised` panel (radius `md`, padding 16px), appears under the options |
+| Next | `primary` `md` Button "Next question" (last: "See result") |
+| Result | "You got 2 of 3." with a line of copy by score, and a ghost "Try again" button |
+
+**Behaviour.** One answer per question, locked once chosen; progress is not saved
+(a reload starts again). Nothing is sent anywhere.
+
+**Motion.** Options press to `scale(0.98)`; the explanation opens by height and
+opacity (250ms `ease-out`); questions cross-fade with a 12px horizontal slide
+(200ms). Reduced motion: instant.
+
+**Accessibility.** A `role="radiogroup"` (arrow keys, Enter to choose); after an
+answer, focus moves to the explanation (`role="status"`); right and wrong are
+shown with icons and text, never colour alone.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.47 Agent session
+
+**Purpose.** Shows a development session with an AI agent (a Claude Code session)
+as a replayable transcript (`session`, D84).
+
+**References.** Owner (2026-10-07): sessions from their agents, embedded in a post.
+The look is the terminal's (§13.44).
+
+**Anatomy.** A dark window as §13.44: a **header** (the title; a mono `label`
+"CLAUDE CODE"; "14 turns · 9 tool calls"), the **transcript**, and a **control
+bar** at the bottom.
+
+**The transcript** is the turns chosen in the editor (`from`–`to`), in order:
+
+| Turn part | Look |
+|---|---|
+| Your prompt | A row with a mono `label` "YOU", the text in `#F5F5F7`, a 2px `#60A5FA` rule at the left |
+| The agent's reply | A mono `label` "AGENT" and the text (a markdown subset: paragraphs, lists, inline code, links) in `#F5F5F7` |
+| A tool call | A collapsed row: a chevron, the tool's name and a one-line summary ("Edit · proxy.ts · +12 −3", "Bash · pnpm test"); opened (click or Enter), it shows the command and its output, or the diff (§13.43 styling in the dark window), cut at 40 lines with "Show all" |
+| Redactions | A `[redacted]` pill (`#262626`, mono) where the editor hid a secret, path or address |
+| The agent's thinking | Left out by default; the editor can include it, shown dimmed and collapsed |
+
+**Values.** Max height 560px (the transcript scrolls inside, the header and
+control bar stay in view), turns separated by 20px, text mono 0.875rem. **Control
+bar:** Play/Pause, Previous and Next turn, a speed toggle (1× / 2×), a progress
+bar you can click, and "Expand all".
+
+**Behaviour.** At first it shows the **first 6 turns** and a "Play session"
+button, so a long session never dominates the page. **Play** reveals the turns one
+by one (the prompts type at 22ms per character, replies appear line by line, tool
+calls appear collapsed); Pause stops; Previous/Next step one turn; "Expand all"
+shows everything. Never autoplays.
+
+**Motion.** A revealed turn fades up 8px (250ms `ease-out`); the transcript
+scrolls to keep the newest turn in view (smoothly; instant in reduced motion).
+Reduced motion: Play reveals turns without typing or movement.
+
+**Accessibility.** The transcript is a real list in the page from the start (the
+collapsed rows are `<details>`); the controls have labels and are keyboard
+operable; the window is a labelled `region`; nothing autoplays.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.48 Blog editor
+
+**Purpose.** Where the owner writes a post **without typing markdown**: a list of
+**blocks**, each filled in with a simple form, with a live preview. It produces the
+custom markdown of `docs/blog-markdown.md` (stored in `blog_posts.content`).
+
+**References.** Owner (2026-10-07): "a simpler method of getting input from the
+user and then putting it in the markdown format", unlike dev.to's markdown box.
+Our own editor (D83), in the admin's plain, functional style (§13.18).
+
+**Anatomy.** An admin screen (§14.19) in the admin shell (§13.18):
+
+1. **Post details**: the title (a large text field), the description, the address
+   (slug, following the title as in §13.21), tags (tag list, §13.21, lowercase
+   kebab-case), the cover (the upload field, §13.22, plus "Use a generated cover"),
+   and a **Settings** disclosure: published date, comments on/off, canonical
+   address, series name.
+2. **Tabs:** **Write** · **Preview** · **Markdown**. From `xl` (1280px) Write and
+   Preview sit side by side, the preview scrolling with the block being edited.
+3. **The block list** (Write): the blocks in order.
+4. **The save bar** (§13.25), with the post's status ("Draft", "Published",
+   "Unsaved changes", "Saved"), Save, and **Publish** / **Unpublish**, and a
+   "More" menu: Publish to DEV (§13.49), Duplicate post, Delete post.
+
+**A block** is a row: a drag handle, a mono Tag with the block's type, the block's
+**form**, and a small toolbar (Move up, Move down, Duplicate, Delete; Delete asks
+first, §13.23). Blocks reorder by dragging (Motion `Reorder`, as the admin lists,
+§13.19) **or** with the Move buttons, so a keyboard works. Between blocks and at the
+end sits an **insert** button (a "+" icon button that appears on hover/focus and
+always at the end).
+
+**Inserting.** The insert button, or typing `/` at the start of an empty paragraph,
+opens a menu (a popover, `surface-raised`, radius `md`, with a search field),
+grouped:
+
+| Group | Blocks |
+|---|---|
+| Text | Paragraph, Heading, Quote, List, Callout, Divider |
+| Media | Image, Code, Code group, Diff |
+| Interactive | Steps, Compare, File tree, Terminal, Typewriter code, Quiz, Flow canvas |
+| Agent | Agent session |
+| Advanced | Raw markdown |
+
+**The forms** (every field is an admin field, §13.21; a long list can be pasted
+in):
+
+| Block | Fields |
+|---|---|
+| Paragraph | An auto-growing text area with a toolbar (Bold, Italic, Link, Inline code, Bulleted list, Numbered list) and the shortcuts Ctrl/⌘ B, I, K; it stores markdown, and the Markdown tab shows it |
+| Heading | Level (2, 3 or 4) and text |
+| Quote, List | Text area; list items one per line |
+| Callout | Type (Note, Tip, Warning) and text |
+| Image | Upload (§13.22) or address, **alt text** (required unless "Decorative" is on), caption, "Wide" switch |
+| Code | Language (searchable list), file name, the code (mono text area), highlighted lines (e.g. `2, 4-6`), line numbers switch |
+| Code group | Tabs: add, rename, reorder; each tab has language, file name and code |
+| Diff | Two text areas, **Before** and **After**, with the computed diff shown below; or switch to editing the diff lines directly |
+| Terminal | Rows, each a type (Command, Output, Comment) and text; "Paste a terminal session" turns pasted `$ …` lines into rows; title |
+| Typewriter | Language, file name, the code, and a **caption** field under each line you click |
+| File tree | A tree editor: rows you indent with Tab / Shift+Tab, folder switch, note field, highlight switch; "Paste `tree` output" imports the text |
+| Steps | Cards you reorder: icon (a searchable Lucide picker), title, text |
+| Compare | A small grid: add or remove rows and columns, the first row is the header, choose the recommended column, title |
+| Quiz | Questions: the question, the options (a radio marks the right one, 2–4 options), the explanation; add and reorder questions |
+| Flow canvas | See below |
+| Agent session | See below |
+| Raw markdown | A mono text area (an escape hatch; checked on save) |
+
+**The flow canvas editor.** A canvas (grid background) and a side panel. **Add
+box** places a node; drag it where you want it; click it to edit its label, icon,
+colour (the style names, as small swatches), description, and whether it is a group
+or inside one; **drag from a box's edge dot to another box to draw an arrow**; click
+an arrow to label or delete it; "Auto-arrange" lays the boxes out in rows. Boxes
+and arrows are also listed in the panel so the diagram can be edited without a
+pointer.
+
+**The agent session editor.** "Upload a session" accepts a Claude Code `.jsonl`
+file (from `~/.claude/projects/`). It then shows (1) the turns as a checklist with
+a preview of each (choose a range, or pick turns; tool calls are listed under
+their turn), (2) options: include the agent's thinking (off), and (3) a **redaction
+review**: everything the tool found and will hide (API keys and tokens, `.env`
+values, email addresses, your home folder's path) listed with its context, each with
+a switch, and a field to add anything else to hide. Only the redacted version is
+stored (`agent_sessions`); the original file is never kept. The block then shows the
+session's title and turn range.
+
+**Autosave and checks.** Drafts save by themselves 5 seconds after the last change
+(the save bar says "Saving…" then "Saved"); the unsaved-changes guard (§13.25)
+covers leaving the page. Each block validates as you go (e.g. an image without alt
+text, a quiz question with no right answer); **Publish is disabled until every block
+is valid**, and the first problem is linked ("Fix 2 problems").
+
+**Preview.** Renders the post with the real public components (§13.28–13.47) in the
+current theme with a light/dark switch of its own; interactive blocks work.
+
+**Markdown tab.** Shows the generated markdown (read-only by default; "Edit
+markdown" unlocks it). Editing and returning to Write re-reads it; a block that
+doesn't parse stays as a Raw markdown block with an error.
+
+**Motion.** As the rest of the admin (§13.18): state changes only, 120–300ms; the
+block reorder uses Motion's layout animation.
+
+**Responsive.** Below `xl` the tabs are exclusive; on phones the block toolbar is a
+"…" menu, and the flow canvas editor works with touch (drag to move, an
+"Add arrow" mode: tap one box, then another).
+
+**Accessibility.** Every control is a labelled form control; blocks are a list; the
+insert menu is a menu (arrow keys, Escape); drag has a keyboard equivalent (Move
+buttons) with an `aria-live` announcement ("Moved to position 3"); errors are tied
+to their fields.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.49 DEV import and export
+
+**Purpose.** Bring the owner's posts from DEV (dev.to) into the blog, and send a
+post to DEV (`docs/blog-markdown.md` §3–§4).
+
+**Import** (a dialog from the Posts list's "Import from DEV" button, native
+`<dialog>`, §13.23's frame, wide):
+
+1. **Username**: a field with the owner's DEV username (remembered after the first
+   time) and "Find my posts". Reading published articles needs no key.
+2. **Choose**: a list of the articles (title, date, tags, a cover thumbnail) with
+   checkboxes, "Select all", and an "Already imported" tag on those already here.
+3. **Import** creates a **draft** for each; a **report** follows: for each post,
+   what became what and every warning (a liquid tag kept as text, an image still on
+   DEV's CDN, more than 4 tags…), with a link to open the draft in the editor.
+
+**Export** (the editor's "Publish to DEV" in the More menu, a dialog):
+
+| Part | Content |
+|---|---|
+| Status | Whether the DEV API key is set (a server secret, `DEVTO_API_KEY`); if not, the dialog says how to create one in DEV's settings and add it in Vercel, and disables the button |
+| What will change | A list of the post's custom blocks and how each will be written for DEV (e.g. "Steps → numbered list", "Flow canvas → image"), so nothing is a surprise |
+| Options | "Publish now" switch (off: it is created as a draft on DEV); the canonical address is always set to the post here |
+| Result | A link to the DEV article; the post remembers it (`devto_id`) so the next export **updates** that article |
+
+**States.** Loading (the button's loading state, §13.1), error (an alert with DEV's
+message, `role="alert"`), success. Nothing is sent without pressing the dialog's
+primary button.
+
+**Accessibility.** A native dialog (focus trapped, Escape closes); lists are real
+lists with labelled checkboxes; the report is a list with warnings as text.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 13.50 Comment moderation
+
+**Purpose.** The owner's tools for the readers' comments (§13.37), in the admin.
+
+**Anatomy.** A resource list (§13.19) at "Comments": filter tabs **All · Reported ·
+Hidden**, newest first; each row: the reader's avatar, name and provider (GitHub /
+Google), the post's title (a link), an excerpt, the time and, when reported, a
+"Reported ×3" status pill.
+
+**Row actions** (icon buttons with labels, §13.2): **Hide / Show** (toggle), **Open
+on the post**, **Delete** (confirm dialog, §13.23), and in a "…" menu **Ban
+reader** (they can no longer comment; confirm) and **Mark this account as the
+author** (shows the "AUTHOR" Tag on its comments).
+
+**States.** Empty ("No comments yet." / "Nothing reported."); hiding a comment
+updates the public page's cache at once (§14.19); every destructive
+action asks first.
+
+**Accessibility.** As the other admin lists (§13.19).
+
+**Approved in:** the Phase 9a PR (issue #61).
+
 ## 14. Page and section specs
 
 The main site's homepage (`/`) and the project page (`/projects/[slug]`). Each
@@ -1598,6 +2546,11 @@ spec follows the section checklist in §12. Components are linked, not repeated.
 **Admin (Phase 6a):** [Admin pages](#1411-admin-pages)
 
 **Launch (Phase 8.4):** [Coming-soon page](#1412-coming-soon-page-creatives-and-blog)
+
+**Blog (Phase 9a):** [Blog home](#1413-blog-home) · [Post page](#1414-post-page) ·
+[Tags](#1415-tags) · [Newsletter confirmation](#1416-newsletter-confirmation) ·
+[Header and footer additions](#1417-blog-header-and-footer-additions) ·
+[Privacy notice](#1418-privacy-notice) · [Blog admin pages](#1419-blog-admin-pages)
 
 ### 14.0 Page-wide rules
 
@@ -2458,3 +3411,183 @@ load; the label, lead and button fade up 16px, 100ms later, 650ms `power3.out`,
 text. The page has the skip link and landmarks of every page (§13.9).
 
 **Approved in:** the Phase 8.4a PR (issue #57).
+
+### 14.13 Blog home
+
+**Purpose.** The blog's front page (`/` on `blog.chestlyace.online`): every
+published post, newest first.
+
+**References.** Owner (2026-10-07): [linear.app/blog](https://linear.app/blog)'s
+minimalism (§13.27), with our type, tokens and motion.
+
+**Content.** Published posts from the database (`blog_posts`, `content-schema.md`
+§4), newest first by `published_at`. The heading's intro is the blog's description
+(`ia-content.md` §4). **With no published post the page is the coming-soon page
+(§14.12).**
+
+**Layout** (one `background` section, so the page alternates correctly with the
+footer's `background-alt`, §14.0):
+
+1. **Heading** (§14.0, the page's `<h1>`): mono label "BLOG", the title "Blog" in
+   Bebas `display-xl`, the intro ("Writing on software engineering, web
+   development, and building things."). 112px below the top of the viewport.
+2. **Post list:** an `<ol>` of Post items (§13.27), 80px below the heading (56px
+   on phones): the latest post in the wide container, the rest in the narrow one.
+3. **Newsletter box** (§13.34), 128px below the last item (96px on phones).
+
+**Motion.** The heading's reveal, the items' entrance (§13.27), the newsletter
+box's entrance.
+
+**Pagination and search.** None at launch: all posts on one page. When there are
+more than 30 posts, pagination is designed then.
+
+**Accessibility.** One `<h1>`; the list is an ordered list of links; the page's
+`<title>` and description are the site's (`ia-content.md` §4).
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.14 Post page
+
+**Purpose.** One post (`/[slug]`). An unknown slug, or a draft, shows the blog's
+404.
+
+**References.** Owner's choice (2026-10-07): **prose with a sticky contents rail**;
+the rich blocks of §13.38–13.47 sit inside the prose.
+
+**Content.** The post's row (title, description, cover, tags, dates, counts) and its
+custom markdown (`docs/blog-markdown.md`), rendered on the server.
+
+**Layout** (one `background` section; wide container, 12 columns on `lg+`):
+
+1. **Post header** (§13.28), columns 1–10.
+2. **Cover** (when the post has one): columns 1–12, aspect `16 / 9`, radius `xl`,
+   `surface` fill, 48px below the header. Its `alt` is `cover_alt` (empty if none,
+   so it is decorative).
+3. **Contents disclosure** (§13.32, below `lg` only, when the post has 3 or more
+   headings), 32px below the cover or header.
+4. **Body and rail** (48px below): the **prose** (§13.29) with its rich blocks in
+   columns 1–8, at most 68ch (interactive blocks may use the full column; images
+   marked `#wide` and the flow canvas and agent session may reach columns 1–10), and
+   on `lg+` the **table of contents** (§13.32) as a sticky rail in columns 10–12.
+5. **Reaction bar** (§13.35), 32px below the prose.
+6. **Post navigation** (§13.33), 96px below (64px on phones), full width.
+7. **Newsletter box** (§13.34), 96px below.
+8. **Comments** (§13.37), 96px below (64px on phones), unless the post turns them
+   off.
+
+**Motion.** The header's title reveal, the default entrance for the cover and the
+newsletter box (§14.0), each rich block's own entrance, the contents rail's moving
+rule. Prose does not animate.
+
+**Responsive.** Below `lg` everything is one column in the order above; the cover
+keeps its `16 / 9` ratio (radius `lg` below `sm`).
+
+**Accessibility.** One `<h1>`; the body is an `<article>`; headings keep their
+order; the skip link goes to `#main`. Each post sets its own `<title>`,
+description, canonical (the post's `canonical_url` when cross-posted) and Open
+Graph image (the cover, else the site's), and `BlogPosting` structured data
+(Phase 9b, SEO).
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.15 Tags
+
+**Purpose.** Browse posts by topic: an index of all tags (`/tags`) and one page
+per tag (`/tags/[tag]`).
+
+**Tags index.** The section heading (§14.0): label "TAGS", title "Tags", intro
+"Browse posts by topic." Below it, every tag as a **linked Tag** (§13.4) enlarged
+to 32px tall with its count after the name ("NEXTJS · 4"), sorted by count
+(highest first), then alphabetically; wrapping with a 12px gap. Tags with no
+published post do not appear.
+
+**Tag page.** The section heading: label "TAG", the title is the tag in Bebas
+(`display-xl`, uppercase), the intro is the count ("4 posts" / "1 post"). Below, the
+Post items (§13.27) for that tag in the same arrangement as the home, then a
+standalone text link "All tags →" (§13.3) 64px below the list. An unknown tag, or
+one with no published post, shows the blog's 404.
+
+Both pages are one `background` section with the newsletter box (§13.34) 128px
+below the content, like the home (§14.13). Each has one `<h1>`.
+
+**SEO.** Tag pages and the tags index are indexable with their own title ("Posts
+tagged nextjs — Chestly Ace") and canonical.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.16 Newsletter confirmation
+
+**Purpose.** Where the link in the confirmation email lands
+(`/newsletter/confirm?token=…`); it confirms the address on the server and shows
+the result.
+
+**Layout and look.** Exactly the coming-soon page (§14.12): label, Bebas title,
+lead, one `primary` Button back to the blog home. Not indexed (`noindex`).
+
+**Copy** (placeholder wording for the owner to approve; in `content/copy.ts`):
+
+| | Confirmed | Link didn't work |
+|---|---|---|
+| Label | "SUBSCRIBED" | "LINK EXPIRED" |
+| Title | "You're on the list" | "That link didn't work" |
+| Lead | "Thanks for confirming. You'll get an email when there's a new post." | "It may have expired or already been used. You can subscribe again from the bottom of any post." |
+| Button | "Read the blog" | "Go to the blog" |
+
+**Accessibility.** As §14.12; the status is the page's `<h1>`.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.17 Blog header and footer additions
+
+**Header key links** (§13.6): **Posts** (`/`) and **Tags** (`/tags`), as text rolls
+(§13.3). The active dot follows the route: Posts on `/` and on post pages, Tags on
+`/tags` and tag pages. The phone menu lists the same two as Bebas rows above the
+Sites rows. The Sites chip and theme toggle stay. (The reader's sign-in is **not**
+in the header: it appears only where it is needed, in the comments, §13.36.)
+
+**Footer** (§13.8): the blog's Connect column gets an **RSS** link (Lucide `rss`
+16px, text roll) to `/rss.xml`, after the socials shown on the blog
+(`socials.show_on`), and the Contact column a **Privacy** link to §14.18. The page
+`<head>` also carries the feed's `alternate` link.
+
+**Accent.** The blog keeps the main blue (§4, Q12): no override.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.18 Privacy notice
+
+**Purpose.** Readers' accounts, comments and likes store personal data, so the blog
+has a short privacy page (`/privacy`; `ia-content.md` §3 said real pages are added
+once something stores data). Not indexed.
+
+**Layout.** The narrow container; the heading (§14.0: label "PRIVACY", title
+"Privacy"); the text in prose (§13.29) with a "Last updated" date in a mono
+`label`. Wording is drafted by the agent in Phase 9b.5 **for the owner's approval**;
+it covers: what is stored (the name, email address and picture the reader's GitHub
+or Google account shares; their comments; a likes cookie held as a hash;
+newsletter addresses), why, who sees it (the name, picture and comments are
+public; the email never is), how long, how to delete the account and its data, and
+how to ask a question.
+
+**Accessibility.** One `<h1>`; headings in order.
+
+**Approved in:** the Phase 9a PR (issue #61).
+
+### 14.19 Blog admin pages
+
+**Purpose.** The owner's side of the blog, in the admin (`admin.chestlyace.online`,
+§14.11): a **Blog** group in the sidebar (§13.18) with **Posts** and **Comments**.
+
+**Screens.**
+
+| Screen | Content |
+|---|---|
+| Posts (`/blog`) | A resource list (§13.19): title, status ("Draft", "Published"), published date, likes and comments counts; a "New post" button and an "Import from DEV" button (§13.49); a publish switch per row; filter tabs All · Published · Drafts; delete with confirm |
+| New and edit post (`/blog/new`, `/blog/[id]`) | The block editor (§13.48) |
+| Comments (`/blog/comments`) | The moderation list (§13.50) |
+
+**Build notes** (not visual). Publishing, unpublishing, editing and hiding a
+comment all revalidate the blog's cached pages (the `blog` cache tag, as the main
+site's admin does with `portfolio`, D74).
+
+**Approved in:** the Phase 9a PR (issue #61).
