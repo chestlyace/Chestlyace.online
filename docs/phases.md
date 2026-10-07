@@ -20,7 +20,7 @@ before the phase starts.
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
-| 9 | Blog | 9a in review (issue #61) | Q12 (blog: decided), Q16 (decided) |
+| 9 | Blog | 9a (revised) in review (issue #61); 9b.1–9b.7 after it | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | Not started | Q1, Q12 |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
@@ -233,34 +233,48 @@ following `docs/launch.md`.)
 
 ## Phase 9 — Blog
 
-**Goal:** blog.chestlyace.online with MDX posts.
+**Goal:** blog.chestlyace.online: posts written in the admin without typing
+markdown, with rich interactive blocks, dev.to import/export, and readers'
+likes, comments and sharing (D82–D85).
 
-**9a — Design (docs only).** Specs for the blog's components (post card, post
-header, prose, code block, callout, table of contents) and pages, plus its accent
-colour (Q12).
+**9a — Design (docs only) — issue #61.** Specs for the blog's components and
+pages (`design.md` §13.27–13.50, §14.13–14.19), the custom markdown
+(`docs/blog-markdown.md`), the database model (`content-schema.md` §4), the blog
+accent (Q12) and the decisions D82–D85 (Q16). Revised on 2026-10-07 after the
+owner's references (linear.app/blog, dev.to, two yokwejuste.me posts).
 
-**9b — Build**, after 9a is merged:
-
-- MDX pipeline and frontmatter validation (`content-schema.md` §4, Q16)
-- Post list, post page, tag pages, RSS feed
-- Blog components (`design.md` §9) and accent colour (Q12)
-- Blog SEO: metadata, `BlogPosting` JSON-LD, sitemap
-
-Split into two steps (owner, 2026-10-07):
+**9b — Build**, after 9a is merged, in separate PRs (owner, 2026-10-07), each
+reviewed and merged before the next:
 
 | Step | Covers | Status |
 |---|---|---|
-| 9a Design — issue #61 | Docs only: blog components `design.md` §13.27–13.35, pages §14.13–14.17, the blog accent, D82 | In review |
-| 9b Build | After 9a is merged; may be split into several PRs (MDX pipeline and pages, then newsletter, then comments) | Not started |
+| 9a Design | The specs above | In review |
+| 9b.1 Database and public blog | `blog_*` tables and migration; the markdown renderer (CommonMark + GFM, Shiki, heading ids, the plain blocks: callout, image, code); blog home, post page, tags, RSS, sitemap, `BlogPosting` JSON-LD, header/footer, the coming-soon fallback; a sample post by seed | Not started |
+| 9b.2 Rich blocks | Steps, compare, file tree, typewriter, code group, diff, terminal, flow canvas, quiz | Not started |
+| 9b.3 Admin block editor | The Blog group in the admin: posts list, the block editor with forms, flow-canvas editor, preview, Markdown tab, autosave, cover and image uploads | Not started |
+| 9b.4 DEV import and export | Import dialog, "Publish to DEV", the conversions of `docs/blog-markdown.md` §3–§4 | Not started |
+| 9b.5 Readers | Better Auth with GitHub and Google, likes, comments and moderation, share, the privacy page | Not started |
+| 9b.6 Agent sessions | Session upload, turn picker, redaction review, the replay block | Not started |
+| 9b.7 Newsletter | The signup box, double opt-in, the confirmation page | Not started |
 
-**Dependencies 9b adds** (named here so merging 9a approves them, D82): `velite`
-(content layer; brings its own `zod`), `@shikijs/rehype` + `shiki` (build-time
-highlighting), `rehype-slug` and `remark-gfm` (heading ids, tables). Giscus is
-loaded from its own script (no package). Newsletter uses Resend's HTTP API
-through `fetch`, as the contact form does. New environment variables:
-`RESEND_AUDIENCE_ID` and `NEWSLETTER_SECRET` (signs the confirmation links).
+**Dependencies 9b adds** (named here so merging 9a approves them, D82–D85; each
+is installed in the step that first needs it): `unified`, `remark-parse`,
+`remark-gfm`, `remark-rehype`, `rehype-slug` and `hast-util-to-jsx-runtime` (the
+markdown renderer, 9b.1); `shiki` and `@shikijs/rehype` (highlighting, 9b.1);
+`diff` (the Diff block's before/after, 9b.2); `better-auth` (reader sign-in,
+9b.5). No editor, canvas or diagram library: the block editor, flow canvas and
+replay are built from what the project already uses (Motion, GSAP, Lucide, Simple
+Icons). Newsletter and DEV use `fetch`, as the contact form does.
 
-**Done when:** a sample post builds, renders in both themes, and appears in RSS.
+**New environment variables, and what the owner sets up** (each step's PR says
+when): `BETTER_AUTH_SECRET`, `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` (a GitHub
+OAuth app with its callback on the blog host) and `GOOGLE_CLIENT_ID` /
+`GOOGLE_CLIENT_SECRET` (a Google OAuth client) for 9b.5; `DEVTO_API_KEY` for 9b.4;
+`RESEND_AUDIENCE_ID` and `NEWSLETTER_SECRET` for 9b.7.
+
+**Done when:** a post written in the editor — with a steps block, a terminal, a
+quiz and an agent session — publishes, renders in both themes, appears in RSS and
+can be liked, commented on and shared; a DEV article imports and a post exports.
 
 ## Phase 10 — Creatives site
 

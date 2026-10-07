@@ -47,17 +47,16 @@ Recommendation: single admin, bcrypt-hashed password in an env var, signed
 Alternatives: Auth.js with GitHub sign-in restricted to your account (no password
 to manage at all), or passkeys. GitHub sign-in is worth considering.
 
-### Q16 — Blog tooling and features · Decided 2026-10-07
-**Answer (D82):** Velite content layer with Shiki highlighting at build time;
-tag pages; table of contents and a copy button on code; Giscus comments in a new
-public repository; a newsletter (Resend Audiences, double opt-in). Categories:
-tags only (proposed in the 9a PR, not asked). Original options:
-- MDX pipeline: `@next/mdx` vs. a content layer (Velite / Content Collections)
-  that gives typed frontmatter for free. Leaning content layer.
-- Syntax highlighting: Shiki (build-time, zero JS) — proposed.
-- Comments? (Giscus = GitHub Discussions, free) — open.
-- Newsletter? The old footer had a non-functional Subscribe box — open.
-- Categories as well as tags? — open.
+### Q16 — Blog tooling and features · Decided 2026-10-07 (revised)
+**Answer (D82–D85):** posts are written in the admin's block editor and stored in
+Postgres as custom markdown; Shiki highlighting; tag pages; table of contents and a
+copy button on code; **readers' own comments and likes** with GitHub/Google sign-in
+(Better Auth), replacing Giscus; a newsletter (Resend Audience, double opt-in);
+dev.to import/export; rich blocks and agent-session embeds. Categories: tags only
+(proposed, not asked). *First answer, superseded the same day:* Velite content layer
+and Giscus.
+Original options: `@next/mdx` vs. a content layer (Velite / Content Collections);
+Shiki; comments (Giscus); newsletter; categories.
 
 ### Q17 — Analytics · Decided 2026-10-07
 **Answer: Vercel Web Analytics** (D79).

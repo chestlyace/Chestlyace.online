@@ -5,7 +5,7 @@ Three content sources, one per site (decisions D3, D6, D7):
 | Site | Source | Edited through |
 |---|---|---|
 | main | Postgres (Prisma Postgres, D31) | Admin panel at `admin.chestlyace.online` |
-| blog | MDX files in `content/blog/` | Git commits |
+| blog | Postgres (posts, likes, comments, agent sessions; D83) | The admin's block editor; readers write comments |
 | creatives | Headless CMS (TBD) | The CMS's own editor |
 
 ---
@@ -276,6 +276,7 @@ returned URL. This avoids pushing large files through a serverless function.
 | Journey logo | `portfolio/journey` | max 600×600 |
 | Profile hero | `portfolio/profile` | max 1600×1600 |
 | Certification badge, skill icon | `portfolio/profile` | max 600×600 (skill icons may also be SVG) |
+| Blog image | `portfolio/blog` | max 1600×1600 (added in 9b) |
 | Resume | `portfolio/profile` | raw PDF |
 
 Limit 10 MB. Images are JPG, PNG, WebP or AVIF; the résumé is a PDF. The stored
@@ -285,29 +286,78 @@ old `optimizeCloudinaryImage()` string rewriting.
 
 ---
 
-## 4. Blog — MDX frontmatter
+## 4. Blog — database tables
 
-File: `content/blog/<slug>.mdx`. The filename is the slug.
+Posts live in Postgres next to the main site's tables (D83) and are written in the
+admin's block editor (`design.md` §13.48). A post's `content` is **custom
+markdown** (`docs/blog-markdown.md`). Reading time is computed from it, not stored.
 
-```yaml
----
-title: "Building a multi-tenant Next.js site"   # required
-description: "How one app serves three subdomains"  # required, used for meta + cards
-date: 2026-10-20                                # required, publish date
-updated: 2026-11-02                             # optional
-tags: [nextjs, architecture]                    # optional, lowercase kebab-case
-cover: /blog/multi-tenant/cover.webp            # optional, path under public/
-coverAlt: "Diagram of three hosts, one app"     # optional, alt text for the cover; empty = decorative
-comments: true                                  # optional, default true; false hides the Giscus comments
-draft: false                                    # optional, drafts excluded from production builds
-canonical: https://…                            # optional, when cross-posted
----
+```sql
+blog_posts
+  id                serial primary key
+  slug              text unique not null      -- lowercase, hyphens
+  title             text not null
+  description       text not null             -- meta + list item
+  content           text not null default ''  -- custom markdown
+  cover_url         text                      -- Cloudinary address
+  cover_alt         text                      -- empty = decorative
+  tags              text[] not null default '{}'  -- lowercase kebab-case; no categories (Q16)
+  status            text not null default 'draft'   -- 'draft' | 'published'
+  published_at      timestamptz               -- shown date and sort order
+  comments_enabled  boolean not null default true
+  canonical_url     text                      -- when cross-posted
+  series            text
+  devto_id          integer                   -- set after an import or export (§13.49)
+  devto_url         text
+  like_count        integer not null default 0   -- kept in step with blog_likes
+  created_at, updated_at
+
+blog_likes                                      -- anyone can like, no account
+  post_id           integer references blog_posts on delete cascade
+  visitor_hash      text                      -- a hash of the browser's likes cookie
+  created_at
+  primary key (post_id, visitor_hash)
+
+agent_sessions                                  -- redacted Claude Code sessions (§13.47)
+  id                text primary key          -- short id used by the `session` block
+  title             text not null
+  source            text not null default 'claude-code'
+  turns             jsonb not null            -- the redacted turns
+  turn_count        integer not null
+  tool_call_count   integer not null
+  started_at        timestamptz
+  created_at
+
+blog_comments
+  id                serial primary key
+  post_id           integer references blog_posts on delete cascade
+  user_id           text references reader_user on delete set null   -- null = deleted account
+  parent_id         integer references blog_comments on delete cascade  -- one level of replies
+  body              text not null             -- plain text
+  status            text not null default 'visible'   -- 'visible' | 'hidden'
+  like_count        integer not null default 0
+  created_at, updated_at
+
+blog_comment_likes   (comment_id, user_id, primary key (comment_id, user_id))
+blog_comment_reports (comment_id, user_id, created_at, primary key (comment_id, user_id))
 ```
 
-Validated with Zod at build time. Reading time is computed, not stored. Post
-images live in `public/blog/<slug>/`. Tags are lowercase kebab-case; there are no
-categories (Q16). Every image in a post body needs `alt` text (or is marked
-decorative) or the build fails (`design.md` §13.29).
+**Readers.** Reader accounts (GitHub or Google sign-in, D83) use **Better Auth**'s
+own tables in the same database (`reader_user`, `reader_session`,
+`reader_account`, `reader_verification`; exact names fixed in 9b.5), with two
+extra columns on the user: `banned` and `is_author` (marks the owner's own
+account, §13.37). The admin sign-in is separate (D71): readers are never admins.
+The newsletter's subscribers are not stored here: they are a **Resend Audience**
+(`RESEND_AUDIENCE_ID`); pending confirmations are signed links
+(`NEWSLETTER_SECRET`), not rows.
+
+**Images.** Uploaded through the admin to Cloudinary (§3 above uses the same
+signature route, with a `blog` folder, `portfolio/blog`, max 1600×1600).
+
+**Validation.** Zod on every write (as D74): `slug` unique, at most 8 tags,
+`title` ≤ 120 characters, `description` ≤ 300; the editor also checks each block
+(`docs/blog-markdown.md`) before a post can be published, including that every
+image has alt text.
 
 ---
 

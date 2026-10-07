@@ -35,8 +35,11 @@ it gets its own page or a section on `/` is decided when that site is built.
 |---|---|
 | `/` | Post list, newest first |
 | `/[slug]` | Post |
+| `/tags` | All tags with counts |
 | `/tags/[tag]` | Posts with a tag |
 | `/rss.xml` | RSS feed |
+| `/privacy` | What the blog stores about readers (accounts, comments, likes, newsletter) |
+| `/newsletter/confirm` | Where the emailed confirmation link lands |
 | `/sitemap.xml`, `/robots.txt` | Generated |
 
 ## 2. Main site — homepage sections
