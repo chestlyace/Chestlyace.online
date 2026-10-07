@@ -10,13 +10,15 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified, type Plugin } from "unified";
+import { isBlockName, parseBlock } from "./blocks";
 import { parseFenceMeta } from "./meta";
 import { codeThemes } from "./theme";
 
 // Renders a post's custom markdown (docs/blog-markdown.md): CommonMark + GFM,
 // heading ids, Shiki-highlighted code, and the blocks this step knows
-// (`callout`, images with captions). Other custom blocks (steps, quiz…) arrive
-// with 9b.2 and meanwhile show as plain code, as the format says unknown blocks do.
+// (`callout`, images with captions) and the rich blocks (steps, compare, quiz…,
+// parsed in ./blocks and drawn by components/blog/blocks). A block that does not
+// parse shows as plain code, as the format says unknown blocks do.
 
 export const CALLOUT_TYPES = ["note", "tip", "warning"] as const;
 export type CalloutType = (typeof CALLOUT_TYPES)[number];
@@ -50,6 +52,27 @@ const remarkBlocks: Plugin<[], MdastRoot> = () => (tree) => {
   walk(tree as Node, (node, parent) => {
     if (node.type !== "code" || !parent?.children) return;
     const code = node as unknown as Code;
+
+    // A rich block (steps, quiz…): its parsed data travels to the component as
+    // JSON. One that doesn't parse stays a plain code block, so a post never
+    // breaks; the admin's checks say what is wrong with it.
+    if (isBlockName(code.lang)) {
+      const parsed = parseBlock(code.lang, code.value, code.meta ?? null);
+      if (!parsed.ok) return;
+      const index = parent.children.indexOf(node);
+      parent.children[index] = {
+        type: "block",
+        data: {
+          hName: "x-block",
+          hProperties: {
+            dataKind: code.lang,
+            dataProps: JSON.stringify(parsed.data),
+          },
+        },
+      } as unknown as Node;
+      return;
+    }
+
     if (code.lang !== "callout") return;
 
     const { values } = parseFenceMeta(code.meta);
@@ -151,6 +174,8 @@ async function createProcessor() {
             const { values, flags } = fenceOf(this.options.meta);
             if (values.title) node.properties["data-title"] = values.title;
             node.properties["data-lang"] = this.options.lang;
+            // The fence options travel in `meta`, not as an attribute.
+            delete node.properties.attributes;
             if (flags.has("showLineNumbers"))
               node.properties["data-line-numbers"] = "true";
           },
@@ -241,6 +266,15 @@ export function findProblems(markdown: string): Problem[] {
     }
     if (node.type === "code") {
       const code = node as unknown as Code;
+      if (isBlockName(code.lang)) {
+        const parsed = parseBlock(code.lang, code.value, code.meta ?? null);
+        if (!parsed.ok) {
+          problems.push({
+            level: "error",
+            message: `The ${code.lang} block can't be read: ${parsed.error}`,
+          });
+        }
+      }
       if (code.lang === "callout") {
         const { values } = parseFenceMeta(code.meta);
         if (

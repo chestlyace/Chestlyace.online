@@ -47,6 +47,111 @@ export function proxy(request: NextRequest) {
 | One app, many hosts | Shared design and deploys | A routing layer |
 | One app per site | Hard isolation | Three of everything |
 
+## The rich blocks
+
+### Steps
+
+\`\`\`steps
+## Plan the move
+icon: map
+Write down what runs where, and what each piece needs from the others.
+---
+## Switch the host
+icon: server
+Point the **proxy** at the right site, then check each host with \`curl\`.
+---
+## Ship it
+icon: rocket
+Merge, deploy, and watch the [analytics](https://vercel.com/docs/analytics) for a day.
+\`\`\`
+
+### Compare
+
+\`\`\`compare
+title: One app or three
+highlight: 3
+| Aspect | One app per site | One app, many hosts |
+| Shared design | Copied around | Built once |
+| Deploys | Three pipelines | One pipeline |
+| Isolation | Strong | Needs care |
+\`\`\`
+
+### A file tree
+
+\`\`\`filetree
+app/
+├── sites/
+│   ├── main/  # The portfolio
+│   ├── blog/  # This blog
+│   └── admin/  # Behind a sign-in
+├── + proxy.ts  # Picks the site from the host
+└── globals.css
+\`\`\`
+
+### Code that types itself
+
+\`\`\`typewriter lang=ts title="siteFromHost.ts"
+export function siteFromHost(host: string) {   // @ One function decides the site
+  const name = host.split(".")[0];
+  return SITES.includes(name) ? name : "main";  // @ Unknown hosts fall back to main
+}
+\`\`\`
+
+### Several files
+
+\`\`\`codegroup
+--- ts proxy.ts
+export const config = { matcher: "/((?!_next).*)" };
+--- json package.json
+{ "name": "portfolio", "private": true }
+\`\`\`
+
+### A change
+
+\`\`\`diff lang=ts title="proxy.ts"
+- const site = "main";
++ const site = siteFromHost(request.headers.get("host"));
+  return NextResponse.rewrite(url);
+\`\`\`
+
+### A terminal
+
+\`\`\`terminal title="zsh"
+# Start the dev server
+$ pnpm dev
+ready - started server on http://localhost:3000
+$ curl -I http://blog.localhost:3000
+HTTP/1.1 200 OK
+\`\`\`
+
+### A diagram
+
+\`\`\`flow
+[browser|icon:globe|style:blue|pos:0,40] Browser
+[proxy|icon:shuffle|style:purple|desc:Reads the host|pos:300,40] Proxy
+[main|icon:house|style:green|pos:600,0] Main site
+[blog|icon:book-open|style:orange|pos:600,120] Blog
+
+browser --> proxy : request
+proxy --> main : main host
+proxy --> blog : blog host
+\`\`\`
+
+### A quiz
+
+\`\`\`quiz
+Q: What decides which site a request gets?
+) The URL path
+*) The host name
+) A cookie
+E: The proxy reads the **host** and rewrites to that site's folder.
+---
+Q: Where do the posts live?
+*) In the database
+) In files in the repository
+E: Posts are rows in Postgres, written in the admin.
+\`\`\`
+
 ## Where to next
 
 Read the [portfolio](https://chestlyace.online), or follow the feed from the footer.
@@ -313,7 +418,7 @@ export const seedData = {
       slug: "hello-world",
       title: "Hello, world",
       description:
-        "A sample post showing what the blog can do: prose, highlighted code, a callout and a table.",
+        "A sample post showing what the blog can do: prose, highlighted code, a callout, a table and every rich block.",
       content: SAMPLE_POST,
       tags: ["meta", "web"],
       status: "published",
