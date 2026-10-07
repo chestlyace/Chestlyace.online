@@ -305,6 +305,7 @@ waiting on a click — runs longer.
 | `Tag` | **Spec: §13.4.** Mono label chip for tech stack, blog tags |
 | `StatusPill` | **Spec: §13.5.** "Open to Remote Roles" with pulsing green dot. Only the "open" state exists for now; other `profile.availability` states are decided when that data arrives |
 | `Container` | `max-w-7xl` + gutters |
+| `ComingSoon` | **Spec: §14.12.** The short placeholder page the creatives and blog hosts show until Phases 9–10 (label, Bebas title, lead, one link to the main site) |
 
 ### Main site (`components/main/`)
 
@@ -1596,6 +1597,8 @@ spec follows the section checklist in §12. Components are linked, not repeated.
 
 **Admin (Phase 6a):** [Admin pages](#1411-admin-pages)
 
+**Launch (Phase 8.4):** [Coming-soon page](#1412-coming-soon-page-creatives-and-blog)
+
 ### 14.0 Page-wide rules
 
 **Order, ids, and numbering.**
@@ -2395,3 +2398,63 @@ the content area on phones, the toast sitting above the bar.
 **Accessibility.** One `<h1>` per screen (the title); focus moves to the `<h1>`
 after a page change; every control is reachable by keyboard; destructive actions
 always confirm; nothing depends on hover.
+
+### 14.12 Coming-soon page (creatives and blog)
+
+**Purpose.** What `creatives.chestlyace.online` and `blog.chestlyace.online` show
+from launch until Phases 9–10 build them. Both hosts are indexed from launch
+(D81), so the page is a real, short page rather than an empty stub: it says what
+will live there and points to the main site. Routes: `/` on both hosts, and
+`/services` on creatives (the address the old `graphic-design.html` and
+`photography.html` redirect to, `ia-content.md` §6), which shows the same page
+until Phase 10. Any other path is the site's 404.
+
+**References.** None supplied. Built from existing components and tokens only, so
+nothing new is introduced: the section heading's look (§14.0), the Button (§13.1)
+and the shared header and footer (§13.6, §13.8). **Owner: send a reference if you
+want it to look different.**
+
+**Content** (placeholder wording for the owner to approve in this PR; it lives in
+`content/copy.ts` with the other placeholders):
+
+| | Creatives | Blog |
+|---|---|---|
+| Label (mono) | "COMING SOON" | "COMING SOON" |
+| Title | "Design & Photography" | "Blog" |
+| Lead | "Graphic design, branding, and photography by Chestly Ace (Amahndong Chestly). A new home for the work is on its way." | "Writing on software engineering, web development, and building things. The first posts are on their way." |
+| Button | "Visit chestlyace.online" → the main site | same |
+
+Both name forms stay in the creatives lead (`ia-content.md` §4). The page's
+`<title>` and description are the site's existing ones (`ia-content.md` §4,
+`lib/seo.ts`); the page is `index, follow` once `SITE_INDEXING` includes the site.
+
+**Layout.** On `background`, between the shared header and footer. A wide
+container (§5); content left-aligned, vertically centred in the space between the
+header and footer (`min-height` of the viewport minus the footer's height, never
+less than 480px), 112px below the top of the viewport at the least (clears the
+capsule).
+
+1. Mono `label` "COMING SOON", `muted`.
+2. The title in Bebas at `display-xl`, uppercase, `foreground`, 24px below the
+   label; max 14ch per line.
+3. The lead in `lead`, `muted`, max 52ch, 24px below the title.
+4. One `primary` Button, size `lg`, trailing `arrow-up-right`, 40px below the
+   lead, opening the main site in the same tab.
+
+Phones: the same stack; the Button goes full width below `sm`. The title scales
+with `display-xl` (4 → 8rem).
+
+**Components used.** Button (§13.1), the heading look of §14.0 (label + Bebas
+title + lead, not the section-index numbering), Container (§5), header and footer
+(§13.6, §13.8).
+
+**Motion.** The title's letters rise as in the section heading (§14.0), once on
+load; the label, lead and button fade up 16px, 100ms later, 650ms `power3.out`,
+80ms stagger. Reduced motion: shown in final state.
+
+**Light and dark.** Tokens only; nothing differs between themes.
+
+**Accessibility.** One `<h1>` (the title). The Button's accessible name is its
+text. The page has the skip link and landmarks of every page (§13.9).
+
+**Approved in:** the Phase 8.4a PR (issue #57).
