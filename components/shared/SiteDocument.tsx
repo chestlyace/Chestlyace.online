@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { ReactNode } from "react";
 import { fontVariables } from "@/lib/fonts";
 import type { FooterLink } from "@/lib/chrome";
@@ -47,6 +48,9 @@ export function SiteDocument({
             contact={footer?.contact}
           />
         </Providers>
+        {/* Visit counts without cookies (Q17). The admin has its own document
+            and is never counted. */}
+        <Analytics />
       </body>
     </html>
   );

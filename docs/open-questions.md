@@ -55,8 +55,9 @@ to manage at all), or passkeys. GitHub sign-in is worth considering.
 - Newsletter? The old footer had a non-functional Subscribe box — open.
 - Categories as well as tags? — open.
 
-### Q17 — Analytics · Open
-Vercel Web Analytics (simplest, privacy-friendly), Plausible, or none.
+### Q17 — Analytics · Decided 2026-10-07
+**Answer: Vercel Web Analytics** (D79).
+Options were Vercel Web Analytics (simplest, privacy-friendly), Plausible, or none.
 
 ### Q21 — Where does the admin live? · Decided 2026-10-06
 **Answer: `admin.chestlyace.online`** (not the recommended `/admin` path). It is
