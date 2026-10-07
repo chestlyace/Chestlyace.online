@@ -132,9 +132,10 @@ describe("decideRoute", () => {
     });
   });
 
-  it("rewrites /admin into the main site on main", () => {
-    expect(decideRoute({ ...base, pathname: "/admin" })).toMatchObject({
-      pathname: "/sites/main/admin",
+  it("sends /admin on main to the admin host (the old panel's address)", () => {
+    expect(decideRoute({ ...base, pathname: "/admin" })).toEqual({
+      kind: "redirect",
+      location: "https://admin.chestlyace.online/",
     });
   });
 
@@ -261,5 +262,76 @@ describe("siteUrl", () => {
     const { siteUrl } = await import("@/lib/sites");
     expect(siteUrl("blog")).toBe("https://blog.chestlyace.online/");
     vi.unstubAllEnvs();
+  });
+});
+
+describe("old addresses (ia-content.md §6)", () => {
+  const base: RoutingInput = {
+    host: "chestlyace.online",
+    pathname: "/",
+    siteParam: null,
+    siteCookie: undefined,
+    allowOverride: false,
+  };
+  const at = (pathname: string, host = "chestlyace.online") =>
+    decideRoute({ ...base, host, pathname });
+
+  it.each([
+    ["/software-development.html", "https://chestlyace.online/#services"],
+    ["/software-development.html/", "https://chestlyace.online/#services"],
+    ["/graphic-design.html", "https://creatives.chestlyace.online/services"],
+    ["/photography.html", "https://creatives.chestlyace.online/services"],
+    ["/admin", "https://admin.chestlyace.online/"],
+    ["/admin/", "https://admin.chestlyace.online/"],
+    ["/admin/index.html", "https://admin.chestlyace.online/"],
+  ])("%s goes to %s", (pathname, location) => {
+    expect(at(pathname)).toEqual({ kind: "redirect", location });
+  });
+
+  it("only redirects on the main host", () => {
+    for (const host of [
+      "creatives.chestlyace.online",
+      "blog.chestlyace.online",
+      "admin.chestlyace.online",
+    ]) {
+      expect(at("/admin", host).kind).toBe("rewrite");
+      expect(at("/photography.html", host).kind).toBe("rewrite");
+    }
+  });
+
+  it("leaves lookalikes alone", () => {
+    expect(at("/administrators").kind).toBe("rewrite");
+    expect(at("/projects/admin").kind).toBe("rewrite");
+    expect(at("/software-development").kind).toBe("rewrite");
+  });
+
+  it("sends www to the main address, keeping the path and query", () => {
+    expect(
+      decideRoute({
+        ...base,
+        host: "www.chestlyace.online",
+        pathname: "/projects/alexdy",
+        search: "?utm_source=x",
+      }),
+    ).toEqual({
+      kind: "redirect",
+      location: "https://chestlyace.online/projects/alexdy?utm_source=x",
+    });
+    expect(decideRoute({ ...base, host: "www.chestlyace.online" })).toEqual({
+      kind: "redirect",
+      location: "https://chestlyace.online/",
+    });
+  });
+
+  it("follows the preview override when asked for another site", () => {
+    expect(
+      decideRoute({
+        ...base,
+        host: "x.vercel.app",
+        pathname: "/admin",
+        siteParam: "creatives",
+        allowOverride: true,
+      }).kind,
+    ).toBe("rewrite");
   });
 });

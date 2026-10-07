@@ -16,7 +16,7 @@ export function ExperienceSection({
   band: Band;
 }) {
   return (
-    <Section id="experience" band={band} narrow>
+    <Section id="experience" legacyId="journey" band={band} narrow>
       <SectionHeading index={index} label="Experience" title="Experience" />
       <div className="mt-16 md:mt-24">
         <ExperienceWheel entries={entries} label="Experience" />

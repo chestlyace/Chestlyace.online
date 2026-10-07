@@ -23,7 +23,7 @@ export function ProjectsSection({
   );
 
   return (
-    <Section id="projects" band={band}>
+    <Section id="projects" legacyId="work" band={band}>
       <SectionHeading index={index} label="Projects" title="Projects" />
       <ProjectsGrid className="mt-12 grid gap-12 md:mt-16 md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:pb-24">
         {projects.map((project, i) => (
