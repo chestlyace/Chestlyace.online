@@ -165,6 +165,15 @@ for all three sites, or use "Chestly Ace" on creatives/blog where "DEV" fits les
 ### Q20 — Cutover plan · Decided 2026-10-07
 **Answer: the owner migrates locally; main + admin go first; the old site stays up 14 days.**
 - The owner runs the `pg_dump` on the EC2 host and the migration on their own machine (`docs/migration.md`, D78).
-- `chestlyace.online` (with `www` and the old-URL redirects) and `admin.chestlyace.online` move to Vercel first; creatives and blog follow with Phases 9–10.
+- `chestlyace.online` (with `www` and the old-URL redirects) and `admin.chestlyace.online` move to Vercel first; creatives and blog follow with Phases 9–10. **Amended 2026-10-07 (D81):** creatives and blog are added to Vercel at the same cutover, as short "coming soon" pages, and are indexed from launch.
 - The old EC2 site stays up, read-only, for 14 days after DNS moves, then is shut down.
 Original questions: who runs the `pg_dump` (live data ≠ seed file), launch all subdomains at once or main first, and how long the old site stays up.
+
+### Q23 — The public email address · Open
+`hello@chestlyace.online` is a requirement (owner, 2026-10-07; mailbox on Zoho Mail's
+free plan, `docs/launch.md`). Q9 chose `chestlyace@gmail.com` as the address shown
+on the site. Once `hello@` works, does it **replace** `chestlyace@gmail.com`
+everywhere the site shows or uses an email (profile, contact tile, footer,
+JSON-LD, where the contact form delivers), or only send the contact form's mail
+and receive it alongside the Gmail address? It is one field in the admin
+(Profile → Email) either way.
