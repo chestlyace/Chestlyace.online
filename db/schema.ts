@@ -179,3 +179,32 @@ export const faqs = pgTable("faqs", {
   ...ordering,
   ...timestamps,
 });
+
+// Blog posts (docs/content-schema.md §4, D83): written in the admin's block
+// editor as custom markdown (docs/blog-markdown.md). Likes, comments and agent
+// sessions arrive with their own steps.
+export const blogPosts = pgTable(
+  "blog_posts",
+  {
+    id: serial("id").primaryKey(),
+    slug: text("slug").notNull().unique(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    content: text("content").notNull().default(""),
+    coverUrl: text("cover_url"),
+    coverAlt: text("cover_alt"),
+    tags: text("tags").array().notNull().default(emptyTextArray),
+    status: text("status").notNull().default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    commentsEnabled: boolean("comments_enabled").notNull().default(true),
+    canonicalUrl: text("canonical_url"),
+    series: text("series"),
+    devtoId: integer("devto_id"),
+    devtoUrl: text("devto_url"),
+    likeCount: integer("like_count").notNull().default(0),
+    ...timestamps,
+  },
+  (t) => [
+    check("blog_posts_status", sql`${t.status} IN ('draft', 'published')`),
+  ],
+);

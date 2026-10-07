@@ -44,7 +44,7 @@ export function sectionBands<T extends string>(
 
 export type NavLinkId = "about" | "projects" | "experience" | "contact";
 
-export type NavLink = { id: NavLinkId; label: string; href: string };
+export type NavLink = { id: string; label: string; href: string };
 
 // The main site's key links (design.md §13.6).
 export const MAIN_NAV: readonly NavLink[] = [

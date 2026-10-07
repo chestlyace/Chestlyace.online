@@ -10,6 +10,8 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { usePathname } from "next/navigation";
+import { blogActiveLink } from "@/lib/blog/nav";
 import { cn } from "@/lib/cn";
 import { useIsPhone } from "@/lib/media";
 import { EASE_OUT, SPRING } from "@/lib/motion";
@@ -61,11 +63,17 @@ function NavItem({ link, active }: { link: NavLink; active: boolean }) {
 export function HeaderBar({
   links,
   sites,
+  activeBy = "section",
 }: {
   links: readonly NavLink[];
   sites: readonly HeaderSite[];
+  /** What makes a link active: the section in view (main) or the route (blog). */
+  activeBy?: "section" | "blog";
 }) {
-  const active = useActiveNavLink();
+  const sectionActive = useActiveNavLink();
+  const pathname = usePathname();
+  const active: string | null =
+    activeBy === "blog" ? blogActiveLink(pathname) : sectionActive;
   const { lock, unlock } = useSmoothScroll();
   const isPhone = useIsPhone();
 

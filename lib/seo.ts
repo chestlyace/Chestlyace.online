@@ -69,6 +69,10 @@ export function robotsMeta(
     : { index: false, follow: false };
 }
 
+// The blog's feed, for readers that look for it in <head> (design.md §14.17).
+const feedLinks = (site: PublicSiteKey) =>
+  site === "blog" ? { types: { "application/rss+xml": "/rss.xml" } } : {};
+
 // A site's layout metadata: its title and description, the canonical address of
 // every page (relative to `metadataBase`), and the Open Graph and Twitter tags.
 export function siteMetadata(site: PublicSiteKey): Metadata {
@@ -80,7 +84,7 @@ export function siteMetadata(site: PublicSiteKey): Metadata {
     metadataBase: new URL(siteOrigin(site)),
     title,
     description,
-    alternates: { canonical: "/" },
+    alternates: { canonical: "/", ...feedLinks(site) },
     robots: robotsMeta(site),
     openGraph: {
       type: "website",
@@ -109,6 +113,10 @@ export function pageMetadata(
     title: string;
     description: string;
     image?: string | null;
+    /** An article (a blog post), with its dates and tags. */
+    article?: { publishedTime: string; modifiedTime: string; tags: string[] };
+    /** An absolute canonical address, when the page is cross-posted. */
+    canonical?: string | null;
   },
 ): Metadata {
   const images = page.image
@@ -119,9 +127,16 @@ export function pageMetadata(
   return {
     title: page.title,
     description: page.description,
-    alternates: { canonical: page.path },
+    alternates: { canonical: page.canonical ?? page.path, ...feedLinks(site) },
     openGraph: {
-      type: "website",
+      ...(page.article
+        ? {
+            type: "article" as const,
+            publishedTime: page.article.publishedTime,
+            modifiedTime: page.article.modifiedTime,
+            tags: page.article.tags,
+          }
+        : { type: "website" as const }),
       siteName: PERSON_NAME,
       title: page.title,
       description: page.description,

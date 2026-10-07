@@ -17,6 +17,41 @@ type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 const devicon = (name: string) => ({ iconSlug: name, iconUrl: null });
 
+const SAMPLE_POST = `Welcome. This is a sample post that the development seed creates, so the blog has something to show; it is replaced by real posts written in the admin.
+
+## What this blog is for
+
+Notes on software engineering, web development, and building things. Short, practical, and written to be read in one sitting.
+
+\`\`\`callout type=tip title="A tip"
+Posts are written in the admin with simple forms. You never type the markdown you are reading here.
+\`\`\`
+
+## Code that reads well
+
+Code is highlighted for both themes, with an optional file name, line numbers and highlighted lines:
+
+\`\`\`ts title="proxy.ts" {2,4-5}
+export function proxy(request: NextRequest) {
+  const site = siteFromHost(request.headers.get("host"));
+  const url = request.nextUrl.clone();
+  url.pathname = \`/sites/\${site}\${url.pathname}\`;
+  return NextResponse.rewrite(url);
+}
+\`\`\`
+
+### A comparison
+
+| Approach | Good for | Cost |
+| --- | --- | --- |
+| One app, many hosts | Shared design and deploys | A routing layer |
+| One app per site | Hard isolation | Three of everything |
+
+## Where to next
+
+Read the [portfolio](https://chestlyace.online), or follow the feed from the footer.
+`;
+
 export const seedData = {
   profile: {
     id: 1,
@@ -271,6 +306,21 @@ export const seedData = {
     },
   ],
 
+  // A sample post so the blog has something to show in development (the real
+  // ones are written in the admin).
+  blogPosts: [
+    {
+      slug: "hello-world",
+      title: "Hello, world",
+      description:
+        "A sample post showing what the blog can do: prose, highlighted code, a callout and a table.",
+      content: SAMPLE_POST,
+      tags: ["meta", "web"],
+      status: "published",
+      publishedAt: new Date("2026-10-07T09:00:00Z"),
+    },
+  ],
+
   // The old homepage FAQ, minus the design and photography questions. "Can
   // clients hire you remotely?" still mentions design and digital content: the
   // owner rewrites it (ia-content.md §2.9).
@@ -294,6 +344,7 @@ const withOrder = <T extends object>(rows: readonly T[]) =>
 export async function seed(db: Database) {
   await db.transaction(async (tx) => {
     for (const table of [
+      schema.blogPosts,
       schema.faqs,
       schema.socials,
       schema.certifications,
@@ -329,6 +380,11 @@ export async function seed(db: Database) {
       .values(withOrder(seedData.certifications));
     await tx.insert(schema.socials).values(withOrder(seedData.socials));
     await tx.insert(schema.faqs).values(withOrder(seedData.faqs));
+    await tx
+      .insert(schema.blogPosts)
+      .values(
+        seedData.blogPosts.map((post) => ({ ...post, tags: [...post.tags] })),
+      );
   });
 }
 

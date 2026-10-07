@@ -796,3 +796,54 @@ html.lenis body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Blog code (design.md §13.30): Shiki writes both themes' colours as variables on
+   every token; the site's light/dark class picks one. Lines are grid rows so the
+   highlight and the line numbers can span the whole width. */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+  text-decoration: var(--shiki-light-text-decoration);
+}
+
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+  text-decoration: var(--shiki-dark-text-decoration);
+}
+
+.shiki {
+  background: transparent;
+}
+
+.shiki code {
+  display: grid;
+  min-width: max-content;
+  counter-reset: line;
+}
+
+.shiki .line {
+  min-height: 1lh;
+  margin-inline: -1.25rem;
+  padding-inline: 1.25rem;
+}
+
+.shiki .line.highlighted {
+  background-color: color-mix(in srgb, var(--primary) 8%, transparent);
+  box-shadow: inset 2px 0 0 var(--primary);
+}
+
+.shiki[data-line-numbers] .line::before {
+  content: counter(line);
+  counter-increment: line;
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: var(--muted);
+  user-select: none;
+}
