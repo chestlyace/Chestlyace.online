@@ -10,11 +10,14 @@ export function Section({
   id,
   band,
   narrow = false,
+  legacyId,
   className,
   children,
 }: {
   id: string;
   band: Band;
+  /** An id the old site used for this section, so old `#…` links still land. */
+  legacyId?: string;
   narrow?: boolean;
   className?: string;
   children: ReactNode;
@@ -24,11 +27,18 @@ export function Section({
       id={id}
       data-band={band === "alt" ? "alt" : undefined}
       className={cn(
-        "py-24 md:py-40",
+        "relative py-24 md:py-40",
         band === "alt" ? "bg-background-alt" : "bg-background",
         className,
       )}
     >
+      {legacyId && (
+        <span
+          id={legacyId}
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-0 scroll-mt-24"
+        />
+      )}
       <Container narrow={narrow}>{children}</Container>
     </section>
   );

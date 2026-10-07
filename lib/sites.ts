@@ -81,6 +81,8 @@ export function siteUrl(site: SiteKey, path = "/"): string {
 export type RoutingInput = {
   host: string | null;
   pathname: string;
+  /** The query string with its "?", when there is one. */
+  search?: string;
   siteParam: string | null;
   siteCookie: string | undefined;
   allowOverride: boolean;
@@ -88,6 +90,7 @@ export type RoutingInput = {
 
 export type RoutingDecision =
   | { kind: "not-found" }
+  | { kind: "redirect"; location: string }
   | { kind: "pass-through"; site: SiteKey }
   | {
       kind: "rewrite";
@@ -117,7 +120,39 @@ function startsWithSegment(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
+// Old addresses on the main host (ia-content.md §6). The old site's pages are
+// sections now, the design and photography pages live on the creatives site, and
+// the admin has its own host. Matching ignores a trailing slash.
+function legacyDestination(pathname: string): string | null {
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  switch (path) {
+    case "/software-development.html":
+      return siteUrl("main", "/#services");
+    case "/graphic-design.html":
+    case "/photography.html":
+      return siteUrl("creatives", "/services");
+  }
+  if (path === "/admin" || startsWithSegment(path, "/admin")) {
+    return siteUrl("admin", "/");
+  }
+  return null;
+}
+
 export function decideRoute(input: RoutingInput): RoutingDecision {
+  // www.chestlyace.online is the same site: one address for search engines.
+  if (
+    input.host &&
+    hostname(input.host) === `www.${hostname(SITES.main.host)}`
+  ) {
+    return {
+      kind: "redirect",
+      location: new URL(
+        input.pathname + (input.search ?? ""),
+        siteUrl("main"),
+      ).toString(),
+    };
+  }
+
   let site = siteFromHost(input.host);
   let setPreviewCookie: SiteKey | undefined;
 
@@ -134,6 +169,11 @@ export function decideRoute(input: RoutingInput): RoutingDecision {
     const owner = apiOwner(input.pathname);
     if (owner !== "any" && owner !== site) return { kind: "not-found" };
     return { kind: "pass-through", site };
+  }
+
+  if (site === "main") {
+    const destination = legacyDestination(input.pathname);
+    if (destination) return { kind: "redirect", location: destination };
   }
 
   const pathname =

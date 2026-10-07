@@ -11,11 +11,16 @@ export function proxy(request: NextRequest) {
   const decision = decideRoute({
     host: request.headers.get("host"),
     pathname: request.nextUrl.pathname,
+    search: request.nextUrl.search,
     siteParam: request.nextUrl.searchParams.get("site"),
     siteCookie: request.cookies.get(PREVIEW_SITE_COOKIE)?.value,
     allowOverride: process.env.VERCEL_ENV !== "production",
   });
 
+  // Old addresses move for good (ia-content.md §6).
+  if (decision.kind === "redirect") {
+    return NextResponse.redirect(decision.location, 308);
+  }
   if (decision.kind === "not-found") {
     return new NextResponse("Not Found", { status: 404 });
   }
@@ -55,6 +60,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|.*\\.(?:png|jpe?g|gif|svg|webp|avif|ico|pdf|woff2?)$).*)",
+    "/((?!_next/static|_next/image|.*\\.(?:png|jpe?g|gif|svg|webp|avif|ico|woff2?)$).*)",
   ],
 };
