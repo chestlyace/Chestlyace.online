@@ -8,7 +8,7 @@ import { createHash } from "node:crypto";
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export type UploadUse =
-  "project" | "logo" | "profile" | "resume" | "badge" | "icon";
+  "project" | "logo" | "profile" | "resume" | "badge" | "icon" | "blog";
 
 export type UploadRule = {
   folder: string;
@@ -38,6 +38,12 @@ export const UPLOAD_RULES: Record<UploadUse, UploadRule> = {
   },
   profile: {
     folder: "portfolio/profile",
+    transformation: "c_limit,w_1600,h_1600",
+    resource: "image",
+    formats: IMAGE_FORMATS,
+  },
+  blog: {
+    folder: "portfolio/blog",
     transformation: "c_limit,w_1600,h_1600",
     resource: "image",
     formats: IMAGE_FORMATS,

@@ -141,7 +141,13 @@ function Frame({
           tabIndex={-1}
           className="px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8"
         >
-          <div className="max-w-[60rem]">{children}</div>
+          <div
+            className={
+              /^\/blog\/(new|\d+)/.test(pathname) ? undefined : "max-w-[60rem]"
+            }
+          >
+            {children}
+          </div>
         </main>
       </div>
     </div>

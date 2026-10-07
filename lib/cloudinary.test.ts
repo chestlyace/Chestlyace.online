@@ -52,6 +52,13 @@ describe("signedUpload", () => {
     );
   });
 
+  it("puts blog images in portfolio/blog, at most 1600×1600", () => {
+    const up = signedUpload("blog", env, now)!;
+    expect(up.folder).toBe("portfolio/blog");
+    expect(up.transformation).toBe("c_limit,w_1600,h_1600");
+    expect(up.allowedFormats).toBe("jpg,png,webp,avif");
+  });
+
   it("sends the résumé as a raw PDF with no transformation", () => {
     const up = signedUpload("resume", env, now)!;
     expect(up.uploadUrl).toBe(

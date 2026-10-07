@@ -6,6 +6,7 @@ import {
   FolderKanban,
   HeartHandshake,
   LayoutDashboard,
+  Newspaper,
   Link2,
   Route,
   UserRound,
@@ -47,6 +48,10 @@ const GROUPS: { title: string; items: Item[] }[] = [
       label: resource.label,
       icon: ICONS[resource.id],
     })),
+  },
+  {
+    title: "Blog",
+    items: [{ href: "/blog", label: "Posts", icon: Newspaper }],
   },
 ];
 
