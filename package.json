@@ -12,6 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local db/seed.ts",
+    "migrate:old": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local db/migrate-old.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "admin:hash": "node scripts/hash-password.mjs"

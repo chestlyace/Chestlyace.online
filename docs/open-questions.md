@@ -161,8 +161,9 @@ for all three sites, or use "Chestly Ace" on creatives/blog where "DEV" fits les
 
 ## Migration
 
-### Q20 — Cutover plan · Open
-- Who runs the `pg_dump` on the EC2 host, and when? (Live data ≠ seed file.)
-- Do we launch all three subdomains at once, or main first with creatives/blog
-  following?
-- How long does the old EC2 site stay up after DNS moves?
+### Q20 — Cutover plan · Decided 2026-10-07
+**Answer: the owner migrates locally; main + admin go first; the old site stays up 14 days.**
+- The owner runs the `pg_dump` on the EC2 host and the migration on their own machine (`docs/migration.md`, D78).
+- `chestlyace.online` (with `www` and the old-URL redirects) and `admin.chestlyace.online` move to Vercel first; creatives and blog follow with Phases 9–10.
+- The old EC2 site stays up, read-only, for 14 days after DNS moves, then is shut down.
+Original questions: who runs the `pg_dump` (live data ≠ seed file), launch all subdomains at once or main first, and how long the old site stays up.
