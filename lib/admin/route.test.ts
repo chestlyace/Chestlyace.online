@@ -811,3 +811,67 @@ describe("/api/admin/newsletter", () => {
     expect(revalidate).not.toHaveBeenCalled();
   });
 });
+
+describe("/api/admin/creatives-settings and the creatives lists", () => {
+  const settings = async () =>
+    await import("@/app/api/admin/creatives-settings/route");
+
+  it("need a session and a same-origin write", async () => {
+    signedIn = false;
+    const { GET, PATCH } = await settings();
+    expect((await GET(call("/x", "GET"))).status).toBe(401);
+    signedIn = true;
+    expect(
+      (
+        await PATCH(
+          call(
+            "/x",
+            "PATCH",
+            { heroLine: "x" },
+            { origin: "https://evil.example" },
+          ),
+        )
+      ).status,
+    ).toBe(403);
+  });
+
+  it("read and change the wording, and revalidate the creatives pages only", async () => {
+    const { GET, PATCH } = await settings();
+    const first = await (await GET(call("/x", "GET"))).json();
+    expect(first.item.heroStatement).toBe("Design & Photography");
+    const response = await PATCH(
+      call("/x", "PATCH", { contactNote: "Replies in a day." }),
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).item.contactNote).toBe("Replies in a day.");
+    expect(revalidate).toHaveBeenCalledWith("creatives", { expire: 0 });
+    expect(revalidate).not.toHaveBeenCalledWith("portfolio", expect.anything());
+    expect((await PATCH(call("/x", "PATCH", { heroLine: "" }))).status).toBe(
+      422,
+    );
+  });
+
+  it("a write to a creatives list revalidates the creatives tag, not the portfolio's", async () => {
+    const response = await (
+      await list()
+    ).POST(
+      call("/api/admin/creative-faqs", "POST", {
+        question: "Do you shoot weddings?",
+        answer: "Not at the moment.",
+        groupName: "photography",
+      }),
+      ctx({ resource: "creative-faqs" }) as never,
+    );
+    expect(response.status).toBe(201);
+    expect(revalidate).toHaveBeenCalledWith("creatives", { expire: 0 });
+    expect(revalidate).not.toHaveBeenCalledWith("portfolio", expect.anything());
+    revalidate.mockClear();
+    await (
+      await list()
+    ).POST(
+      call("/api/admin/faqs", "POST", { question: "Q?", answer: "A." }),
+      ctx({ resource: "faqs" }) as never,
+    );
+    expect(revalidate).toHaveBeenCalledWith("portfolio", { expire: 0 });
+  });
+});

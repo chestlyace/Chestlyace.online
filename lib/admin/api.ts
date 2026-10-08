@@ -3,9 +3,18 @@ import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
+import {
+  withCreativesDefaults,
+  type CreativesSettings,
+} from "@/lib/creativesCopy";
 import { withDefaults, type NewsletterSettings } from "@/lib/newsletterCopy";
 import {
   certificationSchema,
+  creativeFaqSchema,
+  creativeServiceSchema,
+  creativesSettingsSchema,
+  designPieceSchema,
+  photoEventSchema,
   faqSchema,
   fieldErrors,
   journeySchema,
@@ -83,7 +92,40 @@ const RESOURCES: Record<string, ResourceConfig> = {
     schema: faqSchema,
     published: true,
   },
+  // The creatives site (D86, design.md §14.26).
+  "design-pieces": {
+    table: schema.designPieces as unknown as AdminTable,
+    schema: designPieceSchema,
+    published: true,
+    defaults: { images: [], tools: [], isFeatured: false },
+  },
+  "photo-events": {
+    table: schema.photoEvents as unknown as AdminTable,
+    schema: photoEventSchema,
+    published: true,
+    defaults: { covered: [], images: [], credits: [], isFeatured: false },
+  },
+  "creative-services": {
+    table: schema.creativeServices as unknown as AdminTable,
+    schema: creativeServiceSchema,
+    published: true,
+    defaults: { items: [] },
+  },
+  "creative-faqs": {
+    table: schema.creativeFaqs as unknown as AdminTable,
+    schema: creativeFaqSchema,
+    published: true,
+  },
 };
+
+/** The resources of the creatives site: their writes revalidate its pages. */
+export const isCreativesResource = (name: string) =>
+  [
+    "design-pieces",
+    "photo-events",
+    "creative-services",
+    "creative-faqs",
+  ].includes(name);
 
 export const isAdminApiResource = (name: string) =>
   Object.hasOwn(RESOURCES, name);
@@ -114,7 +156,7 @@ function uniqueViolation(error: unknown): Failure | null {
     ok: false,
     status: 422,
     error: "invalid",
-    fields: { slug: "Another project already uses that address." },
+    fields: { slug: "Another entry already uses that address." },
   };
 }
 
@@ -360,4 +402,48 @@ export async function updateNewsletter(
       set: parsed.data,
     });
   return { ok: true, row: await getNewsletter(db) };
+}
+
+// The creatives site's wording is one row (`id = 1`), like the newsletter's: reading
+// gives the wording in use, a change creates the row if needed.
+export async function getCreativesSettings(
+  db: Database,
+): Promise<CreativesSettings> {
+  const [row] = await db
+    .select()
+    .from(schema.creativesSettings)
+    .where(eq(schema.creativesSettings.id, 1))
+    .limit(1);
+  return withCreativesDefaults(row);
+}
+
+export async function updateCreativesSettings(
+  db: Database,
+  input: unknown,
+): Promise<{ ok: true; row: CreativesSettings } | Failure> {
+  const parsed = creativesSettingsSchema.partial().safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      status: 422,
+      error: "invalid",
+      fields: fieldErrors(parsed.error),
+    };
+  }
+  if (Object.keys(parsed.data).length === 0) {
+    return {
+      ok: false,
+      status: 422,
+      error: "invalid",
+      fields: { _: "Nothing to change." },
+    };
+  }
+  await db
+    .insert(schema.creativesSettings)
+    .values({ id: 1, ...parsed.data })
+    .onConflictDoUpdate({
+      target: schema.creativesSettings.id,
+      set: parsed.data,
+    });
+  return { ok: true, row: await getCreativesSettings(db) };
 }

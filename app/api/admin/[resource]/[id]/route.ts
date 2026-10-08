@@ -30,7 +30,7 @@ export async function PATCH(
     await readBody(request),
   );
   if (!result.ok) return failure(result);
-  published();
+  published(resource);
   return json({ item: result.row });
 }
 
@@ -49,6 +49,6 @@ export async function DELETE(
 
   const result = await deleteRow(getDb(), resource, id);
   if (!result.ok) return failure(result);
-  published();
+  published(resource);
   return json({ ok: true });
 }

@@ -64,6 +64,13 @@
       "when": 1791444538374,
       "tag": "0008_newsletter_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791450710069,
+      "tag": "0009_creatives",
+      "breakpoints": true
     }
   ]
 }
