@@ -10,6 +10,7 @@ import { Tag } from "@/components/shared/Tag";
 import type { BlogPostSummary } from "@/lib/admin/blogApi";
 import { cn } from "@/lib/cn";
 import { useConfirm } from "../ConfirmDialog";
+import { ImportDialog } from "./ImportDialog";
 import { Switch } from "../Switch";
 import { useToast } from "../Toast";
 
@@ -60,6 +61,7 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
   const router = useRouter();
   const [items, setItems] = useState(initial);
   const [filter, setFilter] = useState<Filter>("all");
+  const [importing, setImporting] = useState(false);
 
   const [seen, setSeen] = useState(initial);
   if (seen !== initial) {
@@ -151,14 +153,23 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
         <p className="text-sm text-muted">
           {visible.length} {visible.length === 1 ? "post" : "posts"}
         </p>
-        <Button
-          href="/blog/new"
-          magnetic={false}
-          trailingIcon={<Plus />}
-          iconNudge="none"
-        >
-          New post
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            magnetic={false}
+            onClick={() => setImporting(true)}
+          >
+            Import from DEV
+          </Button>
+          <Button
+            href="/blog/new"
+            magnetic={false}
+            trailingIcon={<Plus />}
+            iconNudge="none"
+          >
+            New post
+          </Button>
+        </div>
       </div>
 
       {visible.length === 0 ? (
@@ -245,6 +256,12 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
             );
           })}
         </ul>
+      )}
+      {importing && (
+        <ImportDialog
+          onClose={() => setImporting(false)}
+          onDone={() => router.refresh()}
+        />
       )}
     </>
   );

@@ -1,6 +1,8 @@
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
+import { eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/pglite/migrator";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as schema from "@/db/schema";
 import { seed } from "@/db/seed";
@@ -357,5 +359,131 @@ describe("/api/admin/blog", () => {
       (await read(call("/api/admin/blog/x", "GET"), ctx({ id: "x" }) as never))
         .status,
     ).toBe(404);
+  });
+});
+
+describe("/api/admin/blog/devto", () => {
+  const status = async () =>
+    await import("@/app/api/admin/blog/devto/status/route");
+  const find = async () =>
+    await import("@/app/api/admin/blog/devto/find/route");
+  const importer = async () =>
+    await import("@/app/api/admin/blog/devto/import/route");
+  const exporter = async () =>
+    await import("@/app/api/admin/blog/[id]/devto/route");
+
+  const dev = (
+    handler: (url: string, init?: RequestInit) => unknown,
+    code = 200,
+  ) =>
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async (url: RequestInfo | URL, init?: RequestInit) =>
+          new Response(JSON.stringify(handler(String(url), init)), {
+            status: code,
+          }),
+      ),
+    );
+
+  it("needs a session, and says whether the key is set without showing it", async () => {
+    const { GET } = await status();
+    signedIn = false;
+    expect(
+      (await GET(call("/api/admin/blog/devto/status", "GET"))).status,
+    ).toBe(401);
+    signedIn = true;
+    vi.stubEnv("DEVTO_API_KEY", "");
+    expect(
+      await (await GET(call("/api/admin/blog/devto/status", "GET"))).json(),
+    ).toEqual({ configured: false });
+    vi.stubEnv("DEVTO_API_KEY", "secret-key");
+    const reply = await (
+      await GET(call("/api/admin/blog/devto/status", "GET"))
+    ).json();
+    expect(reply).toEqual({ configured: true });
+  });
+
+  it("finds, imports and exports with DEV standing in", async () => {
+    const articles = [
+      { id: 5, title: "From DEV", url: "https://dev.to/me/x", tag_list: ["a"] },
+    ];
+    dev((url) =>
+      /\/articles\/5$/.test(url)
+        ? {
+            id: 5,
+            title: "From DEV",
+            description: "d",
+            body_markdown: "Body",
+            url: "https://dev.to/me/x",
+          }
+        : articles,
+    );
+
+    const found = await (
+      await (
+        await find()
+      ).POST(call("/api/admin/blog/devto/find", "POST", { username: "me" }))
+    ).json();
+    expect(found.items).toEqual([
+      expect.objectContaining({ id: 5, imported: false }),
+    ]);
+    expect(
+      (
+        await (
+          await find()
+        ).POST(call("/api/admin/blog/devto/find", "POST", {}))
+      ).status,
+    ).toBe(422);
+
+    const imported = await (
+      await (
+        await importer()
+      ).POST(call("/api/admin/blog/devto/import", "POST", { ids: [5] }))
+    ).json();
+    expect(imported.items[0]).toMatchObject({ status: "imported" });
+    expect(
+      (
+        await (
+          await importer()
+        ).POST(call("/api/admin/blog/devto/import", "POST", { ids: [] }))
+      ).status,
+    ).toBe(422);
+
+    const postId = imported.items[0].postId;
+    const target = ctx({ id: String(postId) }) as never;
+    const { POST } = await exporter();
+    vi.stubEnv("DEVTO_API_KEY", "");
+    expect(
+      (
+        await POST(
+          call(`/api/admin/blog/${postId}/devto`, "POST", { publish: false }),
+          target,
+        )
+      ).status,
+    ).toBe(400);
+    vi.stubEnv("DEVTO_API_KEY", "secret-key");
+    dev(() => ({ id: 9, url: "https://dev.to/me/new" }));
+    await db
+      .update(schema.blogPosts)
+      .set({ devtoId: null })
+      .where(eq(schema.blogPosts.id, postId));
+    const sent = await POST(
+      call(`/api/admin/blog/${postId}/devto`, "POST", { publish: false }),
+      target,
+    );
+    expect(await sent.json()).toMatchObject({
+      url: "https://dev.to/me/new",
+      created: true,
+    });
+    expect(
+      (
+        await POST(
+          call(`/api/admin/blog/${postId}/devto`, "POST", { nope: 1 }),
+          target,
+        )
+      ).status,
+    ).toBe(422);
+    vi.unstubAllGlobals();
   });
 });

@@ -21,6 +21,7 @@ export default async function EditPostPage({
       key={post.id}
       id={post.id}
       initial={snapshotOf(post)}
+      devtoUrl={post.devtoUrl}
       initialPreview={await previewBody(post.content)}
     />
   );
