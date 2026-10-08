@@ -8,12 +8,15 @@ import type { Database } from "@/lib/db";
 import {
   createRow,
   deleteRow,
+  getCreativesSettings,
   getNewsletter,
   getProfile,
   getRow,
   isAdminApiResource,
+  isCreativesResource,
   listRows,
   reorderRows,
+  updateCreativesSettings,
   updateNewsletter,
   updateProfile,
   updateRow,
@@ -40,6 +43,10 @@ describe("which resources exist", () => {
       "projects",
       "journey",
       "volunteering",
+      "design-pieces",
+      "photo-events",
+      "creative-services",
+      "creative-faqs",
     ]) {
       expect(isAdminApiResource(name)).toBe(true);
     }
@@ -247,7 +254,7 @@ describe("projects", () => {
       ok: false,
       status: 422,
       error: "invalid",
-      fields: { slug: "Another project already uses that address." },
+      fields: { slug: "Another entry already uses that address." },
     });
     const [other] = await listRows(db, "projects");
     expect(
@@ -418,5 +425,247 @@ describe("newsletter wording", () => {
     }
     expect(await updateNewsletter(db, {})).toMatchObject({ ok: false });
     expect(await db.select().from(schema.newsletterSettings)).toHaveLength(0);
+  });
+});
+
+const img = (n: number, extra: object = {}) => ({
+  url: `https://res.cloudinary.com/x/image/upload/p${n}.webp`,
+  width: 1200,
+  height: 1600,
+  alt: `Picture ${n}`,
+  ...extra,
+});
+
+describe("design pieces", () => {
+  const ok = {
+    title: "Brand Identity for Acme",
+    slug: "acme-identity",
+    category: "Brand identity",
+    coverUrl: "https://res.cloudinary.com/x/image/upload/c.webp",
+    coverWidth: 1600,
+    coverHeight: 1200,
+    coverAlt: "The Acme logo on a card",
+    isFeatured: false,
+  };
+
+  it("creates one unpublished at the end with the lists empty", async () => {
+    const a = await createRow(db, "design-pieces", ok);
+    const b = await createRow(db, "design-pieces", { ...ok, slug: "second" });
+    expect(a.ok && b.ok).toBe(true);
+    if (a.ok && b.ok) {
+      expect(a.row).toMatchObject({
+        isPublished: false,
+        images: [],
+        tools: [],
+        year: null,
+        client: null,
+      });
+      expect(b.row.orderIndex).toBeGreaterThan(a.row.orderIndex as number);
+    }
+  });
+
+  it("keeps the address unique and checks its shape", async () => {
+    await createRow(db, "design-pieces", ok);
+    expect(await createRow(db, "design-pieces", ok)).toMatchObject({
+      ok: false,
+      fields: { slug: "Another entry already uses that address." },
+    });
+    for (const slug of ["Acme Identity", "a--b", "-a"])
+      expect(
+        await createRow(db, "design-pieces", { ...ok, slug }),
+      ).toMatchObject({ ok: false, status: 422 });
+  });
+
+  it("needs the cover, its size and its alt text, and checks every extra image", async () => {
+    for (const bad of [
+      { coverAlt: " " },
+      { coverWidth: 0 },
+      { coverHeight: 1.5 },
+      { coverUrl: "javascript:alert(1)" },
+      { images: [img(1, { alt: "" })] },
+      { images: [img(1, { width: undefined })] },
+      { images: [{ ...img(1), extra: true }] },
+      { images: Array.from({ length: 13 }, (_, n) => img(n)) },
+      { year: 1800 },
+      { year: "soon" },
+      { linkUrl: "nope" },
+      { tools: ["Figma", "figma"] },
+    ])
+      expect(
+        await createRow(db, "design-pieces", { ...ok, ...bad }),
+      ).toMatchObject({ ok: false, status: 422 });
+    const good = await createRow(db, "design-pieces", {
+      ...ok,
+      images: [img(1), img(2)],
+      year: "2026",
+      tools: ["Figma", "Illustrator"],
+      client: "  Acme  ",
+      linkUrl: "https://acme.example",
+    });
+    expect(good.ok && good.row).toMatchObject({
+      year: 2026,
+      client: "Acme",
+      tools: ["Figma", "Illustrator"],
+    });
+  });
+
+  it("updates, reorders and deletes like the other lists", async () => {
+    const a = await createRow(db, "design-pieces", ok);
+    const b = await createRow(db, "design-pieces", { ...ok, slug: "second" });
+    if (!a.ok || !b.ok) throw new Error("setup");
+    expect(
+      await updateRow(db, "design-pieces", a.row.id, { isPublished: true }),
+    ).toMatchObject({ ok: true });
+    expect(
+      await reorderRows(db, "design-pieces", { ids: [b.row.id, a.row.id] }),
+    ).toEqual({
+      ok: true,
+    });
+    expect((await listRows(db, "design-pieces")).map((r) => r.slug)).toEqual([
+      "second",
+      "acme-identity",
+    ]);
+    expect(await deleteRow(db, "design-pieces", a.row.id)).toEqual({
+      ok: true,
+    });
+  });
+});
+
+describe("photo events", () => {
+  const ok = {
+    title: "PyCon Cameroon 2026",
+    slug: "pycon-cameroon-2026",
+    eventDate: "2026-05-16",
+    coverUrl: "https://res.cloudinary.com/x/image/upload/cover.webp",
+    coverWidth: 2400,
+    coverHeight: 1600,
+    coverAlt: "The crowd at the opening keynote",
+    isFeatured: true,
+  };
+
+  it("creates one with pictures, credits and an album link", async () => {
+    const result = await createRow(db, "photo-events", {
+      ...ok,
+      place: "Yaoundé",
+      kind: "Conference",
+      covered: ["Photography"],
+      images: [img(1, { caption: "Opening" }), img(2)],
+      credits: [
+        { role: "Photography", name: "Chestly Ace", url: "https://x.example" },
+        { role: "Organiser", name: "PyCon Cameroon" },
+      ],
+      albumUrl: "https://photos.google.com/share/abc",
+      albumLabel: "Google Photos",
+    });
+    expect(result.ok && result.row).toMatchObject({
+      eventDate: "2026-05-16",
+      isPublished: false,
+      albumLabel: "Google Photos",
+      credits: [
+        { role: "Photography", name: "Chestly Ace", url: "https://x.example" },
+        { role: "Organiser", name: "PyCon Cameroon" },
+      ],
+    });
+  });
+
+  it("checks the date, the pictures, the credits and the album address", async () => {
+    for (const bad of [
+      { eventDate: "May 2026" },
+      { eventDate: "2026-13-45" },
+      { images: Array.from({ length: 61 }, (_, n) => img(n)) },
+      { images: [img(1, { alt: "" })] },
+      { credits: [{ role: "", name: "A" }] },
+      { credits: [{ role: "Photo", name: "A", url: "nope" }] },
+      { credits: Array.from({ length: 31 }, () => ({ role: "R", name: "N" })) },
+      { albumUrl: "http://insecure.example/a" },
+      { albumUrl: "nope" },
+    ])
+      expect(
+        await createRow(db, "photo-events", { ...ok, ...bad }),
+      ).toMatchObject({ ok: false, status: 422 });
+    expect(
+      await createRow(db, "photo-events", { ...ok, albumUrl: "" }),
+    ).toMatchObject({ ok: true });
+  });
+});
+
+describe("creative services and questions", () => {
+  it("need a group and take the same fields as the main site's", async () => {
+    const service = {
+      title: "Event coverage",
+      description: "Conferences, launches and community events.",
+      icon: "Work",
+      groupName: "photography",
+      items: ["Conferences", "Launches"],
+    };
+    expect(await createRow(db, "creative-services", service)).toMatchObject({
+      ok: true,
+      row: { groupName: "photography", isPublished: false },
+    });
+    expect(
+      await createRow(db, "creative-services", {
+        ...service,
+        groupName: "video",
+      }),
+    ).toMatchObject({ ok: false });
+    expect(
+      await createRow(db, "creative-faqs", {
+        question: "Do you cover events?",
+        answer: "Yes.",
+        groupName: "photography",
+      }),
+    ).toMatchObject({ ok: true });
+    expect(
+      await createRow(db, "creative-faqs", { question: "Q", answer: "A" }),
+    ).toMatchObject({ ok: false });
+  });
+});
+
+describe("which writes belong to the creatives site", () => {
+  it("is the four creatives lists only", () => {
+    for (const name of [
+      "design-pieces",
+      "photo-events",
+      "creative-services",
+      "creative-faqs",
+    ])
+      expect(isCreativesResource(name)).toBe(true);
+    for (const name of ["projects", "faqs", "services", "profile", "nope"])
+      expect(isCreativesResource(name)).toBe(false);
+  });
+});
+
+describe("creatives settings", () => {
+  it("reads as the built-in wording, then as what was saved", async () => {
+    const before = await getCreativesSettings(db);
+    expect(before.heroStatement).toBe("Design & Photography");
+    expect(before.marqueeWords).toContain("Photography");
+
+    const saved = await updateCreativesSettings(db, {
+      heroStatement: "  Make & Capture  ",
+      marqueeWords: ["Design", "Photos"],
+    });
+    expect(saved.ok).toBe(true);
+    const after = await getCreativesSettings(db);
+    expect(after.heroStatement).toBe("Make & Capture");
+    expect(after.marqueeWords).toEqual(["Design", "Photos"]);
+    expect(after.contactText).toBe(before.contactText);
+    expect(await db.select().from(schema.creativesSettings)).toHaveLength(1);
+  });
+
+  it("refuses blanks, too-long texts, an empty word list, unknown fields and an empty change", async () => {
+    for (const body of [
+      { heroStatement: " " },
+      { heroLine: "x".repeat(161) },
+      { marqueeWords: [] },
+      { marqueeWords: ["a", "A"] },
+      { nope: "x" },
+    ])
+      expect(await updateCreativesSettings(db, body)).toMatchObject({
+        ok: false,
+        status: 422,
+      });
+    expect(await updateCreativesSettings(db, {})).toMatchObject({ ok: false });
+    expect(await db.select().from(schema.creativesSettings)).toHaveLength(0);
   });
 });

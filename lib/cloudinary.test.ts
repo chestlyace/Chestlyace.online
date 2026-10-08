@@ -52,6 +52,12 @@ describe("signedUpload", () => {
     );
   });
 
+  it("puts creatives images in portfolio/creatives, at most 2400×2400", () => {
+    const up = signedUpload("creatives", env, now)!;
+    expect(up.folder).toBe("portfolio/creatives");
+    expect(up.transformation).toBe("c_limit,w_2400,h_2400");
+  });
+
   it("puts blog images in portfolio/blog, at most 1600×1600", () => {
     const up = signedUpload("blog", env, now)!;
     expect(up.folder).toBe("portfolio/blog");

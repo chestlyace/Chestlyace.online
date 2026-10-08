@@ -8,7 +8,14 @@ import { createHash } from "node:crypto";
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export type UploadUse =
-  "project" | "logo" | "profile" | "resume" | "badge" | "icon" | "blog";
+  | "project"
+  | "logo"
+  | "profile"
+  | "resume"
+  | "badge"
+  | "icon"
+  | "blog"
+  | "creatives";
 
 export type UploadRule = {
   folder: string;
@@ -45,6 +52,13 @@ export const UPLOAD_RULES: Record<UploadUse, UploadRule> = {
   blog: {
     folder: "portfolio/blog",
     transformation: "c_limit,w_1600,h_1600",
+    resource: "image",
+    formats: IMAGE_FORMATS,
+  },
+  // Design pieces and photographs (design.md §14.26): kept larger for the lightbox.
+  creatives: {
+    folder: "portfolio/creatives",
+    transformation: "c_limit,w_2400,h_2400",
     resource: "image",
     formats: IMAGE_FORMATS,
   },

@@ -2,8 +2,9 @@ import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { hasSession } from "./auth";
 import { isSameOrigin } from "./request";
-import { isAdminApiResource, type Failure } from "./api";
+import { isAdminApiResource, isCreativesResource, type Failure } from "./api";
 import { BLOG_TAG } from "@/lib/blog/cache";
+import { CREATIVES_TAG } from "@/lib/creatives/cache";
 import { PORTFOLIO_TAG } from "@/lib/portfolio";
 
 // What every /api/admin route does first and last (content-schema.md §2).
@@ -53,8 +54,16 @@ export function failure(result: Failure): Response {
 
 // Every successful write makes the public site read fresh data
 // (`{ expire: 0 }`: the next visit waits for the new data, not the old page).
-export function published() {
-  revalidateTag(PORTFOLIO_TAG, { expire: 0 });
+export function published(resource?: string) {
+  revalidateTag(
+    resource && isCreativesResource(resource) ? CREATIVES_TAG : PORTFOLIO_TAG,
+    { expire: 0 },
+  );
+}
+
+// A write to the creatives settings makes the creatives site read fresh data.
+export function publishedCreatives() {
+  revalidateTag(CREATIVES_TAG, { expire: 0 });
 }
 
 // A post written, published or deleted makes the blog read fresh data (D74).

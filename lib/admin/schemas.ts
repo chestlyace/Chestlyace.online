@@ -440,3 +440,175 @@ export const newsletterSchema = z
     emailIgnore: copyText("closing note", 300),
   })
   .strict();
+
+// ---- Creatives (design.md §14.26, content-schema.md §5) ----------------------------
+
+const slug = z
+  .string({ error: "Enter the address." })
+  .trim()
+  .min(1, "Enter the address.")
+  .max(60, "Keep the address under 60 characters.")
+  .regex(
+    /^[a-z0-9]+(-[a-z0-9]+)*$/,
+    "Use lowercase letters, numbers and single hyphens, like my-piece.",
+  );
+
+const pixels = (label: string) =>
+  z
+    .number({ error: `The ${label} is missing.` })
+    .int(`The ${label} must be a whole number.`)
+    .min(1, `The ${label} is missing.`)
+    .max(20000, `The ${label} is too large.`);
+
+const altText = z
+  .string({ error: "Describe the image." })
+  .trim()
+  .min(1, "Describe the image.")
+  .max(200, "Keep the description under 200 characters.");
+
+const caption = z
+  .string()
+  .trim()
+  .max(200, "Keep the caption under 200 characters.")
+  .optional();
+
+/** One extra image or picture: its address, its pixel size and its alt text. */
+const creativeImage = z
+  .object({
+    url: imageAddress,
+    width: pixels("width"),
+    height: pixels("height"),
+    alt: altText,
+    caption,
+  })
+  .strict();
+
+const pieceImage = creativeImage.omit({ caption: true }).strict();
+
+// An https address is required for an album: it leaves the site.
+const albumAddress = z.preprocess(
+  clean,
+  httpUrl.refine((v) => v.startsWith("https://"), URL_MESSAGE).nullable(),
+);
+
+export const designPieceSchema = z
+  .object({
+    title: text("title", 120),
+    slug,
+    category: text("category", 40),
+    coverUrl: imageAddress,
+    coverWidth: pixels("width"),
+    coverHeight: pixels("height"),
+    coverAlt: altText,
+    images: z.array(pieceImage).max(12, "Add at most 12 images."),
+    description: longText("description", 3000),
+    client: longText("client", 80),
+    role: longText("role", 80),
+    tools: tagList("tool", 12, 40),
+    year: z.preprocess(
+      (value) => {
+        const cleaned = clean(value);
+        return typeof cleaned === "string" && /^\d{1,4}$/.test(cleaned.trim())
+          ? Number(cleaned)
+          : cleaned;
+      },
+      z
+        .number({ error: "Enter a year, like 2026." })
+        .int("Enter a year, like 2026.")
+        .min(1990, "Enter a year, like 2026.")
+        .max(2100, "Enter a year, like 2026.")
+        .nullable(),
+    ),
+    linkUrl: optionalUrl,
+    isFeatured: z.boolean({ error: "Featured must be on or off." }),
+    isPublished: published,
+  })
+  .strict();
+
+export const photoEventSchema = z
+  .object({
+    title: text("title", 120),
+    slug,
+    eventDate: z
+      .string({ error: "Enter a date." })
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a date.")
+      .refine((value) => !Number.isNaN(Date.parse(value)), "Enter a date."),
+    place: longText("place", 80),
+    kind: longText("kind", 30),
+    coverUrl: imageAddress,
+    coverWidth: pixels("width"),
+    coverHeight: pixels("height"),
+    coverAlt: altText,
+    description: longText("description", 3000),
+    role: longText("role", 80),
+    covered: tagList("item", 8, 40),
+    images: z.array(creativeImage).max(60, "Add at most 60 pictures."),
+    credits: z
+      .array(
+        z
+          .object({
+            role: text("role", 60),
+            name: text("name", 80),
+            url: z.preprocess(
+              (value) => clean(value) ?? undefined,
+              httpUrl.optional(),
+            ),
+          })
+          .strict(),
+      )
+      .max(30, "Add at most 30 credits."),
+    albumUrl: albumAddress,
+    albumLabel: longText("label", 40),
+    isFeatured: z.boolean({ error: "Featured must be on or off." }),
+    isPublished: published,
+  })
+  .strict();
+
+export const CREATIVE_GROUPS = [
+  ["design", "Graphic design"],
+  ["photography", "Photography"],
+] as const;
+
+export const creativeServiceSchema = z
+  .object({
+    title: text("title", 80),
+    description: text("description", 400),
+    icon: z.enum(SERVICE_ICONS, { error: "Choose an icon." }),
+    groupName: z.enum(values(CREATIVE_GROUPS), {
+      error: "Choose graphic design or photography.",
+    }),
+    items: tagList("item", 8, 60),
+    isPublished: published,
+  })
+  .strict();
+
+export const creativeFaqSchema = z
+  .object({
+    question: text("question", 200),
+    answer: text("answer", 1500),
+    groupName: z.enum(values(CREATIVE_GROUPS), {
+      error: "Choose graphic design or photography.",
+    }),
+    isPublished: published,
+  })
+  .strict();
+
+export const creativesSettingsSchema = z
+  .object({
+    heroStatement: text("statement", 60),
+    heroLine: text("line", 160),
+    designIntro: text("intro", 240),
+    photographyIntro: text("intro", 240),
+    portalsTitle: text("title", 60),
+    portalDesignText: text("text", 160),
+    portalPhotographyText: text("text", 160),
+    marqueeWords: tagList("word", 8, 30).refine(
+      (list) => list.length >= 1,
+      "Add at least one word.",
+    ),
+    contactStatement: text("statement", 80),
+    contactText: text("text", 240),
+    contactNote: text("note", 120),
+    seoDescription: text("description", 200),
+  })
+  .strict();

@@ -417,3 +417,131 @@ export const newsletterSettings = pgTable(
   },
   (t) => [check("newsletter_settings_single_row", sql`${t.id} = 1`)],
 );
+
+// ---- Creatives (docs/content-schema.md §5, D86) -------------------------------------
+// Design pieces, photography events, services and the page wording, edited in the
+// admin; images are Cloudinary addresses with their pixel size so the gallery can
+// reserve its space.
+
+export type CreativeImage = {
+  url: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption?: string;
+};
+export type EventCredit = { role: string; name: string; url?: string };
+
+export const designPieces = pgTable("design_pieces", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  category: text("category").notNull(),
+  coverUrl: text("cover_url").notNull(),
+  coverWidth: integer("cover_width").notNull(),
+  coverHeight: integer("cover_height").notNull(),
+  coverAlt: text("cover_alt").notNull(),
+  images: jsonb("images")
+    .$type<CreativeImage[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
+  description: text("description"),
+  client: text("client"),
+  role: text("role"),
+  tools: text("tools").array().notNull().default(emptyTextArray),
+  year: integer("year"),
+  linkUrl: text("link_url"),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  ...ordering,
+  ...timestamps,
+});
+
+export const photoEvents = pgTable("photo_events", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  eventDate: date("event_date").notNull(),
+  place: text("place"),
+  kind: text("kind"),
+  coverUrl: text("cover_url").notNull(),
+  coverWidth: integer("cover_width").notNull(),
+  coverHeight: integer("cover_height").notNull(),
+  coverAlt: text("cover_alt").notNull(),
+  description: text("description"),
+  role: text("role"),
+  covered: text("covered").array().notNull().default(emptyTextArray),
+  images: jsonb("images")
+    .$type<CreativeImage[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
+  credits: jsonb("credits")
+    .$type<EventCredit[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
+  albumUrl: text("album_url"),
+  albumLabel: text("album_label"),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  ...ordering,
+  ...timestamps,
+});
+
+export const creativeServices = pgTable(
+  "creative_services",
+  {
+    id: serial("id").primaryKey(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    icon: text("icon").notNull(),
+    groupName: text("group_name").notNull(),
+    items: text("items").array().notNull().default(emptyTextArray),
+    ...ordering,
+    ...timestamps,
+  },
+  (t) => [
+    check(
+      "creative_services_group",
+      sql`${t.groupName} IN ('design', 'photography')`,
+    ),
+  ],
+);
+
+export const creativeFaqs = pgTable(
+  "creative_faqs",
+  {
+    id: serial("id").primaryKey(),
+    question: text("question").notNull(),
+    answer: text("answer").notNull(),
+    groupName: text("group_name").notNull(),
+    ...ordering,
+    ...timestamps,
+  },
+  (t) => [
+    check(
+      "creative_faqs_group",
+      sql`${t.groupName} IN ('design', 'photography')`,
+    ),
+  ],
+);
+
+// The creatives site's wording (design.md §14.26): one row (`id = 1`); a null
+// column uses the built-in wording in content/copy.ts.
+export const creativesSettings = pgTable(
+  "creatives_settings",
+  {
+    id: integer("id").primaryKey().default(1),
+    heroStatement: text("hero_statement"),
+    heroLine: text("hero_line"),
+    designIntro: text("design_intro"),
+    photographyIntro: text("photography_intro"),
+    portalsTitle: text("portals_title"),
+    portalDesignText: text("portal_design_text"),
+    portalPhotographyText: text("portal_photography_text"),
+    marqueeWords: text("marquee_words").array(),
+    contactStatement: text("contact_statement"),
+    contactText: text("contact_text"),
+    contactNote: text("contact_note"),
+    seoDescription: text("seo_description"),
+    ...timestamps,
+  },
+  (t) => [check("creatives_settings_single_row", sql`${t.id} = 1`)],
+);

@@ -41,6 +41,6 @@ export async function POST(
 
   const result = await createRow(getDb(), resource, await readBody(request));
   if (!result.ok) return failure(result);
-  published();
+  published(resource);
   return json({ item: result.row }, 201);
 }

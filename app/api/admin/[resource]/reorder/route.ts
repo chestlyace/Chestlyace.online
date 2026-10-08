@@ -22,6 +22,6 @@ export async function POST(
 
   const result = await reorderRows(getDb(), resource, await readBody(request));
   if (!result.ok) return failure(result);
-  published();
+  published(resource);
   return json({ ok: true });
 }
