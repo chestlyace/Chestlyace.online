@@ -118,6 +118,16 @@ describe("rich blocks", { timeout: 30_000 }, () => {
     expect(out).toContain("<pre");
   });
 
+  it("turns a session fence into an x-block naming the session, and keeps a bad one as code", async () => {
+    const ok = await html(
+      '```session id=4f9c1a from=2 to=5 title="A title"\n```\n',
+    );
+    expect(ok).toContain('data-kind="session"');
+    expect(ok).toContain("4f9c1a");
+    const bad = await html("```session from=2\n```\n");
+    expect(bad).not.toContain("<x-block");
+  });
+
   it("leaves a block-named fence alone when it is not that block's language", async () => {
     expect(await html("```ts\nconst a = 1;\n```\n")).not.toContain("<x-block");
   });

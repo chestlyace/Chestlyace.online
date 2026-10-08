@@ -848,6 +848,14 @@ html.lenis body {
   user-select: none;
 }
 
+/* The agent session replay: a revealed turn fades up 8px (design.md §13.47). */
+@keyframes replay-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
 /* Blog blocks: the typing caret (design.md §13.41, §13.44). */
 @keyframes caret-blink {
   50% {

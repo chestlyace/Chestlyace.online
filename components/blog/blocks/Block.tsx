@@ -11,6 +11,7 @@ import { FileTree } from "./FileTree";
 import { FlowCanvas } from "./FlowCanvas";
 import { renderIcon } from "./icons";
 import { Quiz } from "./Quiz";
+import { SessionBlock } from "./SessionBlock";
 import { Steps } from "./Steps";
 import { Terminal } from "./Terminal";
 import { Typewriter } from "./Typewriter";
@@ -166,6 +167,8 @@ export async function Block({
       );
       return <Quiz questions={questions} />;
     }
+    case "session":
+      return <SessionBlock data={data as Data.Session} />;
     default:
       return null;
   }
