@@ -34,6 +34,7 @@ import {
   QuoteForm,
   RawForm,
 } from "./blockForms";
+import { FlowEditor } from "./FlowEditor";
 import { InsertButton, InsertMenu } from "./InsertMenu";
 import { CodeGroupForm, DiffForm, TypewriterForm } from "./codeForms";
 import {
@@ -61,6 +62,7 @@ const NAMES: Record<BlockType, string> = {
   terminal: "Terminal",
   typewriter: "Typewriter code",
   quiz: "Quiz",
+  flow: "Flow canvas",
   raw: "Raw markdown",
 };
 
@@ -150,6 +152,13 @@ function Form({
     case "diff":
       return (
         <DiffForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "flow":
+      return (
+        <FlowEditor
           data={block.data}
           onChange={(data) => onChange({ ...block, data })}
         />

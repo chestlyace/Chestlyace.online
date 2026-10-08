@@ -221,10 +221,13 @@ export function AddButton({
   onClick,
   children,
   disabled,
+  icon,
 }: {
   onClick: () => void;
   children: ReactNode;
   disabled?: boolean;
+  /** Replaces the "+". */
+  icon?: ReactNode;
 }) {
   return (
     <button
@@ -233,7 +236,7 @@ export function AddButton({
       disabled={disabled}
       className="flex h-10 w-fit items-center gap-1.5 rounded-full bg-surface px-4 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-tile-hover disabled:opacity-50"
     >
-      <Plus className="size-4" aria-hidden="true" />
+      {icon ?? <Plus className="size-4" aria-hidden="true" />}
       {children}
     </button>
   );

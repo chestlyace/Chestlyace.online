@@ -74,11 +74,11 @@ describe("markdownToBlocks", () => {
   });
 
   it("keeps what has no form yet as raw blocks, untouched", () => {
-    const steps = "```flow\n[a] A\n[b] B\na --> b\n```";
+    const steps = "```session id=1 from=1 to=2\n```";
     const table = "| a | b |\n| - | - |\n| 1 | 2 |";
     expect(types(`${steps}\n\n${table}`)).toEqual(["raw", "raw"]);
     expect(read(steps)[0]).toMatchObject({ markdown: steps });
-    expect(rawKind(steps)).toBe("flow");
+    expect(rawKind(steps)).toBe("session");
     // a code fence with options the Code form can't write also stays raw
     expect(types("```ts foo=bar\nx\n```")).toEqual(["raw"]);
     // nested lists, a level-1 heading and indented code too
@@ -196,6 +196,7 @@ const EXAMPLES: Record<string, string> = {
   diff: '```diff lang=bash title="w.sh"\n- old\n+ new\n  same\n```',
   terminal:
     '```terminal title="zsh"\n# a comment\n$ cd ~/Projects\n$ echo $X\n/Users/alex/.claude\n```',
+  flow: "```flow\n[org|icon:cloud|style:teal|desc:The company|pos:240,0] Organization\n[proj|group|dir:v|pos:20,200] production\n[api|parent:proj] api\n\norg --> api : contains\n```",
   quiz: "```quiz\nQ: Which variable?\n) A flag\n*) CLAUDE_CONFIG_DIR\n) The last login\nE: It points the tool at a config directory.\n---\nQ: Two?\n*) Yes\n) No\n```",
 };
 
@@ -222,7 +223,8 @@ describe("interactive blocks", () => {
     expect(types("```typewriter lang=ts foo=bar\nx\n```")).toEqual(["raw"]);
     expect(types("```terminal\nno command here\n```")).toEqual(["raw"]);
     expect(types("```steps\nnot a step\n```")).toEqual(["raw"]);
-    expect(types("```flow\n[a] A\n```")).toEqual(["raw"]);
+    expect(types("```flow\n[a] A\n[b|style:mauve] B\n```")).toEqual(["raw"]);
+    expect(types("```flow\n[a] A\nb --> a\n```")).toEqual(["raw"]);
   });
 
   it("writes nothing for an empty block and guards a --- line in step text", () => {
