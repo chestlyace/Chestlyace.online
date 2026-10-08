@@ -20,7 +20,7 @@ before the phase starts.
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
-| 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 in review (issue #73); 9b.5–9b.7 after it | Q12 (blog: decided), Q16 (decided) |
+| 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a in review (issue #75); 9b.5b–9b.7 after it | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | Not started | Q1, Q12 |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
@@ -254,8 +254,10 @@ reviewed and merged before the next:
 | 9b.3a Admin: posts, editor core, publishing | The Blog group in the admin: posts list and API, post details, the block list (drag, move, insert menu, `/`), forms for the text and media blocks, Raw markdown, preview, Markdown tab, autosave, publish, cover and image uploads | Done (PR #68) |
 | 9b.3b Admin: interactive block forms | Forms for code group, diff (adds the `diff` package), terminal, typewriter, file tree, steps, compare and quiz | Done (PR #70) |
 | 9b.3c Admin: flow canvas editor | The flow-canvas editor | Done (PR #72) |
-| 9b.4 DEV import and export | Import dialog, "Publish to DEV", the conversions of `docs/blog-markdown.md` §3–§4 | In review (issue #73) |
-| 9b.5 Readers | Better Auth with GitHub and Google, likes, comments and moderation, share, the privacy page | Not started |
+| 9b.4 DEV import and export | Import dialog, "Publish to DEV", the conversions of `docs/blog-markdown.md` §3–§4 | Done (PR #74) |
+| 9b.5a Likes and share | The reaction bar: likes without an account (a hashed cookie, `blog_likes`, the blog API, a rate limit) and share (the system sheet or a menu) | In review (issue #75) |
+| 9b.5b Readers: sign-in and comments | Better Auth with GitHub and Google, comments (composer, replies, likes on comments, reports, delete, the owner's email), the signed-in chip, the privacy page | Not started |
+| 9b.5c Comment moderation | The Comments screen in the admin: hide, show, delete, ban a reader, mark the author's account | Not started |
 | 9b.6 Agent sessions | Session upload, turn picker, redaction review, the replay block | Not started |
 | 9b.7 Newsletter | The signup box, double opt-in, the confirmation page | Not started |
 

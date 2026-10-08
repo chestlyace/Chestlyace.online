@@ -96,6 +96,22 @@ describe("decideRoute", () => {
     },
   );
 
+  it("serves /api/blog on the blog host only", () => {
+    const pathname = "/api/blog/posts/hello/like";
+    expect(
+      decideRoute({ ...base, host: "blog.chestlyace.online", pathname }),
+    ).toEqual({ kind: "pass-through", site: "blog" });
+    for (const host of [
+      "chestlyace.online",
+      "creatives.chestlyace.online",
+      "admin.chestlyace.online",
+    ]) {
+      expect(decideRoute({ ...base, host, pathname })).toEqual({
+        kind: "not-found",
+      });
+    }
+  });
+
   it("serves /api/revalidate on every host", () => {
     for (const host of [
       "chestlyace.online",

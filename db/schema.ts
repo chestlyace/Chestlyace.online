@@ -8,6 +8,7 @@ import {
   date,
   integer,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -207,4 +208,21 @@ export const blogPosts = pgTable(
   (t) => [
     check("blog_posts_status", sql`${t.status} IN ('draft', 'published')`),
   ],
+);
+
+// Likes on a post (content-schema.md §4): anyone can like, no account. The visitor
+// is only a hash of a first-party cookie, so the table holds nothing that names a
+// person. One like per browser; `blog_posts.like_count` is kept in step with it.
+export const blogLikes = pgTable(
+  "blog_likes",
+  {
+    postId: integer("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    visitorHash: text("visitor_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.postId, t.visitorHash] })],
 );
