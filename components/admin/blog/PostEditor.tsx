@@ -32,6 +32,7 @@ import { useConfirm } from "../ConfirmDialog";
 import { useToast } from "../Toast";
 import { useUnsavedChanges } from "../UnsavedGuard";
 import { BlockList } from "./BlockList";
+import { ExportDialog } from "./ExportDialog";
 import { PostDetails } from "./PostDetails";
 import { Preview } from "./Preview";
 
@@ -48,11 +49,14 @@ export function PostEditor({
   id: initialId,
   initial,
   initialPreview,
+  devtoUrl = null,
 }: {
   id?: number;
   initial?: PostSnapshot;
   /** The saved post rendered on the server, shown until the preview updates. */
   initialPreview: ReactNode;
+  /** The DEV article this post is linked to, if any. */
+  devtoUrl?: string | null;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -88,6 +92,8 @@ export function PostEditor({
   const [saving, setSaving] = useState(false);
   const [note, setNote] = useState<"saved" | "autosaved" | null>(null);
   const [slugTouched, setSlugTouched] = useState(Boolean(initialId));
+  const [linked, setLinked] = useState(devtoUrl);
+  const [exporting, setExporting] = useState(false);
   const [previewAt, setPreviewAt] = useState<number | undefined>(undefined);
   const savingRef = useRef(false);
   const noteTimer = useRef<number | undefined>(undefined);
@@ -439,6 +445,17 @@ export function PostEditor({
         </div>
       )}
 
+      {exporting && id && (
+        <ExportDialog
+          id={id}
+          markdown={saved.content}
+          linked={linked}
+          postStatus={saved.status}
+          onClose={() => setExporting(false)}
+          onSent={setLinked}
+        />
+      )}
+
       <div className="material fixed inset-x-0 bottom-0 z-40 border-t border-border lg:left-62">
         <div className="mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 sm:px-6 lg:mx-0 lg:px-8">
           <p
@@ -466,6 +483,7 @@ export function PostEditor({
               status={status}
               slug={saved.details.slug}
               dirty={dirty}
+              onDevto={() => setExporting(true)}
               onDuplicate={async () => {
                 const response = await fetch(
                   `/api/admin/blog/${id}/duplicate`,
@@ -584,6 +602,7 @@ function MoreMenu({
   status,
   slug,
   dirty,
+  onDevto,
   onDuplicate,
   onDelete,
 }: {
@@ -591,6 +610,7 @@ function MoreMenu({
   status: PostStatus;
   slug: string;
   dirty: boolean;
+  onDevto: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
@@ -642,6 +662,19 @@ function MoreMenu({
               View on the blog
             </a>
           )}
+          <button
+            type="button"
+            role="menuitem"
+            disabled={!id || dirty}
+            title={dirty ? "Save first" : undefined}
+            onClick={() => {
+              setOpen(false);
+              onDevto();
+            }}
+            className={item}
+          >
+            Publish to DEV
+          </button>
           <button
             type="button"
             role="menuitem"
