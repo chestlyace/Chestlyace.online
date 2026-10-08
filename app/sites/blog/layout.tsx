@@ -24,7 +24,10 @@ export default async function BlogLayout({
     { label: "RSS", href: "/rss.xml" },
   ];
   return (
-    <SiteDocument site="blog" footer={{ connect, contact: [] }}>
+    <SiteDocument
+      site="blog"
+      footer={{ connect, contact: [{ label: "Privacy", href: "/privacy" }] }}
+    >
       {children}
     </SiteDocument>
   );

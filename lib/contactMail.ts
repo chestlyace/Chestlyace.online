@@ -35,7 +35,7 @@ export function buildContactEmail(
 }
 
 export async function sendContactEmail(
-  email: ReturnType<typeof buildContactEmail>,
+  email: object,
   apiKey: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<boolean> {

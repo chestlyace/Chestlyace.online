@@ -450,6 +450,8 @@ export async function seed(db: Database) {
   await db.transaction(async (tx) => {
     for (const table of [
       schema.blogPosts,
+      schema.readerUser,
+      schema.readerVerification,
       schema.faqs,
       schema.socials,
       schema.certifications,
