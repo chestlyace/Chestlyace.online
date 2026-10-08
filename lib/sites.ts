@@ -108,6 +108,7 @@ const API_OWNERS: [prefix: string, owner: SiteKey | "any"][] = [
   ["/api/revalidate", "any"],
   ["/api/contact", "main"],
   ["/api/blog", "blog"],
+  ["/api/reader", "blog"],
 ];
 
 function apiOwner(pathname: string): SiteKey | "any" {

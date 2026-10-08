@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/shared/Container";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { Reveal } from "@/components/shared/Reveal";
+import { Comments } from "@/components/blog/comments/Comments";
 import { PostHeader } from "@/components/blog/PostHeader";
 import { ReactionBar } from "@/components/blog/ReactionBar";
 import { siteUrl } from "@/lib/sites";
@@ -41,8 +42,7 @@ export async function generateMetadata({
 }
 
 // One post (design.md §14.14): header, cover, the prose with its contents rail,
-// and the way on to the next post. Comments and the newsletter box come with
-// their own steps.
+// and the way on to the next post. The newsletter box comes with its own step.
 export default async function PostPage({
   params,
 }: PageProps<"/sites/blog/[slug]">) {
@@ -95,6 +95,12 @@ export default async function PostPage({
         <div className="mt-24 md:mt-24">
           <PostNavigation previous={previous} next={next} />
         </div>
+
+        {post.commentsEnabled && (
+          <div className="mt-16 md:mt-24 lg:max-w-[calc(100%*8/12)]">
+            <Comments slug={post.slug} />
+          </div>
+        )}
       </Container>
     </div>
   );

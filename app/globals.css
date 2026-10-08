@@ -930,3 +930,10 @@ html.lenis body {
   font-weight: var(--shiki-light-font-weight);
   text-decoration: var(--shiki-light-text-decoration);
 }
+
+/* A new comment fades in (design.md §13.37). */
+@keyframes comment-in {
+  from {
+    opacity: 0;
+  }
+}

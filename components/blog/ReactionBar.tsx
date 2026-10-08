@@ -1,10 +1,11 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/lib/media";
 import { cn } from "@/lib/cn";
+import { RollingCount } from "./RollingCount";
 import { ShareMenu } from "./ShareMenu";
 
 type State = { count: number; liked: boolean };
@@ -95,26 +96,7 @@ export function ReactionBar({
             )}
           />
         </motion.span>
-        <span
-          className="relative inline-grid h-5 min-w-[1ch] place-items-center overflow-hidden"
-          aria-hidden="true"
-        >
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span
-              key={state.count}
-              initial={
-                reduced ? false : { y: state.liked ? 12 : -12, opacity: 0 }
-              }
-              animate={{ y: 0, opacity: 1 }}
-              exit={
-                reduced ? undefined : { y: state.liked ? -12 : 12, opacity: 0 }
-              }
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              {state.count}
-            </motion.span>
-          </AnimatePresence>
-        </span>
+        <RollingCount value={state.count} up={state.liked} />
       </button>
       <ShareMenu title={title} url={url} />
     </div>

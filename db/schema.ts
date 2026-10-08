@@ -3,9 +3,11 @@
 // updated_at current on every UPDATE.
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   date,
+  index,
   integer,
   pgTable,
   primaryKey,
@@ -225,4 +227,141 @@ export const blogLikes = pgTable(
       .defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.postId, t.visitorHash] })],
+);
+
+// Readers (docs/content-schema.md §4, D83): the accounts of people who sign in to
+// comment, in Better Auth's own tables (its field names, ours for the tables).
+// `banned` and `is_author` are our two extra columns on the user.
+export const readerUser = pgTable("reader_user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  image: text("image"),
+  banned: boolean("banned").notNull().default(false),
+  isAuthor: boolean("is_author").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const readerSession = pgTable("reader_session", {
+  id: text("id").primaryKey(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => readerUser.id, { onDelete: "cascade" }),
+});
+
+export const readerAccount = pgTable("reader_account", {
+  id: text("id").primaryKey(),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => readerUser.id, { onDelete: "cascade" }),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at", {
+    withTimezone: true,
+  }),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+    withTimezone: true,
+  }),
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const readerVerification = pgTable("reader_verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Comments under a post (§13.37): plain text, one level of replies. A deleted
+// account leaves its comments behind as "Deleted user" (`user_id` set null); a post
+// or a parent comment going takes its comments with it.
+export const blogComments = pgTable(
+  "blog_comments",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    userId: text("user_id").references(() => readerUser.id, {
+      onDelete: "set null",
+    }),
+    parentId: integer("parent_id").references(
+      (): AnyPgColumn => blogComments.id,
+      {
+        onDelete: "cascade",
+      },
+    ),
+    body: text("body").notNull(),
+    status: text("status").notNull().default("visible"),
+    likeCount: integer("like_count").notNull().default(0),
+    ...timestamps,
+  },
+  (t) => [
+    check("blog_comments_status", sql`${t.status} IN ('visible', 'hidden')`),
+    index("blog_comments_post_idx").on(t.postId, t.createdAt),
+  ],
+);
+
+export const blogCommentLikes = pgTable(
+  "blog_comment_likes",
+  {
+    commentId: integer("comment_id")
+      .notNull()
+      .references(() => blogComments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => readerUser.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.commentId, t.userId] })],
+);
+
+export const blogCommentReports = pgTable(
+  "blog_comment_reports",
+  {
+    commentId: integer("comment_id")
+      .notNull()
+      .references(() => blogComments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => readerUser.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.commentId, t.userId] })],
 );
