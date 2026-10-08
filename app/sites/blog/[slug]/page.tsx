@@ -4,6 +4,7 @@ import { Container } from "@/components/shared/Container";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { Reveal } from "@/components/shared/Reveal";
 import { Comments } from "@/components/blog/comments/Comments";
+import { Newsletter } from "@/components/blog/Newsletter";
 import { PostHeader } from "@/components/blog/PostHeader";
 import { ReactionBar } from "@/components/blog/ReactionBar";
 import { siteUrl } from "@/lib/sites";
@@ -95,6 +96,8 @@ export default async function PostPage({
         <div className="mt-24 md:mt-24">
           <PostNavigation previous={previous} next={next} />
         </div>
+
+        <Newsletter className="mt-24" />
 
         {post.commentsEnabled && (
           <div className="mt-16 md:mt-24 lg:max-w-[calc(100%*8/12)]">

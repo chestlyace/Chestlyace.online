@@ -7,6 +7,7 @@ import type { Database } from "@/lib/db";
 import {
   countTags,
   getAgentSession,
+  getNewsletterCopy,
   getPublishedPost,
   listPostsByTag,
   listPublishedPosts,
@@ -148,5 +149,25 @@ describe("getAgentSession", () => {
       turns,
     });
     expect(await getAgentSession(db, "ffffffff")).toBeNull();
+  });
+});
+
+describe("getNewsletterCopy", () => {
+  it("is the built-in wording until the owner saves some, then theirs", async () => {
+    expect((await getNewsletterCopy(db)).box.title).toBe(
+      "New posts, in your inbox",
+    );
+    await db.delete(schema.newsletterSettings);
+    await db.insert(schema.newsletterSettings).values({
+      id: 1,
+      boxTitle: "Join in",
+      confirmedTitle: "Welcome",
+      enabled: false,
+    });
+    const copy = await getNewsletterCopy(db);
+    expect(copy.enabled).toBe(false);
+    expect(copy.box.title).toBe("Join in");
+    expect(copy.confirmed.title).toBe("Welcome");
+    expect(copy.failed.title).toBe("That link didn't work");
   });
 });

@@ -328,6 +328,14 @@ agent_sessions                                  -- redacted Claude Code sessions
   started_at        timestamptz
   created_at
 
+newsletter_settings                             -- the newsletter's wording and switch (§14.19)
+  id                integer primary key       -- always 1 (check id = 1); the row may not exist yet
+  enabled           boolean not null default true   -- off hides the signup box and refuses signups
+  box_*, confirmed_*, failed_*, email_*   text   -- the signup box, the two confirmation pages
+                                            -- and the email (design.md §13.34, §14.16); null = the
+                                            -- built-in wording in content/copy.ts
+  created_at, updated_at
+
 blog_comments
   id                serial primary key
   post_id           integer references blog_posts on delete cascade
@@ -347,8 +355,8 @@ own tables in the same database (`reader_user`, `reader_session`,
 `reader_account`, `reader_verification`; exact names fixed in 9b.5), with two
 extra columns on the user: `banned` and `is_author` (marks the owner's own
 account, §13.37). The admin sign-in is separate (D71): readers are never admins.
-The newsletter's subscribers are not stored here: they are a **Resend Audience**
-(`RESEND_AUDIENCE_ID`); pending confirmations are signed links
+The newsletter's subscribers are not stored here: they are a **Resend segment**
+(what Resend used to call an audience; its id is `RESEND_AUDIENCE_ID`); pending confirmations are signed links
 (`NEWSLETTER_SECRET`), not rows.
 
 **Images.** Uploaded through the admin to Cloudinary (§3 above uses the same

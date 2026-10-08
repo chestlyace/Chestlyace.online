@@ -100,6 +100,27 @@ export const RESOURCES: readonly Resource[] = [
   },
 ];
 
+// Blog settings that are not a list of entries: one screen of its own in the
+// Blog group (design.md §14.19), edited like the profile.
+export type SettingsResource = Omit<Resource, "id"> & { id: "newsletter" };
+
+export const NEWSLETTER_RESOURCE: SettingsResource = {
+  id: "newsletter",
+  api: "newsletter",
+  label: "Newsletter",
+  href: "/blog/newsletter",
+  description:
+    "The signup box, the pages the confirmation link opens, and the confirmation email.",
+  noun: "newsletter",
+};
+
 export function findResource(id: string): Resource | undefined {
   return RESOURCES.find((resource) => resource.id === id);
+}
+
+// What the editor form can edit: a content resource or the newsletter screen.
+export function findEditable(
+  id: string,
+): Resource | SettingsResource | undefined {
+  return id === NEWSLETTER_RESOURCE.id ? NEWSLETTER_RESOURCE : findResource(id);
 }

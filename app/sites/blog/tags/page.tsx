@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/shared/Container";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { TagLink } from "@/components/shared/Tag";
+import { Newsletter } from "@/components/blog/Newsletter";
 import { getCachedTags } from "@/lib/blog/cache";
 import { pageMetadata } from "@/lib/seo";
 
@@ -35,6 +36,7 @@ export default async function TagsPage() {
             </li>
           ))}
         </ul>
+        <Newsletter className="mt-24 md:mt-32" />
       </Container>
     </div>
   );

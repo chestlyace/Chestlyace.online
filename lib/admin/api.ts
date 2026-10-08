@@ -3,11 +3,13 @@ import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
+import { withDefaults, type NewsletterSettings } from "@/lib/newsletterCopy";
 import {
   certificationSchema,
   faqSchema,
   fieldErrors,
   journeySchema,
+  newsletterSchema,
   profileSchema,
   projectSchema,
   reorderSchema,
@@ -315,4 +317,47 @@ export async function updateProfile(
     .where(eq(schema.profile.id, 1))
     .returning();
   return row ? { ok: true, row: row as Row } : notFound;
+}
+
+// The newsletter's wording is one row (`id = 1`) that may not exist yet or hold
+// blanks: reading gives the wording in use (stored, or the built-in one), and a
+// change creates the row if needed.
+export async function getNewsletter(db: Database): Promise<NewsletterSettings> {
+  const [row] = await db
+    .select()
+    .from(schema.newsletterSettings)
+    .where(eq(schema.newsletterSettings.id, 1))
+    .limit(1);
+  return withDefaults(row);
+}
+
+export async function updateNewsletter(
+  db: Database,
+  input: unknown,
+): Promise<{ ok: true; row: NewsletterSettings } | Failure> {
+  const parsed = newsletterSchema.partial().safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      status: 422,
+      error: "invalid",
+      fields: fieldErrors(parsed.error),
+    };
+  }
+  if (Object.keys(parsed.data).length === 0) {
+    return {
+      ok: false,
+      status: 422,
+      error: "invalid",
+      fields: { _: "Nothing to change." },
+    };
+  }
+  await db
+    .insert(schema.newsletterSettings)
+    .values({ id: 1, ...parsed.data })
+    .onConflictDoUpdate({
+      target: schema.newsletterSettings.id,
+      set: parsed.data,
+    });
+  return { ok: true, row: await getNewsletter(db) };
 }

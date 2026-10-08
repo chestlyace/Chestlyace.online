@@ -1875,8 +1875,9 @@ form (email field + submit) → a helper line.
 | Helper | `sm`, `muted`, 12px below: a line about unsubscribing |
 | Spam protection | A honeypot field hidden from people, plus the rate limit the contact form has (D69); no CAPTCHA |
 
-**Copy** (placeholder wording, for the owner to approve here; it lives in
-`content/copy.ts`):
+**Copy** (placeholder wording, for the owner to approve here; the owner edits it in
+the admin, Blog → Newsletter, §14.19, and `content/copy.ts` holds the wording a
+field shows until it is changed):
 
 | | Text |
 |---|---|
@@ -3524,7 +3525,8 @@ the result.
 **Layout and look.** Exactly the coming-soon page (§14.12): label, Bebas title,
 lead, one `primary` Button back to the blog home. Not indexed (`noindex`).
 
-**Copy** (placeholder wording for the owner to approve; in `content/copy.ts`):
+**Copy** (placeholder wording for the owner to approve; edited in the admin, Blog →
+Newsletter, §14.19; `content/copy.ts` holds the starting wording):
 
 | | Confirmed | Link didn't work |
 |---|---|---|
@@ -3576,7 +3578,8 @@ how to ask a question.
 ### 14.19 Blog admin pages
 
 **Purpose.** The owner's side of the blog, in the admin (`admin.chestlyace.online`,
-§14.11): a **Blog** group in the sidebar (§13.18) with **Posts** and **Comments**.
+§14.11): a **Blog** group in the sidebar (§13.18) with **Posts**, **Comments** and
+**Newsletter**.
 
 **Screens.**
 
@@ -3585,6 +3588,7 @@ how to ask a question.
 | Posts (`/blog`) | A resource list (§13.19): title, status ("Draft", "Published"), published date, likes and comments counts; a "New post" button and an "Import from DEV" button (§13.49); a publish switch per row; filter tabs All · Published · Drafts; delete with confirm |
 | New and edit post (`/blog/new`, `/blog/[id]`) | The block editor (§13.48) |
 | Comments (`/blog/comments`) | The moderation list (§13.50) |
+| Newsletter (`/blog/newsletter`) | One form like the profile's (§14.11, §13.21), no list: a **Show the signup box** switch, then the wording of the signup box (§13.34), of the two confirmation pages (§14.16) and of the confirmation email, each field showing the wording in use. Added in 9b.7 at the owner's request (2026-10-08: everything editable from the admin) |
 
 **Build notes** (not visual). Publishing, unpublishing, editing and hiding a
 comment all revalidate the blog's cached pages (the `blog` cache tag, as the main

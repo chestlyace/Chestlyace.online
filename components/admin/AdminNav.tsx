@@ -6,6 +6,7 @@ import {
   FolderKanban,
   HeartHandshake,
   LayoutDashboard,
+  Mail,
   MessageSquare,
   Newspaper,
   Link2,
@@ -55,16 +56,19 @@ const GROUPS: { title: string; items: Item[] }[] = [
     items: [
       { href: "/blog", label: "Posts", icon: Newspaper },
       { href: "/blog/comments", label: "Comments", icon: MessageSquare },
+      { href: "/blog/newsletter", label: "Newsletter", icon: Mail },
     ],
   },
 ];
 
 function isActive(pathname: string, href: string) {
-  // Posts is not also current on the Comments screen beside it.
+  // Posts is not also current on the Comments or Newsletter screens beside it.
   if (href === "/blog") {
     return (
       pathname === "/blog" ||
-      (pathname.startsWith("/blog/") && !pathname.startsWith("/blog/comments"))
+      (pathname.startsWith("/blog/") &&
+        !pathname.startsWith("/blog/comments") &&
+        !pathname.startsWith("/blog/newsletter"))
     );
   }
   return href === "/"

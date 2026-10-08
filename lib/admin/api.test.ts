@@ -8,11 +8,13 @@ import type { Database } from "@/lib/db";
 import {
   createRow,
   deleteRow,
+  getNewsletter,
   getProfile,
   getRow,
   isAdminApiResource,
   listRows,
   reorderRows,
+  updateNewsletter,
   updateProfile,
   updateRow,
 } from "./api";
@@ -376,5 +378,45 @@ describe("profile", () => {
       ok: true,
       row: { availability: null },
     });
+  });
+});
+
+describe("newsletter wording", () => {
+  it("reads as the built-in wording when nothing is stored, then as what was saved", async () => {
+    const before = await getNewsletter(db);
+    expect(before.enabled).toBe(true);
+    expect(before.boxTitle).toBe("New posts, in your inbox");
+
+    const result = await updateNewsletter(db, {
+      boxTitle: "  Join the list  ",
+      enabled: false,
+    });
+    expect(result.ok).toBe(true);
+    const after = await getNewsletter(db);
+    expect(after.boxTitle).toBe("Join the list");
+    expect(after.enabled).toBe(false);
+    expect(after.boxText).toBe(before.boxText);
+    expect(await db.select().from(schema.newsletterSettings)).toHaveLength(1);
+
+    await updateNewsletter(db, { emailSubject: "Hello" });
+    const again = await getNewsletter(db);
+    expect(again.emailSubject).toBe("Hello");
+    expect(again.boxTitle).toBe("Join the list");
+    expect(await db.select().from(schema.newsletterSettings)).toHaveLength(1);
+  });
+
+  it("refuses blank texts, too-long texts, unknown fields and an empty change", async () => {
+    for (const body of [
+      { boxTitle: "  " },
+      { boxTitle: "x".repeat(81) },
+      { emailSubject: "x".repeat(151) },
+      { nope: "x" },
+      { enabled: "yes" },
+    ]) {
+      const result = await updateNewsletter(db, body);
+      expect(result).toMatchObject({ ok: false, status: 422 });
+    }
+    expect(await updateNewsletter(db, {})).toMatchObject({ ok: false });
+    expect(await db.select().from(schema.newsletterSettings)).toHaveLength(0);
   });
 });

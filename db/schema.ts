@@ -382,3 +382,38 @@ export const agentSessions = pgTable("agent_sessions", {
     .notNull()
     .defaultNow(),
 });
+
+// The newsletter's wording and on/off switch (design.md §14.19), edited in the
+// admin. One row (`id = 1`); a null text column uses the wording in
+// content/copy.ts, so the row can start empty. The subscribers themselves are in
+// Resend, not here.
+export const newsletterSettings = pgTable(
+  "newsletter_settings",
+  {
+    id: integer("id").primaryKey().default(1),
+    enabled: boolean("enabled").notNull().default(true),
+    boxLabel: text("box_label"),
+    boxTitle: text("box_title"),
+    boxText: text("box_text"),
+    boxHelper: text("box_helper"),
+    boxSuccess: text("box_success"),
+    boxError: text("box_error"),
+    boxInvalid: text("box_invalid"),
+    boxRateLimited: text("box_rate_limited"),
+    confirmedLabel: text("confirmed_label"),
+    confirmedTitle: text("confirmed_title"),
+    confirmedLead: text("confirmed_lead"),
+    confirmedButton: text("confirmed_button"),
+    failedLabel: text("failed_label"),
+    failedTitle: text("failed_title"),
+    failedLead: text("failed_lead"),
+    failedButton: text("failed_button"),
+    emailSubject: text("email_subject"),
+    emailIntro: text("email_intro"),
+    emailAction: text("email_action"),
+    emailExpires: text("email_expires"),
+    emailIgnore: text("email_ignore"),
+    ...timestamps,
+  },
+  (t) => [check("newsletter_settings_single_row", sql`${t.id} = 1`)],
+);

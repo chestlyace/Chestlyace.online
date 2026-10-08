@@ -12,7 +12,7 @@ import {
   type Values,
 } from "@/lib/admin/config";
 import { slugify } from "@/lib/admin/order";
-import { findResource } from "@/lib/admin/resources";
+import { findEditable } from "@/lib/admin/resources";
 import { AdminField } from "./fields";
 import { SaveBar } from "./SaveBar";
 import { useConfirm } from "./ConfirmDialog";
@@ -34,7 +34,7 @@ export function EditorForm({
   initial: Values;
 }) {
   const config = adminConfig(resourceId) as AdminConfig;
-  const resource = findResource(resourceId)!;
+  const resource = findEditable(resourceId)!;
   const router = useRouter();
   const toast = useToast();
   const confirm = useConfirm();
