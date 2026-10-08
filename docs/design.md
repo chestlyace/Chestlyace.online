@@ -3999,7 +3999,7 @@ portals are in the HTML from the first paint.
 **Reduced motion, touch and `Save-Data`.** The doodles drawn at once with no idle or
 pointer field, no pin, a static marquee, the strip a plain scroll row.
 
-**Light and dark.** The Bebas statement is `foreground`; the doodles and tiles are
+**Light and dark.** The Bebas statement is `foreground`; the doodle strokes follow `foreground` and the tiles are
 the same in both themes; the bands follow §14.0; the accent is the creatives orange
 (§4).
 
