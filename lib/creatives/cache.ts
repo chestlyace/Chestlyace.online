@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import {
   getCreativesCopy,
   listCreativesSocials,
+  listPublishedEvents,
   listPublishedPieces,
 } from "./data";
 
@@ -26,6 +27,9 @@ function cached<Args extends unknown[], Result>(
 
 export const getCachedPieces = cached("pieces", () =>
   listPublishedPieces(getDb()),
+);
+export const getCachedEvents = cached("events", () =>
+  listPublishedEvents(getDb()),
 );
 export const getCachedCreativesCopy = cached("copy", () =>
   getCreativesCopy(getDb()),

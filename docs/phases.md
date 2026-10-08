@@ -21,7 +21,7 @@ before the phase starts.
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
 | 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 in review (issue #85) | Q12 (blog: decided), Q16 (decided) |
-| 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 in review (issue #93); 10b.4–10b.7 after it | Q1, Q12 (decided 2026-10-08) |
+| 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 in review (issue #95); 10b.5–10b.7 after it | Q1, Q12 (decided 2026-10-08) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
@@ -306,8 +306,8 @@ the blog's 9b was):
 |---|---|---|
 | 10b.1 Tables and admin API | The creatives tables, their admin API, the upload folder and the cache tag | Done (PR #90) |
 | 10b.2 Admin screens | The Creatives group: design pieces, events, services and questions, settings | Done (PR #92) |
-| 10b.3 Graphic design | The gallery, tiles, filters, lightbox, header and footer, contact block, the orange accent | In review (issue #93) |
-| 10b.4 Photography | The events page and the event pages | Not started |
+| 10b.3 Graphic design | The gallery, tiles, filters, lightbox, header and footer, contact block, the orange accent | Done (PR #94) |
+| 10b.4 Photography | The events page and the event pages | In review (issue #95) |
 | 10b.5 Services and launch work | The services page, the import of the old entries, SEO and redirects | Not started |
 | 10b.6 Home: the doodle hero | The full-screen doodle scene and the hero | Not started |
 | 10b.7 Home: the rest | The marquee, the portals, the pinned strip, the services teaser | Not started |
