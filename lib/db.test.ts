@@ -31,6 +31,7 @@ describe("migrations", () => {
       sql`select table_name from information_schema.tables where table_schema = 'public' order by table_name`,
     )) as { rows: { table_name: string }[] };
     expect(result.rows.map((r) => r.table_name)).toEqual([
+      "agent_sessions",
       "blog_comment_likes",
       "blog_comment_reports",
       "blog_comments",

@@ -6,8 +6,7 @@ import type { BlockType } from "@/lib/blog/editor";
 import { cn } from "@/lib/cn";
 import { fieldControl } from "@/components/shared/FormField";
 
-// What can be inserted (design.md §13.48), in the spec's groups. The agent session
-// arrives with a later step.
+// What can be inserted (design.md §13.48), in the spec's groups.
 export const INSERTABLE: { group: string; items: [BlockType, string][] }[] = [
   {
     group: "Text",
@@ -41,6 +40,7 @@ export const INSERTABLE: { group: string; items: [BlockType, string][] }[] = [
       ["flow", "Flow canvas"],
     ],
   },
+  { group: "Agent", items: [["session", "Agent session"]] },
   { group: "Advanced", items: [["raw", "Raw markdown"]] },
 ];
 

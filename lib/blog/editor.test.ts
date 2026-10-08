@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   blockProblems,
+  blockToMarkdown,
   blocksToMarkdown,
   emptyBlock,
   markdownToBlocks,
@@ -74,7 +75,7 @@ describe("markdownToBlocks", () => {
   });
 
   it("keeps what has no form yet as raw blocks, untouched", () => {
-    const steps = "```session id=1 from=1 to=2\n```";
+    const steps = "```session id=1 from=1 to=2\n```"; // an id the form never writes
     const table = "| a | b |\n| - | - |\n| 1 | 2 |";
     expect(types(`${steps}\n\n${table}`)).toEqual(["raw", "raw"]);
     expect(read(steps)[0]).toMatchObject({ markdown: steps });
@@ -287,5 +288,60 @@ describe("interactive blocks", () => {
       ),
     ).toMatch(/needs code/);
     expect(blockProblems([emptyBlock("quiz", "q")])).toEqual([]);
+  });
+});
+
+describe("the agent session block", () => {
+  const fence =
+    '```session id=4f9c1a from=3 to=18 title="Refactoring the proxy"\n```';
+
+  it("reads into its form and writes back the same", () => {
+    const [block] = markdownToBlocks(fence, () => "b");
+    expect(block).toEqual({
+      id: "b",
+      type: "session",
+      sessionId: "4f9c1a",
+      from: 3,
+      to: 18,
+      title: "Refactoring the proxy",
+    });
+    expect(blockToMarkdown(block)).toBe(fence);
+  });
+
+  it("leaves out the range it wasn't given, and writes nothing without a session", () => {
+    const block = {
+      ...emptyBlock("session", "s"),
+      sessionId: "4f9c1a",
+    } as EditorBlock;
+    expect(blockToMarkdown(block)).toBe("```session id=4f9c1a\n```");
+    expect(blockToMarkdown(emptyBlock("session", "s"))).toBe("");
+  });
+
+  it("stays raw when it has something the form can't write", () => {
+    for (const md of [
+      "```session id=4f9c1a extra=1\n```",
+      "```session id=4f9c1a from=0\n```",
+      "```session id=4f9c1a\nsome body\n```",
+      "```session from=1\n```",
+    ])
+      expect(markdownToBlocks(md)[0].type).toBe("raw");
+  });
+
+  it("checks that the first turn doesn't come after the last", () => {
+    const block = {
+      ...emptyBlock("session", "s"),
+      sessionId: "4f9c1a",
+      from: 5,
+      to: 2,
+    } as EditorBlock;
+    expect(blockProblems([block])).toEqual([
+      {
+        blockId: "s",
+        message: "The first turn can't come after the last one.",
+      },
+    ]);
+    expect(
+      blockProblems([{ ...block, from: 2, to: 5 } as EditorBlock]),
+    ).toEqual([]);
   });
 });

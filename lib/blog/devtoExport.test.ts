@@ -53,6 +53,13 @@ describe("markdownForDev", () => {
     expect(out).toContain("![Alt](https://x.test/a.webp)");
     expect(out).not.toContain("#wide");
     expect(out).toContain(`[see it here](${URL})`);
+    // the form's own block, with an id the form wrote
+    const typed = markdownForDev(
+      "```session id=4f9c1a8e from=1 to=4\n```",
+      URL,
+    );
+    expect(typed).toContain(`[see it here](${URL})`);
+    expect(typed).not.toContain("```session");
   });
 });
 
