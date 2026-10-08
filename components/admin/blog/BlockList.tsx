@@ -35,6 +35,14 @@ import {
   RawForm,
 } from "./blockForms";
 import { InsertButton, InsertMenu } from "./InsertMenu";
+import { CodeGroupForm, DiffForm, TypewriterForm } from "./codeForms";
+import {
+  CompareForm,
+  FileTreeForm,
+  QuizForm,
+  StepsForm,
+  TerminalForm,
+} from "./interactiveForms";
 
 const NAMES: Record<BlockType, string> = {
   paragraph: "Paragraph",
@@ -45,6 +53,14 @@ const NAMES: Record<BlockType, string> = {
   divider: "Divider",
   image: "Image",
   code: "Code",
+  codegroup: "Code group",
+  diff: "Diff",
+  steps: "Steps",
+  compare: "Compare",
+  filetree: "File tree",
+  terminal: "Terminal",
+  typewriter: "Typewriter code",
+  quiz: "Quiz",
   raw: "Raw markdown",
 };
 
@@ -82,6 +98,62 @@ function Form({
       return <ImageForm block={block} onChange={change} />;
     case "code":
       return <CodeForm block={block} onChange={change} />;
+    case "steps":
+      return (
+        <StepsForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "compare":
+      return (
+        <CompareForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "filetree":
+      return (
+        <FileTreeForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "terminal":
+      return (
+        <TerminalForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "quiz":
+      return (
+        <QuizForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "typewriter":
+      return (
+        <TypewriterForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "codegroup":
+      return (
+        <CodeGroupForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
+    case "diff":
+      return (
+        <DiffForm
+          data={block.data}
+          onChange={(data) => onChange({ ...block, data })}
+        />
+      );
     case "raw":
       return <RawForm block={block} onChange={change} />;
   }
