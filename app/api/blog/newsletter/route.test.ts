@@ -1,5 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  NEWSLETTER_DEFAULTS,
+  toCopy,
+  withDefaults,
+} from "@/lib/newsletterCopy";
 import { verifyToken } from "@/lib/newsletterServer";
+
+// The wording and switch the owner set in the admin, stood in for.
+let settings = withDefaults(null);
+vi.mock("@/lib/db", () => ({ getDb: () => ({}) }));
+vi.mock("@/lib/blog/data", () => ({
+  getNewsletterCopy: async () => toCopy(settings),
+}));
 
 const SECRET = "a-long-enough-secret-for-testing-0123456789";
 
@@ -17,6 +29,7 @@ describe("POST /api/blog/newsletter", () => {
 
   beforeEach(async () => {
     vi.resetModules();
+    settings = { ...NEWSLETTER_DEFAULTS };
     fetchMock.mockReset().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
     vi.stubEnv("RESEND_API_KEY", "key");
@@ -42,6 +55,25 @@ describe("POST /api/blog/newsletter", () => {
     const token = new URL(link).searchParams.get("token");
     expect(new URL(link).pathname).toBe("/newsletter/confirm");
     expect(verifyToken(token, SECRET)).toBe("ada@example.com");
+  });
+
+  it("uses the wording from the admin in the email", async () => {
+    settings = withDefaults({
+      emailSubject: "Welcome aboard",
+      emailAction: "Yes, subscribe me",
+    });
+    const response = await POST(post({ email: "ada@example.com" }, "5.5.5.5"));
+    expect(response.status).toBe(200);
+    const mail = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(mail.subject).toBe("Welcome aboard");
+    expect(mail.text).toContain("Yes, subscribe me");
+  });
+
+  it("refuses when the owner has turned the newsletter off", async () => {
+    settings = withDefaults({ enabled: false });
+    const response = await POST(post({ email: "ada@example.com" }, "6.6.6.6"));
+    expect(response.status).toBe(404);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("fakes success for a filled hidden field without sending", async () => {

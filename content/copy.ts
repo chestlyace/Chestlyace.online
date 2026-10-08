@@ -98,6 +98,10 @@ export const COMING_SOON: Record<
   },
 };
 
+// The newsletter's wording as first written. The owner edits it in the admin
+// (Blog → Newsletter); these are what a field shows until it is changed, and what
+// a blank or missing one falls back to (lib/newsletterCopy.ts).
+
 // PLACEHOLDER — the blog's newsletter box (design.md §13.34), approved with the
 // Phase 9a spec.
 export const NEWSLETTER = {

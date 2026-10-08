@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/shared/Container";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { TextLink } from "@/components/shared/TextLink";
-import { NewsletterBox } from "@/components/blog/NewsletterBox";
+import { Newsletter } from "@/components/blog/Newsletter";
 import { PostItem } from "@/components/blog/PostItem";
 import { PostList } from "@/components/blog/PostList";
 import { getCachedPostsByTag, getCachedTags } from "@/lib/blog/cache";
@@ -55,7 +55,7 @@ export default async function TagPage({
         </TextLink>
       </Container>
       <Container className="mt-24 md:mt-32">
-        <NewsletterBox />
+        <Newsletter />
       </Container>
     </div>
   );

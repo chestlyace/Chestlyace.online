@@ -40,6 +40,7 @@ describe("migrations", () => {
       "certifications",
       "faqs",
       "journey",
+      "newsletter_settings",
       "profile",
       "projects",
       "reader_account",

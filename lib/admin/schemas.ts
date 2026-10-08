@@ -409,3 +409,34 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
   }
   return fields;
 }
+
+// The newsletter's wording and switch (design.md §14.19): every text is required
+// here (the form shows the wording in use), at most as long as the layout allows.
+const copyText = (label: string, max: number) => text(label, max);
+
+export const newsletterSchema = z
+  .object({
+    enabled: z.boolean({ error: "Choose on or off." }),
+    boxLabel: copyText("label", 30),
+    boxTitle: copyText("title", 80),
+    boxText: copyText("text", 200),
+    boxHelper: copyText("helper line", 200),
+    boxSuccess: copyText("success message", 200),
+    boxError: copyText("error message", 200),
+    boxInvalid: copyText("invalid-address message", 100),
+    boxRateLimited: copyText("too-many-tries message", 200),
+    confirmedLabel: copyText("label", 30),
+    confirmedTitle: copyText("title", 60),
+    confirmedLead: copyText("text", 300),
+    confirmedButton: copyText("button", 40),
+    failedLabel: copyText("label", 30),
+    failedTitle: copyText("title", 60),
+    failedLead: copyText("text", 300),
+    failedButton: copyText("button", 40),
+    emailSubject: copyText("subject", 150),
+    emailIntro: copyText("opening line", 300),
+    emailAction: copyText("link text", 60),
+    emailExpires: copyText("note about the link", 200),
+    emailIgnore: copyText("closing note", 300),
+  })
+  .strict();

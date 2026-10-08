@@ -7,6 +7,7 @@ import {
   AVAILABILITY,
   WORK_TYPES,
   journeySchema,
+  newsletterSchema,
   profileSchema,
   projectSchema,
   volunteeringSchema,
@@ -50,7 +51,7 @@ export type Values = Record<string, string | boolean | string[]>;
 export type AdminRow = Record<string, unknown> & { id: number };
 
 export type AdminConfig = {
-  id: ResourceId;
+  id: ResourceId | "newsletter";
   /** Singular, for "New skill" and "Edit …". */
   noun: string;
   schema: z.ZodObject;
@@ -687,7 +688,115 @@ const profile: AdminConfig = {
   }),
 };
 
-const CONFIGS: Partial<Record<ResourceId, AdminConfig>> = {
+const copy = (
+  name: string,
+  label: string,
+  max: number,
+  helper?: string,
+  long = false,
+): FieldDef =>
+  long
+    ? { type: "long", name, label, max, helper }
+    : { type: "text", name, label, max, helper };
+
+const newsletter: AdminConfig = {
+  id: "newsletter",
+  noun: "newsletter",
+  schema: newsletterSchema,
+  hasPublished: false,
+  single: true,
+  defaults: {},
+  groups: [
+    {
+      title: "Signup box",
+      fields: [
+        {
+          type: "switch",
+          name: "enabled",
+          label: "Show the signup box",
+          helper:
+            "Under the post list, every post and the tag pages. Turn it off until Resend is set up (docs/launch.md).",
+        },
+        copy("boxLabel", "Label", 30, "The small caps line above the title."),
+        copy("boxTitle", "Title", 80),
+        copy("boxText", "Text", 200, "One line under the title.", true),
+        copy("boxHelper", "Helper line", 200, "Under the field.", true),
+        copy(
+          "boxSuccess",
+          "Success message",
+          200,
+          "Replaces the form once the address is sent.",
+          true,
+        ),
+        copy(
+          "boxError",
+          "Error message",
+          200,
+          "When the email couldn't be sent.",
+          true,
+        ),
+        copy("boxInvalid", "Invalid address message", 100, "Under the field."),
+        copy(
+          "boxRateLimited",
+          "Too many tries message",
+          200,
+          "When one place tries too often.",
+          true,
+        ),
+      ],
+    },
+    {
+      title: "Confirmation page: it worked",
+      fields: [
+        copy("confirmedLabel", "Label", 30),
+        copy("confirmedTitle", "Title", 60),
+        copy("confirmedLead", "Text", 300, undefined, true),
+        copy("confirmedButton", "Button", 40, "Goes back to the blog."),
+      ],
+    },
+    {
+      title: "Confirmation page: the link didn't work",
+      fields: [
+        copy("failedLabel", "Label", 30),
+        copy("failedTitle", "Title", 60),
+        copy(
+          "failedLead",
+          "Text",
+          300,
+          "Shown for a link that is expired, used up or damaged.",
+          true,
+        ),
+        copy("failedButton", "Button", 40, "Goes back to the blog."),
+      ],
+    },
+    {
+      title: "Confirmation email",
+      fields: [
+        copy("emailSubject", "Subject", 150),
+        copy("emailIntro", "Opening line", 300, undefined, true),
+        copy("emailAction", "Link text", 60, "The words of the confirm link."),
+        copy(
+          "emailExpires",
+          "Note about the link",
+          200,
+          "The link works for 48 hours; say so here if you keep this note.",
+          true,
+        ),
+        copy(
+          "emailIgnore",
+          "Closing note",
+          300,
+          "For someone who didn't ask for the email.",
+          true,
+        ),
+      ],
+    },
+  ],
+  row: () => ({ title: "Newsletter", subtitle: "" }),
+};
+
+const CONFIGS: Partial<Record<ResourceId | "newsletter", AdminConfig>> = {
+  newsletter,
   projects,
   experience,
   volunteering,
@@ -700,7 +809,9 @@ const CONFIGS: Partial<Record<ResourceId, AdminConfig>> = {
 };
 
 export function adminConfig(id: string): AdminConfig | undefined {
-  return Object.hasOwn(CONFIGS, id) ? CONFIGS[id as ResourceId] : undefined;
+  return Object.hasOwn(CONFIGS, id)
+    ? CONFIGS[id as ResourceId | "newsletter"]
+    : undefined;
 }
 
 // A database row → the editor's form values (blank text for missing).

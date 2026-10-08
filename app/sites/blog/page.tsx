@@ -2,7 +2,7 @@ import { ComingSoon } from "@/components/shared/ComingSoon";
 import { Container } from "@/components/shared/Container";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { SectionHeading } from "@/components/shared/SectionHeading";
-import { NewsletterBox } from "@/components/blog/NewsletterBox";
+import { Newsletter } from "@/components/blog/Newsletter";
 import { PostItem } from "@/components/blog/PostItem";
 import { PostList } from "@/components/blog/PostList";
 import { getCachedPosts } from "@/lib/blog/cache";
@@ -31,7 +31,7 @@ export default async function BlogHome() {
         ))}
       </PostList>
       <Container className="mt-24 md:mt-32">
-        <NewsletterBox />
+        <Newsletter />
       </Container>
     </div>
   );

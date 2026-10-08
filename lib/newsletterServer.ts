@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { NEWSLETTER_EMAIL } from "@/content/copy";
+import type { NewsletterCopy } from "@/lib/newsletterCopy";
 
 // The newsletter behind the box (design.md §13.34, §14.16), without HTTP. Double
 // opt-in with nothing stored here: the confirmation link is the address and an
@@ -52,9 +52,9 @@ const escapeHtml = (text: string) =>
 export function buildConfirmEmail(
   to: string,
   link: string,
+  copy: NewsletterCopy["email"],
   from?: string,
 ): { from: string; to: string[]; subject: string; text: string; html: string } {
-  const copy = NEWSLETTER_EMAIL;
   return {
     from: from || "Chestly Ace blog <onboarding@resend.dev>",
     to: [to],

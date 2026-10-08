@@ -15,7 +15,8 @@ server is shut down.
 | `chestlyace.online` | Live on Vercel | Yes (`SITE_INDEXING=main`) |
 | `www.chestlyace.online` | Redirects to the apex | — |
 | `admin.chestlyace.online` | Live on Vercel | Never |
-| `creatives.chestlyace.online`, `blog.chestlyace.online` | Live on Vercel with short "coming soon" pages (`design.md` §14.12) | Yes (D81) |
+| `blog.chestlyace.online` | Live on Vercel with the blog (Phase 9). It shows the "coming soon" page until the first post is published | Yes (D81) |
+| `creatives.chestlyace.online` | Live on Vercel with a short "coming soon" page (`design.md` §14.12) until Phase 10 | Yes (D81) |
 
 ## 1. Accounts to set up first
 
@@ -30,6 +31,10 @@ server is shut down.
       you, see "Email" below), then create an API key. Until the domain is
       verified Resend only delivers to your own account address.
 - [ ] **Vercel Web Analytics**: project → Analytics tab → Enable (D79).
+- [ ] **For the blog** (Phase 9; the settings are in §2 and the steps in §2a):
+      a **GitHub OAuth app** and a **Google OAuth client** (readers sign in with
+      either to comment), a **DEV API key** (only if you publish to DEV from the
+      admin) and, in Resend, a **segment** for the newsletter.
 
 ### Email: hello@chestlyace.online
 
@@ -94,14 +99,68 @@ database and any values you want to test with (`SITE_INDEXING` stays unset there
 | `RESEND_API_KEY` | from Resend | The dashboard warns while it is missing |
 | `CONTACT_FROM_EMAIL` | `Chestly Ace <hello@chestlyace.online>` | Must be on the verified Resend domain (see "Email" below) |
 | `CONTACT_TO_EMAIL` | optional | Defaults to the profile's email; set it to `hello@chestlyace.online` once that mailbox works |
+| `BETTER_AUTH_SECRET` | 32+ random characters | `openssl rand -base64 32`. Signs readers' sessions; changing it signs every reader out |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | from the GitHub OAuth app (§2a) | Without both, "Continue with GitHub" is not offered |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | from the Google OAuth client (§2a) | Without both, "Continue with Google" is not offered |
+| `COMMENT_MAX_WORDS` | optional | The longest comment, in words. Defaults to 120 |
+| `DEVTO_API_KEY` | optional | From DEV (Settings → Extensions). Only for "Publish to DEV" in the admin; importing your DEV articles needs no key |
+| `RESEND_AUDIENCE_ID` | the id of the newsletter's Resend segment (§2a) | Resend now calls audiences "segments"; this is the segment's id. Without it the newsletter box can't subscribe anyone |
+| `NEWSLETTER_SECRET` | 32+ random characters | `openssl rand -base64 32`. Signs the confirmation links in the newsletter email; changing it makes links already sent stop working |
 | `SITE_INDEXING` | `on` | Production only. Opens all three public sites to search engines (D76, D81); a redeploy applies it |
+
+The newsletter confirmation email and the "new comment" email to you are sent
+with `RESEND_API_KEY` from `CONTACT_FROM_EMAIL`, like the contact form, so they
+need the same verified Resend domain (new comments go to `CONTACT_TO_EMAIL`, or
+the profile's email).
 
 Not needed yet: `NEXT_PUBLIC_*_URL` (the production defaults are right),
 `REVALIDATE_SECRET` and `CMS_*` (creatives, later).
 
+### 2a. Setting up the blog's services
+
+**Reader sign-in (comments).** Readers sign in with GitHub or Google; the blog
+keeps only what they share (name, email, picture), as the privacy page says.
+
+- [ ] **GitHub:** github.com → Settings → Developer settings → OAuth Apps → New
+      OAuth App. Homepage URL `https://blog.chestlyace.online`; **Authorization
+      callback URL** `https://blog.chestlyace.online/api/reader/callback/github`.
+      Create a client secret. Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
+- [ ] **Google:** Google Cloud console → APIs & Services → Credentials → Create
+      credentials → OAuth client ID (type "Web application"; set up the consent
+      screen first, with the `email`, `profile` and `openid` scopes only).
+      **Authorised redirect URI** `https://blog.chestlyace.online/api/reader/callback/google`.
+      Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. Publish the consent screen
+      ("In production") so people other than you can sign in.
+- [ ] Set `BETTER_AUTH_SECRET`.
+- [ ] After your first sign-in on the blog, open admin → Blog → Comments, find
+      your own account and choose **Mark as author**, so your comments carry the
+      Author tag.
+
+For a preview, a GitHub OAuth app and a Google client each take **one** callback
+address, so give the preview its own apps (or test sign-in on production only).
+
+**Newsletter (Resend).** Subscribers live in Resend, not in the blog's database;
+a reader is only added after opening the link in the confirmation email.
+
+- [ ] In Resend, open **Segments** (previously "Audiences"), create one called
+      for example "Blog subscribers", and copy its **id**. Set it as
+      `RESEND_AUDIENCE_ID`.
+- [ ] Set `NEWSLETTER_SECRET`.
+- [ ] The wording of the signup box, of the two pages the confirmation link opens
+      and of the confirmation email is edited in admin → **Blog → Newsletter**. The
+      same screen has the **Show the signup box** switch: it is **on** by default,
+      so turn it off until `RESEND_AUDIENCE_ID`, `NEWSLETTER_SECRET` and the
+      Resend domain are ready, then on again.
+- [ ] To send a post to subscribers, write a **Broadcast** in Resend to that
+      segment. Every broadcast carries Resend's own unsubscribe link.
+
+**Publish to DEV (optional).** Create a key at dev.to → Settings → Extensions →
+"DEV Community API Keys" and set `DEVTO_API_KEY`. Exporting makes a **draft** on
+DEV with the canonical address pointing at your post.
+
 ## 3. Database
 
-- [ ] `DATABASE_URL=<production direct string> pnpm db:migrate`
+- [ ] `DATABASE_URL=<production direct string> pnpm db:migrate` (this also creates the blog's tables: posts, likes, readers and comments, agent sessions, the newsletter's wording)
 - [ ] Load your data, following `docs/migration.md` (dump, dry run, `--write`).
       Rehearse on the **preview** database first.
 - [ ] Open the admin on the preview and fix what the migration report named:
@@ -120,6 +179,15 @@ On the Vercel preview URL (`?site=main`, `?site=admin`, …):
 - [ ] `/resume.pdf` opens your résumé.
 - [ ] `/robots.txt` disallows everything on the preview (previews are never
       indexable), and the page source has `noindex`.
+- [ ] **The blog** (`?site=blog`): write a post in admin → Blog → Posts, preview
+      it, publish it; it appears on the blog home, in `rss.xml` and the sitemap.
+      Like it. Sign in with GitHub and Google (production only if the OAuth apps
+      are for production), comment, reply, and hide the comment from admin →
+      Blog → Comments. Upload an agent session in a post and play it. Subscribe to
+      the newsletter with your own address: the confirmation email arrives, its
+      link says "You're on the list", and the address is in the Resend segment.
+- [ ] Read the **privacy page** (`/privacy` on the blog) once and approve or
+      change its wording; it is a draft until you do.
 
 ## 5. DNS and domains
 
@@ -141,16 +209,20 @@ back within minutes. The old server must still be running (§8).
 ## 6. The creatives and blog hosts at launch
 
 Owner decision (2026-10-07, D81): both hosts go live at the same time as the main
-site and are findable by search engines.
+site and are findable by search engines. The blog (Phase 9) is built; the
+creatives site (Phase 10) is not.
 
 - [ ] Add `creatives.chestlyace.online` and `blog.chestlyace.online` to the
       Vercel project with the other domains (§5) and the DNS records Vercel shows.
-- They show the short "coming soon" pages of `design.md` §14.12 until Phases 9–10
-  replace them. `creatives.chestlyace.online/services` shows the same page, so the
-  old `graphic-design.html` and `photography.html` links land on a real page.
+- The blog shows the short "coming soon" page (`design.md` §14.12) until you
+  publish the first post, then the real blog. The creatives host shows the same
+  page until Phase 10 replaces it; `creatives.chestlyace.online/services` shows it
+  too, so the old `graphic-design.html` and `photography.html` links land on a
+  real page.
 - They are indexed (`SITE_INDEXING=on`), but a short placeholder gives a search
-  engine little to rank; expect them to matter only once the real sites ship.
-  Each host's sitemap lists just its homepage until then.
+  engine little to rank; expect them to matter once the real sites ship. The
+  creatives sitemap lists just its homepage until then, and the blog's lists its
+  published posts and tags.
 
 ## 7. After the cutover
 
@@ -164,6 +236,8 @@ site and are findable by search engines.
 - [ ] The same for `creatives.chestlyace.online` and `blog.chestlyace.online`
       (`robots.txt`, `sitemap.xml`, `index, follow`), and
       `creatives.chestlyace.online/services` shows the coming-soon page.
+- [ ] On the blog: sign in with GitHub and Google and post a comment; subscribe to
+      the newsletter once with your own address and open the link in the email.
 - [ ] Send yourself a message through the contact form; it arrives.
 - [ ] Vercel → Analytics shows your visit.
 - [ ] Check the structured data of the homepage with Google's Rich Results test
@@ -190,6 +264,6 @@ site and are findable by search engines.
 
 ## 9. Later
 
-- When Phases 9–10 ship the blog and creatives sites, nothing in the indexing
-  settings changes (`SITE_INDEXING=on` already covers them); in Search Console add
-  each host and submit its `sitemap.xml`.
+- When Phase 10 ships the creatives site, nothing in the indexing settings
+  changes (`SITE_INDEXING=on` already covers every host); in Search Console add
+  each host (including the blog) and submit its `sitemap.xml`.

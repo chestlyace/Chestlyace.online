@@ -1,6 +1,11 @@
 import { and, arrayContains, desc, eq, isNotNull, sql } from "drizzle-orm";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
+import {
+  toCopy,
+  withDefaults,
+  type NewsletterCopy,
+} from "@/lib/newsletterCopy";
 import type { SessionTurn } from "./session/types";
 
 // Public reads of the blog (docs/content-schema.md §4). Results are cached as
@@ -165,4 +170,14 @@ export async function getAgentSession(
     .from(schema.agentSessions)
     .where(eq(schema.agentSessions.id, id));
   return row ?? null;
+}
+
+// The newsletter's wording and switch for the box, the confirmation page and the
+// email (9b.7): the stored row over the built-in wording.
+export async function getNewsletterCopy(db: Database): Promise<NewsletterCopy> {
+  const [row] = await db
+    .select()
+    .from(schema.newsletterSettings)
+    .where(eq(schema.newsletterSettings.id, 1));
+  return toCopy(withDefaults(row));
 }

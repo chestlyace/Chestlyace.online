@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getNewsletterCopy } from "@/lib/blog/data";
+import { getDb } from "@/lib/db";
 import { cleanEmail } from "@/lib/newsletter";
 import { buildConfirmEmail, signToken } from "@/lib/newsletterServer";
 import { sendContactEmail } from "@/lib/contactMail";
@@ -57,6 +59,9 @@ export async function POST(request: Request) {
   const email = cleanEmail(body.email);
   if (!email) return reply({ error: "invalid" }, 422);
 
+  const copy = await getNewsletterCopy(getDb());
+  if (!copy.enabled) return reply({ error: "disabled" }, 404);
+
   const apiKey = process.env.RESEND_API_KEY;
   const secret = process.env.NEWSLETTER_SECRET;
   if (!apiKey || !secret || !process.env.RESEND_AUDIENCE_ID)
@@ -67,7 +72,7 @@ export async function POST(request: Request) {
     `/newsletter/confirm?token=${encodeURIComponent(signToken(email, secret))}`,
   );
   const sent = await sendContactEmail(
-    buildConfirmEmail(email, link, process.env.CONTACT_FROM_EMAIL),
+    buildConfirmEmail(email, link, copy.email, process.env.CONTACT_FROM_EMAIL),
     apiKey,
   );
   if (!sent) return reply({ error: "send-failed" }, 502);

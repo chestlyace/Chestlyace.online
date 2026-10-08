@@ -57,6 +57,13 @@
       "when": 1791440035223,
       "tag": "0007_agent_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791444538374,
+      "tag": "0008_newsletter_settings",
+      "breakpoints": true
     }
   ]
 }

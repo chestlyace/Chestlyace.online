@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { NEWSLETTER_DEFAULTS, toCopy } from "./newsletterCopy";
 import {
   TOKEN_TTL_MS,
   addSubscriber,
@@ -7,6 +8,7 @@ import {
   verifyToken,
 } from "./newsletterServer";
 
+const EMAIL_COPY = toCopy(NEWSLETTER_DEFAULTS).email;
 const SECRET = "a-long-enough-secret-for-testing-0123456789";
 
 describe("confirmation links", () => {
@@ -53,15 +55,27 @@ describe("buildConfirmEmail", () => {
     const mail = buildConfirmEmail(
       "ada@example.com",
       'https://blog.example/newsletter/confirm?token=a&b="c"',
+      EMAIL_COPY,
       "Blog <b@example.com>",
     );
     expect(mail.to).toEqual(["ada@example.com"]);
     expect(mail.from).toBe("Blog <b@example.com>");
     expect(mail.text).toContain('confirm?token=a&b="c"');
     expect(mail.html).toContain("token=a&amp;b=&quot;c&quot;");
-    expect(buildConfirmEmail("a@b.co", "https://x.test").from).toMatch(
-      /resend\.dev/,
-    );
+    expect(mail.subject).toBe(EMAIL_COPY.subject);
+    expect(
+      buildConfirmEmail("a@b.co", "https://x.test", {
+        ...EMAIL_COPY,
+        subject: "Hi <there>",
+        intro: "A & B",
+      }),
+    ).toMatchObject({
+      subject: "Hi <there>",
+      html: expect.stringContaining("A &amp; B"),
+    });
+    expect(
+      buildConfirmEmail("a@b.co", "https://x.test", EMAIL_COPY).from,
+    ).toMatch(/resend\.dev/);
   });
 });
 

@@ -6,22 +6,29 @@ import { useCallback, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/shared/Button";
 import { FormField, fieldControl } from "@/components/shared/FormField";
 import { Reveal } from "@/components/shared/Reveal";
-import { NEWSLETTER } from "@/content/copy";
 import { cn } from "@/lib/cn";
 import { cleanEmail } from "@/lib/newsletter";
+import type { NewsletterCopy } from "@/lib/newsletterCopy";
 
 type Status = "idle" | "sending" | "sent" | "failed";
 
-// The newsletter box (design.md §13.34): a panel with an email field and a
+// The newsletter box (design.md §13.34), with the wording the owner set in the
+// admin: a panel with an email field and a
 // Subscribe button. The address is only emailed a confirmation link here (double
 // opt-in); the answer is the same whether or not it is already subscribed. A
 // hidden field and a per-IP limit keep bots out (no CAPTCHA). The success message
 // takes focus and is announced.
-export function NewsletterBox({ className }: { className?: string }) {
+export function NewsletterBox({
+  copy,
+  className,
+}: {
+  copy: NewsletterCopy["box"];
+  className?: string;
+}) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
-  const [failure, setFailure] = useState(NEWSLETTER.error);
+  const [failure, setFailure] = useState(copy.error);
   const honeypot = useRef<HTMLInputElement>(null);
   const input = useRef<HTMLInputElement>(null);
   // The success message takes focus when it appears (after the form fades out).
@@ -30,19 +37,19 @@ export function NewsletterBox({ className }: { className?: string }) {
   }, []);
 
   const check = (value: string) =>
-    setError(cleanEmail(value) ? null : NEWSLETTER.invalid);
+    setError(cleanEmail(value) ? null : copy.invalid);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (status === "sending") return;
     if (!cleanEmail(email)) {
-      setError(NEWSLETTER.invalid);
+      setError(copy.invalid);
       input.current?.focus();
       return;
     }
     setError(null);
     setStatus("sending");
-    setFailure(NEWSLETTER.error);
+    setFailure(copy.error);
     try {
       const response = await fetch("/api/blog/newsletter", {
         method: "POST",
@@ -57,12 +64,12 @@ export function NewsletterBox({ className }: { className?: string }) {
         return;
       }
       if (response.status === 422) {
-        setError(NEWSLETTER.invalid);
+        setError(copy.invalid);
         setStatus("idle");
         input.current?.focus();
         return;
       }
-      if (response.status === 429) setFailure(NEWSLETTER.rateLimited);
+      if (response.status === 429) setFailure(copy.rateLimited);
     } catch {
       // a network error: the generic message below
     }
@@ -76,11 +83,9 @@ export function NewsletterBox({ className }: { className?: string }) {
         className="rounded-xl bg-surface p-6 sm:p-8"
       >
         <div className="max-w-[36rem]">
-          <p className="type-label text-muted">{NEWSLETTER.label}</p>
-          <h2 className="mt-2 text-title text-foreground">
-            {NEWSLETTER.title}
-          </h2>
-          <p className="mt-3 text-body text-muted">{NEWSLETTER.text}</p>
+          <p className="type-label text-muted">{copy.label}</p>
+          <h2 className="mt-2 text-title text-foreground">{copy.title}</h2>
+          <p className="mt-3 text-body text-muted">{copy.text}</p>
 
           <div className="mt-6">
             <AnimatePresence mode="wait" initial={false}>
@@ -99,9 +104,7 @@ export function NewsletterBox({ className }: { className?: string }) {
                     className="mt-0.5 size-6 shrink-0 text-secondary"
                     aria-hidden="true"
                   />
-                  <p className="text-body text-foreground">
-                    {NEWSLETTER.success}
-                  </p>
+                  <p className="text-body text-foreground">{copy.success}</p>
                 </motion.div>
               ) : (
                 <motion.form
@@ -176,7 +179,7 @@ export function NewsletterBox({ className }: { className?: string }) {
                   </div>
 
                   <p id="newsletter-helper" className="text-sm text-muted">
-                    {NEWSLETTER.helper}
+                    {copy.helper}
                   </p>
                 </motion.form>
               )}

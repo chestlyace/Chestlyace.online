@@ -4,7 +4,8 @@ import { Button } from "@/components/shared/Button";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { SectionHeading } from "@/components/shared/SectionHeading";
-import { NEWSLETTER_CONFIRMED, NEWSLETTER_FAILED } from "@/content/copy";
+import { getNewsletterCopy } from "@/lib/blog/data";
+import { getDb } from "@/lib/db";
 import { addSubscriber, verifyToken } from "@/lib/newsletterServer";
 import { siteUrl } from "@/lib/sites";
 
@@ -31,7 +32,8 @@ export default async function ConfirmPage({
     !!apiKey &&
     !!segmentId &&
     (await addSubscriber(email, { apiKey, segmentId }));
-  const copy = confirmed ? NEWSLETTER_CONFIRMED : NEWSLETTER_FAILED;
+  const wording = await getNewsletterCopy(getDb());
+  const copy = confirmed ? wording.confirmed : wording.failed;
 
   return (
     <div className="flex min-h-[30rem] flex-1 items-center pt-28 pb-24">

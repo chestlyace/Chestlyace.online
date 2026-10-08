@@ -760,3 +760,54 @@ describe("/api/admin/blog/sessions", () => {
     expect(await db.select().from(schema.agentSessions)).toHaveLength(0);
   });
 });
+
+describe("/api/admin/newsletter", () => {
+  const route = async () => await import("@/app/api/admin/newsletter/route");
+
+  it("needs a session and a same-origin write", async () => {
+    signedIn = false;
+    const { GET, PATCH } = await route();
+    expect((await GET(call("/api/admin/newsletter", "GET"))).status).toBe(401);
+    signedIn = true;
+    expect(
+      (
+        await PATCH(
+          call(
+            "/api/admin/newsletter",
+            "PATCH",
+            { boxTitle: "x" },
+            { origin: "https://evil.example" },
+          ),
+        )
+      ).status,
+    ).toBe(403);
+  });
+
+  it("reads the wording in use, changes it, and makes the blog read fresh data", async () => {
+    const { GET, PATCH } = await route();
+    const first = await (await GET(call("/x", "GET"))).json();
+    expect(first.item.boxTitle).toBe("New posts, in your inbox");
+    expect(first.item.enabled).toBe(true);
+
+    const response = await PATCH(
+      call("/x", "PATCH", { boxTitle: "Join in", enabled: false }),
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).item).toMatchObject({
+      boxTitle: "Join in",
+      enabled: false,
+    });
+    expect(revalidate).toHaveBeenCalledWith("blog", { expire: 0 });
+    expect((await (await GET(call("/x", "GET"))).json()).item.boxTitle).toBe(
+      "Join in",
+    );
+  });
+
+  it("answers 422 with the fields that are wrong", async () => {
+    const { PATCH } = await route();
+    const response = await PATCH(call("/x", "PATCH", { boxTitle: "" }));
+    expect(response.status).toBe(422);
+    expect((await response.json()).fields.boxTitle).toBeTruthy();
+    expect(revalidate).not.toHaveBeenCalled();
+  });
+});
