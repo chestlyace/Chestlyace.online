@@ -21,6 +21,7 @@ export type BlogPostSummary = {
   publishedAt: string | null;
   updatedAt: string;
   likeCount: number;
+  commentCount: number;
 };
 
 const invalid = (fields: Record<string, string>): Failure => ({
@@ -70,6 +71,7 @@ export async function listPosts(db: Database): Promise<BlogPostSummary[]> {
       >`to_char(${blogPosts.publishedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       updatedAt: sql<string>`to_char(${blogPosts.updatedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       likeCount: blogPosts.likeCount,
+      commentCount: sql<number>`(select count(*)::int from blog_comments c where c.post_id = blog_posts.id and c.status = 'visible')`,
     })
     .from(blogPosts)
     .orderBy(

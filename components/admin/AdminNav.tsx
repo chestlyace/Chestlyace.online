@@ -6,6 +6,7 @@ import {
   FolderKanban,
   HeartHandshake,
   LayoutDashboard,
+  MessageSquare,
   Newspaper,
   Link2,
   Route,
@@ -51,11 +52,21 @@ const GROUPS: { title: string; items: Item[] }[] = [
   },
   {
     title: "Blog",
-    items: [{ href: "/blog", label: "Posts", icon: Newspaper }],
+    items: [
+      { href: "/blog", label: "Posts", icon: Newspaper },
+      { href: "/blog/comments", label: "Comments", icon: MessageSquare },
+    ],
   },
 ];
 
 function isActive(pathname: string, href: string) {
+  // Posts is not also current on the Comments screen beside it.
+  if (href === "/blog") {
+    return (
+      pathname === "/blog" ||
+      (pathname.startsWith("/blog/") && !pathname.startsWith("/blog/comments"))
+    );
+  }
   return href === "/"
     ? pathname === "/"
     : pathname === href || pathname.startsWith(`${href}/`);
