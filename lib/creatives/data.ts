@@ -1,4 +1,4 @@
-import { and, arrayContains, asc, eq } from "drizzle-orm";
+import { and, arrayContains, asc, desc, eq } from "drizzle-orm";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
 import {
@@ -8,7 +8,7 @@ import {
 
 // Public reads of the creatives site (docs/content-schema.md §5). Results are
 // cached as JSON (lib/creatives/cache.ts), so they hold only plain values.
-const { designPieces, creativesSettings, socials } = schema;
+const { designPieces, photoEvents, creativesSettings, socials } = schema;
 
 export type PublicImage = {
   url: string;
@@ -66,6 +66,75 @@ export async function listPublishedPieces(
     linkUrl: row.linkUrl,
     isFeatured: row.isFeatured,
   }));
+}
+
+export type PublicEvent = {
+  slug: string;
+  title: string;
+  /** ISO date, "2026-03-14". */
+  eventDate: string;
+  place: string | null;
+  kind: string | null;
+  cover: PublicImage;
+  description: string | null;
+  role: string | null;
+  covered: string[];
+  images: (PublicImage & { caption: string | null })[];
+  credits: { role: string; name: string; url: string | null }[];
+  albumUrl: string | null;
+  albumLabel: string | null;
+  isFeatured: boolean;
+};
+
+// Every published event, in the order set in the admin (newest first among equals),
+// with the featured event first (design.md §14.22).
+export async function listPublishedEvents(
+  db: Database,
+): Promise<PublicEvent[]> {
+  const rows = await db
+    .select()
+    .from(photoEvents)
+    .where(eq(photoEvents.isPublished, true))
+    .orderBy(
+      asc(photoEvents.orderIndex),
+      desc(photoEvents.eventDate),
+      asc(photoEvents.id),
+    );
+  const events = rows.map((row): PublicEvent => ({
+    slug: row.slug,
+    title: row.title,
+    eventDate: row.eventDate,
+    place: row.place,
+    kind: row.kind,
+    cover: {
+      url: row.coverUrl,
+      width: row.coverWidth,
+      height: row.coverHeight,
+      alt: row.coverAlt,
+    },
+    description: row.description,
+    role: row.role,
+    covered: row.covered,
+    images: row.images.map((image) => ({
+      url: image.url,
+      width: image.width,
+      height: image.height,
+      alt: image.alt,
+      caption: image.caption ?? null,
+    })),
+    credits: row.credits.map((credit) => ({
+      role: credit.role,
+      name: credit.name,
+      url: credit.url ?? null,
+    })),
+    albumUrl: row.albumUrl,
+    albumLabel: row.albumLabel,
+    isFeatured: row.isFeatured,
+  }));
+  return [
+    ...events.filter((event) => event.isFeatured),
+    ...events.filter((event) => !event.isFeatured),
+  ];
 }
 
 // The creatives site's wording: the stored row over the built-in wording.

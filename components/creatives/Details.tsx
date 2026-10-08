@@ -14,6 +14,7 @@ export function Details({
   description,
   link,
   credits,
+  tone = "dark",
 }: {
   heading: string;
   rows: readonly DetailRow[];
@@ -22,29 +23,39 @@ export function Details({
   description?: string | null;
   link?: { href: string; label: string } | null;
   credits?: readonly CreditRow[];
+  /** `dark` over the lightbox's dark layer; `page` on the page's own background. */
+  tone?: "dark" | "page";
 }) {
+  const page = tone === "page";
+  const head = page ? "text-muted" : "text-[#a1a1a6]";
+  const term = page ? "text-muted" : "text-[#8e8e93]";
+  const value = page ? "text-foreground" : "text-[#f5f5f7]";
+  const body = page ? "text-muted" : "text-[#d1d1d6]";
+  const rule = page
+    ? "decoration-foreground/40 hover:decoration-foreground"
+    : "decoration-white/40 hover:decoration-[#f5f5f7]";
   const shown = rows.filter((row) => row.value);
   return (
     <div className="grid gap-6">
       <div>
-        <p className="type-label text-[#a1a1a6]">{heading}</p>
+        <p className={`type-label ${head}`}>{heading}</p>
         <dl className="mt-4 grid gap-3">
           {shown.map((row) => (
             <div key={row.term} className="grid gap-0.5">
-              <dt className="type-label text-[#8e8e93]">{row.term}</dt>
-              <dd className="text-sm text-[#f5f5f7]">{row.value}</dd>
+              <dt className={`type-label ${term}`}>{row.term}</dt>
+              <dd className={`text-sm ${value}`}>{row.value}</dd>
             </div>
           ))}
           {tags && tags.values.length > 0 && (
             <div className="grid gap-1.5">
-              <dt className="type-label text-[#8e8e93]">{tags.term}</dt>
+              <dt className={`type-label ${term}`}>{tags.term}</dt>
               <dd className="flex flex-wrap gap-1.5">
-                {tags.values.map((value) => (
+                {tags.values.map((tag) => (
                   <span
-                    key={value}
-                    className="type-label inline-flex h-6 items-center rounded-sm bg-white/10 px-2.5 whitespace-nowrap text-[#d1d1d6]"
+                    key={tag}
+                    className={`type-label inline-flex h-6 items-center rounded-sm px-2.5 whitespace-nowrap ${page ? "bg-tile text-foreground" : "bg-white/10 text-[#d1d1d6]"}`}
                   >
-                    {value}
+                    {tag}
                   </span>
                 ))}
               </dd>
@@ -53,7 +64,9 @@ export function Details({
         </dl>
       </div>
       {description && (
-        <p className="max-w-[60ch] text-sm leading-relaxed whitespace-pre-line text-[#d1d1d6]">
+        <p
+          className={`max-w-[60ch] text-sm leading-relaxed whitespace-pre-line ${body}`}
+        >
           {description}
         </p>
       )}
@@ -62,7 +75,7 @@ export function Details({
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex w-fit items-center gap-1.5 rounded-sm text-sm font-medium text-[#f5f5f7] underline underline-offset-4 decoration-white/40 hover:decoration-[#f5f5f7]"
+          className={`inline-flex w-fit items-center gap-1.5 rounded-sm text-sm font-medium underline underline-offset-4 ${value} ${rule}`}
         >
           {link.label}
           <ArrowUpRight className="size-4" aria-hidden="true" />
@@ -71,17 +84,17 @@ export function Details({
       )}
       {credits && credits.length > 0 && (
         <div>
-          <p className="type-label text-[#a1a1a6]">Credits</p>
-          <ul className="mt-4 grid gap-2 text-sm text-[#f5f5f7]">
+          <p className={`type-label ${head}`}>Credits</p>
+          <ul className={`mt-4 grid gap-2 text-sm ${value}`}>
             {credits.map((credit, index) => (
               <li key={index}>
-                <span className="text-[#a1a1a6]">{credit.role} — </span>
+                <span className={head}>{credit.role} — </span>
                 {credit.url ? (
                   <a
                     href={credit.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-4 decoration-white/40 hover:decoration-[#f5f5f7]"
+                    className={`underline underline-offset-4 ${rule}`}
                   >
                     {credit.name}
                     <span className="sr-only"> (opens in a new tab)</span>
