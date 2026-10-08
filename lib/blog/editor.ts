@@ -2,7 +2,32 @@ import type { Code, Image, List, ListItem, Paragraph, Root } from "mdast";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
-import { isBlockName, parseBlock } from "./blocks";
+import {
+  isBlockName,
+  parseBlock,
+  type BlockName,
+  type CodeTab,
+  type Compare,
+  type Diff,
+  type QuizQuestion,
+  type Step,
+  type Terminal,
+  type TreeEntry,
+  type Typewriter,
+} from "./blocks";
+import {
+  codeGroupText,
+  compareText,
+  diffMeta,
+  diffText,
+  fileTreeText,
+  quizText,
+  stepsText,
+  terminalMeta,
+  terminalText,
+  typewriterMeta,
+  typewriterText,
+} from "./blockText";
 import { parseFenceMeta } from "./meta";
 
 // The block editor's model (design.md §13.48): a post is a list of blocks, each
@@ -10,6 +35,8 @@ import { parseFenceMeta } from "./meta";
 // write and read. Pure (no React, no highlighting), so the editor and its tests
 // share it. Blocks without a form yet (steps, quiz…: 9b.3b, 9b.3c) are kept
 // intact as `raw` blocks, so a post that has them is never changed by opening it.
+// The interactive blocks (steps, compare…) have forms; a block is only read into
+// its form when the form writes it back so that it reads the same.
 
 export type CalloutKind = "note" | "tip" | "warning";
 
@@ -44,6 +71,14 @@ export type EditorBlock =
       highlight: string;
       lineNumbers: boolean;
     })
+  | (Base & { type: "steps"; data: Step[] })
+  | (Base & { type: "compare"; data: Compare })
+  | (Base & { type: "filetree"; data: TreeEntry[] })
+  | (Base & { type: "typewriter"; data: Typewriter })
+  | (Base & { type: "codegroup"; data: CodeTab[] })
+  | (Base & { type: "diff"; data: Diff })
+  | (Base & { type: "terminal"; data: Terminal })
+  | (Base & { type: "quiz"; data: QuizQuestion[] })
   | (Base & { type: "raw"; markdown: string });
 
 export type BlockType = EditorBlock["type"];
@@ -91,6 +126,69 @@ export function emptyBlock(
         code: "",
         highlight: "",
         lineNumbers: false,
+      };
+    case "steps":
+      return { id, type, data: [{ title: "", icon: null, text: "" }] };
+    case "compare":
+      return {
+        id,
+        type,
+        data: {
+          title: null,
+          highlight: null,
+          header: ["", "", ""],
+          rows: [["", "", ""]],
+        },
+      };
+    case "filetree":
+      return {
+        id,
+        type,
+        data: [
+          { name: "", depth: 0, folder: false, note: null, highlight: false },
+        ],
+      };
+    case "typewriter":
+      return {
+        id,
+        type,
+        data: { lang: "ts", title: null, lines: [{ code: "", caption: null }] },
+      };
+    case "codegroup":
+      return {
+        id,
+        type,
+        data: [
+          { lang: "ts", file: null, code: "" },
+          { lang: "json", file: null, code: "" },
+        ],
+      };
+    case "diff":
+      return {
+        id,
+        type,
+        data: { lang: "ts", title: null, lines: [{ type: "same", text: "" }] },
+      };
+    case "terminal":
+      return {
+        id,
+        type,
+        data: { title: null, rows: [{ type: "command", text: "" }] },
+      };
+    case "quiz":
+      return {
+        id,
+        type,
+        data: [
+          {
+            question: "",
+            options: [
+              { text: "", correct: true },
+              { text: "", correct: false },
+            ],
+            explanation: null,
+          },
+        ],
       };
     case "raw":
       return { id, type, markdown: "" };
@@ -181,6 +279,42 @@ export function blockToMarkdown(block: EditorBlock): string {
     }
     case "raw":
       return block.markdown.trim();
+    default: {
+      const written = customText(block);
+      return written?.body
+        ? fence(
+            written.meta ? `${block.type} ${written.meta}` : block.type,
+            written.body,
+          )
+        : "";
+    }
+  }
+}
+
+// What a form block writes inside its fence: the attributes and the body.
+function customText(block: EditorBlock): { meta: string; body: string } | null {
+  switch (block.type) {
+    case "steps":
+      return { meta: "", body: stepsText(block.data) };
+    case "compare":
+      return { meta: "", body: compareText(block.data) };
+    case "filetree":
+      return { meta: "", body: fileTreeText(block.data) };
+    case "typewriter":
+      return {
+        meta: typewriterMeta(block.data),
+        body: typewriterText(block.data),
+      };
+    case "codegroup":
+      return { meta: "", body: codeGroupText(block.data) };
+    case "diff":
+      return { meta: diffMeta(block.data), body: diffText(block.data) };
+    case "terminal":
+      return { meta: terminalMeta(block.data), body: terminalText(block.data) };
+    case "quiz":
+      return { meta: "", body: quizText(block.data) };
+    default:
+      return null;
   }
 }
 
@@ -238,6 +372,35 @@ function readList(source: string, node: List): EditorBlock | null {
   return { id: "", type: "list", ordered: !!node.ordered, items };
 }
 
+// A steps, quiz… block, when the form writes it back so that it reads the same
+// (and it has no attributes the form doesn't know), else it stays raw.
+function readCustom(node: Code, name: BlockName): EditorBlock | null {
+  if (name === "flow") return null;
+  const parsed = parseBlock(name, node.value, node.meta ?? null);
+  if (!parsed.ok) return null;
+  const { values, flags, highlight } = parseFenceMeta(node.meta);
+  const known =
+    name === "typewriter" || name === "diff"
+      ? ["lang", "title"]
+      : name === "terminal"
+        ? ["title"]
+        : [];
+  if (
+    flags.size ||
+    highlight.size ||
+    Object.keys(values).some((k) => !known.includes(k))
+  )
+    return null;
+
+  const block = { id: "", type: name, data: parsed.data } as EditorBlock;
+  const written = customText(block);
+  if (!written) return null;
+  const again = parseBlock(name, written.body, written.meta || null);
+  if (!again.ok || JSON.stringify(again.data) !== JSON.stringify(parsed.data))
+    return null;
+  return block;
+}
+
 function readCode(source: string, node: Code): EditorBlock | null {
   const raw = slice(source, node);
   if (!raw.startsWith("```")) return null;
@@ -258,7 +421,8 @@ function readCode(source: string, node: Code): EditorBlock | null {
       text: node.value,
     };
   }
-  if (isBlockName(lang) || lang === "session") return null;
+  if (lang === "session") return null;
+  if (isBlockName(lang)) return readCustom(node, lang);
 
   // Only what the Code form can write: a title, line numbers, highlighted lines.
   const extra = Object.keys(values).filter((k) => k !== "title");
@@ -381,9 +545,68 @@ export function blockProblems(blocks: readonly EditorBlock[]): BlockProblem[] {
         if (found) add(block, found);
         break;
       }
+      default: {
+        const found = customProblem(block);
+        if (found) add(block, found);
+      }
     }
   }
   return problems;
+}
+
+// What is wrong with a form block, in the words of its form. A block with
+// nothing filled in writes nothing and is not a problem.
+function customProblem(block: EditorBlock): string | null {
+  const written = customText(block);
+  if (!written || !written.body) return null;
+  switch (block.type) {
+    case "steps":
+      if (block.data.some((step) => !step.title.trim()))
+        return "Give every step a title.";
+      break;
+    case "compare":
+      if (block.data.header.some((text) => !text.trim()))
+        return "Fill in every column heading.";
+      if (block.data.rows.length === 0) return "Add at least one row.";
+      break;
+    case "filetree":
+      break;
+    case "typewriter":
+      if (!block.data.lang.trim()) return "Choose the language.";
+      break;
+    case "codegroup":
+      if (block.data.some((tab) => !tab.lang.trim()))
+        return "Choose a language for every tab.";
+      if (block.data.some((tab) => !tab.code.trim()))
+        return "Every tab needs code.";
+      break;
+    case "diff":
+      if (!block.data.lines.some((line) => line.type !== "same"))
+        return "Change something between Before and After to show a diff.";
+      break;
+    case "terminal":
+      if (!block.data.rows.some((row) => row.type === "command"))
+        return "Add at least one command.";
+      break;
+    case "quiz":
+      for (const question of block.data) {
+        const label = question.question.trim() || "A question";
+        if (!question.question.trim()) return "Every question needs its text.";
+        if (question.options.some((option) => !option.text.trim()))
+          return `${label}: fill in every option, or remove the empty ones.`;
+        if (question.options.length < 2 || question.options.length > 4)
+          return `${label}: use 2 to 4 options.`;
+        if (question.options.filter((option) => option.correct).length !== 1)
+          return `${label}: mark exactly one right answer.`;
+      }
+      break;
+  }
+  const parsed = parseBlock(
+    block.type as BlockName,
+    written.body,
+    written.meta || null,
+  );
+  return parsed.ok ? null : parsed.error;
 }
 
 // A raw block holding a custom block that can't be read says why.

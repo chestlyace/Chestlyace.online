@@ -473,9 +473,11 @@ export function RawForm({
       id={id}
       label="Markdown"
       helper={
-        kind
-          ? `A ${kind} block. Its own form arrives in a later step; until then it is edited as markdown.`
-          : "Anything the other blocks can't write, as markdown."
+        kind === "flow"
+          ? "A flow block. Its own editor arrives in a later step; until then it is edited as markdown."
+          : kind
+            ? `A ${kind} block the form can't show (it has an option or a mistake the form doesn't know), so it is edited as markdown.`
+            : "Anything the other blocks can't write, as markdown."
       }
     >
       <textarea

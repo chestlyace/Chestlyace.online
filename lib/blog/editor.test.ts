@@ -74,11 +74,11 @@ describe("markdownToBlocks", () => {
   });
 
   it("keeps what has no form yet as raw blocks, untouched", () => {
-    const steps = "```steps\n## One\n---\n## Two\n```";
+    const steps = "```flow\n[a] A\n[b] B\na --> b\n```";
     const table = "| a | b |\n| - | - |\n| 1 | 2 |";
     expect(types(`${steps}\n\n${table}`)).toEqual(["raw", "raw"]);
     expect(read(steps)[0]).toMatchObject({ markdown: steps });
-    expect(rawKind(steps)).toBe("steps");
+    expect(rawKind(steps)).toBe("flow");
     // a code fence with options the Code form can't write also stays raw
     expect(types("```ts foo=bar\nx\n```")).toEqual(["raw"]);
     // nested lists, a level-1 heading and indented code too
@@ -177,5 +177,113 @@ describe("blockProblems", () => {
     const problems = blockProblems(blocks);
     expect(problems.map((p) => p.blockId)).toEqual(["h", "i", "c", "r"]);
     expect(problems[3].message).toContain("quiz");
+  });
+});
+
+// ---- the interactive blocks have forms ------------------------------------------------
+
+const EXAMPLES: Record<string, string> = {
+  steps:
+    "```steps\n## Two accounts\nicon: users\nSet up a **second** config.\n---\n## The wrong account\nicon: triangle-alert\nOpened the wrong project.\n```",
+  compare:
+    "```compare\ntitle: Aliases vs routing\nhighlight: 3\n| Aspect | Aliases | Routing |\n| Commands | Two | Just `claude` |\n| Overhead | Constant | None |\n```",
+  filetree:
+    "```filetree\napp/\n  sites/  # The sites\n    blog/\n  + proxy.ts  # Picks the site\n  globals.css\n```",
+  typewriter:
+    '```typewriter lang=ts title="a.ts"\nconst a = 1;  // @ A constant\nconsole.log(a);\n```',
+  codegroup:
+    '```codegroup\n--- bash wrapper.sh\n#!/bin/bash\necho hi\n--- json settings.json\n{ "a": 1 }\n```',
+  diff: '```diff lang=bash title="w.sh"\n- old\n+ new\n  same\n```',
+  terminal:
+    '```terminal title="zsh"\n# a comment\n$ cd ~/Projects\n$ echo $X\n/Users/alex/.claude\n```',
+  quiz: "```quiz\nQ: Which variable?\n) A flag\n*) CLAUDE_CONFIG_DIR\n) The last login\nE: It points the tool at a config directory.\n---\nQ: Two?\n*) Yes\n) No\n```",
+};
+
+describe("interactive blocks", () => {
+  for (const [name, markdown] of Object.entries(EXAMPLES)) {
+    it(`reads ${name} into its form and writes it back so it reads the same`, () => {
+      const [block] = read(markdown);
+      expect(block.type).toBe(name);
+      const written = blocksToMarkdown([block]);
+      const [again] = read(written);
+      expect(again.type).toBe(name);
+      expect("data" in again && again.data).toEqual(
+        "data" in block && block.data,
+      );
+      // writing is stable
+      expect(blocksToMarkdown([again])).toBe(written);
+    });
+  }
+
+  it("keeps a block raw when its form would lose something", () => {
+    expect(types("```steps\n## One\nunknown: x\n---\n## Two\n```")).toEqual([
+      "steps",
+    ]);
+    expect(types("```typewriter lang=ts foo=bar\nx\n```")).toEqual(["raw"]);
+    expect(types("```terminal\nno command here\n```")).toEqual(["raw"]);
+    expect(types("```steps\nnot a step\n```")).toEqual(["raw"]);
+    expect(types("```flow\n[a] A\n```")).toEqual(["raw"]);
+  });
+
+  it("writes nothing for an empty block and guards a --- line in step text", () => {
+    expect(
+      blocksToMarkdown([
+        emptyBlock("steps", "1"),
+        emptyBlock("quiz", "2"),
+        emptyBlock("diff", "3"),
+      ]),
+    ).toBe("");
+    const [steps] = read(EXAMPLES.steps);
+    if (steps.type !== "steps") throw new Error("not steps");
+    steps.data[0].text = "Before\n---\nAfter";
+    const [again] = read(blocksToMarkdown([steps]));
+    expect(again.type).toBe("steps");
+    expect(again.type === "steps" && again.data).toHaveLength(2);
+  });
+
+  it("says what is wrong with a block in the words of its form", () => {
+    const check = (
+      type: EditorBlock["type"],
+      change: (b: EditorBlock) => void,
+    ) => {
+      const block = emptyBlock(type, type);
+      change(block);
+      return blockProblems([block]).map((p) => p.message)[0];
+    };
+    expect(
+      check("steps", (b) => b.type === "steps" && (b.data[0].text = "x")),
+    ).toMatch(/title/);
+    expect(
+      check("quiz", (b) => {
+        if (b.type !== "quiz") return;
+        b.data[0].question = "Q?";
+        b.data[0].options = [
+          { text: "a", correct: false },
+          { text: "b", correct: false },
+        ];
+      }),
+    ).toMatch(/exactly one right answer/);
+    expect(
+      check(
+        "terminal",
+        (b) =>
+          b.type === "terminal" &&
+          (b.data.rows = [{ type: "output", text: "hi" }]),
+      ),
+    ).toMatch(/command/);
+    expect(
+      check(
+        "diff",
+        (b) =>
+          b.type === "diff" && (b.data.lines = [{ type: "same", text: "x" }]),
+      ),
+    ).toMatch(/diff/i);
+    expect(
+      check(
+        "codegroup",
+        (b) => b.type === "codegroup" && (b.data[0].code = "x"),
+      ),
+    ).toMatch(/needs code/);
+    expect(blockProblems([emptyBlock("quiz", "q")])).toEqual([]);
   });
 });
