@@ -12,7 +12,9 @@ Status key: **Open** · **Proposed** (recommendation exists, needs your yes) ·
 
 ## Platform & tooling
 
-### Q1 — Which headless CMS for the creatives site? · Open
+### Q1 — Which headless CMS for the creatives site? · Decided 2026-10-08 (D86)
+**Answer: none: the creatives content is edited in the existing admin, with images on
+Cloudinary.** The options below were the candidates.
 Candidates: **Sanity** (generous free tier, strong image pipeline, schema in
 code), **Payload** (open source, self-hosted, own your data, more setup),
 **Storyblok** (visual editor, built-in image service).
@@ -143,8 +145,9 @@ block (e.g. under Skills), or leave them out?
 
 ## Design
 
-### Q12 — Accent colours for creatives and blog · Blog decided 2026-10-07; creatives open
-**Blog: keep the main blue** (no override, `design.md` §4; D82). Creatives still open.
+### Q12 — Accent colours for creatives and blog · Decided (blog 2026-10-07; creatives 2026-10-08)
+**Blog: keep the main blue** (no override, `design.md` §4; D82). **Creatives: a warm
+orange**, `#C2410C` (`design.md` §4, D87).
 Main is royal blue `#2563EB`. Each other site overrides only the accent
 (`design.md` §4). Ideas: creatives → warm (amber/orange) to feel expressive;
 blog → emerald (the old `secondary`) or keep blue for one family feel.

@@ -371,35 +371,75 @@ image has alt text.
 
 ---
 
-## 5. Creatives — draft content model
+## 5. Creatives — content model
 
-CMS-agnostic until the CMS is picked (`open-questions.md` Q1). Whichever CMS is
-chosen should express these types.
+Decided at 10a (Q1, D86): **no external CMS**. The creatives content lives in the
+same Postgres database and is edited in the same admin as everything else
+(`design.md` §14.26), with images on Cloudinary through the existing signed upload
+(`portfolio/creatives`). Every table has `created_at` and `updated_at` (with the
+trigger) like the rest; every list table has `order_index` and `is_published`.
 
-**`piece`** — one design or photography work
+```
+design_pieces                                   -- Graphic design gallery (§14.21)
+  id                serial primary key
+  slug              text unique not null
+  title             text not null
+  category          text not null             -- 'Brand identity', 'Poster', 'Social'… filter chips
+  cover_url         text not null             -- Cloudinary
+  cover_width       integer not null          -- pixel size, so the grid reserves space
+  cover_height      integer not null
+  cover_alt         text not null
+  images            jsonb not null default '[]'   -- more images: [{ url, width, height, alt }]
+  description       text                      -- plain text, blank lines make paragraphs
+  client            text
+  role              text
+  tools             text[] not null default '{}'  -- Figma, Photoshop, Illustrator…
+  year              integer
+  link_url          text
+  is_featured       boolean not null default false  -- shown on the home page
+  order_index, is_published, created_at, updated_at
 
-| Field | Type | Notes |
-|---|---|---|
-| `title` | string | |
-| `slug` | slug | |
-| `discipline` | `'design' \| 'photography' \| 'event'` | gallery filter |
-| `category` | string | e.g. 'Brand Identity', 'Portrait', 'Poster' |
-| `cover` | image | |
-| `images` | image[] | ordered |
-| `description` | rich text | |
-| `client` | string? | |
-| `tools` | string[] | Figma, Photoshop, Lightroom… |
-| `highlights` | string[] | for events, e.g. 'Photography', 'Videography' |
-| `date` | date | |
-| `featured` | boolean | |
+photo_events                                    -- Photography (§14.22–14.23)
+  id                serial primary key
+  slug              text unique not null
+  title             text not null             -- 'PyCon Cameroon 2026'
+  event_date        date not null
+  place             text
+  kind              text                      -- 'Conference', 'Community', 'Portrait'…
+  cover_url, cover_width, cover_height, cover_alt   -- as design_pieces
+  description       text
+  role              text                      -- 'Event photographer'
+  covered           text[] not null default '{}'  -- 'Photography', 'Portraits'…
+  images            jsonb not null default '[]'   -- selected pictures: [{ url, width, height, alt, caption }]
+  credits           jsonb not null default '[]'   -- [{ role, name, url? }]
+  album_url         text                      -- the full album (Google Photos, Drive, Behance…)
+  album_label       text                      -- 'Google Photos' …
+  is_featured, order_index, is_published, created_at, updated_at
 
-**`service`** — design/photo services (absorbs the old `graphic-design.html` and
-`photography.html` content, plus the old UI/UX, Photography, and Event Coverage
-service rows): `title`, `description`, `icon`, `items[]`, `order`.
+creative_services                               -- Services page (§14.24)
+  id                serial primary key
+  title, description, icon  text
+  group_name        text not null             -- 'design' | 'photography'
+  items             text[] not null default '{}'   -- what is offered
+  order_index, is_published, created_at, updated_at
 
-**`settings`** — singleton: hero text, about blurb, contact CTA.
+creative_faqs                                   -- the old pages' design/photography questions
+  id, question, answer, group_name, order_index, is_published, created_at, updated_at
 
----
+creatives_settings                              -- one row (id = 1), like the profile
+  hero_statement, hero_line, design_intro, photography_intro,
+  portals_title, portal_design_text, portal_photography_text, marquee_words text[],
+  contact_statement, contact_text, contact_note, seo_description
+```
+
+The photography entries are **events with a selection of pictures**, not one row per
+photo: the owner picks the pictures to show and links the full album elsewhere
+(`album_url`). The filter categories are the distinct `category` values of published
+design pieces. Videography will add its own table when it is designed (D87).
+
+**Validation.** Zod on every write (as D74): `slug` unique and URL-safe, `title` ≤ 120
+characters, at most 60 pictures per event and 12 images per piece, every image with
+alt text and its pixel size, an album address that is an `https://` URL.
 
 ## 6. Old → new data mapping
 
@@ -415,9 +455,9 @@ Source is the **live** EC2 database, not `db/neon_setup.sql` (see
 | `skills` Ps, Lr, Canva | creatives site | Remove from main — Q7 (decided; Figma stays on main) |
 | `skills` MongoDB/MySQL/PostgreSQL, Google Cloud/AWS | `skills` | Recategorise to `database` / `cloud` |
 | `services` 'Software Development' | `services` | Split into a few software services — `ia-content.md` §2.4 |
-| `services` 'UI/UX & Graphic Design', 'Photography', 'Event Coverage' | creatives `service` | Move |
+| `services` 'UI/UX & Graphic Design', 'Photography', 'Event Coverage' | `creative_services` | Move; the old `graphic-design.html` and `photography.html` copy becomes the Services page's text and `creative_faqs` |
 | `works` `type='project'` | `projects` | Copy; generate `slug`; `'#'` links → `NULL`; first sentence → `summary` |
-| `works` `type='design'`, `type='event'` | creatives `piece` | Export to JSON for CMS import. Seed rows are Unsplash placeholders — check live data. |
+| `works` `type='design'`, `type='event'` | `design_pieces` / `photo_events` | Export to JSON and import into the creatives tables (10b). Seed rows are Unsplash placeholders — check live data. |
 | `journey` `type='work'`/`'education'` | `journey` | Copy; `company` → `organization`; parse `dates` into `start_date`/`end_date` |
 | `journey` 'Photographer/Designer — CEY2 Youth Church', 'Graphic Designer — Kris Kitchen' | creatives site | Q6 (decided). Removed from the dev seed |
 | — | `certifications` | New; no old rows. The seven Google badges in `assets/certs/` are seeded — Q22 |
