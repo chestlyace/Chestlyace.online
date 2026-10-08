@@ -22,8 +22,7 @@ which no longer belongs on the main site (D4).
 | Route | Purpose |
 |---|---|
 | `/` | Animated showcase: hero, the two sections' entrances, selected work, services teaser (`design.md` §14.20) |
-| `/design` | Graphic design: a filterable masonry gallery (§14.21) |
-| `/design/[slug]` | A design piece: opens as a lightbox over the gallery, or as a page when visited directly |
+| `/design` | Graphic design: a filterable masonry gallery; a click opens a lightbox (`?piece=slug` opens it directly) (§14.21) |
 | `/photography` | Photography: the events (§14.22) |
 | `/photography/[slug]` | One event: story, selected pictures, details sidebar, credits, link to the full album (§14.23) |
 | `/services` | Design & photography services (absorbs the old `graphic-design.html` and `photography.html`) |

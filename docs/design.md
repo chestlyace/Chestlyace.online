@@ -481,7 +481,7 @@ write is in [`blog-markdown.md`](./blog-markdown.md).
 **Creatives components (Phase 10a):** [Masonry grid](#1351-masonry-grid) ·
 [Gallery tile](#1352-gallery-tile) · [Filter bar](#1353-filter-bar) ·
 [Event tile](#1354-event-tile) · [Lightbox](#1355-lightbox) ·
-[Details and credits](#1356-details-and-credits) · [Image trail](#1357-image-trail) ·
+[Details and credits](#1356-details-and-credits) · [Doodle scene](#1357-doodle-scene) ·
 [Marquee](#1358-marquee) · [Section portal](#1359-section-portal) ·
 [Creatives contact block](#1360-creatives-contact-block) (§13.51–13.60).
 
@@ -2692,8 +2692,9 @@ a shared-element transition: the cover grows into the page's hero (GSAP Flip,
 **Purpose.** Opens a design piece or an event picture full size with its details,
 and steps through the pieces without going back to the grid.
 
-**References.** The "click for more details or credits" of the owner; anubi.io/work
-pieces. A real route: the lightbox is the piece page shown over the grid (§14.21).
+**References.** The "click for more details or credits" of the owner (2026-10-08):
+the click on a design piece opens this and the journey ends there, with no further
+page. Deep link: `/design?piece=slug` opens the gallery with the lightbox open.
 
 **Anatomy.** A full-screen layer: the **image** (contained, max 100% of the stage)
 on the left on desktop, a **details panel** on the right (§13.56), a close button
@@ -2712,8 +2713,7 @@ stage; an event picture has no panel (the event's own sidebar is on the page beh
 
 **Behaviour.** Opens from a tile with a Flip from the tile's rectangle to the stage
 (500ms `ease-in-out`); closes the other way. Previous / next and ← / → move through
-the grid's current order (the filter included); the URL changes with each (a
-shallow route, `/design/[slug]`), so a piece can be shared. Escape, the close
+the grid's current order (the filter included); the URL changes with each (`?piece=slug`, no navigation), so a piece can be shared. Escape, the close
 button or a click outside closes; swiping down or sideways does so on touch
 (Motion drag gestures). Focus is trapped inside; closing returns focus to the tile.
 Neighbouring images are preloaded. Reduced motion: a 200ms cross-fade.
@@ -2738,25 +2738,60 @@ value is not shown. Tools and "what was covered" are Tags (§13.4) without butto
 
 **Accessibility.** A real `<dl>`; Credits an `<ul>`; links have visible names.
 
-### 13.57 Image trail
+### 13.57 Doodle scene
 
-**Purpose.** A home page effect (§14.20): the hero's pointer leaves a trail of work.
+**Purpose.** The home page's interactive hero illustration (§14.20): hand-drawn
+doodles that draw themselves and react to the pointer, with the work inside it.
 
-**References.** anubi.io's creative motion; the owner asked for "really cool
-animations" on the home page.
+**References.** anubi.io's visual animation; owner (2026-10-08): "hand-drawn doodles
+that draw themselves and react to hover", as the full-screen hero of the home page.
 
-**Behaviour.** Desktop with a fine pointer only. As the pointer moves over the
-hero, every 90px of travel an image from the featured pieces appears at the pointer
-(240px wide, its own ratio, square corners), tilted by up to 6° toward the direction
-of travel, scales from `0.7` to `1` and fades in over 200ms, stays 400ms, then fades
-and shrinks away over 500ms (GSAP, `power3.out`). At most six are alive at once; the
-oldest is recycled. They sit behind the hero text and never block clicks
-(`pointer-events: none`). The pointer is idle for 800ms: the trail finishes and
-stops.
+**Anatomy.** One SVG layer (`viewBox="0 0 1440 900"`, `preserveAspectRatio="xMidYMid
+slice"`) behind the hero text: about **fourteen doodles** in a single hand-drawn
+style (2.5px strokes, round caps and joins, slightly wobbly paths, no fills except
+tiny dots), on the themes of the two sections: a **camera**, an **aperture**, a
+**pen nib with a bézier curve and its handles**, a **pencil**, **crop marks**, three
+**star bursts**, a **squiggle** under the "&", a **scribble circle** around
+"PHOTOGRAPHY", a **curly arrow** pointing at the "See the work" button, a **spiral**,
+a **spark** and three **colour dots**. Six **frames** (hand-drawn rectangles and
+polaroids, tilted −6° to 6°) hold featured images (the pieces and events marked
+featured, square corners). Strokes are `foreground` at 85%; the stars, the scribble
+circle, the arrow and the spark are `primary-text` (the creatives orange, §4).
 
-**Reduced motion, touch and slow connections.** Not rendered (no images are
-fetched for it): the hero's still collage (§14.20) is the fallback.
-**Accessibility.** Entirely decorative: `aria-hidden`, no focus, no text.
+**Draw-on (once, on load).** Every doodle path carries `pathLength="1"` and animates
+`stroke-dashoffset` `1 → 0` over 900ms `power2.inOut`, staggered by 90ms from 400ms
+after the statement starts (§14.20); a frame draws, then its image reveals with a
+300ms clip-path wipe. Nothing waits on it: the statement and buttons are in the HTML.
+
+**Idle.** Once drawn, each doodle "breathes": a ±2° rotation and 3% scale loop of
+4–7s with its own phase (GSAP sine), paused while the hero is off-screen.
+
+**Hover (fine pointer).**
+
+- **Field:** doodles within 180px of the pointer drift away from it by up to 16px
+  (stronger when closer) and tilt toward it, GSAP `quickTo`, 0.5s. The statement and
+  buttons are never moved.
+- **Doodle reactions:** pointing at a doodle makes it play its own 600ms animation:
+  the **camera** flashes (a ring of strokes expands and fades), the **aperture's**
+  blades rotate 60°, a **star** spins 180° and scales to 1.2, the **squiggle** and
+  **scribble circle** redraw themselves, the **arrow** wiggles, the **pen nib's**
+  curve handles slide, a **frame** straightens to 0° and its image brightens. Each
+  reaction ends in the doodle's resting pose and can be re-triggered after it ends.
+- **Touch:** no pointer field; a tap on a doodle plays its reaction.
+
+**Doodle accents.** The section headings of Graphic design and Photography (§14.21,
+§14.22) carry one small doodle beside the title (a star and a squiggle) that draws
+itself when the heading reveals and plays its reaction on hover.
+
+**Reduced motion and `Save-Data`.** The doodles are drawn at once (no draw-on, no
+idle, no pointer field); hover only changes a doodle's colour to `primary-text` over
+150ms. **Performance.** One SVG; only `transform` and `stroke-dashoffset` animate; at
+most twenty elements animate at once; the scene's timelines pause when it leaves the
+viewport and the SVG is split into its own lazy chunk.
+
+**Accessibility.** The scene is `aria-hidden` and has no focusable parts; every
+effect is decoration, so nothing is lost without it. The images in the frames have
+alt text, as everywhere.
 
 ### 13.58 Marquee
 
@@ -3914,8 +3949,8 @@ the Phase 10a PR (issue #87).
 **Purpose.** The first impression of the creative work: what Chestly makes, the
 best of it, and the doors into the two sections. Route `/`.
 
-**References.** anubi.io (big statements, image-forward, scroll motion); the
-main site's hero (§14.1) for the way type is revealed.
+**References.** anubi.io (big statements, image-forward, scroll motion, the visual
+animation); the main site's hero (§14.1) for the way type is revealed.
 
 **Content.**
 
@@ -3923,7 +3958,7 @@ main site's hero (§14.1) for the way type is revealed.
 |---|---|---|
 | Hero statement | settings (§14.26) | "DESIGN & PHOTOGRAPHY" (placeholder, editable) |
 | Hero line | settings | "Brand visuals and event stories by Chestly Ace (Amahndong Chestly)." |
-| Featured work | pieces and events marked **featured** | up to 8 images, mixed |
+| Featured work | pieces and events marked **featured** | up to 8 images, mixed (six in the doodle frames) |
 | Portals | static | Graphic design, Photography (each with its latest featured image) |
 | Selected work | featured pieces and events | up to 8 |
 | Services teaser | `creative_services` | the three or four service titles, a link to `/services` |
@@ -3936,11 +3971,10 @@ main site's hero (§14.1) for the way type is revealed.
    in Bebas at `display-2xl`, centred, two lines ("DESIGN" and "& PHOTOGRAPHY"), the
    hero line in `lead`, `muted`, 24px below, and two Buttons: **See the work**
    (`primary`, scrolls to the portals) and **Get in touch** (`secondary`, to the
-   contact block). Around the text a **collage** of six of the featured images
-   (square corners, the tiles' own ratios, 140–260px, placed in a fixed pattern
-   around the edges) that drifts with the pointer (parallax: each layer 12–40px,
-   GSAP `quickTo`, 0.6s) and with scroll (each rises at its own rate, scrubbed).
-   The **Image trail** (§13.57) runs over it on desktop.
+   contact block). Behind them the full-screen **Doodle scene** (§13.57): hand-drawn
+   doodles that draw themselves on load and react to the pointer, with six featured
+   pieces in hand-drawn frames. The text sits above the scene and is always legible
+   (the scene keeps clear of the statement's box).
 2. **Marquee** (§13.58), 48px below the hero's bottom padding.
 3. **Portals** (`background-alt`): two Section portals (§13.59) side by side from
    `md`, stacked on phones, 16px gap, under a section heading (§14.0, label "01 —
@@ -3957,16 +3991,15 @@ main site's hero (§14.1) for the way type is revealed.
 6. **Contact block** (§13.60), then the footer (§13.8).
 
 **Motion.** The hero's statement letters rise (900ms `expo.out`, 30ms stagger, as
-§14.0); the collage images fly in from their nearest screen edge (700ms `power3.out`,
-60ms stagger, starting 300ms after the statement); the portals, tiles and
-headings use the shared entrances. All the pieces above are compositor-only. The
-collage, trail, marquee and pinned strip are **lazy**: nothing waits on them, the
-hero text and the portals are in the HTML from the first paint.
+§14.0); the doodles draw on from 400ms later (§13.57); the portals, tiles and
+headings use the shared entrances. All of it is compositor-only. The doodle scene,
+marquee and pinned strip are **lazy**: nothing waits on them, the hero text and the
+portals are in the HTML from the first paint.
 
-**Reduced motion, touch and `Save-Data`.** No trail, no parallax, no pin, a static
-marquee, the collage as a still arrangement, the strip a plain scroll row.
+**Reduced motion, touch and `Save-Data`.** The doodles drawn at once with no idle or
+pointer field, no pin, a static marquee, the strip a plain scroll row.
 
-**Light and dark.** The Bebas statement is `foreground`; the collage and tiles are
+**Light and dark.** The Bebas statement is `foreground`; the doodles and tiles are
 the same in both themes; the bands follow §14.0; the accent is the creatives orange
 (§4).
 
@@ -3975,8 +4008,7 @@ the same in both themes; the bands follow §14.0; the accent is the creatives or
 
 ### 14.21 Graphic design
 
-**Purpose.** The gallery of design work. Route `/design`; a piece is
-`/design/[slug]`.
+**Purpose.** The gallery of design work. Route `/design`.
 
 **References.** anubi.io/lab (the rigid masonry and its details).
 
@@ -3988,20 +4020,22 @@ the same in both themes; the bands follow §14.0; the accent is the creatives or
 3. **Masonry grid** (§13.51) of Gallery tiles (§13.52), 32px below the bar.
 4. **Contact block** (§13.60).
 
-**Opening a piece.** A click opens the Lightbox (§13.55) with the piece's images
-(a **thumbnail rail** when there are several), and the Details and credits panel
-(§13.56). The same piece at `/design/[slug]` opened directly is a full page: the
-images stacked at the column's width under the title, the details panel as a sticky
-sidebar from `lg`, then "More design" (four neighbouring tiles) and the contact
-block. Pieces are ordered by the order set in the admin (newest first by default).
+**Opening a piece.** Hovering a tile shows its details (§13.52); a click opens the
+Lightbox (§13.55) with the piece's images (a **thumbnail rail** when there are
+several) and the Details and credits panel (§13.56), and the journey ends there:
+there is no separate page per piece (owner, 2026-10-08). `/design?piece=slug` opens
+the gallery with that piece's lightbox open, so a piece can be shared. Pieces are
+ordered by the order set in the admin (newest first by default).
 
 **Empty.** With no published piece the page shows the coming-soon look (§14.12) with
 the section's name.
 
-**Motion.** The grid's entrance, Flip filtering (§13.51), the Lightbox's Flip.
+**Motion.** The grid's entrance, Flip filtering (§13.51), the Lightbox's Flip; the
+heading carries a Doodle accent (§13.57).
 
-**SEO.** Title "Graphic design — Chestly Ace"; every piece is indexable with its
-own title, description and Open Graph image, `CreativeWork` JSON-LD.
+**SEO.** Title "Graphic design — Chestly Ace"; the page carries every piece as an
+`ImageObject`/`CreativeWork` in its JSON-LD with its title, description and image, and
+`?piece=` addresses are canonicalised to `/design`.
 
 ### 14.22 Photography
 
@@ -4020,7 +4054,7 @@ the tile; there is no filter bar until there are more than twelve events (then t
 Filter bar, §13.53, by kind).
 
 **Motion.** Tiles rise 32px and fade in (the default entrance, 80ms stagger); the
-hover and open transitions are §13.54.
+hover and open transitions are §13.54; the heading carries a Doodle accent (§13.57).
 
 **SEO.** Title "Photography — Chestly Ace"; each event indexable; `ImageGallery`
 JSON-LD per event.
