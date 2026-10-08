@@ -12,6 +12,7 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import { blogActiveLink } from "@/lib/blog/nav";
+import { creativesActiveLink } from "@/lib/creatives/nav";
 import { cn } from "@/lib/cn";
 import { useIsPhone } from "@/lib/media";
 import { EASE_OUT, SPRING } from "@/lib/motion";
@@ -68,12 +69,18 @@ export function HeaderBar({
   links: readonly NavLink[];
   sites: readonly HeaderSite[];
   /** What makes a link active: the section in view (main) or the route (blog). */
-  activeBy?: "section" | "blog";
+  activeBy?: "section" | "blog" | "creatives";
 }) {
   const sectionActive = useActiveNavLink();
-  const pathname = usePathname();
+  // Server-side the path may still be the internal one (`/sites/creatives/design`)
+  // the host was rewritten to; the browser's is `/design`. Both mean the same.
+  const pathname = usePathname().replace(/^\/sites\/[a-z]+(?=\/|$)/, "") || "/";
   const active: string | null =
-    activeBy === "blog" ? blogActiveLink(pathname) : sectionActive;
+    activeBy === "blog"
+      ? blogActiveLink(pathname)
+      : activeBy === "creatives"
+        ? creativesActiveLink(pathname)
+        : sectionActive;
   const { lock, unlock } = useSmoothScroll();
   const isPhone = useIsPhone();
 

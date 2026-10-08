@@ -6,6 +6,9 @@ import {
   optimizeCloudinaryUrl,
   signParams,
   signedUpload,
+  placeholderUrl,
+  resizedUrl,
+  responsiveImage,
   thumbnailUrl,
 } from "./cloudinary";
 
@@ -148,5 +151,33 @@ describe("thumbnailUrl", () => {
       "https://images.example/a.png",
     );
     expect(thumbnailUrl("/local.png")).toBe("/local.png");
+  });
+});
+
+describe("gallery images", () => {
+  const url =
+    "https://res.cloudinary.com/x/image/upload/f_auto,q_auto/v1/a.webp";
+  it("resizes without enlarging, replacing the delivery options already there", () => {
+    expect(resizedUrl(url, 800)).toBe(
+      "https://res.cloudinary.com/x/image/upload/c_limit,w_800,f_auto,q_auto/v1/a.webp",
+    );
+  });
+  it("gives a srcset at every width, the largest as the src", () => {
+    const image = responsiveImage(url, [1200, 480]);
+    expect(image.srcSet).toBe(
+      "https://res.cloudinary.com/x/image/upload/c_limit,w_480,f_auto,q_auto/v1/a.webp 480w, https://res.cloudinary.com/x/image/upload/c_limit,w_1200,f_auto,q_auto/v1/a.webp 1200w",
+    );
+    expect(image.src).toContain("w_1200");
+  });
+  it("leaves other addresses alone and has no placeholder for them", () => {
+    expect(resizedUrl("https://x.test/a.png", 800)).toBe(
+      "https://x.test/a.png",
+    );
+    expect(responsiveImage("https://x.test/a.png", [480, 800])).toEqual({
+      src: "https://x.test/a.png",
+      srcSet: undefined,
+    });
+    expect(placeholderUrl("https://x.test/a.png")).toBeNull();
+    expect(placeholderUrl(url)).toContain("w_24,e_blur:200");
   });
 });

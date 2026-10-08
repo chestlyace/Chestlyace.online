@@ -176,3 +176,47 @@ export function thumbnailUrl(url: string, width = 96): string {
     return url;
   }
 }
+
+// An image at a given width for the gallery (`c_limit` never enlarges it), as
+// WebP/AVIF. Anything that isn't a Cloudinary image is left alone.
+export function resizedUrl(url: string, width: number): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "res.cloudinary.com") return url;
+    if (!parsed.pathname.includes("/image/upload/")) return url;
+    parsed.pathname = parsed.pathname.replace(
+      /\/image\/upload\/(?:[^/]*(?:f_auto|q_auto)[^/]*\/)?/,
+      `/image/upload/c_limit,w_${width},f_auto,q_auto/`,
+    );
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
+/** `src` and `srcset` of an image at the widths a layout may need. */
+export function responsiveImage(
+  url: string,
+  widths: readonly number[],
+): { src: string; srcSet: string | undefined } {
+  const sorted = [...widths].sort((a, b) => a - b);
+  const srcSet = sorted.map((w) => `${resizedUrl(url, w)} ${w}w`).join(", ");
+  const resized = resizedUrl(url, sorted[sorted.length - 1]);
+  return { src: resized, srcSet: resized === url ? undefined : srcSet };
+}
+
+// A 24px blurred copy, shown while the image loads (the lab page's blur-up).
+export function placeholderUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "res.cloudinary.com") return null;
+    if (!parsed.pathname.includes("/image/upload/")) return null;
+    parsed.pathname = parsed.pathname.replace(
+      /\/image\/upload\/(?:[^/]*(?:f_auto|q_auto)[^/]*\/)?/,
+      "/image/upload/c_limit,w_24,e_blur:200,f_auto,q_30/",
+    );
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
