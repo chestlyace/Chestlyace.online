@@ -2,6 +2,7 @@
 // Every table has created_at/updated_at; a trigger (see migrations) keeps
 // updated_at current on every UPDATE.
 import { sql } from "drizzle-orm";
+import type { SessionTurn } from "@/lib/blog/session/types";
 import {
   type AnyPgColumn,
   boolean,
@@ -9,6 +10,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   serial,
@@ -365,3 +367,18 @@ export const blogCommentReports = pgTable(
   },
   (t) => [primaryKey({ columns: [t.commentId, t.userId] })],
 );
+
+// A redacted Claude Code session, replayed by a post's `session` block
+// (docs/content-schema.md §4). Only the redacted turns are kept.
+export const agentSessions = pgTable("agent_sessions", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  source: text("source").notNull().default("claude-code"),
+  turns: jsonb("turns").$type<SessionTurn[]>().notNull(),
+  turnCount: integer("turn_count").notNull(),
+  toolCallCount: integer("tool_call_count").notNull(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});

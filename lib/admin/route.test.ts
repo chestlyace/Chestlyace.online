@@ -645,3 +645,118 @@ describe("/api/admin/blog/comments and readers", () => {
     ).toBe(404);
   });
 });
+
+describe("/api/admin/blog/sessions", () => {
+  const create = async () =>
+    await import("@/app/api/admin/blog/sessions/route");
+  const one = async () =>
+    await import("@/app/api/admin/blog/sessions/[id]/route");
+  const turns = [
+    {
+      prompt: "Fix it",
+      at: "2026-10-07T10:00:00.000Z",
+      parts: [
+        { kind: "text", text: "Done" },
+        {
+          kind: "tool",
+          name: "Bash",
+          summary: "pnpm test",
+          input: "pnpm test",
+          output: "ok",
+          failed: false,
+        },
+      ],
+    },
+    { prompt: "Thanks", at: null, parts: [] },
+  ];
+
+  it("need a session and a same-origin write", async () => {
+    signedIn = false;
+    const { POST } = await create();
+    expect(
+      (
+        await POST(
+          call("/api/admin/blog/sessions", "POST", { title: "T", turns }),
+        )
+      ).status,
+    ).toBe(401);
+    signedIn = true;
+    expect(
+      (
+        await POST(
+          call(
+            "/api/admin/blog/sessions",
+            "POST",
+            { title: "T", turns },
+            { origin: "https://evil.example" },
+          ),
+        )
+      ).status,
+    ).toBe(403);
+    signedIn = false;
+    expect(
+      (
+        await (
+          await one()
+        ).GET(call("/x", "GET"), ctx({ id: "4f9c1a00" }) as never)
+      ).status,
+    ).toBe(401);
+  });
+
+  it("stores a redacted session and answers with what the block shows", async () => {
+    const { POST } = await create();
+    const response = await POST(
+      call("/api/admin/blog/sessions", "POST", { title: "Fix it", turns }),
+    );
+    expect(response.status).toBe(201);
+    const { item } = await response.json();
+    expect(item).toMatchObject({
+      title: "Fix it",
+      turnCount: 2,
+      toolCallCount: 1,
+      startedAt: "2026-10-07T10:00:00.000Z",
+    });
+    expect(item.id).toMatch(/^[0-9a-f]{8}$/);
+
+    const [row] = await db.select().from(schema.agentSessions);
+    expect(row.turns).toEqual(turns);
+
+    const found = await (
+      await one()
+    ).GET(call("/x", "GET"), ctx({ id: item.id }) as never);
+    expect((await found.json()).item).toEqual(item);
+    expect(
+      (
+        await (
+          await one()
+        ).GET(call("/x", "GET"), ctx({ id: "ffffffff" }) as never)
+      ).status,
+    ).toBe(404);
+    expect(
+      (await (await one()).GET(call("/x", "GET"), ctx({ id: "../" }) as never))
+        .status,
+    ).toBe(404);
+  });
+
+  it("refuses what isn't a session", async () => {
+    const { POST } = await create();
+    for (const body of [
+      {},
+      { title: "", turns },
+      { title: "T", turns: [] },
+      { title: "T", turns, extra: 1 },
+      { title: "T", turns: [{ prompt: "x", at: "yesterday", parts: [] }] },
+      {
+        title: "T",
+        turns: [{ prompt: "x", at: null, parts: [{ kind: "oops" }] }],
+      },
+      { title: "x".repeat(121), turns },
+    ]) {
+      const response = await POST(
+        call("/api/admin/blog/sessions", "POST", body),
+      );
+      expect(response.status).toBe(422);
+    }
+    expect(await db.select().from(schema.agentSessions)).toHaveLength(0);
+  });
+});

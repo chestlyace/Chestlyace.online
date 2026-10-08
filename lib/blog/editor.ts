@@ -82,6 +82,15 @@ export type EditorBlock =
   | (Base & { type: "terminal"; data: Terminal })
   | (Base & { type: "quiz"; data: QuizQuestion[] })
   | (Base & { type: "flow"; data: Flow })
+  | (Base & {
+      type: "session";
+      /** The stored session (`agent_sessions`); empty until one is uploaded. */
+      sessionId: string;
+      /** The first and last turn shown; null means from the start / to the end. */
+      from: number | null;
+      to: number | null;
+      title: string;
+    })
   | (Base & { type: "raw"; markdown: string });
 
 export type BlockType = EditorBlock["type"];
@@ -195,6 +204,8 @@ export function emptyBlock(
       };
     case "flow":
       return { id, type, data: emptyFlow() };
+    case "session":
+      return { id, type, sessionId: "", from: null, to: null, title: "" };
     case "raw":
       return { id, type, markdown: "" };
   }
@@ -281,6 +292,19 @@ export function blockToMarkdown(block: EditorBlock): string {
         .filter(Boolean)
         .join(" ");
       return fence(info, block.code.replace(/\n+$/, ""));
+    }
+    case "session": {
+      if (!block.sessionId) return "";
+      const info = [
+        "session",
+        `id=${block.sessionId}`,
+        block.from != null ? `from=${block.from}` : "",
+        block.to != null ? `to=${block.to}` : "",
+        block.title.trim() ? attribute("title", block.title.trim()) : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      return `\`\`\`${info}\n\`\`\``;
     }
     case "raw":
       return block.markdown.trim();
@@ -407,6 +431,38 @@ function readCustom(node: Code, name: BlockName): EditorBlock | null {
   return block;
 }
 
+// A session block, when its attributes are the ones the form writes.
+function readSession(node: Code): EditorBlock | null {
+  const { values, flags, highlight } = parseFenceMeta(node.meta);
+  if (node.value.trim() || flags.size || highlight.size) return null;
+  if (
+    Object.keys(values).some((k) => !["id", "from", "to", "title"].includes(k))
+  )
+    return null;
+  const turn = (value: string | undefined) =>
+    value === undefined
+      ? null
+      : /^[1-9]\d{0,3}$/.test(value)
+        ? Number(value)
+        : NaN;
+  const from = turn(values.from);
+  const to = turn(values.to);
+  if (
+    !/^[0-9a-f]{6,16}$/.test(values.id ?? "") ||
+    Number.isNaN(from) ||
+    Number.isNaN(to)
+  )
+    return null;
+  return {
+    id: "",
+    type: "session",
+    sessionId: values.id,
+    from,
+    to,
+    title: values.title ?? "",
+  };
+}
+
 function readCode(source: string, node: Code): EditorBlock | null {
   const raw = slice(source, node);
   if (!raw.startsWith("```")) return null;
@@ -427,7 +483,7 @@ function readCode(source: string, node: Code): EditorBlock | null {
       text: node.value,
     };
   }
-  if (lang === "session") return null;
+  if (lang === "session") return readSession(node);
   if (isBlockName(lang)) return readCustom(node, lang);
 
   // Only what the Code form can write: a title, line numbers, highlighted lines.
@@ -545,6 +601,15 @@ export function blockProblems(blocks: readonly EditorBlock[]): BlockProblem[] {
       case "list":
         if (!block.items.some((item) => item.trim()))
           add(block, "Add at least one item.");
+        break;
+      case "session":
+        if (
+          block.sessionId &&
+          block.from != null &&
+          block.to != null &&
+          block.from > block.to
+        )
+          add(block, "The first turn can't come after the last one.");
         break;
       case "raw": {
         const found = rawProblem(block.markdown);

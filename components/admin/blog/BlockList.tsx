@@ -35,6 +35,7 @@ import {
   RawForm,
 } from "./blockForms";
 import { FlowEditor } from "./FlowEditor";
+import { SessionForm } from "./SessionForm";
 import { InsertButton, InsertMenu } from "./InsertMenu";
 import { CodeGroupForm, DiffForm, TypewriterForm } from "./codeForms";
 import {
@@ -63,6 +64,7 @@ const NAMES: Record<BlockType, string> = {
   typewriter: "Typewriter code",
   quiz: "Quiz",
   flow: "Flow canvas",
+  session: "Agent session",
   raw: "Raw markdown",
 };
 
@@ -163,6 +165,8 @@ function Form({
           onChange={(data) => onChange({ ...block, data })}
         />
       );
+    case "session":
+      return <SessionForm block={block} onChange={change} />;
     case "raw":
       return <RawForm block={block} onChange={change} />;
   }

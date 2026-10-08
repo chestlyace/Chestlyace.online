@@ -221,6 +221,10 @@ export function blockForDev(block: EditorBlock, postUrl: string): string {
             .join("\n\n"),
         ),
       ].join("\n\n");
+    case "session":
+      return block.sessionId
+        ? `*An agent session is replayed on the blog: [see it here](${postUrl}).*`
+        : "";
     case "raw":
       if (rawKind(block.markdown) === "session")
         return `*An agent session is replayed on the blog: [see it here](${postUrl}).*`;

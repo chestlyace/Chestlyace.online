@@ -50,6 +50,13 @@
       "when": 1791426610364,
       "tag": "0006_blog_readers_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791440035223,
+      "tag": "0007_agent_sessions",
+      "breakpoints": true
     }
   ]
 }
