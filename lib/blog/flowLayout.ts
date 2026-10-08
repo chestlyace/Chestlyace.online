@@ -6,12 +6,12 @@ import type { Flow, FlowNode } from "./blocks";
 // out inside it, left to right (`dir:h`) or top to bottom (`dir:v`).
 
 export const NODE_WIDTH = 208;
-const NODE_HEIGHT = 68;
-const NODE_HEIGHT_WITH_DESC = 92;
+export const NODE_HEIGHT = 68;
+export const NODE_HEIGHT_WITH_DESC = 92;
 const GAP = 24;
 const GROUP_PADDING = 20;
 const GROUP_HEADER = 32;
-const MARGIN = 24;
+export const MARGIN = 24;
 const ROW_SIZE = 3;
 
 export type Placed = { id: string; x: number; y: number; w: number; h: number };
@@ -27,6 +27,8 @@ export type FlowLayout = {
   height: number;
   items: Placed[];
   edges: PlacedEdge[];
+  /** How far everything was moved to bring the top-left box to the margin. */
+  shift: { x: number; y: number };
 };
 
 type Size = { w: number; h: number };
@@ -167,5 +169,11 @@ export function layoutFlow(flow: Flow): FlowLayout {
     };
   });
 
-  return { width, height, items, edges };
+  return {
+    width,
+    height,
+    items,
+    edges,
+    shift: { x: MARGIN - minX, y: MARGIN - minY },
+  };
 }

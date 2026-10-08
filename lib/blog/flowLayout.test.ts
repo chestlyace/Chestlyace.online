@@ -55,3 +55,11 @@ describe("layoutFlow", () => {
     expect(l.height).toBeGreaterThan(24 + 68);
   });
 });
+
+describe("layoutFlow shift", () => {
+  it("says how far everything moved, so a raw position can be recovered", () => {
+    const l = layout("[a|pos:200,100] A\n[b|pos:400,300] B");
+    expect(l.shift).toEqual({ x: 24 - 200, y: 24 - 100 });
+    expect(item(l, "b").x - l.shift.x).toBe(400);
+  });
+});

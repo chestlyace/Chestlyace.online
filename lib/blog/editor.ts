@@ -9,6 +9,7 @@ import {
   type CodeTab,
   type Compare,
   type Diff,
+  type Flow,
   type QuizQuestion,
   type Step,
   type Terminal,
@@ -28,6 +29,7 @@ import {
   typewriterMeta,
   typewriterText,
 } from "./blockText";
+import { emptyFlow, flowText } from "./flowEdit";
 import { parseFenceMeta } from "./meta";
 
 // The block editor's model (design.md §13.48): a post is a list of blocks, each
@@ -79,6 +81,7 @@ export type EditorBlock =
   | (Base & { type: "diff"; data: Diff })
   | (Base & { type: "terminal"; data: Terminal })
   | (Base & { type: "quiz"; data: QuizQuestion[] })
+  | (Base & { type: "flow"; data: Flow })
   | (Base & { type: "raw"; markdown: string });
 
 export type BlockType = EditorBlock["type"];
@@ -190,6 +193,8 @@ export function emptyBlock(
           },
         ],
       };
+    case "flow":
+      return { id, type, data: emptyFlow() };
     case "raw":
       return { id, type, markdown: "" };
   }
@@ -313,6 +318,8 @@ function customText(block: EditorBlock): { meta: string; body: string } | null {
       return { meta: terminalMeta(block.data), body: terminalText(block.data) };
     case "quiz":
       return { meta: "", body: quizText(block.data) };
+    case "flow":
+      return { meta: "", body: flowText(block.data) };
     default:
       return null;
   }
@@ -375,7 +382,6 @@ function readList(source: string, node: List): EditorBlock | null {
 // A steps, quiz… block, when the form writes it back so that it reads the same
 // (and it has no attributes the form doesn't know), else it stays raw.
 function readCustom(node: Code, name: BlockName): EditorBlock | null {
-  if (name === "flow") return null;
   const parsed = parseBlock(name, node.value, node.meta ?? null);
   if (!parsed.ok) return null;
   const { values, flags, highlight } = parseFenceMeta(node.meta);
@@ -570,6 +576,8 @@ function customProblem(block: EditorBlock): string | null {
       if (block.data.rows.length === 0) return "Add at least one row.";
       break;
     case "filetree":
+      break;
+    case "flow":
       break;
     case "typewriter":
       if (!block.data.lang.trim()) return "Choose the language.";
