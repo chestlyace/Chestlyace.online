@@ -12,7 +12,7 @@ import {
   type AdminConfig,
   type AdminRow,
 } from "@/lib/admin/config";
-import { findResource } from "@/lib/admin/resources";
+import { findEditable } from "@/lib/admin/resources";
 import { mergeSubset } from "@/lib/admin/order";
 import { cn } from "@/lib/cn";
 import { useConfirm } from "./ConfirmDialog";
@@ -48,7 +48,7 @@ export function ResourceList({
   initial: AdminRow[];
 }) {
   const config = adminConfig(resourceId) as AdminConfig;
-  const resource = findResource(resourceId)!;
+  const resource = findEditable(resourceId)!;
   const toast = useToast();
   const confirm = useConfirm();
 
@@ -269,6 +269,8 @@ function Row({
 }) {
   const controls = useDragControls();
   const { title, subtitle } = config.row(item);
+  const thumb = config.thumb?.(item) ?? null;
+  const featured = config.featured?.(item) ?? false;
   const published = config.hasPublished ? Boolean(item.isPublished) : true;
 
   // Keyboard reordering: Space picks the row up, arrows move it, Space drops it
@@ -356,12 +358,22 @@ function Row({
         <GripVertical className="size-5" aria-hidden="true" />
       </button>
 
+      {thumb && (
+        // eslint-disable-next-line @next/next/no-img-element -- Cloudinary thumbnail
+        <img
+          src={thumb}
+          alt=""
+          className="size-12 shrink-0 rounded-sm bg-surface object-cover"
+        />
+      )}
       <Link href={href} className="min-w-0 flex-1 rounded-sm">
         <span className="block truncate text-body font-medium text-foreground">
           {title}
         </span>
         <span className="block truncate text-sm text-muted">{subtitle}</span>
       </Link>
+
+      {featured && <Tag className="hidden md:inline-flex">Featured</Tag>}
 
       {config.hasPublished && (
         <>

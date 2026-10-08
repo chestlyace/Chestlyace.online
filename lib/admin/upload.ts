@@ -64,7 +64,14 @@ export function nameFromUrl(url: string): string {
 
 export const isPdf = (url: string) => /\.pdf(\?|#|$)/i.test(url);
 
-export type UploadResult = { url: string; bytes: number; name: string };
+export type UploadResult = {
+  url: string;
+  bytes: number;
+  name: string;
+  /** The image's pixel size as Cloudinary stored it (images only). */
+  width?: number;
+  height?: number;
+};
 
 export class UploadError extends Error {
   constructor(
@@ -131,6 +138,8 @@ export function uploadFile(
             const body = JSON.parse(xhr.responseText) as {
               secure_url?: string;
               bytes?: number;
+              width?: number;
+              height?: number;
             };
             if (xhr.status >= 200 && xhr.status < 300 && body.secure_url) {
               onProgress(1);
@@ -138,6 +147,8 @@ export function uploadFile(
                 url: optimizeCloudinaryUrl(body.secure_url),
                 bytes: body.bytes ?? file.size,
                 name: file.name,
+                width: body.width,
+                height: body.height,
               });
               done();
               return;

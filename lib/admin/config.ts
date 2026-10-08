@@ -1,13 +1,19 @@
 import type { z } from "zod";
 import type { UploadUse } from "@/lib/cloudinary";
+import { thumbnailUrl } from "@/lib/cloudinary";
 import { timelineDates } from "@/lib/timeline";
 import { SERVICE_ICONS } from "./serviceIcons";
-import type { ResourceId } from "./resources";
+import type { CreativesId, ResourceId } from "./resources";
 import {
   AVAILABILITY,
   WORK_TYPES,
+  creativeFaqSchema,
+  creativeServiceSchema,
+  creativesSettingsSchema,
+  designPieceSchema,
   journeySchema,
   newsletterSchema,
+  photoEventSchema,
   profileSchema,
   projectSchema,
   volunteeringSchema,
@@ -51,7 +57,7 @@ export type Values = Record<string, string | boolean | string[]>;
 export type AdminRow = Record<string, unknown> & { id: number };
 
 export type AdminConfig = {
-  id: ResourceId | "newsletter";
+  id: ResourceId | "newsletter" | CreativesId;
   /** Singular, for "New skill" and "Edit …". */
   noun: string;
   schema: z.ZodObject;
@@ -63,6 +69,10 @@ export type AdminConfig = {
   /** Tabs above the list that filter it by a field (experience: work / education). */
   tabs?: { field: string; options: Options };
   defaults: Values;
+  /** A small picture for a list row (the creatives' pieces and events). */
+  thumb?: (item: AdminRow) => string | null;
+  /** A "Featured" tag on a list row. */
+  featured?: (item: AdminRow) => boolean;
   /** What a list row says: a title and a second line. */
   row: (item: AdminRow) => { title: string; subtitle: string };
 };
@@ -795,7 +805,205 @@ const newsletter: AdminConfig = {
   row: () => ({ title: "Newsletter", subtitle: "" }),
 };
 
-const CONFIGS: Partial<Record<ResourceId | "newsletter", AdminConfig>> = {
+// ---- Creatives (design.md §14.26) ----------------------------------------------------
+// Pieces and events have their own editors (components/admin/creatives); these
+// configs give their lists a row and a picture.
+
+const GROUPS: Options = [
+  ["design", "Graphic design"],
+  ["photography", "Photography"],
+];
+const groupLabel = (value: unknown) => label(GROUPS, value);
+
+const design: AdminConfig = {
+  id: "design",
+  noun: "piece",
+  schema: designPieceSchema,
+  hasPublished: true,
+  defaults: {},
+  groups: [],
+  thumb: (item) => (item.coverUrl ? thumbnailUrl(String(item.coverUrl)) : null),
+  featured: (item) => item.isFeatured === true,
+  row: (item) => ({
+    title: String(item.title),
+    subtitle: [item.category, item.year].filter(Boolean).join(" · "),
+  }),
+};
+
+const photography: AdminConfig = {
+  id: "photography",
+  noun: "event",
+  schema: photoEventSchema,
+  hasPublished: true,
+  defaults: {},
+  groups: [],
+  thumb: (item) => (item.coverUrl ? thumbnailUrl(String(item.coverUrl)) : null),
+  featured: (item) => item.isFeatured === true,
+  row: (item) => ({
+    title: String(item.title),
+    subtitle: [
+      item.eventDate,
+      item.place,
+      `${list(item.images).length} pictures`,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+  }),
+};
+
+const creativeServices: AdminConfig = {
+  id: "creative-services",
+  noun: "service",
+  schema: creativeServiceSchema,
+  hasPublished: true,
+  defaults: {
+    isPublished: false,
+    title: "",
+    description: "",
+    icon: "",
+    groupName: "",
+    items: [],
+  },
+  groups: [
+    {
+      fields: [
+        PUBLISHED,
+        { type: "text", name: "title", label: "Title", max: 80 },
+        {
+          type: "select",
+          name: "groupName",
+          label: "Section",
+          options: GROUPS,
+          helper: "Which heading of the services page it is under.",
+        },
+        { type: "long", name: "description", label: "Description", max: 400 },
+        {
+          type: "select",
+          name: "icon",
+          label: "Icon",
+          options: SERVICE_ICONS.map((name) => [name, name] as const),
+        },
+        {
+          type: "tags",
+          name: "items",
+          label: "What's offered",
+          itemLabel: "item",
+          max: 8,
+          optional: true,
+          helper: "Short lines under the description.",
+        },
+      ],
+    },
+  ],
+  row: (item) => ({
+    title: String(item.title),
+    subtitle: `${groupLabel(item.groupName)} · ${list(item.items).length} items`,
+  }),
+};
+
+const creativeFaqs: AdminConfig = {
+  id: "creative-faqs",
+  noun: "question",
+  schema: creativeFaqSchema,
+  hasPublished: true,
+  defaults: { isPublished: false, question: "", answer: "", groupName: "" },
+  groups: [
+    {
+      fields: [
+        PUBLISHED,
+        { type: "text", name: "question", label: "Question", max: 200 },
+        { type: "long", name: "answer", label: "Answer", max: 1500 },
+        {
+          type: "select",
+          name: "groupName",
+          label: "Section",
+          options: GROUPS,
+          helper: "Shown with this section's services.",
+        },
+      ],
+    },
+  ],
+  row: (item) => ({
+    title: String(item.question),
+    subtitle: groupLabel(item.groupName),
+  }),
+};
+
+const creativesSettings: AdminConfig = {
+  id: "creatives-settings",
+  noun: "settings",
+  schema: creativesSettingsSchema,
+  hasPublished: false,
+  single: true,
+  defaults: {},
+  groups: [
+    {
+      title: "Home: the hero",
+      fields: [
+        copy(
+          "heroStatement",
+          "Statement",
+          60,
+          "The big line. Two lines if it has an “&”.",
+        ),
+        copy("heroLine", "Line under it", 160, undefined, true),
+      ],
+    },
+    {
+      title: "Home: the two entrances",
+      fields: [
+        copy("portalsTitle", "Section title", 60),
+        copy("portalDesignText", "Graphic design text", 160, undefined, true),
+        copy("portalPhotographyText", "Photography text", 160, undefined, true),
+        {
+          type: "tags",
+          name: "marqueeWords",
+          label: "Marquee words",
+          itemLabel: "word",
+          max: 8,
+          helper: "The moving line of outlined words between sections.",
+        },
+      ],
+    },
+    {
+      title: "The section pages",
+      fields: [
+        copy("designIntro", "Graphic design intro", 240, undefined, true),
+        copy("photographyIntro", "Photography intro", 240, undefined, true),
+      ],
+    },
+    {
+      title: "Contact block (every page)",
+      fields: [
+        copy("contactStatement", "Statement", 80),
+        copy("contactText", "Text", 240, undefined, true),
+        copy("contactNote", "Note under the buttons", 120),
+      ],
+    },
+    {
+      title: "Search results",
+      fields: [
+        copy(
+          "seoDescription",
+          "Description",
+          200,
+          "What search engines show under the site's name.",
+          true,
+        ),
+      ],
+    },
+  ],
+  row: () => ({ title: "Creatives settings", subtitle: "" }),
+};
+
+const CONFIGS: Partial<
+  Record<ResourceId | "newsletter" | CreativesId, AdminConfig>
+> = {
+  design,
+  photography,
+  "creative-services": creativeServices,
+  "creative-faqs": creativeFaqs,
+  "creatives-settings": creativesSettings,
   newsletter,
   projects,
   experience,
@@ -810,7 +1018,7 @@ const CONFIGS: Partial<Record<ResourceId | "newsletter", AdminConfig>> = {
 
 export function adminConfig(id: string): AdminConfig | undefined {
   return Object.hasOwn(CONFIGS, id)
-    ? CONFIGS[id as ResourceId | "newsletter"]
+    ? CONFIGS[id as ResourceId | "newsletter" | CreativesId]
     : undefined;
 }
 
