@@ -206,6 +206,8 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
                     )}
                     {item.likeCount > 0 &&
                       ` · ${item.likeCount} ${item.likeCount === 1 ? "like" : "likes"}`}
+                    {item.commentCount > 0 &&
+                      ` · ${item.commentCount} ${item.commentCount === 1 ? "comment" : "comments"}`}
                   </span>
                 </Link>
                 <span className="hidden md:block">

@@ -532,3 +532,116 @@ describe("/api/blog/posts/<slug>/like", () => {
     expect(response.status).toBe(403);
   });
 });
+
+describe("/api/admin/blog/comments and readers", () => {
+  const list = async () => await import("@/app/api/admin/blog/comments/route");
+  const comment = async () =>
+    await import("@/app/api/admin/blog/comments/[id]/route");
+  const readerRoute = async () =>
+    await import("@/app/api/admin/blog/readers/[id]/route");
+
+  it("need a session and a same-origin write", async () => {
+    signedIn = false;
+    expect(
+      (await (await list()).GET(call("/api/admin/blog/comments", "GET")))
+        .status,
+    ).toBe(401);
+    signedIn = true;
+    const forged = await (
+      await comment()
+    ).PATCH(
+      call(
+        "/api/admin/blog/comments/1",
+        "PATCH",
+        { status: "hidden" },
+        { origin: "https://evil.example" },
+      ),
+      ctx({ id: "1" }) as never,
+    );
+    expect(forged.status).toBe(403);
+  });
+
+  it("hide, show, delete and ban, revalidating the blog", async () => {
+    const [post] = await db
+      .select({ id: schema.blogPosts.id })
+      .from(schema.blogPosts);
+    await db
+      .insert(schema.readerUser)
+      .values({ id: "rx", name: "Rex", email: "rx@x.test" });
+    const [made] = await db
+      .insert(schema.blogComments)
+      .values({ postId: post.id, userId: "rx", body: "Hi" })
+      .returning({ id: schema.blogComments.id });
+    const id = String(made.id);
+
+    const listed = await (
+      await (
+        await list()
+      ).GET(call("/api/admin/blog/comments?filter=all", "GET"))
+    ).json();
+    expect(listed.items[0]).toMatchObject({
+      body: "Hi",
+      reader: { name: "Rex" },
+    });
+
+    const { PATCH, DELETE } = await comment();
+    expect(
+      (
+        await PATCH(
+          call("/x", "PATCH", { status: "hidden" }),
+          ctx({ id }) as never,
+        )
+      ).status,
+    ).toBe(200);
+    expect(revalidate).toHaveBeenCalledWith("blog", { expire: 0 });
+    expect(
+      (
+        await PATCH(
+          call("/x", "PATCH", { status: "nope" }),
+          ctx({ id }) as never,
+        )
+      ).status,
+    ).toBe(422);
+    expect(
+      (
+        await PATCH(
+          call("/x", "PATCH", { status: "hidden" }),
+          ctx({ id: "9999" }) as never,
+        )
+      ).status,
+    ).toBe(404);
+    const hidden = await (
+      await (
+        await list()
+      ).GET(call("/api/admin/blog/comments?filter=hidden", "GET"))
+    ).json();
+    expect(hidden.items).toHaveLength(1);
+
+    const ban = (await readerRoute()).PATCH;
+    expect(
+      (
+        await ban(
+          call("/x", "PATCH", { banned: true }),
+          ctx({ id: "rx" }) as never,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (await ban(call("/x", "PATCH", {}), ctx({ id: "rx" }) as never)).status,
+    ).toBe(422);
+    expect(
+      (
+        await ban(
+          call("/x", "PATCH", { banned: true }),
+          ctx({ id: "nobody" }) as never,
+        )
+      ).status,
+    ).toBe(404);
+    expect(
+      (await DELETE(call("/x", "DELETE"), ctx({ id }) as never)).status,
+    ).toBe(200);
+    expect(
+      (await DELETE(call("/x", "DELETE"), ctx({ id }) as never)).status,
+    ).toBe(404);
+  });
+});
