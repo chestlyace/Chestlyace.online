@@ -6,6 +6,7 @@ import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
 import {
   countTags,
+  getAgentSession,
   getPublishedPost,
   listPostsByTag,
   listPublishedPosts,
@@ -126,5 +127,26 @@ describe("countTags", () => {
       { tag: "a", count: 1 },
       { tag: "c", count: 1 },
     ]);
+  });
+});
+
+describe("getAgentSession", () => {
+  it("reads a stored session by id, and nothing for an unknown one", async () => {
+    const turns = [
+      { prompt: "Hi", at: null, parts: [{ kind: "text", text: "Hello" }] },
+    ];
+    await db.insert(schema.agentSessions).values({
+      id: "4f9c1a8e",
+      title: "A session",
+      turns: turns as never,
+      turnCount: 1,
+      toolCallCount: 0,
+    });
+    expect(await getAgentSession(db, "4f9c1a8e")).toEqual({
+      id: "4f9c1a8e",
+      title: "A session",
+      turns,
+    });
+    expect(await getAgentSession(db, "ffffffff")).toBeNull();
   });
 });

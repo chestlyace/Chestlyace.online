@@ -20,7 +20,7 @@ before the phase starts.
 | 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
-| 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a in review (issue #81); 9b.6b–9b.7 after it | Q12 (blog: decided), Q16 (decided) |
+| 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b in review (issue #83); 9b.7 after it | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | Not started | Q1, Q12 |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
@@ -258,8 +258,8 @@ reviewed and merged before the next:
 | 9b.5a Likes and share | The reaction bar: likes without an account (a hashed cookie, `blog_likes`, the blog API, a rate limit) and share (the system sheet or a menu) | Done (PR #76) |
 | 9b.5b Readers: sign-in and comments | Better Auth with GitHub and Google, comments (composer, replies, likes on comments, reports, delete, the owner's email), the signed-in chip, the privacy page | Done (PR #78) |
 | 9b.5c Comment moderation | The Comments screen in the admin: hide, show, delete, ban a reader, mark the author's account | Done (PR #80) |
-| 9b.6a Agent sessions: upload | The session file parser, the redaction rules, the `agent_sessions` table, upload, and the editor's Agent session form (turn picker, redaction review) | In review (issue #81) |
-| 9b.6b Agent sessions: replay | The public replay block and the markdown `session` block | Not started |
+| 9b.6a Agent sessions: upload | The session file parser, the redaction rules, the `agent_sessions` table, upload, and the editor's Agent session form (turn picker, redaction review) | Done (PR #82) |
+| 9b.6b Agent sessions: replay | The public replay block and the markdown `session` block | In review (issue #83) |
 | 9b.7 Newsletter | The signup box, double opt-in, the confirmation page | Not started |
 
 **Dependencies 9b adds** (named here so merging 9a approves them, D82–D85; each

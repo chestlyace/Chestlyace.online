@@ -399,6 +399,36 @@ export function parseQuiz(body: string): Result<QuizQuestion[]> {
   return questions.length > 0 ? ok(questions) : fail("There are no questions.");
 }
 
+// ---- session -------------------------------------------------------------------
+
+// An agent session (docs/blog-markdown.md §2): the body is empty and the session
+// itself is in `agent_sessions`; the fence only names it and the turns shown.
+export type Session = {
+  id: string;
+  /** The first and last turn shown (1-based); null means from the start / to the end. */
+  from: number | null;
+  to: number | null;
+  title: string | null;
+};
+
+export function parseSessionBlock(meta: string | null): Result<Session> {
+  const { values } = parseFenceMeta(meta);
+  if (!/^[0-9a-f]{6,16}$/.test(values.id ?? ""))
+    return fail("A session needs the id of an uploaded session.");
+  const turn = (name: "from" | "to"): number | null | "bad" => {
+    const value = values[name];
+    if (value === undefined) return null;
+    return /^[1-9]\d{0,3}$/.test(value) ? Number(value) : "bad";
+  };
+  const from = turn("from");
+  const to = turn("to");
+  if (from === "bad" || to === "bad")
+    return fail("The first and last turn are numbers from 1.");
+  if (from !== null && to !== null && from > to)
+    return fail("The first turn can't come after the last one.");
+  return ok({ id: values.id, from, to, title: values.title ?? null });
+}
+
 // ---- dispatch ------------------------------------------------------------------
 
 export const BLOCK_NAMES = [
@@ -411,6 +441,7 @@ export const BLOCK_NAMES = [
   "terminal",
   "flow",
   "quiz",
+  "session",
 ] as const;
 export type BlockName = (typeof BLOCK_NAMES)[number];
 
@@ -443,5 +474,7 @@ export function parseBlock(
       return parseFlow(body);
     case "quiz":
       return parseQuiz(body);
+    case "session":
+      return parseSessionBlock(meta);
   }
 }

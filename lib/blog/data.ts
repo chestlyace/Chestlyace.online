@@ -1,6 +1,7 @@
 import { and, arrayContains, desc, eq, isNotNull, sql } from "drizzle-orm";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
+import type { SessionTurn } from "./session/types";
 
 // Public reads of the blog (docs/content-schema.md §4). Results are cached as
 // JSON (lib/blog/cache.ts), so timestamps are selected as ISO strings rather
@@ -142,4 +143,26 @@ export async function listBlogSocials(
     .from(schema.socials)
     .where(arrayContains(schema.socials.showOn, ["blog"]))
     .orderBy(schema.socials.orderIndex, schema.socials.id);
+}
+
+export type AgentSession = {
+  id: string;
+  title: string;
+  turns: SessionTurn[];
+};
+
+// A stored agent session by id, for a post's `session` block (9b.6).
+export async function getAgentSession(
+  db: Database,
+  id: string,
+): Promise<AgentSession | null> {
+  const [row] = await db
+    .select({
+      id: schema.agentSessions.id,
+      title: schema.agentSessions.title,
+      turns: schema.agentSessions.turns,
+    })
+    .from(schema.agentSessions)
+    .where(eq(schema.agentSessions.id, id));
+  return row ?? null;
 }

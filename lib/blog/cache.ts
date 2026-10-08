@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { getDb } from "@/lib/db";
 import {
+  getAgentSession,
   getPublishedPost,
   listBlogSocials,
   listPostsByTag,
@@ -36,4 +37,7 @@ export const getCachedPostsByTag = cached("by-tag", (tag: string) =>
 );
 export const getCachedBlogSocials = cached("socials", () =>
   listBlogSocials(getDb()),
+);
+export const getCachedSession = cached("session", (id: string) =>
+  getAgentSession(getDb(), id),
 );

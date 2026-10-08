@@ -6,6 +6,7 @@ import {
   parseFileTree,
   parseFlow,
   parseQuiz,
+  parseSessionBlock,
   parseSteps,
   parseTerminal,
   parseTypewriter,
@@ -224,5 +225,39 @@ describe("parseQuiz", () => {
     expect(parseQuiz("Q: x\n*) a").ok).toBe(false);
     expect(parseQuiz("Q: x\n) a\n) b").ok).toBe(false);
     expect(parseQuiz("Q: x\n*) a\n*) b").ok).toBe(false);
+  });
+});
+
+describe("parseSessionBlock", () => {
+  it("reads the id, the range and the title", () => {
+    expect(
+      data(
+        parseSessionBlock(
+          'id=4f9c1a from=3 to=18 title="Refactoring the proxy"',
+        ),
+      ),
+    ).toEqual({
+      id: "4f9c1a",
+      from: 3,
+      to: 18,
+      title: "Refactoring the proxy",
+    });
+    expect(data(parseSessionBlock("id=4f9c1a8e"))).toEqual({
+      id: "4f9c1a8e",
+      from: null,
+      to: null,
+      title: null,
+    });
+  });
+
+  it("says what is wrong", () => {
+    expect(parseSessionBlock(null)).toMatchObject({ ok: false });
+    expect(parseSessionBlock("id=zzz")).toMatchObject({ ok: false });
+    expect(parseSessionBlock("id=4f9c1a from=0")).toMatchObject({ ok: false });
+    expect(parseSessionBlock("id=4f9c1a from=x")).toMatchObject({ ok: false });
+    expect(parseSessionBlock("id=4f9c1a from=5 to=2")).toMatchObject({
+      ok: false,
+      error: "The first turn can't come after the last one.",
+    });
   });
 });
