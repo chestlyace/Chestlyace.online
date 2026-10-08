@@ -21,13 +21,17 @@ which no longer belongs on the main site (D4).
 
 | Route | Purpose |
 |---|---|
-| `/` | Hero + filterable gallery (design / photography / events) |
-| `/[slug]` | Single piece: images, description, client, tools |
+| `/` | Animated showcase: hero, the two sections' entrances, selected work, services teaser (`design.md` §14.20) |
+| `/design` | Graphic design: a filterable masonry gallery (§14.21) |
+| `/design/[slug]` | A design piece: opens as a lightbox over the gallery, or as a page when visited directly |
+| `/photography` | Photography: the events (§14.22) |
+| `/photography/[slug]` | One event: story, selected pictures, details sidebar, credits, link to the full album (§14.23) |
 | `/services` | Design & photography services (absorbs the old `graphic-design.html` and `photography.html`) |
 | `/sitemap.xml`, `/robots.txt` | Generated |
 
-Contact on the creatives site reuses the WhatsApp/email contact pattern; whether
-it gets its own page or a section on `/` is decided when that site is built.
+Contact on the creatives site is a block at the bottom of every page (owner,
+2026-10-08; `design.md` §13.60), reusing the WhatsApp/email pattern. Videography
+is a later section (D87).
 
 ### `blog.chestlyace.online`
 
@@ -171,8 +175,8 @@ On phones the capsule expands into the menu: the key links, then the three sites
 
 ### Header — creatives and blog
 
-Same capsule. Each site's own key links (e.g. `Work · Services · Contact` /
-`Posts · Tags`) are decided in its design step; the Sites chip and theme toggle
+Same capsule. Each site's own key links (creatives: `Work · Design · Photography ·
+Services`; blog: `Posts · Tags`) are set in its design step; the Sites chip and theme toggle
 stay.
 
 The old header also showed a "chestlyace.online" globe link pointing at itself —

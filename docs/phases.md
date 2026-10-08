@@ -21,7 +21,7 @@ before the phase starts.
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
 | 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 in review (issue #85) | Q12 (blog: decided), Q16 (decided) |
-| 10 | Creatives site | Not started | Q1, Q12 |
+| 10 | Creatives site | 10a in review (issue #87); 10b after it | Q1, Q12 (decided 2026-10-08) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
@@ -286,15 +286,20 @@ can be liked, commented on and shared; a DEV article imports and a post exports.
 
 **Goal:** creatives.chestlyace.online with design and photography work.
 
-**10a — Design (docs only).** Specs for the creatives site's components (gallery,
-filters, lightbox, piece page) and pages, plus its accent colour (Q12).
+**10a — Design (docs only).** Specs for the creatives site's components (masonry
+gallery, tile, filters, event tile, lightbox, details and credits, the home page's
+animation pieces, contact block) and pages (home, Graphic design, Photography and
+its event pages, Services, admin screens), plus its accent colour (Q12). Decisions:
+D86, D87.
 
-**10b — Build**, after 10a is merged:
+**10b — Build**, after 10a is merged (split further, with the owner's agreement, as
+the blog's 9b was):
 
-- CMS set up per Q1, with the content model from `content-schema.md` §5
-- Gallery with filters, piece pages, lightbox, services page
+- The creatives tables and their admin screens (D86, `content-schema.md` §5), with
+  images on Cloudinary and revalidation of the creatives pages
+- Gallery with filters, lightbox and piece pages; photography events and event pages;
+  the services page; the home page and its animations; the contact block
 - Import of the old design/event entries and service copy
-- Publish webhook → revalidation
 - Accent colour (Q12), SEO, redirects from the old design/photography pages
 
-**Done when:** content published in the CMS appears on the site without a deploy.
+**Done when:** content published in the admin appears on the site without a deploy.

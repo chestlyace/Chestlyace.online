@@ -128,14 +128,27 @@ Rules:
 ## 4. Per-site accents
 
 All three sites share every token. Each site may override **only** `primary`,
-`primary-text`, and `ring`, so they feel related but distinguishable:
+`primary-hover` (its hover fill), `primary-text`, and `ring`, so they feel related
+but distinguishable:
 
 | Site | Accent | Status |
 |---|---|---|
 | main | Blue `#2563EB` | Decided |
 | admin | The main blue (no override; D72) | Decided |
-| creatives | TBD — uses the main accent until decided | Q12 |
+| creatives | Warm orange `#C2410C` (values below) | Decided (Q12, 2026-10-08; D87) |
 | blog | The main blue (no override) | Decided (Q12, 2026-10-07) |
+
+**Creatives orange** (D87), contrast-checked (WCAG AA 4.5:1):
+
+| Token | Light | Dark | Check |
+|---|---|---|---|
+| `primary` | `#C2410C` | `#C2410C` | White (`primary-foreground`) on it: 5.18:1 |
+| `primary-hover` | `#9A3412` | `#9A3412` | White on it: 7.31:1 |
+| `primary-text` | `#C2410C` | `#FB923C` | On `background` 5.18:1 and on `background-alt` 4.76:1 (light); on `background` 8.75:1, `surface` 7.92:1 and `surface-raised` 7.28:1 (dark) |
+| `ring` | `#C2410C` | `#FB923C` | At least 3:1 on every background it is drawn on |
+
+A lighter orange such as `#EA580C` would give white text only 3.56:1, so `#C2410C`
+is the lightest orange that keeps white button text readable.
 
 Applied by a `data-site="main|creatives|blog|admin"` attribute on `<html>` set in each
 site's root layout.
@@ -464,6 +477,13 @@ content components — PR #22 (issue #21).
 [Blog editor](#1348-blog-editor) · [DEV import and export](#1349-dev-import-and-export) ·
 [Comment moderation](#1350-comment-moderation). The custom markdown they read and
 write is in [`blog-markdown.md`](./blog-markdown.md).
+
+**Creatives components (Phase 10a):** [Masonry grid](#1351-masonry-grid) ·
+[Gallery tile](#1352-gallery-tile) · [Filter bar](#1353-filter-bar) ·
+[Event tile](#1354-event-tile) · [Lightbox](#1355-lightbox) ·
+[Details and credits](#1356-details-and-credits) · [Image trail](#1357-image-trail) ·
+[Marquee](#1358-marquee) · [Section portal](#1359-section-portal) ·
+[Creatives contact block](#1360-creatives-contact-block) (§13.51–13.60).
 
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
@@ -2530,6 +2550,279 @@ action asks first.
 
 **Approved in:** the Phase 9a PR (issue #61).
 
+**Creatives components (Phase 10a).**
+
+Owner references (2026-10-08): **anubi.io/lab** (a tight, rigid masonry of
+work with the title bottom-left and the year top-right on each tile), **anubi.io/work**
+(event tiles with a blur-and-details hover that open into an event page with an
+information sidebar, more pictures and credits) and **anubi.io** (the creative
+motion). The creatives site has **two sections**, **Graphic design** and
+**Photography** (Videography is a later step, D87). **Approved in:** the Phase 10a
+PR (issue #87).
+
+Shared rules for §13.51–13.60: the always-in-HTML and compositor-only rules of §8;
+every image has alt text (the admin requires it, or "decorative"); every image
+carries its pixel size so the grid reserves its space (no layout shift); images are
+Cloudinary addresses served at the width the tile needs (`f_auto,q_auto`, a
+`srcset`), with a blurred 24px placeholder shown until the image is ready (the
+blur-up of the lab page); the first row of a page loads eagerly, the rest lazily.
+
+### 13.51 Masonry grid
+
+**Purpose.** The Graphic design page's gallery (§14.21): many pieces of different
+proportions in one solid, even arrangement.
+
+**References.** anubi.io/lab: columns of tiles at their own ratios, tight gutters,
+square corners, nothing decorative between tiles.
+
+**Anatomy.** A list of Gallery tiles (§13.52) in CSS columns' order: tiles are placed
+into the **shortest column** as they come, so reading order is left to right, then
+down, and the columns end at nearly the same height.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Columns | 1 on phones, 2 from `sm`, 3 from `lg`, 4 from `2xl` (≥ 1536px; the grid is then wider than the container, see below) |
+| Gutter | 12px between tiles, both directions (the lab page's tight, rigid look) |
+| Container | Wide (§5); from `2xl` the grid runs to 1600px |
+| Tile ratio | The image's own (`width / height`), clamped to between 3:4 portrait-tall and 16:10 landscape-wide so no tile is a sliver |
+| Radius | **0** (owner's "solid and rigid"; a deliberate exception to the `lg` media radius of §5, used only for the gallery tiles and the lightbox image) |
+
+**Behaviour.** Filtering (§13.53) re-flows the grid with a GSAP Flip: tiles that
+stay glide to their new places (500ms `ease-in-out`), tiles that leave fade and
+shrink to `scale(0.95)` (200ms), tiles that arrive fade in from `scale(0.95)`
+(300ms, 30ms stagger). The page keeps its scroll position; the URL records the
+filter (`?category=poster`) without a navigation. Reduced motion: the grid changes
+with a 150ms cross-fade.
+
+**Motion (entrance).** Tiles rise 24px and fade in as their row passes 85% of the
+viewport, in a 40ms stagger by column (`power3.out`, 700ms), once.
+
+**Accessibility.** An `<ul>` of `<li>`s with the filter's result count in a polite
+live region ("12 pieces"); order in the DOM is the reading order.
+
+### 13.52 Gallery tile
+
+**Purpose.** One design piece in the Masonry grid (§13.51), and also the clickable
+thumbnail inside an event page (§14.23).
+
+**References.** anubi.io/lab tiles: the image fills the tile; a dark gradient
+carries the title bottom-left and the year top-right; the media is a blur-up.
+
+**Anatomy.** Image → a bottom gradient → **title** (bottom-left, Text semibold at
+`h3`, `#F5F5F7`, max 2 lines) and a mono `label` line under it with the category
+→ the **year** (top-right, mono `label`). A tile is one `<a>` (or `<button>` that
+opens the Lightbox, §13.55).
+
+**States.**
+
+| State | Treatment |
+|---|---|
+| Rest | Image sharp; the gradient (transparent → `rgb(0 0 0 / 0.6)`, bottom 45%) is always there so the title is readable on any image |
+| Hover (fine pointer) | **Details**: the image blurs (`blur(8px)`) and darkens (`rgb(0 0 0 / 0.45)`) over 300ms `ease-out`, `scale(1.03)`; the details rise 12px and fade in over the gradient: the title, the category, the **client** (if any), the **tools** as tags (§13.4), and a "View" label with `arrow-up-right` in the accent |
+| Focus | The same as hover plus the 2px `ring` outline inset 2px; opens on Enter |
+| Press | `scale(0.985)`, 120ms |
+| Touch devices | No hover state: the tile shows the rest state and a tap opens the Lightbox (the details are in it) |
+| Loading | The blurred placeholder, then a 300ms cross-fade to the image |
+
+**Values.** Text over images is always `#F5F5F7` on the gradient (it does not
+follow the theme, as the always-dark terminal of §13.44 does not); the gradient
+makes it at least 4.5:1 on any image; the blurred hover dim makes it 7:1.
+
+**Motion.** As above; compositor-only (`transform`, `opacity`, `filter`). The
+blur is on a duplicate image layer faded in over the sharp one (so the blur never
+re-rasterises the sharp image). Reduced motion: the hover swaps to the dimmed state
+with a 150ms opacity change, no blur or scale.
+
+**Accessibility.** The tile's accessible name is "Title, category, year"; the hover
+details are decorative duplicates (`aria-hidden`) because the Lightbox holds them
+for everyone. The tile is reachable by keyboard in DOM order.
+
+### 13.53 Filter bar
+
+**Purpose.** Narrows the Graphic design grid by category.
+
+**Anatomy.** A row of **Tags** (§13.4, `button` variant): "All" then each category
+that has a published piece, with the count after the name ("POSTER · 12"), sorted by
+count then name. One is selected at a time (`aria-pressed`), shown as the accent
+pill (`primary` fill, `primary-foreground` text).
+
+**Values.** 8px gap, wraps to a second line; sticky nowhere (it scrolls with the
+page). On phones the row scrolls sideways (no wrap) with the right edge faded.
+
+**Behaviour.** Selecting a filter runs the grid's Flip (§13.51), updates the URL
+and moves nothing else. Arrow keys move between chips (a roving tab stop); Space or
+Enter selects. A category with no pieces never appears; with a single category
+there is no bar.
+
+### 13.54 Event tile
+
+**Purpose.** One photography event on the Photography page (§14.22).
+
+**References.** anubi.io/work: a large cover tile per project, a blurred hover with
+details, opening into its own page.
+
+**Anatomy.** A wide cover image (`16 / 10`) with, over it: the event's **year**
+(top-right, mono `label`) and its **title** (bottom-left, Bebas at `display-lg`,
+`#F5F5F7`); under the image, outside it: the **place** and **date** on one mono
+`label` line, `muted`, and the number of pictures ("48 PHOTOS").
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Layout | 1 column on phones, 2 from `md` (24px gutters); the **featured** event spans both columns at `21 / 9` |
+| Radius | 0, as the gallery tiles |
+| Gradient | The same bottom gradient as §13.52 |
+
+**States.** Hover (fine pointer): the cover blurs (`blur(10px)`), dims, and a panel
+rises over it with the event's **description** (3 lines), its **role** line ("Event
+photographer"), and an "Open the event" label with `arrow-up-right`, 350ms
+`ease-out`; the cover scales to 1.03. Press `scale(0.99)`. Focus as hover. Touch:
+a tap opens the event (no hover state). Click opens the event page (§14.23) through
+a shared-element transition: the cover grows into the page's hero (GSAP Flip,
+700ms `ease-in-out`); with reduced motion, a plain 200ms cross-fade.
+
+**Accessibility.** One link; its name is "Title, place, date"; the hover panel is
+`aria-hidden`.
+
+### 13.55 Lightbox
+
+**Purpose.** Opens a design piece or an event picture full size with its details,
+and steps through the pieces without going back to the grid.
+
+**References.** The "click for more details or credits" of the owner; anubi.io/work
+pieces. A real route: the lightbox is the piece page shown over the grid (§14.21).
+
+**Anatomy.** A full-screen layer: the **image** (contained, max 100% of the stage)
+on the left on desktop, a **details panel** on the right (§13.56), a close button
+(top-right), previous / next buttons (the stage's edges), and a counter ("03 / 24").
+A piece with several images shows them as a vertical **thumbnail rail** beside the
+stage; an event picture has no panel (the event's own sidebar is on the page behind).
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Layer | A native `<dialog>`, `100dvh`, `rgb(10 10 10 / 0.94)` background in both themes, no blur (it is opaque enough; reduced transparency changes nothing) |
+| Stage | The image contained, never upscaled past its pixel size; 24px padding |
+| Panel | 360px wide from `lg`; below it, under the image as a sheet that scrolls with the page |
+| Controls | 44px icon buttons (§13.2) over the layer, `#F5F5F7` icons |
+
+**Behaviour.** Opens from a tile with a Flip from the tile's rectangle to the stage
+(500ms `ease-in-out`); closes the other way. Previous / next and ← / → move through
+the grid's current order (the filter included); the URL changes with each (a
+shallow route, `/design/[slug]`), so a piece can be shared. Escape, the close
+button or a click outside closes; swiping down or sideways does so on touch
+(Motion drag gestures). Focus is trapped inside; closing returns focus to the tile.
+Neighbouring images are preloaded. Reduced motion: a 200ms cross-fade.
+
+**Accessibility.** The `<dialog>` is named by the piece's title; the counter is a
+polite live region; all gestures have button equivalents.
+
+### 13.56 Details and credits
+
+**Purpose.** The facts about a piece or an event, in one reusable block: the Lightbox
+panel (§13.55), the design page's sidebar and the event page's sidebar (§14.23).
+
+**Anatomy.** A definition list under a mono `label` heading. For a **design piece**:
+Client, Category, Role, Tools, Year, then a short description (`body`, `muted`) and
+an optional link ("View the project ↗"). For an **event**: Event, Date, Place,
+Role, What was covered (tags), then the description. Followed, when present, by
+**Credits**: a list of "Role — Name" rows (a name may link out).
+
+**Values.** Each row is a mono `label` term (`muted`) over its value (`sm`,
+`foreground`), 12px between rows, a 1px `border` line between groups; a term with no
+value is not shown. Tools and "what was covered" are Tags (§13.4) without buttons.
+
+**Accessibility.** A real `<dl>`; Credits an `<ul>`; links have visible names.
+
+### 13.57 Image trail
+
+**Purpose.** A home page effect (§14.20): the hero's pointer leaves a trail of work.
+
+**References.** anubi.io's creative motion; the owner asked for "really cool
+animations" on the home page.
+
+**Behaviour.** Desktop with a fine pointer only. As the pointer moves over the
+hero, every 90px of travel an image from the featured pieces appears at the pointer
+(240px wide, its own ratio, square corners), tilted by up to 6° toward the direction
+of travel, scales from `0.7` to `1` and fades in over 200ms, stays 400ms, then fades
+and shrinks away over 500ms (GSAP, `power3.out`). At most six are alive at once; the
+oldest is recycled. They sit behind the hero text and never block clicks
+(`pointer-events: none`). The pointer is idle for 800ms: the trail finishes and
+stops.
+
+**Reduced motion, touch and slow connections.** Not rendered (no images are
+fetched for it): the hero's still collage (§14.20) is the fallback.
+**Accessibility.** Entirely decorative: `aria-hidden`, no focus, no text.
+
+### 13.58 Marquee
+
+**Purpose.** A band of outlined Bebas words that keeps moving, between home page
+sections (§14.20).
+
+**Anatomy.** One line of words separated by a small accent star ("GRAPHIC DESIGN ✦
+PHOTOGRAPHY ✦ BRANDING ✦ EVENTS ✦ "), repeated to fill twice the width. Type: Bebas
+at `display-xl`, `transparent` fill with a 1.5px `foreground` outline (the outlined
+line of the main hero, §14.1); every third word filled with the accent (`primary-text`).
+
+**Motion.** It drifts left at 60px/s. **Scroll speeds it up:** the speed adds the
+scroll velocity from Lenis (capped at 4×) and the direction **reverses** when the
+page scrolls up (GSAP `ticker`, eased, 400ms). Paused when off-screen. Reduced
+motion: the words are static, centred and wrapped.
+
+**Accessibility.** The line is `aria-hidden`; the same words are in the page's
+`<h1>`/section headings as text, so nothing is lost.
+
+### 13.59 Section portal
+
+**Purpose.** The two big entrances on the creatives home (§14.20): Graphic design and
+Photography.
+
+**Anatomy.** A tall panel (`4 / 5` on phones, `3 / 4` side by side from `md`) with a
+featured image, a mono index ("01 — GRAPHIC DESIGN"), the section name in Bebas at
+`display-lg`, one line of text (`lead` step, `#F5F5F7`) and a "View the work" label
+with `arrow-up-right`. Radius 0, bottom gradient as §13.52.
+
+**States.** Hover (fine pointer): the image reacts to the pointer with the **ripple
+distortion** (OGL) of the main site's project tiles (§14.5), the name's letters roll
+up (the text roll of §13.3), and a round **cursor label** "VIEW" in the accent follows
+the pointer (GSAP `quickTo`, 0.3s). Focus: a 2px `ring` outline. Press: `scale(0.99)`.
+Touch: no ripple, no cursor label; the panel is a plain link.
+
+**Motion.** The ripple canvas is created on first hover only, lazy-loaded, and
+removed when the pointer leaves for 2s; reduced motion, `Save-Data` and touch use
+the still image. Click opens the section with a Flip of the panel's image into the
+section's first row (700ms), or a cross-fade for reduced motion.
+
+**Accessibility.** One link per panel, named "Graphic design" / "Photography"; the
+canvas is `aria-hidden`.
+
+### 13.60 Creatives contact block
+
+**Purpose.** The way to ask for work, at the bottom of **every** creatives page
+(owner, 2026-10-08), above the footer (§13.8).
+
+**References.** The main site's contact tiles (§13.14), without the form.
+
+**Anatomy.** A mono `label` "CONTACT"; a Bebas statement ("HAVE A PROJECT OR AN EVENT
+TO COVER?", `display-xl`) in two lines; a line of text; a row of three **Buttons**
+(§13.1): **WhatsApp** (`primary`, `lg`, with a pre-filled message "Hi Chestly, I saw
+your creative work and I'd like to talk about…", the link of §14.8), **Email**
+(`secondary`) and, when the profile has one, **Instagram** (`secondary`, from the
+socials shown on creatives); under them the response-time note.
+
+**Values.** A `background-alt` band, wide container, 96px padding (128px from `md`).
+The text and buttons come from the settings screen (§14.26) and the profile's
+WhatsApp number, email and socials, so the copy is editable.
+
+**Motion.** The statement's letters rise as a section heading (§14.0); the buttons
+fade up with a 80ms stagger. Reduced motion: final state.
+
+**Accessibility.** The block is a labelled `<section>`; the statement is an `<h2>`.
+
 ## 14. Page and section specs
 
 The main site's homepage (`/`) and the project page (`/projects/[slug]`). Each
@@ -2547,6 +2840,12 @@ spec follows the section checklist in §12. Components are linked, not repeated.
 **Admin (Phase 6a):** [Admin pages](#1411-admin-pages)
 
 **Launch (Phase 8.4):** [Coming-soon page](#1412-coming-soon-page-creatives-and-blog)
+
+**Creatives (Phase 10a):** [Creatives home](#1420-creatives-home) ·
+[Graphic design](#1421-graphic-design) · [Photography](#1422-photography) ·
+[Event page](#1423-event-page) · [Services](#1424-creatives-services) ·
+[Header and footer additions](#1425-creatives-header-and-footer-additions) ·
+[Creatives admin pages](#1426-creatives-admin-pages)
 
 **Blog (Phase 9a):** [Blog home](#1413-blog-home) · [Post page](#1414-post-page) ·
 [Tags](#1415-tags) · [Newsletter confirmation](#1416-newsletter-confirmation) ·
@@ -3595,3 +3894,238 @@ comment all revalidate the blog's cached pages (the `blog` cache tag, as the mai
 site's admin does with `portfolio`, D74).
 
 **Approved in:** the Phase 9a PR (issue #61).
+
+**Creatives pages (Phase 10a).**
+
+`creatives.chestlyace.online` has **two sections, Graphic design and Photography**
+(owner, 2026-10-08; Videography follows as its own step), a home page that shows
+them off, a Services page, and a contact block under every page (§13.60). Specs
+follow the checklist of §12; components are linked, not repeated. **Approved in:**
+the Phase 10a PR (issue #87).
+
+**Creatives (Phase 10a):** [Creatives home](#1420-creatives-home) ·
+[Graphic design](#1421-graphic-design) · [Photography](#1422-photography) ·
+[Event page](#1423-event-page) · [Services](#1424-creatives-services) ·
+[Header and footer additions](#1425-creatives-header-and-footer-additions) ·
+[Creatives admin pages](#1426-creatives-admin-pages)
+
+### 14.20 Creatives home
+
+**Purpose.** The first impression of the creative work: what Chestly makes, the
+best of it, and the doors into the two sections. Route `/`.
+
+**References.** anubi.io (big statements, image-forward, scroll motion); the
+main site's hero (§14.1) for the way type is revealed.
+
+**Content.**
+
+| Element | Source | Copy |
+|---|---|---|
+| Hero statement | settings (§14.26) | "DESIGN & PHOTOGRAPHY" (placeholder, editable) |
+| Hero line | settings | "Brand visuals and event stories by Chestly Ace (Amahndong Chestly)." |
+| Featured work | pieces and events marked **featured** | up to 8 images, mixed |
+| Portals | static | Graphic design, Photography (each with its latest featured image) |
+| Selected work | featured pieces and events | up to 8 |
+| Services teaser | `creative_services` | the three or four service titles, a link to `/services` |
+| Contact | §13.60 | |
+
+**Layout** (top to bottom, wide container; bands alternate `background` and
+`background-alt` counting up from the footer as §14.0):
+
+1. **Hero** (`background`, one viewport tall, `min-height: 100svh`). The statement
+   in Bebas at `display-2xl`, centred, two lines ("DESIGN" and "& PHOTOGRAPHY"), the
+   hero line in `lead`, `muted`, 24px below, and two Buttons: **See the work**
+   (`primary`, scrolls to the portals) and **Get in touch** (`secondary`, to the
+   contact block). Around the text a **collage** of six of the featured images
+   (square corners, the tiles' own ratios, 140–260px, placed in a fixed pattern
+   around the edges) that drifts with the pointer (parallax: each layer 12–40px,
+   GSAP `quickTo`, 0.6s) and with scroll (each rises at its own rate, scrubbed).
+   The **Image trail** (§13.57) runs over it on desktop.
+2. **Marquee** (§13.58), 48px below the hero's bottom padding.
+3. **Portals** (`background-alt`): two Section portals (§13.59) side by side from
+   `md`, stacked on phones, 16px gap, under a section heading (§14.0, label "01 —
+   WORK", title "TWO WAYS I WORK" placeholder).
+4. **Selected work** (`background`): the section heading ("02 — SELECTED"), then a
+   **pinned horizontal strip**: while the section is pinned the featured pieces slide
+   left as you scroll (GSAP ScrollTrigger `scrub`, `pin`), each a Gallery tile
+   (§13.52) at a fixed 360px height; a mono counter ("03 / 08") and a thin accent
+   progress bar sit under the strip. Clicking a tile opens the Lightbox (§13.55).
+   Phones and tablets: no pin: a native horizontal scroll-snap row.
+5. **Services teaser** (`background-alt`): the section heading ("03 — SERVICES"),
+   the services as a two-column list of Bebas rows ("BRANDING SUPPORT", "EVENT
+   COVERAGE"…), each a link to its place on `/services`, with a text roll (§13.3).
+6. **Contact block** (§13.60), then the footer (§13.8).
+
+**Motion.** The hero's statement letters rise (900ms `expo.out`, 30ms stagger, as
+§14.0); the collage images fly in from their nearest screen edge (700ms `power3.out`,
+60ms stagger, starting 300ms after the statement); the portals, tiles and
+headings use the shared entrances. All the pieces above are compositor-only. The
+collage, trail, marquee and pinned strip are **lazy**: nothing waits on them, the
+hero text and the portals are in the HTML from the first paint.
+
+**Reduced motion, touch and `Save-Data`.** No trail, no parallax, no pin, a static
+marquee, the collage as a still arrangement, the strip a plain scroll row.
+
+**Light and dark.** The Bebas statement is `foreground`; the collage and tiles are
+the same in both themes; the bands follow §14.0; the accent is the creatives orange
+(§4).
+
+**SEO.** Title "Chestly Ace — Design & Photography"; one `<h1>` (the statement);
+`Person` and `WebSite` JSON-LD with each featured piece as a `CreativeWork`.
+
+### 14.21 Graphic design
+
+**Purpose.** The gallery of design work. Route `/design`; a piece is
+`/design/[slug]`.
+
+**References.** anubi.io/lab (the rigid masonry and its details).
+
+**Layout** (`background`, 112px below the viewport top as §14.0):
+
+1. **Heading** (§14.0): label "GRAPHIC DESIGN", title "DESIGN" in Bebas at
+   `display-xl`, an intro in `lead` (editable, §14.26), and the piece count.
+2. **Filter bar** (§13.53), 48px below.
+3. **Masonry grid** (§13.51) of Gallery tiles (§13.52), 32px below the bar.
+4. **Contact block** (§13.60).
+
+**Opening a piece.** A click opens the Lightbox (§13.55) with the piece's images
+(a **thumbnail rail** when there are several), and the Details and credits panel
+(§13.56). The same piece at `/design/[slug]` opened directly is a full page: the
+images stacked at the column's width under the title, the details panel as a sticky
+sidebar from `lg`, then "More design" (four neighbouring tiles) and the contact
+block. Pieces are ordered by the order set in the admin (newest first by default).
+
+**Empty.** With no published piece the page shows the coming-soon look (§14.12) with
+the section's name.
+
+**Motion.** The grid's entrance, Flip filtering (§13.51), the Lightbox's Flip.
+
+**SEO.** Title "Graphic design — Chestly Ace"; every piece is indexable with its
+own title, description and Open Graph image, `CreativeWork` JSON-LD.
+
+### 14.22 Photography
+
+**Purpose.** The photography work, organised by event. Route `/photography`.
+
+**References.** anubi.io/work (event tiles with the blurred, detailed hover).
+
+**Layout** (`background`): the heading (§14.0: label "PHOTOGRAPHY", title
+"PHOTOGRAPHY", the intro, the event count); then the **Event tiles** (§13.54) in
+the order set in the admin (newest first by default), the featured event first
+and across both columns, 24px gutters, 64px between rows; then a line "More coming
+soon" only when there is a single event; then the contact block.
+
+Events with a **kind** (conference, community, portrait…) show it as a mono tag on
+the tile; there is no filter bar until there are more than twelve events (then the
+Filter bar, §13.53, by kind).
+
+**Motion.** Tiles rise 32px and fade in (the default entrance, 80ms stagger); the
+hover and open transitions are §13.54.
+
+**SEO.** Title "Photography — Chestly Ace"; each event indexable; `ImageGallery`
+JSON-LD per event.
+
+### 14.23 Event page
+
+**Purpose.** One event: its story, a selection of pictures, who made it, and a way
+to see everything. Route `/photography/[slug]`.
+
+**References.** anubi.io/work/[project]: a cover, an information sidebar, more
+images, credits.
+
+**Layout** (wide container):
+
+1. **Hero** (full width, `70svh` max): the cover image, with the event's title in
+   Bebas at `display-xl` (`#F5F5F7` on the §13.52 gradient, bottom-left), the year
+   top-right. The cover is the shared element from the tile (§13.54).
+2. **Body**, 12 columns from `lg`: **columns 1–4: the sidebar**, sticky 112px below
+   the top, with the Details and credits block (§13.56: Event, Date, Place, Role,
+   What was covered) and the **"View the full album ↗" button** (`primary`, `md`;
+   the address and the service's name, "Google Photos", "Google Drive" or
+   "Behance", come from the event in the admin; absent, no button). **Columns
+   5–12: the story and the pictures:** the description in `lead` (max 60ch), then
+   the **selected pictures** in a masonry (§13.51) of Gallery tiles (§13.52) without
+   titles; a click opens the Lightbox (§13.55) through the event's pictures with
+   the picture's caption, if any. Below `lg` the sidebar comes first as a block under
+   the hero, then the story and pictures.
+3. **Credits** (below the pictures, `background-alt` band): the mono label
+   "CREDITS", then the credits as "Role — Name" rows in two columns (§13.56); the
+   last row is the photographer's. The full-album button repeats here.
+4. **Next event** (`background`): a large Event tile (§13.54) for the next event,
+   under a label "NEXT EVENT", then the contact block.
+
+**Motion.** The hero's title letters rise; the sidebar and pictures use the shared
+entrances; the pictures' masonry as §13.51; the Lightbox's Flip. Reduced motion:
+final states and cross-fades.
+
+**Accessibility.** One `<h1>` (the title); the pictures' alt text is edited per
+picture in the admin; the sidebar is an `<aside>` named "About the event".
+
+**SEO.** Title "Event title — Photography — Chestly Ace", the cover as the Open
+Graph image, `ImageGallery` JSON-LD.
+
+### 14.24 Creatives services
+
+**Purpose.** What Chestly offers in design and photography, and how to ask. Route
+`/services`; the old `graphic-design.html` and `photography.html` redirect here
+(`ia-content.md` §6).
+
+**Content.** From `creative_services` (§14.26), in two groups under the headings
+"GRAPHIC DESIGN" and "PHOTOGRAPHY" (placeholder wording carried from the old pages,
+`content-schema.md` §6): each service has a title, a description, an icon and a
+list of what is offered. The page also carries the old pages' **FAQ**
+(design and photography questions), as `<details>` rows (§14.9's look).
+
+**Layout** (`background`): heading (§14.0, label "SERVICES"); each group as a
+section: the group name in Bebas at `display-lg`, then the services as a
+three-column grid of service cards (the Services section's cards, §14.4, in the
+creatives accent), then a primary Button "Request design work" / "Book a session"
+(the WhatsApp link, §13.60); then the FAQ; then the contact block.
+
+**Motion.** The shared entrances.
+
+**SEO.** Title "Design & photography services — Chestly Ace"; `Service` JSON-LD per
+service; `FAQPage` JSON-LD. The page keeps the old pages' search intent (graphic
+designer portfolio, event photographer…) in its text, written naturally.
+
+### 14.25 Creatives header and footer additions
+
+**Header key links** (§13.6): **Work** (`/`), **Design** (`/design`), **Photography**
+(`/photography`) and **Services** (`/services`), as text rolls (§13.3); the active
+dot follows the route (Work on the home only). Videography is added with its own
+step. The phone menu lists the same as Bebas rows above the Sites rows. The Sites
+chip and theme toggle stay.
+
+**Footer** (§13.8): the Connect column shows the socials with `creatives` in their
+`show_on` (Instagram, TikTok); the Contact column the email and WhatsApp; the
+site's one-line description (D26) is the creatives one.
+
+**Accent.** The creatives orange (§4): the `primary` Buttons, active dot, focus ring
+and accent text of these pages.
+
+### 14.26 Creatives admin pages
+
+**Purpose.** Everything on the creatives site is edited in the same admin
+(`admin.chestlyace.online`, D86), in a **Creatives** group of the sidebar (§13.18)
+beside Content and Blog. Same patterns as the other screens: resource lists
+(§13.19), the editor form (§13.21, §14.11), the image fields (§13.22), the save bar
+(§13.25).
+
+| Screen | Content |
+|---|---|
+| Design (`/creatives/design`) | A resource list of design pieces: cover thumbnail, title, category, year, featured star, published switch, drag to reorder; "New piece". The editor: title, address (slug, from the title), category (a text field suggesting the existing ones), cover image, **more images** (uploaded, reordered, each with alt text), description, client, role, tools (tags), year, a link, featured, published |
+| Photography (`/creatives/photography`) | A list of events: cover thumbnail, title, date, place, number of pictures, featured, published, drag to reorder; "New event". The editor: title, address, date, place, kind, cover, description, role, what was covered (tags), **pictures** (uploaded in bulk, drag to reorder, each with alt text and an optional caption), **credits** (rows of role and name with an optional link, reorderable), the **full-album address** and its service's name (Google Photos, Google Drive, Behance or a custom label), featured, published |
+| Services (`/creatives/services`) | A list: title, group (Graphic design or Photography), published, drag to reorder. The editor: title, group, description, icon (the picker of §14.4), what is offered (a list), published. A second tab "FAQ" edits the creatives questions and answers |
+| Creatives settings (`/creatives/settings`) | One form like the profile's: the hero statement, hero line, the two sections' intros, the portals' text, the marquee words, the contact block's statement, text and response-time note, the SEO description |
+
+**Rules.** Images upload through the existing signed Cloudinary upload (a
+`creatives` folder: `portfolio/creatives`, up to 2400px on the long side, WebP/AVIF
+by the delivery URL), and the editor records each image's **width and height**
+so the site can reserve its space. Every image needs alt text before the piece or
+event can be published (the editor's check, as for blog images). Publishing,
+editing, reordering and deleting revalidate the creatives site's cached pages (the
+`creatives` cache tag, as D74 for the others). The wording of every fixed text on
+the site is in these screens or in `content/copy.ts` as a default (`D86`: the owner
+edits everything from the admin).
+
+**Approved in:** the Phase 10a PR (issue #87).
