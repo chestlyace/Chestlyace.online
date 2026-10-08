@@ -487,3 +487,48 @@ describe("/api/admin/blog/devto", () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe("/api/blog/posts/<slug>/like", () => {
+  const like = async () =>
+    await import("@/app/api/blog/posts/[slug]/like/route");
+  const slug = (value: string) => ctx({ slug: value }) as never;
+  const post = (path: string, headers: Record<string, string> = {}) =>
+    new Request(`https://blog.example${path}`, { method: "POST", headers });
+
+  it("likes and unlikes with a cookie that only the browser holds, and answers 404 for no post", async () => {
+    const { GET, POST } = await like();
+    const first = await POST(
+      post("/api/blog/posts/hello-world/like"),
+      slug("hello-world"),
+    );
+    expect(first.status).toBe(200);
+    expect(await first.json()).toEqual({ count: 1, liked: true });
+    const cookie = first.headers.get("set-cookie") ?? "";
+    expect(cookie).toMatch(/blog_visitor=/);
+    expect(cookie).toMatch(/HttpOnly/i);
+    expect(cookie).toMatch(/SameSite=lax/i);
+
+    expect(
+      (await POST(post("/api/blog/posts/nope/like"), slug("nope"))).status,
+    ).toBe(404);
+    expect(
+      (await GET(new Request("https://blog.example/x"), slug("nope"))).status,
+    ).toBe(404);
+    expect(
+      await (
+        await GET(new Request("https://blog.example/x"), slug("hello-world"))
+      ).json(),
+    ).toEqual({ count: 1, liked: false });
+  });
+
+  it("refuses a request from another site", async () => {
+    const { POST } = await like();
+    const response = await POST(
+      post("/api/blog/posts/hello-world/like", {
+        origin: "https://evil.example",
+      }),
+      slug("hello-world"),
+    );
+    expect(response.status).toBe(403);
+  });
+});

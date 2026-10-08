@@ -4,6 +4,8 @@ import { Container } from "@/components/shared/Container";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { Reveal } from "@/components/shared/Reveal";
 import { PostHeader } from "@/components/blog/PostHeader";
+import { ReactionBar } from "@/components/blog/ReactionBar";
+import { siteUrl } from "@/lib/sites";
 import { PostNavigation } from "@/components/blog/PostNavigation";
 import { Prose } from "@/components/blog/Prose";
 import { TableOfContents } from "@/components/blog/TableOfContents";
@@ -39,8 +41,8 @@ export async function generateMetadata({
 }
 
 // One post (design.md §14.14): header, cover, the prose with its contents rail,
-// and the way on to the next post. Likes, comments and the newsletter box come
-// with their own steps.
+// and the way on to the next post. Comments and the newsletter box come with
+// their own steps.
 export default async function PostPage({
   params,
 }: PageProps<"/sites/blog/[slug]">) {
@@ -79,6 +81,15 @@ export default async function PostPage({
           <article className="min-w-0 lg:col-span-8">
             <Prose>{content}</Prose>
           </article>
+        </div>
+
+        <div className="mt-8 lg:max-w-[calc(100%*8/12)]">
+          <ReactionBar
+            slug={post.slug}
+            title={post.title}
+            url={post.canonicalUrl ?? siteUrl("blog", `/${post.slug}`)}
+            initialCount={post.likeCount}
+          />
         </div>
 
         <div className="mt-24 md:mt-24">
