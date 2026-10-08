@@ -76,8 +76,20 @@
   --band-bg: var(--background);
 }
 
-/* Per-site accents (design.md §4) override only primary, primary-text and
-   ring under [data-site="…"]. Creatives and blog use the main accent until Q12. */
+/* Per-site accents (design.md §4) override only primary, primary-hover,
+   primary-text and ring under [data-site="…"]. The blog keeps the main blue; the
+   creatives site's is a burnt orange (D87), white on it 5.18:1. */
+[data-site="creatives"] {
+  --primary: #c2410c;
+  --primary-hover: #9a3412;
+  --primary-text: #c2410c;
+  --ring: #c2410c;
+}
+
+[data-site="creatives"].dark {
+  --primary-text: #fb923c;
+  --ring: #fb923c;
+}
 
 @theme inline {
   --color-background: var(--background);
