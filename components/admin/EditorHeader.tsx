@@ -1,13 +1,13 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import type { Resource } from "@/lib/admin/resources";
+import type { AdminResource } from "@/lib/admin/resources";
 
 // The top of an editor screen (design.md §14.11): "← Skills", the title.
 export function EditorHeader({
   resource,
   title,
 }: {
-  resource: Resource;
+  resource: AdminResource;
   title: string;
 }) {
   return (

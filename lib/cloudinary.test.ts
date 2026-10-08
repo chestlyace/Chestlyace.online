@@ -6,6 +6,7 @@ import {
   optimizeCloudinaryUrl,
   signParams,
   signedUpload,
+  thumbnailUrl,
 } from "./cloudinary";
 
 const env = {
@@ -123,5 +124,29 @@ describe("optimizeCloudinaryUrl", () => {
     ]) {
       expect(optimizeCloudinaryUrl(url)).toBe(url);
     }
+  });
+});
+
+describe("thumbnailUrl", () => {
+  it("asks Cloudinary for a small square, replacing the delivery options already there", () => {
+    expect(
+      thumbnailUrl(
+        "https://res.cloudinary.com/x/image/upload/f_auto,q_auto/v1/a/b.webp",
+        96,
+      ),
+    ).toBe(
+      "https://res.cloudinary.com/x/image/upload/c_fill,w_96,h_96,f_auto,q_auto/v1/a/b.webp",
+    );
+    expect(
+      thumbnailUrl("https://res.cloudinary.com/x/image/upload/v1/a.png", 48),
+    ).toBe(
+      "https://res.cloudinary.com/x/image/upload/c_fill,w_48,h_48,f_auto,q_auto/v1/a.png",
+    );
+  });
+  it("leaves other addresses alone", () => {
+    expect(thumbnailUrl("https://images.example/a.png")).toBe(
+      "https://images.example/a.png",
+    );
+    expect(thumbnailUrl("/local.png")).toBe("/local.png");
   });
 });

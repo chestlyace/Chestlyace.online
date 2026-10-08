@@ -159,3 +159,20 @@ export function optimizeCloudinaryUrl(url: string): string {
     return url;
   }
 }
+
+// A small version of a Cloudinary image for a list's thumbnail (`w_` pixels wide,
+// delivered as WebP/AVIF). Anything that isn't a Cloudinary image is left alone.
+export function thumbnailUrl(url: string, width = 96): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "res.cloudinary.com") return url;
+    if (!parsed.pathname.includes("/image/upload/")) return url;
+    parsed.pathname = parsed.pathname.replace(
+      /\/image\/upload\/(?:[^/]*(?:f_auto|q_auto)[^/]*\/)?/,
+      `/image/upload/c_fill,w_${width},h_${width},f_auto,q_auto/`,
+    );
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}

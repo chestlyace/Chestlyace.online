@@ -114,13 +114,73 @@ export const NEWSLETTER_RESOURCE: SettingsResource = {
   noun: "newsletter",
 };
 
+// The creatives site's screens (design.md §14.26), a Creatives group of the sidebar:
+// kept apart from RESOURCES, which is the main site's content (nav, dashboard).
+export type CreativesId =
+  | "design"
+  | "photography"
+  | "creative-services"
+  | "creative-faqs"
+  | "creatives-settings";
+
+export type AdminResource = Omit<Resource, "id"> & { id: string };
+
+export const CREATIVES_RESOURCES: readonly (Omit<Resource, "id"> & {
+  id: CreativesId;
+})[] = [
+  {
+    id: "design",
+    api: "design-pieces",
+    label: "Design",
+    href: "/creatives/design",
+    description: "The graphic design pieces in the gallery.",
+    noun: "piece",
+  },
+  {
+    id: "photography",
+    api: "photo-events",
+    label: "Photography",
+    href: "/creatives/photography",
+    description:
+      "Events, with their pictures, credits and a link to the album.",
+    noun: "event",
+  },
+  {
+    id: "creative-services",
+    api: "creative-services",
+    label: "Services",
+    href: "/creatives/services",
+    description: "What you offer in design and photography.",
+    noun: "service",
+  },
+  {
+    id: "creative-faqs",
+    api: "creative-faqs",
+    label: "Questions",
+    href: "/creatives/faq",
+    description: "Questions and answers on the services page.",
+    noun: "question",
+  },
+  {
+    id: "creatives-settings",
+    api: "creatives-settings",
+    label: "Settings",
+    href: "/creatives/settings",
+    description:
+      "The home page's statement, the section intros, the marquee and the contact block.",
+    noun: "settings",
+  },
+];
+
 export function findResource(id: string): Resource | undefined {
   return RESOURCES.find((resource) => resource.id === id);
 }
 
 // What the editor form can edit: a content resource or the newsletter screen.
-export function findEditable(
-  id: string,
-): Resource | SettingsResource | undefined {
-  return id === NEWSLETTER_RESOURCE.id ? NEWSLETTER_RESOURCE : findResource(id);
+export function findEditable(id: string): AdminResource | undefined {
+  if (id === NEWSLETTER_RESOURCE.id) return NEWSLETTER_RESOURCE;
+  return (
+    findResource(id) ??
+    CREATIVES_RESOURCES.find((resource) => resource.id === id)
+  );
 }

@@ -6,7 +6,10 @@ import {
   FolderKanban,
   HeartHandshake,
   LayoutDashboard,
+  Camera,
   Mail,
+  Palette,
+  SlidersHorizontal,
   MessageSquare,
   Newspaper,
   Link2,
@@ -50,6 +53,20 @@ const GROUPS: { title: string; items: Item[] }[] = [
       label: resource.label,
       icon: ICONS[resource.id],
     })),
+  },
+  {
+    title: "Creatives",
+    items: [
+      { href: "/creatives/design", label: "Design", icon: Palette },
+      { href: "/creatives/photography", label: "Photography", icon: Camera },
+      { href: "/creatives/services", label: "Services", icon: Briefcase },
+      { href: "/creatives/faq", label: "Questions", icon: CircleHelp },
+      {
+        href: "/creatives/settings",
+        label: "Settings",
+        icon: SlidersHorizontal,
+      },
+    ],
   },
   {
     title: "Blog",
