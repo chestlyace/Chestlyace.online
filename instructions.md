@@ -63,6 +63,22 @@ as "the owner".
    `refactor:`, `test:`, `style:`).
 6. Review comments on an open pull request are addressed on that same pull request.
 
+## 4a. Autonomous run for Phases 11b.6, 12 and 13 (owner, 2026-10-11, D90)
+
+For the steps of Phases 11b.6, 12 and 13 only, the owner has said they will review
+and merge everything at the end. So, for those steps:
+
+1. The agent **does not wait for a merge** between steps (this replaces §1.3, §4.4
+   and §5 for them), and tells the owner once, when every step is done.
+2. Each step is still its own GitHub issue and its own pull request with
+   `Closes #<n>`, and the PRs are **stacked**: a step's branch starts from the
+   previous step's branch and its PR targets that branch (the first targets the
+   branch of the pull request before it). The owner merges from the bottom up.
+3. Everything else in this file still applies: the agent never merges and never
+   pushes to `main`, asks before new dependencies and before design or copy it is
+   unsure of, runs the quality bar (§6) and the self-check (§7), and the specs in
+   `docs/` are the owner's merged decisions.
+
 ## 5. Stop after every phase
 
 1. When a phase's work is complete and checked (§6), open the pull request.
