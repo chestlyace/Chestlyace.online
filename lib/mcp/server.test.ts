@@ -10,7 +10,10 @@ import type { Database } from "@/lib/db";
 import { listActivity } from "./activity";
 import { resetLimits } from "./limits";
 import { createMcpServer } from "./server";
-import { allTools } from "./tools";
+import { generalTools } from "./tools/general";
+import { mediaTools } from "./tools/media";
+
+const allTools = () => [...generalTools, ...mediaTools];
 import { ToolError, defineTool, type AnyTool, type Caller } from "./tool";
 
 let db: Database;
