@@ -129,3 +129,39 @@ export function servicesJsonLd(
   }
   return graph;
 }
+
+// The home page (design.md §14.20): the person and the site, with each featured piece
+// or event as a CreativeWork.
+export function homeJsonLd(
+  work: readonly { title: string; href: string; image: { url: string } }[],
+  description: string,
+  origin: string = siteOrigin("creatives"),
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": `${origin}/#person`,
+        name: PERSON_NAME,
+        url: origin,
+        jobTitle: "Graphic designer and photographer",
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${origin}/#website`,
+        name: `${PERSON_NAME} — Design & Photography`,
+        url: origin,
+        description,
+        publisher: { "@id": `${origin}/#person` },
+      },
+      ...work.map((item) => ({
+        "@type": "CreativeWork",
+        name: item.title,
+        url: `${origin}${item.href}`,
+        image: item.image.url,
+        creator: { "@id": `${origin}/#person` },
+      })),
+    ],
+  };
+}
