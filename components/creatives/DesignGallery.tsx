@@ -21,6 +21,9 @@ import { prefersReducedMotionNow } from "@/lib/media";
 import { FilterBar } from "./FilterBar";
 import { GalleryTile } from "./GalleryTile";
 import { Lightbox } from "./Lightbox";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
+import { useLang } from "@/components/shared/LangProvider";
+import { plural } from "@/lib/i18n/format";
 
 const GAP = 12;
 const ROW = 4;
@@ -65,6 +68,8 @@ function useColumns(): number {
 // tiles span rows worked out from their ratios, so the tiles stay in reading order
 // in the page and still fill the shortest column.
 export function DesignGallery({ pieces }: { pieces: PublicPiece[] }) {
+  const t = useCreativesText();
+  const lang = useLang();
   const params = useQuery();
   const categories = useMemo(() => categoriesOf(pieces), [pieces]);
   const requested = params.get("category");
@@ -162,12 +167,12 @@ export function DesignGallery({ pieces }: { pieces: PublicPiece[] }) {
         />
       )}
       <p aria-live="polite" className="sr-only">
-        {visible.length} {visible.length === 1 ? "piece" : "pieces"}
+        {plural(t.pieces, visible.length, lang)}
       </p>
       <div
         ref={grid}
         role="list"
-        aria-label="Design pieces"
+        aria-label={t.designPieces}
         className={
           masonry
             ? "grid grid-flow-dense items-start"

@@ -9,6 +9,9 @@ import { placeholderUrl, responsiveImage } from "@/lib/cloudinary";
 import type { PublicEvent } from "@/lib/creatives/data";
 import { eventYear, formatEventDate } from "@/lib/creatives/events";
 import { rememberTile } from "./eventFlight";
+import { useLang } from "@/components/shared/LangProvider";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
+import { plural } from "@/lib/i18n/format";
 
 const WIDTHS = [640, 960, 1400, 2000];
 
@@ -28,12 +31,14 @@ export function EventTile({
   priority?: boolean;
   className?: string;
 }) {
+  const t = useCreativesText();
+  const lang = useLang();
   const root = useRef<HTMLDivElement>(null);
   useReveal(root);
   const image = responsiveImage(event.cover.url, WIDTHS);
   const placeholder = placeholderUrl(event.cover.url);
   const count = event.images.length;
-  const meta = [event.place, formatEventDate(event.eventDate)]
+  const meta = [event.place, formatEventDate(event.eventDate, lang)]
     .filter(Boolean)
     .join(" · ");
   const sizes = featured
@@ -50,7 +55,11 @@ export function EventTile({
     >
       <Link
         href={`/photography/${event.slug}`}
-        aria-label={[event.title, event.place, formatEventDate(event.eventDate)]
+        aria-label={[
+          event.title,
+          event.place,
+          formatEventDate(event.eventDate, lang),
+        ]
           .filter(Boolean)
           .join(", ")}
         onClick={(click) => rememberTile(event.slug, click.currentTarget)}
@@ -123,7 +132,7 @@ export function EventTile({
               <span className="type-label text-[#d1d1d6]">{event.role}</span>
             )}
             <span className="type-label inline-flex items-center gap-1 text-[#fb923c]">
-              Open the event
+              {t.openEvent}
               <ArrowUpRight className="size-3.5" />
             </span>
           </span>
@@ -143,7 +152,7 @@ export function EventTile({
           <span>{meta}</span>
           {count > 0 && (
             <span className="whitespace-nowrap">
-              {count} {count === 1 ? "PHOTO" : "PHOTOS"}
+              {plural(t.photos, count, lang)}
             </span>
           )}
         </span>

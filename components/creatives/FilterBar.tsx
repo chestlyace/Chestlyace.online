@@ -3,6 +3,8 @@
 import { useRef, type KeyboardEvent } from "react";
 import type { CategoryCount } from "@/lib/creatives/gallery";
 import { cn } from "@/lib/cn";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
+import { format } from "@/lib/i18n/format";
 
 // The Graphic design filter (design.md §13.53): "All" and each category with its
 // count, one selected at a time (the orange pill). Arrow keys move between the chips
@@ -19,8 +21,9 @@ export function FilterBar({
   onSelect: (slug: string | null) => void;
 }) {
   const row = useRef<HTMLDivElement>(null);
+  const t = useCreativesText();
   const items: { slug: string | null; label: string }[] = [
-    { slug: null, label: `All · ${total}` },
+    { slug: null, label: format(t.filterAll, { count: total }) },
     ...categories.map((c) => ({
       slug: c.slug,
       label: `${c.name} · ${c.count}`,
@@ -48,7 +51,7 @@ export function FilterBar({
     <div
       ref={row}
       role="group"
-      aria-label="Filter by category"
+      aria-label={t.filter}
       className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] sm:[mask-image:none]"
     >
       {items.map((item, index) => {

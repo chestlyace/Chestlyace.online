@@ -14,52 +14,62 @@ import type { CreativeGroup } from "@/lib/creatives/data";
 import { servicesJsonLd } from "@/lib/creatives/seo";
 import { getCachedHomepageData } from "@/lib/portfolio";
 import { pageMetadata } from "@/lib/seo";
+import { notFound } from "next/navigation";
+import { isLang } from "@/lib/i18n";
+import { CREATIVES_UI } from "@/lib/i18n/ui";
 
-const TITLE = "Design & photography services — Chestly Ace";
-const DESCRIPTION =
-  "Graphic design, branding and photography services by Chestly Ace (Amahndong Chestly): logos, social media graphics and posters, event and portrait photography.";
-
-export const metadata: Metadata = pageMetadata("creatives", {
-  path: "/services",
-  title: TITLE,
-  description: DESCRIPTION,
-});
-
-// Each group's heading, button and the message the button opens WhatsApp with.
-const GROUPS: {
-  group: CreativeGroup;
-  heading: string;
-  button: string;
-  message: string;
-}[] = [
-  {
-    group: "design",
-    heading: "Graphic design",
-    button: "Request design work",
-    message:
-      "Hi Chestly, I saw your services page and I'd like to request some design work: ",
-  },
-  {
-    group: "photography",
-    heading: "Photography",
-    button: "Book a session",
-    message:
-      "Hi Chestly, I saw your services page and I'd like to book a photography session: ",
-  },
-];
+export async function generateMetadata({
+  params,
+}: PageProps<"/sites/creatives/[lang]/services">): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLang(lang)) return {};
+  const t = CREATIVES_UI[lang];
+  return pageMetadata("creatives", {
+    path: "/services",
+    title: t.servicesMetaTitle,
+    description: t.servicesMetaDescription,
+    lang,
+  });
+}
 
 // The Services page (design.md §14.24): the heading, each group's service cards with
 // a button that opens WhatsApp, the FAQ, then the contact block. The wording comes
 // from the admin (Creatives → Services and FAQ). With nothing published it is the
 // coming-soon look.
-export default async function CreativesServices() {
+export default async function CreativesServices({
+  params,
+}: PageProps<"/sites/creatives/[lang]/services">) {
+  const { lang } = await params;
+  if (!isLang(lang)) notFound();
+  const t = CREATIVES_UI[lang];
   const [services, faqs, { profile }] = await Promise.all([
-    getCachedServices(),
-    getCachedFaqs(),
+    getCachedServices(lang),
+    getCachedFaqs(lang),
     getCachedHomepageData(),
   ]);
   if (services.length === 0 && faqs.length === 0)
-    return <ComingSoon site="creatives" />;
+    return <ComingSoon site="creatives" lang={lang} />;
+
+  // Each group's heading, button and the message the button opens WhatsApp with.
+  const GROUPS: {
+    group: CreativeGroup;
+    heading: string;
+    button: string;
+    message: string;
+  }[] = [
+    {
+      group: "design",
+      heading: t.groupDesign,
+      button: t.requestDesign,
+      message: t.messageDesign,
+    },
+    {
+      group: "photography",
+      heading: t.groupPhotography,
+      button: t.bookSession,
+      message: t.messagePhotography,
+    },
+  ];
 
   const sections = GROUPS.map((g) => ({
     ...g,
@@ -75,16 +85,16 @@ export default async function CreativesServices() {
 
   return (
     <>
-      {servicesJsonLd(services, faqs).map((data, index) => (
+      {servicesJsonLd(services, faqs, undefined, lang).map((data, index) => (
         <JsonLd key={index} data={data} />
       ))}
       <div className="pt-28 pb-24 md:pb-32">
         <Container>
           <SectionHeading
             as="h1"
-            label="Services"
-            title="Services"
-            intro="Graphic design and photography for brands, creators and events: logos, social media graphics and posters, event coverage and portraits."
+            label={t.servicesLabel}
+            title={t.servicesTitle}
+            intro={t.servicesIntro}
           />
           <div className="mt-16 grid gap-20 md:mt-24 md:gap-28">
             {sections.map((section) => (
@@ -120,7 +130,7 @@ export default async function CreativesServices() {
         </Container>
         {questions.length > 0 && (
           <Container narrow className="mt-24 md:mt-32">
-            <SectionHeading label="FAQ" title="Questions" size="lg" />
+            <SectionHeading label={t.faqLabel} title={t.faqTitle} size="lg" />
             <div className="mt-12 grid gap-14">
               {questions.map((section) => (
                 <section
@@ -140,7 +150,7 @@ export default async function CreativesServices() {
           </Container>
         )}
       </div>
-      <ContactBlock />
+      <ContactBlock lang={lang} />
     </>
   );
 }

@@ -12,24 +12,36 @@ import { getCachedEvents } from "@/lib/creatives/cache";
 import { formatEventDate, nextEvent } from "@/lib/creatives/events";
 import { eventJsonLd } from "@/lib/creatives/seo";
 import { pageMetadata } from "@/lib/seo";
+import { isLang } from "@/lib/i18n";
+import { CREATIVES_UI } from "@/lib/i18n/ui";
+import { format } from "@/lib/i18n/format";
+import { NEW_TAB } from "@/lib/i18n/ui";
 
 export async function generateStaticParams() {
-  return (await getCachedEvents()).map((event) => ({ slug: event.slug }));
+  return (await getCachedEvents("en")).map((event) => ({ slug: event.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/sites/creatives/[lang]/photography/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
-  const event = (await getCachedEvents()).find((e) => e.slug === slug);
+  const { lang, slug } = await params;
+  if (!isLang(lang)) return {};
+  const t = CREATIVES_UI[lang];
+  const event = (await getCachedEvents(lang)).find((e) => e.slug === slug);
   if (!event) return {};
   return pageMetadata("creatives", {
     path: `/photography/${event.slug}`,
-    title: `${event.title} — Photography — Chestly Ace`,
+    title: format(t.eventMetaTitle, { title: event.title }),
     description:
       event.description ??
-      `Photographs from ${event.title}${event.place ? `, ${event.place}` : ""}.`,
+      (event.place
+        ? format(t.eventMetaFallbackAt, {
+            title: event.title,
+            place: event.place,
+          })
+        : format(t.eventMetaFallback, { title: event.title })),
     image: event.cover.url,
+    lang,
   });
 }
 
@@ -38,34 +50,39 @@ export async function generateMetadata({
 export default async function EventPage({
   params,
 }: PageProps<"/sites/creatives/[lang]/photography/[slug]">) {
-  const { slug } = await params;
-  const events = await getCachedEvents();
+  const { lang, slug } = await params;
+  if (!isLang(lang)) notFound();
+  const t = CREATIVES_UI[lang];
+  const events = await getCachedEvents(lang);
   const event = events.find((e) => e.slug === slug);
   if (!event) notFound();
   const next = nextEvent(events, slug);
 
   return (
     <>
-      <JsonLd data={eventJsonLd(event)} />
+      <JsonLd data={eventJsonLd(event, undefined, lang)} />
       <EventHero event={event} />
       <div className="py-14 md:py-20">
         <Container className="grid gap-12 lg:grid-cols-12 lg:gap-10">
           <aside
-            aria-label="About the event"
+            aria-label={t.aboutEvent}
             className="grid content-start gap-8 lg:sticky lg:top-28 lg:col-span-4 lg:self-start"
           >
             <Details
               tone="page"
-              heading="About the event"
+              heading={t.aboutEvent}
               rows={[
-                { term: "Event", value: event.title },
-                { term: "Date", value: formatEventDate(event.eventDate) },
-                { term: "Place", value: event.place },
-                { term: "Role", value: event.role },
+                { term: t.termEvent, value: event.title },
+                {
+                  term: t.termDate,
+                  value: formatEventDate(event.eventDate, lang),
+                },
+                { term: t.termPlace, value: event.place },
+                { term: t.termRole, value: event.role },
               ]}
-              tags={{ term: "What was covered", values: event.covered }}
+              tags={{ term: t.covered, values: event.covered }}
             />
-            <AlbumButton event={event} />
+            <AlbumButton event={event} lang={lang} />
           </aside>
           <div className="grid gap-10 lg:col-span-8">
             {event.description && (
@@ -84,7 +101,7 @@ export default async function EventPage({
         >
           <Container className="grid gap-8">
             <h2 id="credits" className="type-label text-muted">
-              CREDITS
+              {t.credits}
             </h2>
             <ul className="grid gap-x-10 gap-y-3 text-sm sm:grid-cols-2">
               {event.credits.map((credit, index) => (
@@ -98,7 +115,7 @@ export default async function EventPage({
                       className="underline decoration-foreground/40 underline-offset-4 hover:decoration-foreground"
                     >
                       {credit.name}
-                      <span className="sr-only"> (opens in a new tab)</span>
+                      <span className="sr-only"> ({NEW_TAB[lang]})</span>
                     </a>
                   ) : (
                     credit.name
@@ -106,7 +123,7 @@ export default async function EventPage({
                 </li>
               ))}
             </ul>
-            <AlbumButton event={event} />
+            <AlbumButton event={event} lang={lang} />
           </Container>
         </section>
       )}
@@ -114,13 +131,13 @@ export default async function EventPage({
         <section aria-labelledby="next-event" className="py-14 md:py-20">
           <Container className="grid gap-6">
             <h2 id="next-event" className="type-label text-muted">
-              NEXT EVENT
+              {t.nextEvent}
             </h2>
             <EventTile event={next} featured />
           </Container>
         </section>
       )}
-      <ContactBlock />
+      <ContactBlock lang={lang} />
     </>
   );
 }

@@ -9,16 +9,17 @@ import {
 import { whatsappHref } from "@/lib/contact";
 import { isHttpUrl } from "@/lib/links";
 import { getCachedHomepageData } from "@/lib/portfolio";
+import type { Lang } from "@/lib/i18n";
+import { CREATIVES_UI } from "@/lib/i18n/ui";
 
 // The way to ask for work, at the bottom of every creatives page (design.md §13.60,
 // owner 2026-10-08): a statement and three buttons, with the wording from the admin
 // (Creatives → Settings) and the contact details from the profile.
-const MESSAGE =
-  "Hi Chestly, I saw your creative work and I'd like to talk about…";
-
-export async function ContactBlock() {
+export async function ContactBlock({ lang }: { lang: Lang }) {
+  const t = CREATIVES_UI[lang];
+  const MESSAGE = t.contactMessage;
   const [copy, socials, { profile }] = await Promise.all([
-    getCachedCreativesCopy(),
+    getCachedCreativesCopy(lang),
     getCachedCreativesSocials(),
     getCachedHomepageData(),
   ]);
@@ -33,12 +34,12 @@ export async function ContactBlock() {
   return (
     <section
       id="contact"
-      aria-label="Contact"
+      aria-label={t.contactLabel}
       className="bg-background-alt py-24 md:py-32"
     >
       <Container>
         <SectionHeading
-          label="Contact"
+          label={t.contactLabel}
           title={copy.contactStatement}
           intro={copy.contactText}
         />
@@ -46,7 +47,7 @@ export async function ContactBlock() {
           <div className="flex flex-wrap gap-3">
             {whatsapp && (
               <Button href={whatsapp} external size="lg">
-                WhatsApp
+                {t.whatsapp}
               </Button>
             )}
             {profile?.email && (
@@ -55,7 +56,7 @@ export async function ContactBlock() {
                 variant="secondary"
                 size="lg"
               >
-                Email
+                {t.email}
               </Button>
             )}
             {instagram && (
@@ -65,7 +66,7 @@ export async function ContactBlock() {
                 variant="secondary"
                 size="lg"
               >
-                Instagram
+                {t.instagram}
               </Button>
             )}
           </div>

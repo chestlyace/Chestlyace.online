@@ -7,6 +7,8 @@ import { useEffect, useRef } from "react";
 import { placeholderUrl, resizedUrl } from "@/lib/cloudinary";
 import type { FeaturedWork } from "@/lib/creatives/home";
 import { tileRatio } from "@/lib/creatives/gallery";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
+import { format } from "@/lib/i18n/format";
 
 const HEIGHT = 360;
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -18,6 +20,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 // accent bar show the position either way. A tile opens its piece in the gallery's
 // lightbox (`/design?piece=…`) or the event's page.
 export function SelectedStrip({ work }: { work: FeaturedWork[] }) {
+  const t = useCreativesText();
+  const kindName = (kind: "design" | "photography") =>
+    kind === "design" ? t.groupDesign : t.groupPhotography;
   const section = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLUListElement>(null);
@@ -87,7 +92,7 @@ export function SelectedStrip({ work }: { work: FeaturedWork[] }) {
       <div
         ref={viewport}
         tabIndex={0}
-        aria-label="Selected work, scroll sideways"
+        aria-label={t.selectedAria}
         className="overflow-x-auto overscroll-x-contain scroll-pl-4 snap-x snap-mandatory px-4 pb-4 outline-none focus-visible:outline-2 focus-visible:outline-ring sm:scroll-pl-6 sm:px-6 lg:scroll-pl-8 lg:px-8"
       >
         <ul ref={track} className="flex w-max gap-3">
@@ -102,7 +107,10 @@ export function SelectedStrip({ work }: { work: FeaturedWork[] }) {
               >
                 <Link
                   href={item.href}
-                  aria-label={`${item.title}, ${item.kind === "design" ? "graphic design" : "photography"}`}
+                  aria-label={format(t.selectedItem, {
+                    title: item.title,
+                    kind: kindName(item.kind),
+                  })}
                   style={{
                     backgroundImage: placeholder
                       ? `url(${placeholder})`
@@ -132,9 +140,7 @@ export function SelectedStrip({ work }: { work: FeaturedWork[] }) {
                   >
                     <span className="text-h3 leading-tight">{item.title}</span>
                     <span className="type-label text-[#d1d1d6]">
-                      {item.kind === "design"
-                        ? "Graphic design"
-                        : "Photography"}
+                      {kindName(item.kind)}
                     </span>
                   </span>
                 </Link>

@@ -78,11 +78,70 @@ describe("listPublishedEvents", () => {
   });
 });
 
+describe("events in French", () => {
+  beforeEach(async () => {
+    await db.delete(schema.photoEvents);
+    await db.insert(schema.photoEvents).values(
+      row("x", {
+        title: "Conference",
+        place: "Yaoundé",
+        description: "The story",
+        covered: ["Photography"],
+        coverAlt: "Cover",
+        images: [
+          {
+            url: "u1",
+            width: 10,
+            height: 20,
+            alt: "one",
+            altFr: "un",
+            caption: "First",
+            captionFr: "Premier",
+          },
+          { url: "u2", width: 10, height: 20, alt: "two", altFr: "  " },
+        ],
+        credits: [
+          { role: "Photographer", roleFr: "Photographe", name: "Chestly" },
+        ],
+        translations: {
+          fr: {
+            title: "Conférence",
+            description: "  ",
+            covered: ["Photographie"],
+          },
+        },
+      }),
+    );
+  });
+
+  it("changes nothing for English", async () => {
+    const [event] = await listPublishedEvents(db);
+    expect(event.title).toBe("Conference");
+    expect(event.images.map((i) => i.alt)).toEqual(["one", "two"]);
+    expect(event.credits[0].role).toBe("Photographer");
+  });
+
+  it("reads the French that is there and keeps the English that is not", async () => {
+    const [event] = await listPublishedEvents(db, "fr");
+    expect(event.title).toBe("Conférence");
+    expect(event.description).toBe("The story"); // blank French
+    expect(event.place).toBe("Yaoundé");
+    expect(event.covered).toEqual(["Photographie"]);
+    expect(event.images.map((i) => [i.alt, i.caption])).toEqual([
+      ["un", "Premier"],
+      ["two", null],
+    ]);
+    expect(event.credits[0].role).toBe("Photographe");
+  });
+});
+
 describe("event helpers", () => {
   it("formats a calendar date without a time zone", () => {
     expect(formatEventDate("2026-03-14")).toBe("14 Mar 2026");
     expect(formatEventDate("2026-12-01")).toBe("1 Dec 2026");
     expect(formatEventDate("nonsense")).toBe("nonsense");
+    expect(formatEventDate("2026-03-14", "fr")).toBe("14 mars 2026");
+    expect(formatEventDate("2026-12-01", "fr")).toBe("1 déc. 2026");
     expect(eventYear({ eventDate: "2026-03-14" })).toBe("2026");
   });
 

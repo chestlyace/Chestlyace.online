@@ -8,6 +8,7 @@ import { prefersReducedMotionNow } from "@/lib/media";
 import { Doodle } from "./Doodle";
 import { DoodleSceneLazy } from "./DoodleSceneLazy";
 import { useDoodles } from "./useDoodles";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
 
 // The creatives home page's hero (design.md §14.20, item 1): the statement in Bebas at
 // `display-2xl`, centred, in two lines ("DESIGN" and "& PHOTOGRAPHY"), the hero line
@@ -27,6 +28,7 @@ export function Hero({
   pictures: { url: string; alt: string }[];
   workHref: string;
 }) {
+  const t = useCreativesText();
   const content = useRef<HTMLDivElement>(null);
   useDoodles(content);
 
@@ -153,7 +155,7 @@ export function Hero({
             <Doodle kind="arrow" accent />
           </svg>
           <Button href={workHref} size="lg" className="pointer-events-auto">
-            See the work
+            {t.heroWork}
           </Button>
           <Button
             href="#contact"
@@ -161,7 +163,7 @@ export function Hero({
             size="lg"
             className="pointer-events-auto"
           >
-            Get in touch
+            {t.heroContact}
           </Button>
         </div>
       </div>

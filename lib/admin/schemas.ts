@@ -553,6 +553,18 @@ const caption = z
   .max(200, "Keep the caption under 200 characters.")
   .optional();
 
+// A French sibling of an English text inside a list item (docs/i18n.md §5): optional,
+// and blank means "not translated".
+const frenchSibling = z.preprocess(
+  (value) =>
+    typeof value === "string" && value.trim() === "" ? undefined : value,
+  z
+    .string()
+    .trim()
+    .max(200, "Keep the French text under 200 characters.")
+    .optional(),
+);
+
 /** One extra image or picture: its address, its pixel size and its alt text. */
 const creativeImage = z
   .object({
@@ -561,10 +573,14 @@ const creativeImage = z
     height: pixels("height"),
     alt: altText,
     caption,
+    altFr: frenchSibling,
+    captionFr: frenchSibling,
   })
   .strict();
 
-const pieceImage = creativeImage.omit({ caption: true }).strict();
+const pieceImage = creativeImage
+  .omit({ caption: true, captionFr: true })
+  .strict();
 
 // An https address is required for an album: it leaves the site.
 const albumAddress = z.preprocess(
@@ -634,6 +650,7 @@ const photoEventBase = z
         z
           .object({
             role: text("role", 60),
+            roleFr: frenchSibling,
             name: text("name", 80),
             url: z.preprocess(
               (value) => clean(value) ?? undefined,

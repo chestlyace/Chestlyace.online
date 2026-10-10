@@ -1045,8 +1045,9 @@ const API_NAME: Partial<Record<AdminConfig["id"], string>> = {
   photography: "photo-events",
 };
 
-// The editors that have the French switch. The creatives' pieces and events and the
-// blog's posts have their own editors and get theirs with their steps (11b.4, 11b.5).
+// The editors that have the French switch. The creatives' pieces and events have their
+// own editors (components/admin/creatives) with French fields of their own; they are
+// here so their lists show the French chip. The blog's posts have theirs too.
 const WITH_FRENCH = new Set<string>([
   "profile",
   "services",
@@ -1059,6 +1060,8 @@ const WITH_FRENCH = new Set<string>([
   "creative-faqs",
   "creatives-settings",
   "newsletter",
+  "design",
+  "photography",
 ]);
 
 /** The translatable fields of an editor, in the editor's order ([] for one without French). */
@@ -1067,6 +1070,8 @@ export function translatableNames(config: AdminConfig): string[] {
   const api = API_NAME[config.id] ?? config.id;
   if (!isTranslatable(api)) return [];
   const allowed = TRANSLATABLE[api] as Record<string, string>;
+  // An editor of its own (no field groups here) translates every listed field.
+  if (config.groups.length === 0) return Object.keys(allowed);
   return config.groups
     .flatMap((group) => group.fields)
     .map((field) => field.name)
