@@ -4,7 +4,9 @@ import {
   getCreativesCopy,
   listCreativesSocials,
   listPublishedEvents,
+  listPublishedFaqs,
   listPublishedPieces,
+  listPublishedServices,
 } from "./data";
 
 // The creatives site's cache tag and cached reads, like `portfolio` for the main
@@ -31,6 +33,10 @@ export const getCachedPieces = cached("pieces", () =>
 export const getCachedEvents = cached("events", () =>
   listPublishedEvents(getDb()),
 );
+export const getCachedServices = cached("services", () =>
+  listPublishedServices(getDb()),
+);
+export const getCachedFaqs = cached("faqs", () => listPublishedFaqs(getDb()));
 export const getCachedCreativesCopy = cached("copy", () =>
   getCreativesCopy(getDb()),
 );

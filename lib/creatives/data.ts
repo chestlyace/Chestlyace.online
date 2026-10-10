@@ -8,7 +8,14 @@ import {
 
 // Public reads of the creatives site (docs/content-schema.md §5). Results are
 // cached as JSON (lib/creatives/cache.ts), so they hold only plain values.
-const { designPieces, photoEvents, creativesSettings, socials } = schema;
+const {
+  designPieces,
+  photoEvents,
+  creativeServices,
+  creativeFaqs,
+  creativesSettings,
+  socials,
+} = schema;
 
 export type PublicImage = {
   url: string;
@@ -135,6 +142,60 @@ export async function listPublishedEvents(
     ...events.filter((event) => event.isFeatured),
     ...events.filter((event) => !event.isFeatured),
   ];
+}
+
+export type CreativeGroup = "design" | "photography";
+
+export type PublicService = {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  group: CreativeGroup;
+  items: string[];
+};
+
+export type PublicFaq = {
+  id: number;
+  question: string;
+  answer: string;
+  group: CreativeGroup;
+};
+
+const asGroup = (value: string): CreativeGroup =>
+  value === "photography" ? "photography" : "design";
+
+// The Services page's cards, in the admin's order (design.md §14.24).
+export async function listPublishedServices(
+  db: Database,
+): Promise<PublicService[]> {
+  const rows = await db
+    .select()
+    .from(creativeServices)
+    .where(eq(creativeServices.isPublished, true))
+    .orderBy(asc(creativeServices.orderIndex), asc(creativeServices.id));
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    icon: row.icon,
+    group: asGroup(row.groupName),
+    items: row.items,
+  }));
+}
+
+export async function listPublishedFaqs(db: Database): Promise<PublicFaq[]> {
+  const rows = await db
+    .select()
+    .from(creativeFaqs)
+    .where(eq(creativeFaqs.isPublished, true))
+    .orderBy(asc(creativeFaqs.orderIndex), asc(creativeFaqs.id));
+  return rows.map((row) => ({
+    id: row.id,
+    question: row.question,
+    answer: row.answer,
+    group: asGroup(row.groupName),
+  }));
 }
 
 // The creatives site's wording: the stored row over the built-in wording.
