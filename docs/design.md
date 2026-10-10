@@ -485,6 +485,10 @@ write is in [`blog-markdown.md`](./blog-markdown.md).
 [Marquee](#1358-marquee) · [Section portal](#1359-section-portal) ·
 [Creatives contact block](#1360-creatives-contact-block) (§13.51–13.60).
 
+**Loading and not-found (Phase 12a):** [Brand loader](#1364-brand-loader) ·
+[Skeletons](#1365-skeletons) · [Inline pending states](#1366-inline-pending-states) ·
+[Not-found and error pages](#1367-not-found-and-error-pages) (§13.64–13.67).
+
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
 [Tag](#134-tag) · [Status pill](#135-status-pill) ·
@@ -3003,6 +3007,134 @@ the admin.
 
 **Accessibility.** The control is a `role="tablist"` with `aria-selected`; the French
 fields have `lang="fr"` so a screen reader and the spell checker use French.
+
+### 13.64 Brand loader
+
+**Purpose.** What the sites show while something loads: the brand mark drawing
+itself. It replaces every spinner (D91). One component with three sizes, used by the
+page transition (§13.64), the skeletons' header (§13.65) and the small states of §13.66.
+
+**Anatomy.** The logo circle (`/brand/logo.png`) centred, with a **ring** around it
+drawn as an SVG stroke in the site's `primary` (blue on Dev and Blog, orange on
+Creatives, the admin's blue). Under the logo, the name "CHESTLY ACE" in Bebas
+(`font-display`), and under that a 2px **line**. The three move on one 2.4s loop:
+
+| Time | Ring | Letters | Line |
+|---|---|---|---|
+| 0–0.9s | Draws clockwise from 12 o'clock to a full circle (`stroke-dashoffset`, `expo.out`) | Rise one by one out of a clipping box, 40ms apart (the section heading's reveal, §14.0) | Grows from the left to full width |
+| 0.9–1.7s | Holds; the logo breathes (scale 1 → 1.04 → 1) | Hold | Holds |
+| 1.7–2.4s | Erases clockwise from 12 o'clock (the gap chases the stroke) | Drop out together, 150ms | Shrinks to the right |
+
+**Sizes.**
+
+| Size | Logo | Ring | Letters and line | Used for |
+|---|---|---|---|---|
+| `lg` | 96px | 3px stroke, 8px gap | Bebas 40px, line 2px × 160px | The page transition overlay, the 500 page |
+| `md` | 48px | 2px stroke | Bebas 24px, no line | Admin list and screen loading, a lightbox loading its image |
+| `sm` | 16px (no logo) | 2px stroke, a circle that draws and erases | None | Inside buttons, next to a label (§13.66) |
+
+**Page transition.** A slim **bar** (2px, `primary`, top of the viewport, above the
+header) starts at the click of any internal link: it grows to 80% over 800ms and waits;
+on arrival it completes to 100% in 150ms and fades. If the new page takes longer than
+**400ms**, the `lg` loader appears centred on a `background` layer at 92% opacity (150ms
+fade in, 150ms out) and stays until the page is ready; shorter loads never show it, so
+fast navigation never flashes. Built on `useLinkStatus` (the `Link` wrapper) and each
+site's `loading.tsx`.
+
+**Reduced motion.** The ring is shown full (no drawing), the letters are visible, the
+logo does not breathe, and the bar is a static 2px line that appears and disappears.
+`Save-Data` behaves the same.
+
+**Accessibility.** The overlay is `role="status"` with the visually hidden text
+"Loading" ("Chargement"), `aria-live="polite"`; it never traps focus and never blocks
+the page's own content from being read once ready. The decoration is `aria-hidden`.
+
+**Dark mode.** The logo keeps its light backing (as the header's); the ring and letters
+use the theme tokens.
+
+### 13.65 Skeletons
+
+**Purpose.** The placeholder of content that is loading (D91), shaped like what is
+coming so the page does not jump.
+
+**Anatomy.** Blocks of `tile` colour with the content's own radius, one per kind:
+
+| Where | Skeleton |
+|---|---|
+| Blog home and tag pages | A 16:9 cover block, a mono meta line (40% width), a 2-line Bebas-height title, 2 text lines, repeated 3 times (the first wider) |
+| A blog post | The back link, meta line, a 2-line title, a 16:9 cover, then 8 text lines of varied length |
+| Main home | The hero's two Bebas lines and a paragraph block; each later section: its heading block and a row of 3 card blocks |
+| A project page | A 16:9 hero, a title block, the facts column and 6 text lines |
+| Design gallery | The heading, a filter row of 4 chips, 6 masonry blocks of heights 1.0 / 1.3 / 0.8 / 1.2 / 1.0 / 1.4 × the column width |
+| Photography | The heading and 4 event tiles (the first full width), 4:3 |
+| An event page | A 70svh cover block, the sidebar column and 6 picture blocks |
+| Services | The heading and 3 cards across, twice |
+| Comments (client) | The 3 rows of §13.37 (avatar circle, two lines) |
+| Admin lists | 6 rows of the list's height: a drag handle, a title block, a status pill, an icon |
+
+**Motion.** A **shimmer**: a diagonal band of `tile-hover` (the brand line's colour at
+8% opacity in the Creatives) sweeping left to right across every block together over
+1.4s, `ease-in-out`, looping. Reduced motion: static blocks, no sweep.
+
+**Behaviour.** Each route has a `loading.tsx` that draws its skeleton at once (inside
+the site's header and footer), so a slow page never shows a blank. The skeleton and the
+page share their container widths. A skeleton is replaced by the content with a 150ms
+fade (none with reduced motion). The `lg` brand loader of §13.64 sits over the skeleton
+only after the 400ms threshold, so a slow load shows both: the page's shape and the mark.
+
+**Accessibility.** `aria-busy="true"` on the region; the blocks are `aria-hidden`; one
+visually hidden "Loading" status.
+
+### 13.66 Inline pending states
+
+**Purpose.** Small waits: a button that has sent something, a like, a list loading more,
+an upload (D91).
+
+| State | Treatment |
+|---|---|
+| A button waiting (`loading`) | The `sm` loader replaces the button's trailing icon (or sits before the label if none); the label stays, the button keeps its width and is disabled |
+| Like, reply, report, delete (comments, reactions) | The control's own icon pulses (opacity 1 → 0.4 → 1, 800ms) until the answer; the count rolls when it arrives |
+| "Load more comments" | The button shows the `sm` loader |
+| A form sending (contact, newsletter, sign-in) | Its submit button as above; the fields stay editable-looking but read-only |
+| Admin list or screen | The `md` loader centred under the heading, over the skeleton |
+| An upload (admin) | A progress line under the field in `primary` (determinate when the percentage is known, else the bar of §13.64) with the file name; the `sm` loader next to it |
+| The lightboxes' image | The `md` loader on the dark layer until the picture is decoded |
+
+**Accessibility.** A waiting button has `aria-busy="true"`; the message of the result
+(success or error) is announced as before.
+
+### 13.67 Not-found and error pages
+
+**Purpose.** A page that does not exist, or broke, is still a page of the site (D91): the
+header and footer stay, the tone is the site's, and there is always a way on. The status
+code stays 404 (500 for the error page).
+
+**Shared anatomy.** A giant **404** in Bebas (`text-display-xl` and larger: `clamp(8rem,
+28vw, 22rem)`), under the header, then a one-line headline, a short line, two or three
+buttons, and the site's own touch. The wording is in the dictionaries (English and
+French). The path that was not found is shown in a mono `label` ("/blog/oops"). A "Report"
+link is not needed.
+
+**Per site.**
+
+| Site | The touch | Buttons |
+|---|---|---|
+| Main (Dev) | The **0** is the brand's logo circle: it rolls in from the left 120px, wobbles twice and settles (800ms); a faint pixel grid behind, `tile` colour at 40% | Home · Projects · Contact |
+| Creatives | Hand-drawn doodles (the Creatives hero's squiggle under the number, a star above the second 4) drawing themselves in 900ms; "Meanwhile, here is some work": a row of up to 3 featured pieces or events (the pinned-strip tiles, §13.58) | Graphic design · Photography · Services |
+| Blog | The **0** is an open book glyph (line icon); under the line "Maybe it was never written. These are the latest posts": the 3 latest posts as small list items (§13.27, no cover) | All posts · Tags |
+| Admin | A plain page: "Page not found", one line and a "Back to the dashboard" button; no animation, no 404 number | Back to the dashboard |
+
+**Error page** (`error.tsx`, `global-error.tsx`). Same shape with "500"-style text "Oops"
+and "Something broke on our side": a **Try again** button (calls `reset`) and Home; the
+`md` loader is shown for 600ms after Try again. Public sites only; the admin has the plain
+version.
+
+**Motion.** As above, once on arrival; reduced motion shows the final state.
+
+**Accessibility.** One `h1` (the headline; the big number is `aria-hidden` and its text is
+in the headline "Page not found — 404"), focus moves to the `h1` on arrival, buttons are
+standard buttons (§13.2), the doodles and glyphs are `aria-hidden`. Contrast of the
+number is decorative (it uses `tile-hover` on `background`) so the page does not rely on it.
 
 ## 14. Page and section specs
 
