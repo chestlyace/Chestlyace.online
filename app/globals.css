@@ -1169,3 +1169,22 @@ html.lenis body {
     display: none;
   }
 }
+
+/* ---- Inline pending states (design.md §13.66) ---------------------------------------- */
+/* A control waiting on the server: its icon and label pulse until the answer arrives. */
+.pending-pulse {
+  animation: pending-pulse 800ms ease-in-out infinite;
+}
+
+@keyframes pending-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pending-pulse {
+    animation: none;
+    opacity: 0.6;
+  }
+}

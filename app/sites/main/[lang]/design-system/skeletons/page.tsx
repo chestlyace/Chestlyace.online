@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AdminListSkeleton } from "@/components/skeletons/admin";
 import {
   BlogListSkeleton,
   PostSkeleton,
@@ -32,6 +33,7 @@ const SKELETONS = [
   ["Photography", PhotographySkeleton],
   ["Event", EventSkeleton],
   ["Services", ServicesSkeleton],
+  ["Admin list", AdminListSkeleton],
 ] as const;
 
 // Every page skeleton (design.md §13.65) on one page, to look at them: a dev and

@@ -1,6 +1,5 @@
 "use client";
 
-import { LoaderCircle } from "lucide-react";
 import {
   animate,
   motion,
@@ -19,6 +18,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/cn";
+import { BrandLoader } from "./BrandLoader";
 import { isPagePath } from "@/lib/links";
 import { useFinePointer, usePrefersReducedMotion } from "@/lib/media";
 import { EASE_OUT, SPRING } from "@/lib/motion";
@@ -242,7 +242,7 @@ export function Button({
         {children}
       </motion.span>
       {loading ? (
-        <LoaderCircle className="animate-spin" aria-hidden="true" />
+        <BrandLoader size="sm" decorative />
       ) : (
         trailingIcon && (
           <span

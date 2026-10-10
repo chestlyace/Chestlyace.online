@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { AdminLink as Link } from "@/components/admin/AdminLink";
 import type { AdminResource } from "@/lib/admin/resources";
 
 // The top of an editor screen (design.md §14.11): "← Skills", the title.

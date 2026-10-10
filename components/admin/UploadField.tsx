@@ -15,6 +15,7 @@ import {
   uploadFile,
 } from "@/lib/admin/upload";
 import { cn } from "@/lib/cn";
+import { BrandLoader } from "@/components/shared/BrandLoader";
 
 type Status =
   | { kind: "idle" }
@@ -218,8 +219,9 @@ export function UploadField({
         className="rounded-md bg-(--field-fill,var(--tile)) p-4 shadow-[inset_0_0_0_1px_var(--border)]"
       >
         <div className="flex items-center justify-between gap-4">
-          <p className="min-w-0 truncate text-sm text-foreground">
-            {status.name}
+          <p className="flex min-w-0 items-center gap-2 truncate text-sm text-foreground">
+            <BrandLoader size="sm" decorative />
+            <span className="truncate">{status.name}</span>
           </p>
           <button
             type="button"

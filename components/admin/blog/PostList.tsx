@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, Ellipsis, Pencil, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { AdminLink as Link } from "@/components/admin/AdminLink";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/shared/Button";
