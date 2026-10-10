@@ -97,8 +97,7 @@ the agent can act on (field → message, like the admin's 422).
 | `<r>_get` | One item, complete, including `translations.fr` | read |
 | `<r>_create` | Creates an item from the schema's fields | write (+ publish to be live) |
 | `<r>_update` | Changes the given fields only | write (+ publish for the published switch) |
-| `<r>_set_published` | Puts an item live or hides it (resources with a switch) | publish |
-| `<r>_delete` | Deletes (needs `confirm`: the item's name) | delete |
+| `<r>_delete` | Deletes (needs `confirm`) | delete |
 | `<r>_reorder` | Sets the order from a list of ids (resources with an order) | write |
 
 `profile_get` / `profile_update` (one row, French included, résumé address). Settings:
@@ -108,11 +107,11 @@ the agent can act on (field → message, like the admin's 422).
 
 | Tool | Does | Scope |
 |---|---|---|
-| `blog_list` / `blog_get` | Posts with status, tags, French status; one post with its markdown | read |
-| `blog_create` / `blog_update` | Title, slug, description, tags, cover, markdown content, series, canonical, `translations.fr` (title, description, content, cover alt, series, `published`) | write |
-| `blog_publish` / `blog_unpublish` | Status | publish |
-| `blog_validate` | Checks markdown with the block rules and returns the problems, without saving | read |
-| `blog_duplicate` / `blog_delete` | A draft copy; delete | write / delete |
+| `blog_posts_list` / `blog_post_get` | Posts with status, tags, French status; one post with its markdown | read |
+| `blog_post_create` / `blog_post_update` | Title, slug, description, tags, cover, markdown content, series, canonical, `translations.fr` (title, description, content, cover alt, series, `published`) | write |
+| `blog_post_publish` / `blog_post_unpublish` | Status | publish |
+| `blog_post_validate` | Checks markdown with the block rules and returns the problems, without saving | read |
+| `blog_post_duplicate` / `blog_post_delete` | A draft copy; delete | write / delete |
 | `blog_comments_list` | Comments (name, text, status, likes, reports) with the post, filterable | read |
 | `blog_comment_hide` / `_restore` / `_delete` | Moderation | delete |
 
