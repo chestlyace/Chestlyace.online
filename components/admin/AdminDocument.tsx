@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { NavigationProgress } from "@/components/shared/NavigationProgress";
 import { SkipLink } from "@/components/shared/SkipLink";
 import { fontVariables } from "@/lib/fonts";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -20,6 +21,7 @@ export function AdminDocument({ children }: { children: ReactNode }) {
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
         <AdminProviders>
           <SkipLink />
+          <NavigationProgress />
           {children}
         </AdminProviders>
       </body>

@@ -2,7 +2,7 @@
 
 import { Ellipsis, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { AnimatePresence, Reorder, useDragControls } from "motion/react";
-import Link from "next/link";
+import { AdminLink as Link } from "@/components/admin/AdminLink";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/shared/Button";
 import { IconButton } from "@/components/shared/IconButton";

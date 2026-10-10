@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleAlert, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { AdminLink as Link } from "@/components/admin/AdminLink";
 import { useId, useState } from "react";
 import { Button } from "@/components/shared/Button";
 import { FormField, fieldControl } from "@/components/shared/FormField";
