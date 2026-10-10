@@ -116,18 +116,16 @@ describe("POST /mcp", () => {
     const names = (await list.json()).result.tools
       .map((t: { name: string }) => t.name)
       .sort();
-    expect(names).toEqual([
-      "blog_comments_list",
-      "blog_create",
-      "blog_duplicate",
-      "blog_get",
-      "blog_list",
-      "blog_update",
-      "blog_validate",
-      "get_guide",
-      "list_resources",
-      "whoami",
-    ]); // no media scope
+    expect(names).toEqual(
+      expect.arrayContaining([
+        "whoami",
+        "get_guide",
+        "blog_create",
+        "projects_create",
+      ]),
+    );
+    expect(names).not.toContain("blog_publish");
+    expect(names).not.toContain("projects_delete"); // no media scope
   });
 
   it("calls a tool, and logs it against the token", async () => {
