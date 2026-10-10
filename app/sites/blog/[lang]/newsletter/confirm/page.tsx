@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { Container } from "@/components/shared/Container";
@@ -7,19 +8,29 @@ import { SectionHeading } from "@/components/shared/SectionHeading";
 import { getNewsletterCopy } from "@/lib/blog/data";
 import { getDb } from "@/lib/db";
 import { addSubscriber, verifyToken } from "@/lib/newsletterServer";
+import { getMessages } from "@/content/messages";
+import { isLang, localizedPath } from "@/lib/i18n";
 import { siteUrl } from "@/lib/sites";
 
-export const metadata: Metadata = {
-  title: "Newsletter — Chestly Ace",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: PageProps<"/sites/blog/[lang]/newsletter/confirm">): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    title: getMessages(isLang(lang) ? lang : "en").blog.newsletter.pageTitle,
+    robots: { index: false, follow: false },
+  };
+}
 
 // Where the link in the confirmation email lands (design.md §14.16): it checks the
 // link, adds the address to the newsletter's segment, and shows the result in the
 // coming-soon page's look. Not indexed.
 export default async function ConfirmPage({
+  params,
   searchParams,
 }: PageProps<"/sites/blog/[lang]/newsletter/confirm">) {
+  const { lang } = await params;
+  if (!isLang(lang)) notFound();
   const { token } = await searchParams;
   const secret = process.env.NEWSLETTER_SECRET;
   const apiKey = process.env.RESEND_API_KEY;
@@ -32,7 +43,7 @@ export default async function ConfirmPage({
     !!apiKey &&
     !!segmentId &&
     (await addSubscriber(email, { apiKey, segmentId }));
-  const wording = await getNewsletterCopy(getDb());
+  const wording = await getNewsletterCopy(getDb(), lang);
   const copy = confirmed ? wording.confirmed : wording.failed;
 
   return (
@@ -46,7 +57,7 @@ export default async function ConfirmPage({
         />
         <Reveal y={16} className="mt-10">
           <Button
-            href={siteUrl("blog")}
+            href={siteUrl("blog", localizedPath("/", lang))}
             size="lg"
             trailingIcon={<ArrowUpRight />}
             iconNudge="up-right"

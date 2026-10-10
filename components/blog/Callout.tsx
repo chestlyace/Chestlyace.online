@@ -4,9 +4,9 @@ import { cn } from "@/lib/cn";
 import type { CalloutType } from "@/lib/blog/markdown";
 
 const TYPES = {
-  note: { icon: Info, label: "Note", tone: "text-primary-text" },
-  tip: { icon: Lightbulb, label: "Tip", tone: "text-primary-text" },
-  warning: { icon: TriangleAlert, label: "Warning", tone: "text-danger" },
+  note: { icon: Info, tone: "text-primary-text" },
+  tip: { icon: Lightbulb, tone: "text-primary-text" },
+  warning: { icon: TriangleAlert, tone: "text-danger" },
 } as const;
 
 // A short aside in a post (design.md §13.31): `note`, `tip` or `warning`. The
@@ -14,13 +14,17 @@ const TYPES = {
 export function Callout({
   type,
   title,
+  labels,
   children,
 }: {
   type: CalloutType;
   title?: string;
+  /** The label of each type, in the page's language. */
+  labels: Record<CalloutType, string>;
   children: ReactNode;
 }) {
-  const { icon: Icon, label, tone } = TYPES[type] ?? TYPES.note;
+  const { icon: Icon, tone } = TYPES[type] ?? TYPES.note;
+  const label = labels[type] ?? labels.note;
   return (
     <aside
       role="note"

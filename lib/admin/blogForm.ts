@@ -17,10 +17,32 @@ export type PostDetails = {
 
 export type PostStatus = "draft" | "published";
 
+/** The French version of a post (docs/i18n.md §5): optional, with its own switch. */
+export type FrenchPost = {
+  title: string;
+  description: string;
+  coverAlt: string;
+  series: string;
+  /** The post's markdown, in French. */
+  content: string;
+  /** Whether the French version is live (it also needs its text). */
+  published: boolean;
+};
+
+export const EMPTY_FRENCH: FrenchPost = {
+  title: "",
+  description: "",
+  coverAlt: "",
+  series: "",
+  content: "",
+  published: false,
+};
+
 export type PostSnapshot = {
   details: PostDetails;
   content: string;
   status: PostStatus;
+  french: FrenchPost;
 };
 
 export const EMPTY_DETAILS: PostDetails = {
@@ -49,7 +71,10 @@ type Row = {
   commentsEnabled: boolean;
   canonicalUrl: string | null;
   series: string | null;
+  translations?: { fr?: Record<string, unknown> } | null;
 };
+
+const str = (value: unknown) => (typeof value === "string" ? value : "");
 
 export function snapshotOf(row: Row): PostSnapshot {
   const published = row.publishedAt
@@ -70,7 +95,35 @@ export function snapshotOf(row: Row): PostSnapshot {
     },
     content: row.content,
     status: row.status === "published" ? "published" : "draft",
+    french: frenchOf(row.translations?.fr),
   };
+}
+
+function frenchOf(fr: Record<string, unknown> | undefined): FrenchPost {
+  if (!fr) return EMPTY_FRENCH;
+  return {
+    title: str(fr.title),
+    description: str(fr.description),
+    coverAlt: str(fr.coverAlt),
+    series: str(fr.series),
+    content: str(fr.content),
+    published: fr.published === true,
+  };
+}
+
+/** The `translations` value to store: only what has been written. */
+export function translationsOf(french: FrenchPost): Record<string, unknown> {
+  const fr: Record<string, unknown> = {};
+  for (const field of [
+    "title",
+    "description",
+    "coverAlt",
+    "series",
+    "content",
+  ] as const)
+    if (french[field].trim() !== "") fr[field] = french[field];
+  if (Object.keys(fr).length === 0 && !french.published) return {};
+  return { fr: { ...fr, published: french.published } };
 }
 
 const blankToNull = (value: string) => (value.trim() === "" ? null : value);
@@ -91,6 +144,7 @@ export function bodyOf(snapshot: PostSnapshot): Record<string, unknown> {
     series: blankToNull(details.series),
     content: snapshot.content,
     status: snapshot.status,
+    translations: translationsOf(snapshot.french),
   };
 }
 

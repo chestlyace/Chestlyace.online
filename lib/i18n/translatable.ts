@@ -11,7 +11,9 @@ export type TranslationKind =
   /** A list of short items (tags, "what's offered", marquee words). */
   | "list"
   /** An uploaded file's address (the French résumé). */
-  | "file";
+  | "file"
+  /** A whole post's markdown. */
+  | "article";
 
 export const TRANSLATABLE = {
   profile: {
@@ -109,7 +111,7 @@ export const TRANSLATABLE = {
   "blog-posts": {
     title: "text",
     description: "long",
-    content: "long",
+    content: "article",
     coverAlt: "text",
     series: "text",
   },
@@ -132,4 +134,5 @@ export const TRANSLATION_LIMITS: Record<TranslationKind, number> = {
   long: 20000,
   list: 80, // per item; at most 20 items
   file: 500,
+  article: 200_000,
 };

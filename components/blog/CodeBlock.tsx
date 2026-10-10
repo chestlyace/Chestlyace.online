@@ -3,6 +3,7 @@
 import { Check, Copy } from "lucide-react";
 import { useRef, useState, type ComponentProps } from "react";
 import { cn } from "@/lib/cn";
+import { useBlockText } from "./blocks/useBlockText";
 
 // A highlighted code block (design.md §13.30): a header row with the file name
 // (or the language) and a copy button, then the code, which scrolls sideways
@@ -21,6 +22,7 @@ export function CodeBlock({
 }) {
   const pre = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
+  const t = useBlockText();
   const label = title ?? language ?? "code";
 
   async function copy() {
@@ -41,7 +43,7 @@ export function CodeBlock({
         <button
           type="button"
           onClick={copy}
-          aria-label="Copy code"
+          aria-label={t.copyCode}
           className="relative grid size-8 shrink-0 place-items-center rounded-full text-foreground transition-[opacity,background-color] duration-150 ease-out before:absolute before:-inset-1 before:content-[''] hover:bg-tile-hover focus-visible:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within/code:opacity-100 [@media(hover:hover)]:group-hover/code:opacity-100"
         >
           {copied ? (
@@ -51,7 +53,7 @@ export function CodeBlock({
           )}
         </button>
         <span role="status" className="sr-only">
-          {copied ? "Copied" : ""}
+          {copied ? t.copied : ""}
         </span>
       </div>
       <div

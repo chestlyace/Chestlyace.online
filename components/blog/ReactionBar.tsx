@@ -5,6 +5,9 @@ import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/lib/media";
 import { cn } from "@/lib/cn";
+import type { Messages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
+import { plural } from "@/lib/i18n/format";
 import { RollingCount } from "./RollingCount";
 import { ShareMenu } from "./ShareMenu";
 
@@ -19,11 +22,17 @@ export function ReactionBar({
   title,
   url,
   initialCount,
+  lang,
+  reactions,
+  share,
 }: {
   slug: string;
   title: string;
   url: string;
   initialCount: number;
+  lang: Lang;
+  reactions: Messages["blog"]["reactions"];
+  share: Messages["blog"]["share"];
 }) {
   const reduced = usePrefersReducedMotion();
   const [state, setState] = useState<State>({
@@ -70,7 +79,7 @@ export function ReactionBar({
       <button
         type="button"
         aria-pressed={state.liked}
-        aria-label={`Like this post, ${state.count} ${state.count === 1 ? "like" : "likes"}`}
+        aria-label={`${reactions.like}, ${plural(reactions.likes, state.count, lang)}`}
         onClick={() => void toggle()}
         className={cn(
           "type-label flex h-10 items-center gap-2 rounded-full border bg-surface px-4 text-foreground transition-colors duration-150 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [@media(hover:hover)]:hover:bg-tile-hover",
@@ -98,7 +107,7 @@ export function ReactionBar({
         </motion.span>
         <RollingCount value={state.count} up={state.liked} />
       </button>
-      <ShareMenu title={title} url={url} />
+      <ShareMenu title={title} url={url} labels={share} />
     </div>
   );
 }

@@ -7,12 +7,14 @@ import { Button } from "@/components/shared/Button";
 import { Tag } from "@/components/shared/Tag";
 import {
   EMPTY_DETAILS,
+  EMPTY_FRENCH,
   bodyOf,
   canAutosave,
   changesOf,
   detailProblems,
   sameSnapshot,
   snapshotOf,
+  type FrenchPost,
   type PostDetails as Details,
   type PostSnapshot,
   type PostStatus,
@@ -33,6 +35,7 @@ import { useToast } from "../Toast";
 import { useUnsavedChanges } from "../UnsavedGuard";
 import { BlockList } from "./BlockList";
 import { ExportDialog } from "./ExportDialog";
+import { FrenchPanel } from "./FrenchPanel";
 import { PostDetails } from "./PostDetails";
 import { Preview } from "./Preview";
 
@@ -69,6 +72,7 @@ export function PostEditor({
         details: EMPTY_DETAILS,
         content: "",
         status: "draft",
+        french: EMPTY_FRENCH,
       },
     [initial],
   );
@@ -85,6 +89,8 @@ export function PostEditor({
   }));
   const [details, setDetails] = useState<Details>(start.details);
   const [status, setStatus] = useState<PostStatus>(start.status);
+  const [french, setFrench] = useState<FrenchPost>(start.french);
+  const [lang, setLang] = useState<"en" | "fr">("en");
   const [mdText, setMdText] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("write");
   const [errors, setErrors] = useState<Errors>({});
@@ -99,7 +105,7 @@ export function PostEditor({
   const noteTimer = useRef<number | undefined>(undefined);
 
   const content = mdText ?? blocksToMarkdown(blocks);
-  const current: PostSnapshot = { details, content, status };
+  const current: PostSnapshot = { details, content, status, french };
   const dirty = !sameSnapshot(saved, current);
   useUnsavedChanges(dirty);
   useEffect(() => () => window.clearTimeout(noteTimer.current), []);
@@ -130,6 +136,14 @@ export function PostEditor({
       return next;
     });
     setErrors((now) => ({ ...now, [name]: undefined }));
+  };
+
+  const changeFrench = <K extends keyof FrenchPost>(
+    name: K,
+    value: FrenchPost[K],
+  ) => {
+    setFrench((now) => ({ ...now, [name]: value }));
+    setErrors((now) => ({ ...now, [`fr:${name}`]: undefined }));
   };
 
   const selectTab = (next: Tab) => {
@@ -218,11 +232,16 @@ export function PostEditor({
         const { content: contentError, _: general, ...rest } = result.fields;
         setErrors(rest);
         setBanner(contentError ?? general ?? null);
-        if (Object.keys(rest).length && !contentError)
+        const first = Object.keys(rest)[0];
+        if (first?.startsWith("fr:")) {
+          // A problem in the French version: open that tab and focus the field.
+          setLang("fr");
+          requestAnimationFrame(() =>
+            document.querySelector<HTMLElement>(`[name="${first}"]`)?.focus(),
+          );
+        } else if (first && !contentError)
           document
-            .querySelector<HTMLElement>(
-              `[name="${Object.keys(rest)[0]}"], #post-${Object.keys(rest)[0]}`,
-            )
+            .querySelector<HTMLElement>(`[name="${first}"], #post-${first}`)
             ?.focus();
       } else setBanner("Couldn't save. Check your connection and try again.");
     } catch {
@@ -368,81 +387,129 @@ export function PostEditor({
         </p>
       )}
 
-      <div className="max-w-[45rem]">
-        <PostDetails details={details} errors={errors} onChange={change} />
-      </div>
-
       <div
         role="tablist"
-        aria-label="Editor view"
-        className="mt-10 mb-6 inline-flex rounded-full bg-surface p-1"
+        aria-label="Language"
+        className="mb-8 inline-flex rounded-full border border-border bg-tile p-1"
       >
-        {tabs.map(([value, text]) => (
+        {(
+          [
+            ["en", "English"],
+            ["fr", "Français"],
+          ] as const
+        ).map(([code, name]) => (
           <button
-            key={value}
+            key={code}
             type="button"
             role="tab"
-            aria-selected={(split ? "write" : tab) === value}
-            onClick={() => selectTab(value)}
+            id={`post-tab-${code}`}
+            aria-selected={lang === code}
+            onClick={() => setLang(code)}
             className={cn(
-              "h-9 rounded-full px-4 text-sm font-medium transition-colors duration-150",
-              (split ? "write" : tab) === value
-                ? "bg-surface-raised text-foreground shadow-sm"
-                : "text-muted [@media(hover:hover)]:hover:text-foreground",
+              "type-label h-9 rounded-full px-5 transition-colors duration-150",
+              lang === code
+                ? "bg-primary text-primary-foreground"
+                : "text-muted hover:text-foreground",
             )}
           >
-            {text}
+            {name}
+            {code === "fr" && french.published && (
+              <span className="sr-only"> (published)</span>
+            )}
           </button>
         ))}
       </div>
 
-      {tab === "markdown" ? (
-        <MarkdownTab
-          markdown={content}
-          editing={mdText !== null}
-          onEdit={() => setMdText(content)}
-          onChange={setMdText}
+      {lang === "fr" ? (
+        <FrenchPanel
+          french={french}
+          english={details}
+          englishContent={content}
+          errors={errors}
+          postStatus={status}
+          onChange={changeFrench}
         />
       ) : (
-        <div className={cn(split && "grid grid-cols-2 items-start gap-8")}>
-          {showWrite && (
-            <div
-              className="min-w-0"
-              onFocusCapture={(event) => {
-                const row = (event.target as HTMLElement).closest(
-                  "li[id^='block-']",
-                );
-                const index = readBlocks.findIndex(
-                  (b) => `block-${b.id}` === row?.id,
-                );
-                if (index >= 0)
-                  setPreviewAt(
-                    readBlocks.length > 1 ? index / (readBlocks.length - 1) : 0,
-                  );
-              }}
-            >
-              <BlockList
-                blocks={blocks}
-                onChange={setBlocks}
-                problems={blockIssues}
-              />
+        <>
+          <div className="max-w-[45rem]">
+            <PostDetails details={details} errors={errors} onChange={change} />
+          </div>
+
+          <div
+            role="tablist"
+            aria-label="Editor view"
+            className="mt-10 mb-6 inline-flex rounded-full bg-surface p-1"
+          >
+            {tabs.map(([value, text]) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={(split ? "write" : tab) === value}
+                onClick={() => selectTab(value)}
+                className={cn(
+                  "h-9 rounded-full px-4 text-sm font-medium transition-colors duration-150",
+                  (split ? "write" : tab) === value
+                    ? "bg-surface-raised text-foreground shadow-sm"
+                    : "text-muted [@media(hover:hover)]:hover:text-foreground",
+                )}
+              >
+                {text}
+              </button>
+            ))}
+          </div>
+
+          {tab === "markdown" ? (
+            <MarkdownTab
+              markdown={content}
+              editing={mdText !== null}
+              onEdit={() => setMdText(content)}
+              onChange={setMdText}
+            />
+          ) : (
+            <div className={cn(split && "grid grid-cols-2 items-start gap-8")}>
+              {showWrite && (
+                <div
+                  className="min-w-0"
+                  onFocusCapture={(event) => {
+                    const row = (event.target as HTMLElement).closest(
+                      "li[id^='block-']",
+                    );
+                    const index = readBlocks.findIndex(
+                      (b) => `block-${b.id}` === row?.id,
+                    );
+                    if (index >= 0)
+                      setPreviewAt(
+                        readBlocks.length > 1
+                          ? index / (readBlocks.length - 1)
+                          : 0,
+                      );
+                  }}
+                >
+                  <BlockList
+                    blocks={blocks}
+                    onChange={setBlocks}
+                    problems={blockIssues}
+                  />
+                </div>
+              )}
+              {showPreview && (
+                <div className={cn("min-w-0", split && "sticky top-6")}>
+                  <Preview
+                    title={details.title}
+                    description={details.description}
+                    tags={details.tags}
+                    publishedAt={details.publishedAt}
+                    markdown={content}
+                    initial={initialPreview}
+                    initialMarkdown={start.content}
+                    scrollTo={split ? previewAt : undefined}
+                  />
+                </div>
+              )}
             </div>
           )}
-          {showPreview && (
-            <div className={cn("min-w-0", split && "sticky top-6")}>
-              <Preview
-                title={details.title}
-                description={details.description}
-                tags={details.tags}
-                publishedAt={details.publishedAt}
-                markdown={content}
-                initial={initialPreview}
-                initialMarkdown={start.content}
-                scrollTo={split ? previewAt : undefined}
-              />
-            </div>
-          )}
-        </div>
+        </>
       )}
 
       {exporting && id && (

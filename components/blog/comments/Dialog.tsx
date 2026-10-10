@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useCommentsText } from "./CommentsText";
 
 // A native <dialog> for the comments' sign-in and confirmations (design.md §13.23,
 // §13.36): focus is trapped and returns to the control that opened it, Escape
@@ -17,6 +18,7 @@ export function Dialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  const { text } = useCommentsText();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -39,7 +41,7 @@ export function Dialog({
         </h2>
         <button
           type="button"
-          aria-label="Close"
+          aria-label={text.close}
           onClick={() => ref.current?.close()}
           className="-mt-1 -mr-2 grid size-10 place-items-center rounded-full text-foreground transition-colors duration-150 hover:bg-tile"
         >

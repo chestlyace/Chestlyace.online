@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { useReveal } from "./useReveal";
+import { useBlockText } from "./useBlockText";
 
 // `compare` (design.md §13.39): a titled table with an optional recommended
 // column. Rows fade up in turn when the block enters; the recommended column's
@@ -20,6 +21,7 @@ export function Compare({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useReveal(ref);
+  const t = useBlockText();
   const tint = (column: number) =>
     column === highlight &&
     "bg-primary/6 transition-colors delay-[600ms] duration-300 group-data-[phase=armed]/compare:bg-transparent";
@@ -29,13 +31,13 @@ export function Compare({
       ref={ref}
       className="group/compare my-10 rounded-lg bg-tile p-5 sm:p-6"
     >
-      <p className="type-label text-muted">Compare</p>
+      <p className="type-label text-muted">{t.compare}</p>
       {title && (
         <p className="mt-1 text-body font-semibold text-foreground">{title}</p>
       )}
       <div
         role="region"
-        aria-label={title ?? "Comparison"}
+        aria-label={title ?? t.comparison}
         tabIndex={0}
         className="mt-4 overflow-x-auto outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
@@ -54,7 +56,7 @@ export function Compare({
                 >
                   {column === highlight && (
                     <span className="mb-2 block text-primary-text">
-                      Recommended
+                      {t.recommended}
                     </span>
                   )}
                   {cell}

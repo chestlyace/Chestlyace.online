@@ -7,6 +7,8 @@ import { cn } from "@/lib/cn";
 import { SPRING } from "@/lib/motion";
 import { CodeFrame, Tokens } from "./CodeFrame";
 import { CopyButton } from "./CopyButton";
+import { format } from "@/lib/i18n/format";
+import { useBlockText } from "./useBlockText";
 
 export type TabView = {
   label: string;
@@ -23,6 +25,7 @@ export function CodeGroup({ tabs }: { tabs: TabView[] }) {
   const id = useId();
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const tab = tabs[selected];
+  const t = useBlockText();
 
   function onKeyDown(event: KeyboardEvent, index: number) {
     const last = tabs.length - 1;
@@ -62,7 +65,7 @@ export function CodeGroup({ tabs }: { tabs: TabView[] }) {
           <LayoutGroup id={id}>
             <div
               role="tablist"
-              aria-label="Files"
+              aria-label={t.files}
               className="flex min-w-0 overflow-x-auto"
             >
               {tabs.map((item, index) => (
@@ -105,7 +108,9 @@ export function CodeGroup({ tabs }: { tabs: TabView[] }) {
         role={tabs.length > 1 ? "tabpanel" : "region"}
         id={`${id}-panel`}
         aria-labelledby={tabs.length > 1 ? `${id}-tab-${selected}` : undefined}
-        aria-label={tabs.length > 1 ? undefined : `${tab.label} code`}
+        aria-label={
+          tabs.length > 1 ? undefined : format(t.code, { title: tab.label })
+        }
         tabIndex={0}
         className="overflow-x-auto outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
       >

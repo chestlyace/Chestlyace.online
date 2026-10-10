@@ -27,16 +27,18 @@ export function SiteHeader({
     current: key === site,
   }));
 
-  // The main site's links are translated here; the blog's and Creatives' follow with
-  // their own steps (docs/i18n.md §11).
+  // The main site's and the blog's links are translated here; Creatives' follow with
+  // their own step (docs/i18n.md §11).
+  const translate = (nav: readonly NavLink[]): NavLink[] =>
+    nav.map((link) => ({
+      ...link,
+      label: m.nav[link.id as keyof typeof m.nav] ?? link.label,
+    }));
   const links: readonly NavLink[] =
     site === "main"
-      ? MAIN_NAV.map((link) => ({
-          ...link,
-          label: m.nav[link.id as keyof typeof m.nav] ?? link.label,
-        }))
+      ? translate(MAIN_NAV)
       : site === "blog"
-        ? BLOG_NAV
+        ? translate(BLOG_NAV)
         : site === "creatives"
           ? CREATIVES_NAV
           : [];

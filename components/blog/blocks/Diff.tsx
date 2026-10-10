@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { CodeFrame, Tokens } from "./CodeFrame";
 import { CopyButton } from "./CopyButton";
 import { useReveal } from "./useReveal";
+import { useBlockText } from "./useBlockText";
 
 export type DiffLineView = {
   type: "add" | "remove" | "same";
@@ -28,6 +29,7 @@ export function Diff({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useReveal(ref);
+  const t = useBlockText();
   const after = lines
     .filter((line) => line.type !== "remove")
     .map((line) => line.text);
@@ -36,7 +38,7 @@ export function Diff({
     <div ref={ref} className="group/diff">
       <CodeFrame
         label={title ?? language}
-        controls={<CopyButton text={after.join("\n")} label="Copy new code" />}
+        controls={<CopyButton text={after.join("\n")} label={t.copyNewCode} />}
       >
         <div
           role="region"

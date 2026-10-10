@@ -12,6 +12,7 @@ import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import type { TreeEntry } from "@/lib/blog/blocks";
 import { cn } from "@/lib/cn";
 import { useReveal } from "./useReveal";
+import { useBlockText } from "./useBlockText";
 
 const CODE =
   /\.(tsx?|jsx?|mjs|cjs|py|sh|zsh|bash|rs|go|rb|php|css|scss|html|vue|svelte|sql|ya?ml|toml)$/i;
@@ -27,6 +28,7 @@ function fileIcon(name: string) {
 export function FileTree({ entries }: { entries: TreeEntry[] }) {
   const ref = useRef<HTMLDivElement>(null);
   useReveal(ref);
+  const t = useBlockText();
   const [collapsed, setCollapsed] = useState<ReadonlySet<number>>(new Set());
   const [focused, setFocused] = useState(0);
   const items = useRef<(HTMLDivElement | null)[]>([]);
@@ -121,7 +123,7 @@ export function FileTree({ entries }: { entries: TreeEntry[] }) {
       ref={ref}
       className="group/tree my-10 overflow-x-auto rounded-lg bg-tile px-5 py-4"
     >
-      <div role="tree" aria-label="File tree" className="min-w-max">
+      <div role="tree" aria-label={t.fileTree} className="min-w-max">
         {entries.map((entry, index) => {
           const Icon = entry.folder
             ? collapsed.has(index) || !meta[index].hasChildren

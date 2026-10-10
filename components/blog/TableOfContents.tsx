@@ -85,17 +85,24 @@ function List({
   );
 }
 
-export function TableOfContents({ items }: { items: TocItem[] }) {
+export function TableOfContents({
+  items,
+  label,
+}: {
+  items: TocItem[];
+  /** "On this page" in the page's language. */
+  label: string;
+}) {
   const ids = items.map((item) => item.id);
   const active = useActiveHeading(ids);
 
   return (
     <>
       <nav
-        aria-label="On this page"
+        aria-label={label}
         className="sticky top-28 hidden max-h-[calc(100dvh-9rem)] overflow-y-auto pl-3 lg:block"
       >
-        <p className="type-label mb-4 text-muted">On this page</p>
+        <p className="type-label mb-4 text-muted">{label}</p>
         <LayoutGroup id="toc">
           <List items={items} active={active} rule />
         </LayoutGroup>
@@ -103,13 +110,13 @@ export function TableOfContents({ items }: { items: TocItem[] }) {
 
       <details className="group/toc rounded-md bg-tile lg:hidden">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-4 text-sm font-medium text-foreground [&::-webkit-details-marker]:hidden">
-          On this page
+          {label}
           <ChevronDown
             className="size-4 transition-transform duration-200 ease-out group-open/toc:rotate-180"
             aria-hidden="true"
           />
         </summary>
-        <nav aria-label="On this page" className="px-4 pb-4">
+        <nav aria-label={label} className="px-4 pb-4">
           <List items={items} active={active} rule={false} />
         </nav>
       </details>

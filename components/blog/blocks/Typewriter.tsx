@@ -9,6 +9,8 @@ import { CodeFrame, Tokens } from "./CodeFrame";
 import { CopyButton } from "./CopyButton";
 import { useClock } from "./useClock";
 import { useReveal } from "./useReveal";
+import { format } from "@/lib/i18n/format";
+import { useBlockText } from "./useBlockText";
 
 export type TypewriterLineView = {
   tokens: Token[];
@@ -53,6 +55,7 @@ export function Typewriter({
   );
   const clock = useClock(total);
   useReveal(ref, clock.start);
+  const t = useBlockText();
 
   const state = reduced
     ? { doneLines: lines.length, typing: null, done: true }
@@ -76,7 +79,7 @@ export function Typewriter({
                 }}
                 className="type-label rounded-full px-3 py-1.5 text-muted transition-colors duration-150 hover:bg-tile-hover hover:text-foreground"
               >
-                Skip
+                {t.skip}
               </button>
             )}
             {!reduced && (
@@ -87,7 +90,7 @@ export function Typewriter({
                   if (clock.playing) clock.skip();
                   else clock.replay();
                 }}
-                aria-label={clock.playing ? "Finish typing" : "Replay typing"}
+                aria-label={clock.playing ? t.finishTyping : t.replayTyping}
                 className="relative grid size-8 place-items-center rounded-full transition-colors duration-150 before:absolute before:-inset-1 before:content-[''] hover:bg-tile-hover"
               >
                 <RotateCcw className="size-4" aria-hidden="true" />
@@ -99,7 +102,7 @@ export function Typewriter({
       >
         <div
           role="region"
-          aria-label={`${title ?? language} code, typed out`}
+          aria-label={format(t.typedOut, { title: title ?? language })}
           tabIndex={0}
           className="overflow-x-auto outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
         >

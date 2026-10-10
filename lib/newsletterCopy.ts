@@ -1,15 +1,12 @@
-import {
-  NEWSLETTER,
-  NEWSLETTER_CONFIRMED,
-  NEWSLETTER_EMAIL,
-  NEWSLETTER_FAILED,
-} from "@/content/copy";
+import { en } from "@/content/messages/en";
+import { fr } from "@/content/messages/fr";
+import type { Lang } from "@/lib/i18n";
 
 // The newsletter's wording and its on/off switch, as the owner edits them in the
 // admin (Blog → Newsletter) and the blog reads them (design.md §13.34, §14.16).
 // One flat record per field (what the table and the form hold); `toCopy` shapes
 // it for the box, the confirmation page and the email. A blank or missing field
-// uses the wording in content/copy.ts, so nothing is ever empty on the site.
+// uses the built-in wording (content/messages, both languages), so nothing is ever empty on the site.
 // Pure: safe for the browser.
 
 export const NEWSLETTER_FIELDS = [
@@ -42,41 +39,53 @@ export type NewsletterSettings = { enabled: boolean } & Record<
   string
 >;
 
-export const NEWSLETTER_DEFAULTS: NewsletterSettings = {
-  enabled: true,
-  boxLabel: NEWSLETTER.label,
-  boxTitle: NEWSLETTER.title,
-  boxText: NEWSLETTER.text,
-  boxHelper: NEWSLETTER.helper,
-  boxSuccess: NEWSLETTER.success,
-  boxError: NEWSLETTER.error,
-  boxInvalid: NEWSLETTER.invalid,
-  boxRateLimited: NEWSLETTER.rateLimited,
-  confirmedLabel: NEWSLETTER_CONFIRMED.label,
-  confirmedTitle: NEWSLETTER_CONFIRMED.title,
-  confirmedLead: NEWSLETTER_CONFIRMED.lead,
-  confirmedButton: NEWSLETTER_CONFIRMED.button,
-  failedLabel: NEWSLETTER_FAILED.label,
-  failedTitle: NEWSLETTER_FAILED.title,
-  failedLead: NEWSLETTER_FAILED.lead,
-  failedButton: NEWSLETTER_FAILED.button,
-  emailSubject: NEWSLETTER_EMAIL.subject,
-  emailIntro: NEWSLETTER_EMAIL.intro,
-  emailAction: NEWSLETTER_EMAIL.action,
-  emailExpires: NEWSLETTER_EMAIL.expires,
-  emailIgnore: NEWSLETTER_EMAIL.ignore,
+/** The built-in wording of each language (content/messages, docs/i18n.md §4). */
+const BUILT_IN: Record<Lang, Record<NewsletterField, string>> = {
+  en: en.blog.newsletterDefaults,
+  fr: fr.blog.newsletterDefaults,
 };
 
-/** The stored fields, with the built-in wording where one is blank or missing. */
+export const NEWSLETTER_DEFAULTS: NewsletterSettings = {
+  enabled: true,
+  ...BUILT_IN.en,
+};
+
+type Stored = Partial<Record<keyof NewsletterSettings, unknown>> & {
+  translations?: unknown;
+};
+
+const text = (value: unknown): string | null =>
+  typeof value === "string" && value.trim() !== "" ? value.trim() : null;
+
+/**
+ * The stored fields, with the built-in wording where one is blank or missing. In
+ * French a field is, in order: the French the owner wrote, else the French built-in
+ * wording when the English field is still the built-in one (or blank), else the
+ * English the owner wrote (docs/i18n.md §5: English fills what French lacks).
+ */
 export function withDefaults(
-  stored: Partial<Record<keyof NewsletterSettings, unknown>> | null | undefined,
+  stored: Stored | null | undefined,
+  lang: Lang = "en",
 ): NewsletterSettings {
   const settings = { ...NEWSLETTER_DEFAULTS };
-  if (!stored) return settings;
+  if (!stored) {
+    if (lang === "fr") Object.assign(settings, BUILT_IN.fr);
+    return settings;
+  }
+  const french =
+    stored.translations && typeof stored.translations === "object"
+      ? ((stored.translations as { fr?: Record<string, unknown> }).fr ?? {})
+      : {};
   for (const field of NEWSLETTER_FIELDS) {
-    const value = stored[field];
-    if (typeof value === "string" && value.trim() !== "")
-      settings[field] = value.trim();
+    const english = text(stored[field]);
+    if (lang === "fr") {
+      const translated = text(french[field]);
+      settings[field] =
+        translated ??
+        (english === null || english === BUILT_IN.en[field]
+          ? BUILT_IN.fr[field]
+          : english);
+    } else if (english !== null) settings[field] = english;
   }
   if (typeof stored.enabled === "boolean") settings.enabled = stored.enabled;
   return settings;

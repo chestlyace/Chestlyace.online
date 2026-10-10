@@ -2,6 +2,9 @@
 // become links, and nothing is ever rendered as HTML. This only works out the
 // pieces; the component draws them (as text nodes and links, never raw HTML).
 
+/** The name a comment keeps when its author deleted their account (the page translates it). */
+export const DELETED_USER = "Deleted user";
+
 export type Piece =
   { type: "text"; text: string } | { type: "link"; href: string; text: string };
 

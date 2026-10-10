@@ -6,7 +6,10 @@ import { Button } from "@/components/shared/Button";
 import { fieldControl } from "@/components/shared/FormField";
 import { countWords } from "@/lib/blog/commentText";
 import { cn } from "@/lib/cn";
+import { format } from "@/lib/i18n/format";
 import { Avatar } from "./Avatar";
+import { useCommentsText } from "./CommentsText";
+import { failureText, type Failure } from "./failureText";
 import type { CommentView } from "@/lib/blog/comments";
 
 // The composer (design.md §13.37): the reader's avatar beside a textarea, a word
@@ -16,7 +19,7 @@ export function Composer({
   parentId = null,
   reader,
   maxWords,
-  label = "Add a comment",
+  label,
   autoFocus = false,
   onPosted,
   onCancel,
@@ -31,6 +34,7 @@ export function Composer({
   onCancel?: () => void;
 }) {
   const id = useId();
+  const { text: t } = useCommentsText();
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,26 +57,14 @@ export function Composer({
       );
       const data = (await response.json().catch(() => ({}))) as {
         comment?: CommentView;
-        message?: string;
-        error?: string;
-      };
+      } & Failure;
       if (response.ok && data.comment) {
         setText("");
         onPosted(data.comment);
         area.current?.focus();
-      } else
-        setError(
-          data.message ??
-            (response.status === 401
-              ? "Your sign-in ended. Please sign in again."
-              : response.status === 403
-                ? "You can't comment here."
-                : response.status === 429
-                  ? "Slow down a little, then try again."
-                  : "That didn't work. Please try again."),
-        );
+      } else setError(failureText(t, data, response.status));
     } catch {
-      setError("Couldn't reach the server. Check your connection.");
+      setError(t.offline);
     }
     setPosting(false);
   };
@@ -85,7 +77,7 @@ export function Composer({
           htmlFor={id}
           className="mb-2 block text-sm font-medium text-foreground"
         >
-          {label}
+          {label ?? t.addComment}
         </label>
         <textarea
           id={id}
@@ -127,7 +119,7 @@ export function Composer({
             id={`${id}-count`}
             className={cn("text-sm", over ? "text-danger" : "text-muted")}
           >
-            {words} / {maxWords} words
+            {format(t.words, { count: words, max: maxWords })}
           </p>
           <div className="flex items-center gap-2">
             {onCancel && (
@@ -137,7 +129,7 @@ export function Composer({
                 magnetic={false}
                 onClick={onCancel}
               >
-                Cancel
+                {t.cancel}
               </Button>
             )}
             <Button
@@ -147,7 +139,7 @@ export function Composer({
               disabled={!text.trim() || over}
               onClick={() => void post()}
             >
-              Post comment
+              {t.post}
             </Button>
           </div>
         </div>

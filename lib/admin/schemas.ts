@@ -21,6 +21,8 @@ const clean = (value: unknown) =>
 // are dropped, so the stored object only holds what has been translated.
 function translationsSchema(resource: TranslatableResource) {
   const shape: Record<string, z.ZodType> = {};
+  // A post's French version also says whether it is live (docs/i18n.md §5).
+  if (resource === "blog-posts") shape.published = z.boolean();
   for (const [field, kind] of Object.entries(TRANSLATABLE[resource])) {
     const limit = TRANSLATION_LIMITS[kind];
     shape[field] =
@@ -406,7 +408,7 @@ const blogTag = z
     "Tags use lowercase letters, numbers and single hyphens, like web-dev.",
   );
 
-export const blogPostSchema = z
+const blogPostBase = z
   .object({
     title: text("title", 120),
     slug: z
@@ -468,6 +470,10 @@ export const blogPostSchema = z
     ),
   })
   .strict();
+
+export const blogPostSchema = blogPostBase.extend({
+  translations: translationsSchema("blog-posts").optional(),
+});
 
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const fields: Record<string, string> = {};

@@ -4,6 +4,9 @@ import { cn } from "@/lib/cn";
 import { metaParts } from "@/lib/blog/format";
 import type { PostSummary } from "@/lib/blog/data";
 import { Container } from "@/components/shared/Container";
+import { Tag } from "@/components/shared/Tag";
+import { getMessages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
 
 // One post in a list (design.md §13.27, after linear.app/blog): a big cover, a
 // mono meta line, the title with an arrow, the description. The whole item is
@@ -11,11 +14,18 @@ import { Container } from "@/components/shared/Container";
 export function PostItem({
   post,
   latest = false,
+  lang,
 }: {
   post: PostSummary;
   latest?: boolean;
+  /** The language of the page; a post in the other one is marked and tagged. */
+  lang: Lang;
 }) {
-  const { published, reading } = metaParts(post);
+  const m = getMessages(lang).blog;
+  const { published, reading } = metaParts(post, m.meta.minRead);
+  // On the French blog a post without French is in English (docs/i18n.md §5).
+  const foreign = post.lang !== lang;
+  const textLang = foreign ? post.lang : undefined;
   return (
     <li data-post className="list-none">
       <Container narrow={!latest}>
@@ -52,9 +62,21 @@ export function PostItem({
               {" · "}
               {reading}
               {post.tags[0] && ` · ${post.tags[0]}`}
+              {foreign && (
+                <>
+                  {" · "}
+                  <Tag
+                    aria-label={m.onlyEnglish.markLabel}
+                    className="ml-1 h-5 px-1.5"
+                  >
+                    {m.onlyEnglish.mark}
+                  </Tag>
+                </>
+              )}
             </p>
             <div className="mt-2 flex items-start justify-between gap-4">
               <h2
+                lang={textLang}
                 className={cn(
                   "font-display text-foreground uppercase transition-colors duration-150 group-hover/post:text-primary-text",
                   latest
@@ -69,7 +91,10 @@ export function PostItem({
                 aria-hidden="true"
               />
             </div>
-            <p className="mt-3 line-clamp-2 max-w-[52ch] text-lead text-muted sm:line-clamp-none">
+            <p
+              lang={textLang}
+              className="mt-3 line-clamp-2 max-w-[52ch] text-lead text-muted sm:line-clamp-none"
+            >
               {post.description}
             </p>
           </div>

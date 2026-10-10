@@ -17,6 +17,7 @@ const summary = (
   publishedAt: "2026-10-20T09:00:00Z",
   updatedAt: "2026-11-02T10:00:00Z",
   readingMinutes: 3,
+  lang: "en",
   ...extra,
 });
 
@@ -108,5 +109,37 @@ describe("blogSitemapUrls", () => {
 
   it("is just the home before there are any posts", () => {
     expect(blogSitemapUrls([], [])).toHaveLength(1);
+  });
+});
+
+describe("in French", () => {
+  it("describes the French blog and a French post", () => {
+    const blog = blogJsonLd(origin, "fr");
+    expect(blog).toMatchObject({
+      inLanguage: "fr",
+      url: `${origin}/fr`,
+      name: "Chestly Ace — Blog",
+    });
+    expect(blog.description).toMatch(/ingénierie/);
+    const french = blogPostingJsonLd(post({ lang: "fr" }), origin);
+    expect(french).toMatchObject({
+      inLanguage: "fr",
+      url: `${origin}/fr/hello`,
+    });
+  });
+
+  it("describes an English-only post, read on the French blog, as English", () => {
+    expect(blogPostingJsonLd(post({ lang: "en" }), origin)).toMatchObject({
+      inLanguage: "en",
+      url: `${origin}/hello`,
+    });
+  });
+
+  it("makes the French feed with French addresses and its own address", () => {
+    const xml = rssXml([summary("bonjour", { lang: "fr" })], origin, "fr");
+    expect(xml).toContain("<language>fr</language>");
+    expect(xml).toContain(`<link>${origin}/fr/bonjour</link>`);
+    expect(xml).toContain(`href="${origin}/fr/rss.xml"`);
+    expect(xml).toContain(`<link>${origin}/fr</link>`);
   });
 });

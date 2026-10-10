@@ -18,7 +18,9 @@ export async function POST(
     : reply(
         {
           error: result.error,
-          ...("message" in result ? { message: result.message } : {}),
+          ...("message" in result
+            ? { code: result.code, message: result.message }
+            : {}),
         },
         result.status,
       );

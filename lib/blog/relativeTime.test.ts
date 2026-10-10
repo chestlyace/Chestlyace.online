@@ -22,3 +22,13 @@ describe("relativeTime", () => {
     );
   });
 });
+
+describe("in French", () => {
+  it("reads the time and the full date in French", () => {
+    expect(relativeTime(ago(10_000), now, "fr", "à l’instant")).toBe(
+      "à l’instant",
+    );
+    expect(relativeTime(ago(3 * 86_400_000), now, "fr")).toBe("il y a 3 jours");
+    expect(fullDate("2026-10-08T09:30:00Z", "fr")).toContain("octobre");
+  });
+});

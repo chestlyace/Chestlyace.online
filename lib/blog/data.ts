@@ -1,4 +1,12 @@
-import { and, arrayContains, desc, eq, isNotNull, sql } from "drizzle-orm";
+import {
+  and,
+  arrayContains,
+  desc,
+  eq,
+  isNotNull,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
 import {
@@ -6,6 +14,8 @@ import {
   withDefaults,
   type NewsletterCopy,
 } from "@/lib/newsletterCopy";
+import type { Lang } from "@/lib/i18n";
+import { inLanguage, writtenIn, type FrenchColumns } from "./localizePost";
 import type { SessionTurn } from "./session/types";
 
 // Public reads of the blog (docs/content-schema.md §4). Results are cached as
@@ -19,7 +29,15 @@ const iso = (
 ) =>
   sql<string>`to_char(${column} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`;
 
-const readingMinutes = sql<number>`greatest(1, ceil(cardinality(regexp_split_to_array(btrim(${blogPosts.content}), '\\s+'))::numeric / 200))::int`;
+const minutesOf = (text: SQL) =>
+  sql<number>`greatest(1, ceil(cardinality(regexp_split_to_array(btrim(${text}), '\\s+'))::numeric / 200))::int`;
+
+const readingMinutes = minutesOf(sql`${blogPosts.content}`);
+
+// The French version lives in `translations.fr` (docs/i18n.md §5).
+const frenchContent = sql<
+  string | null
+>`${blogPosts.translations} -> 'fr' ->> 'content'`;
 
 const summaryColumns = {
   slug: blogPosts.slug,
@@ -31,6 +49,12 @@ const summaryColumns = {
   publishedAt: iso(blogPosts.publishedAt),
   updatedAt: iso(blogPosts.updatedAt),
   readingMinutes,
+  fr: sql<Record<
+    string,
+    unknown
+  > | null>`(${blogPosts.translations} -> 'fr') - 'content'`,
+  frenchLive: sql<boolean>`coalesce(btrim(${frenchContent}) <> '' and ${blogPosts.translations} -> 'fr' ->> 'published' = 'true', false)`,
+  readingMinutesFr: minutesOf(sql`${frenchContent}`),
 };
 
 export type PostSummary = {
@@ -43,6 +67,8 @@ export type PostSummary = {
   publishedAt: string;
   updatedAt: string;
   readingMinutes: number;
+  /** The language the text is in: French only for a post with a published French version. */
+  lang: Lang;
 };
 
 export type Post = PostSummary & {
@@ -61,12 +87,22 @@ const published = and(
 const newestFirst = [desc(blogPosts.publishedAt), desc(blogPosts.id)] as const;
 
 // Every published post, newest first (no bodies).
-export async function listPublishedPosts(db: Database): Promise<PostSummary[]> {
-  return (await db
+type SummaryRow = Omit<PostSummary, "lang"> & FrenchColumns;
+
+/**
+ * Every published post, newest first, as `lang` reads it. On the French blog every post
+ * is listed: one without a published French version is in English (`lang: "en"`).
+ */
+export async function listPublishedPosts(
+  db: Database,
+  lang: Lang = "en",
+): Promise<PostSummary[]> {
+  const rows = (await db
     .select(summaryColumns)
     .from(blogPosts)
     .where(published)
-    .orderBy(...newestFirst)) as PostSummary[];
+    .orderBy(...newestFirst)) as SummaryRow[];
+  return rows.map((row) => inLanguage(row, lang));
 }
 
 export async function listPublishedSlugs(db: Database): Promise<string[]> {
@@ -81,15 +117,16 @@ export type PostPage = {
   next: PostSummary | null;
 };
 
-// One published post with its neighbours; a draft or unknown slug is null.
 export async function getPublishedPost(
   db: Database,
   slug: string,
+  lang: Lang = "en",
 ): Promise<PostPage | null> {
   const [row] = await db
     .select({
       ...summaryColumns,
       content: blogPosts.content,
+      frenchContent,
       canonicalUrl: blogPosts.canonicalUrl,
       commentsEnabled: blogPosts.commentsEnabled,
       likeCount: blogPosts.likeCount,
@@ -100,10 +137,18 @@ export async function getPublishedPost(
     .limit(1);
   if (!row) return null;
 
-  const all = await listPublishedPosts(db);
+  const { frenchContent: french, ...rest } = row;
+  const localized = inLanguage(rest as typeof rest & FrenchColumns, lang);
+  const inFrench = localized.lang === "fr";
+  const all = await listPublishedPosts(db, lang);
   const index = all.findIndex((post) => post.slug === slug);
   return {
-    post: row as Post,
+    post: {
+      ...localized,
+      content: inFrench && french ? french : rest.content,
+      // The cross-post canonical belongs to the English text.
+      canonicalUrl: inFrench ? null : rest.canonicalUrl,
+    } as Post,
     previous: all[index + 1] ?? null,
     next: index > 0 ? all[index - 1] : null,
   };
@@ -111,7 +156,6 @@ export async function getPublishedPost(
 
 export type TagCount = { tag: string; count: number };
 
-// Tags with at least one published post: most posts first, then A to Z.
 export function countTags(
   posts: readonly Pick<PostSummary, "tags">[],
 ): TagCount[] {
@@ -124,22 +168,25 @@ export function countTags(
     .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 }
 
-export async function listTags(db: Database): Promise<TagCount[]> {
-  return countTags(await listPublishedPosts(db));
+/** The tags and their counts; the French blog counts only the posts with French. */
+export async function listTags(
+  db: Database,
+  lang: Lang = "en",
+): Promise<TagCount[]> {
+  return countTags(writtenIn(await listPublishedPosts(db, lang), lang));
 }
 
+/** The posts with a tag; the French blog lists only the posts with French. */
 export async function listPostsByTag(
   db: Database,
   tag: string,
+  lang: Lang = "en",
 ): Promise<PostSummary[]> {
-  return (await db
-    .select(summaryColumns)
-    .from(blogPosts)
-    .where(and(published, arrayContains(blogPosts.tags, [tag])))
-    .orderBy(...newestFirst)) as PostSummary[];
+  return writtenIn(await listPublishedPosts(db, lang), lang).filter((post) =>
+    post.tags.includes(tag),
+  );
 }
 
-// The socials the blog's footer shows (`show_on` includes "blog").
 export async function listBlogSocials(
   db: Database,
 ): Promise<{ platform: string; url: string }[]> {
@@ -174,10 +221,13 @@ export async function getAgentSession(
 
 // The newsletter's wording and switch for the box, the confirmation page and the
 // email (9b.7): the stored row over the built-in wording.
-export async function getNewsletterCopy(db: Database): Promise<NewsletterCopy> {
+export async function getNewsletterCopy(
+  db: Database,
+  lang: Lang = "en",
+): Promise<NewsletterCopy> {
   const [row] = await db
     .select()
     .from(schema.newsletterSettings)
     .where(eq(schema.newsletterSettings.id, 1));
-  return toCopy(withDefaults(row));
+  return toCopy(withDefaults(row, lang));
 }

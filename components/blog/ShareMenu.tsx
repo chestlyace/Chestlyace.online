@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { siWhatsapp, siX } from "simple-icons";
 import { Button } from "@/components/shared/Button";
 import { cn } from "@/lib/cn";
+import type { Messages } from "@/content/messages";
 
 const Brand = ({ path }: { path: string }) => (
   <svg
@@ -20,7 +21,15 @@ const Brand = ({ path }: { path: string }) => (
 // Share (design.md §13.35): the system share sheet where there is one, otherwise a
 // small menu: Copy link, X, LinkedIn, WhatsApp, Email. The address is the post's own
 // canonical one, with no tracking parameters.
-export function ShareMenu({ title, url }: { title: string; url: string }) {
+export function ShareMenu({
+  title,
+  url,
+  labels,
+}: {
+  title: string;
+  url: string;
+  labels: Messages["blog"]["share"];
+}) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -78,12 +87,12 @@ export function ShareMenu({ title, url }: { title: string; url: string }) {
   const text = encodeURIComponent(title);
   const links: { label: string; href: string; icon: ReactNode }[] = [
     {
-      label: "Share on X",
+      label: labels.onX,
       href: `https://twitter.com/intent/tweet?text=${text}&url=${encoded}`,
       icon: <Brand path={siX.path} />,
     },
     {
-      label: "Share on LinkedIn",
+      label: labels.onLinkedIn,
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`,
       icon: (
         <span
@@ -95,12 +104,12 @@ export function ShareMenu({ title, url }: { title: string; url: string }) {
       ),
     },
     {
-      label: "Share on WhatsApp",
+      label: labels.onWhatsApp,
       href: `https://wa.me/?text=${text}%20${encoded}`,
       icon: <Brand path={siWhatsapp.path} />,
     },
     {
-      label: "Share by email",
+      label: labels.byEmail,
       href: `mailto:?subject=${text}&body=${encoded}`,
       icon: <Mail className="size-4" aria-hidden="true" />,
     },
@@ -123,14 +132,14 @@ export function ShareMenu({ title, url }: { title: string; url: string }) {
           trailingIcon={<Share2 />}
           iconNudge="none"
         >
-          Share
+          {labels.share}
         </Button>
       </div>
       {open && (
         <div
           id={menuId}
           role="menu"
-          aria-label="Share this post"
+          aria-label={labels.menu}
           className={cn(
             "absolute bottom-full left-0 z-20 mb-2 w-60 rounded-md border border-border/60 bg-surface-raised p-1 shadow-float-lifted",
             "animate-[quiz-open_150ms_ease-out] motion-reduce:animate-none",
@@ -147,7 +156,7 @@ export function ShareMenu({ title, url }: { title: string; url: string }) {
             ) : (
               <Link2 className="size-4" aria-hidden="true" />
             )}
-            {copied ? "Link copied" : "Copy link"}
+            {copied ? labels.linkCopied : labels.copyLink}
           </button>
           {links.map((link) => (
             <a
@@ -165,7 +174,7 @@ export function ShareMenu({ title, url }: { title: string; url: string }) {
         </div>
       )}
       <p role="status" aria-live="polite" className="sr-only">
-        {copied ? "Link copied" : ""}
+        {copied ? labels.linkCopied : ""}
       </p>
     </div>
   );

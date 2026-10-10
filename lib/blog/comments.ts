@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
-import { countWords, normalise } from "./commentText";
+import { DELETED_USER, countWords, normalise } from "./commentText";
 
 // Comments under a post (design.md §13.37): plain text, one level of replies,
 // visible at once and moderated afterwards. Reads and writes, apart from HTTP and
@@ -39,13 +39,36 @@ export type CommentPage = {
 export type CommentFailure =
   | { ok: false; status: 404; error: "not-found" }
   | { ok: false; status: 403; error: "closed" }
-  | { ok: false; status: 422; error: "invalid"; message: string };
+  | {
+      ok: false;
+      status: 422;
+      error: "invalid";
+      /** What went wrong, for the page to say in its language. */
+      code: InvalidCode;
+      /** English text (what the page shows when it has no wording for the code). */
+      message: string;
+      values?: Record<string, number>;
+    };
 
-const invalid = (message: string): CommentFailure => ({
+export type InvalidCode =
+  | "empty"
+  | "too-long"
+  | "too-many-words"
+  | "no-parent"
+  | "duplicate"
+  | "own-comment";
+
+const invalid = (
+  code: InvalidCode,
+  message: string,
+  values?: Record<string, number>,
+): CommentFailure => ({
   ok: false,
   status: 422,
   error: "invalid",
+  code,
   message,
+  ...(values ? { values } : {}),
 });
 const notFound: CommentFailure = { ok: false, status: 404, error: "not-found" };
 
@@ -103,7 +126,7 @@ function toView(
     author: removed
       ? null
       : {
-          name: row.name ?? "Deleted user",
+          name: row.name ?? DELETED_USER,
           image: row.image,
           isAuthor: Boolean(row.isAuthor),
         },
@@ -223,12 +246,15 @@ export async function createComment(
     .replace(/\r\n?/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-  if (!body) return invalid("Write something first.");
-  if (body.length > 5000) return invalid("That comment is too long.");
+  if (!body) return invalid("empty", "Write something first.");
+  if (body.length > 5000)
+    return invalid("too-long", "That comment is too long.");
   const words = countWords(body);
   if (words > options.maxWords)
     return invalid(
+      "too-many-words",
       `Keep it to ${options.maxWords} words or fewer (it is ${words}).`,
+      { max: options.maxWords, words },
     );
 
   // A reply to a reply attaches to the same parent (one level deep).
@@ -245,7 +271,7 @@ export async function createComment(
       .where(eq(blogComments.id, input.parentId))
       .limit(1);
     if (!parent || parent.postId !== post.id || parent.status !== "visible")
-      return invalid("That comment isn't there to reply to.");
+      return invalid("no-parent", "That comment isn't there to reply to.");
     parentId = parent.parentId ?? parent.id;
   }
 
@@ -271,7 +297,7 @@ export async function createComment(
         ),
       )
       .limit(1);
-    if (!answered) return invalid("You've already posted that.");
+    if (!answered) return invalid("duplicate", "You've already posted that.");
   }
 
   const [row] = await db
@@ -379,7 +405,7 @@ export async function reportComment(
     .limit(1);
   if (!comment) return notFound;
   if (comment.userId === userId)
-    return invalid("You can't report your own comment.");
+    return invalid("own-comment", "You can't report your own comment.");
   await db
     .insert(blogCommentReports)
     .values({ commentId: id, userId })

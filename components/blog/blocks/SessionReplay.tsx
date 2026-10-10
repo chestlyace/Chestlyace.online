@@ -31,6 +31,8 @@ import { cn } from "@/lib/cn";
 import { usePrefersReducedMotion } from "@/lib/media";
 import { Redacted } from "./Redacted";
 import { useReplayClock } from "./useReplayClock";
+import { format } from "@/lib/i18n/format";
+import { useBlockText } from "./useBlockText";
 
 // What the server hands over for each turn (SessionBlock).
 export type ReplayDiffLine = { type: "add" | "remove" | "same"; text: string };
@@ -94,6 +96,7 @@ export function SessionReplay({
   const [expanded, setExpanded] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const progress = useId();
+  const t = useBlockText();
 
   const initial = Math.min(REPLAY.initialTurns, turns.length);
   const state: ReplayState =
@@ -137,12 +140,15 @@ export function SessionReplay({
   };
 
   const range = turns.length
-    ? `${turns[0].number} to ${turns[turns.length - 1].number}`
+    ? format(t.turnsRange, {
+        from: turns[0].number,
+        to: turns[turns.length - 1].number,
+      })
     : "";
 
   return (
     <section
-      aria-label={`${title}: agent session`}
+      aria-label={format(t.agentSession, { title })}
       className="my-8 overflow-hidden rounded-lg border border-border bg-[#0a0a0a] text-[#f5f5f7]"
     >
       <div className="flex min-h-10 flex-wrap items-center justify-between gap-x-4 border-b border-[#262626] bg-[#171717] py-1.5 pr-4 pl-4 text-[#a1a1a6]">
@@ -161,7 +167,7 @@ export function SessionReplay({
       <div
         ref={scroller}
         role="group"
-        aria-label={`Transcript, turns ${range}`}
+        aria-label={format(t.transcript, { range })}
         tabIndex={0}
         className="max-h-[560px] overflow-y-auto outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
       >
@@ -191,30 +197,34 @@ export function SessionReplay({
 
       <div className="flex flex-wrap items-center gap-x-1 gap-y-2 border-t border-[#262626] bg-[#171717] px-2 py-1.5 text-[#a1a1a6] [&_button]:text-[#a1a1a6] [&_button:hover]:bg-white/10 [&_button:hover]:text-[#f5f5f7]">
         {clock.playing ? (
-          <ControlButton onClick={clock.pause} text="Pause" icon={<Pause />} />
+          <ControlButton
+            onClick={clock.pause}
+            text={t.pause}
+            icon={<Pause />}
+          />
         ) : (
           <ControlButton
             onClick={startPlaying}
-            text={mode === "idle" ? "Play session" : atEnd ? "Replay" : "Play"}
+            text={mode === "idle" ? t.playSession : atEnd ? t.replay : t.play}
             icon={<Play />}
             strong={mode === "idle"}
           />
         )}
         <IconControl
-          label="Previous turn"
+          label={t.previousTurn}
           disabled={complete <= 0 && mode === "replay"}
           onClick={() => seekTo(complete - 1)}
           icon={<SkipBack />}
         />
         <IconControl
-          label="Next turn"
+          label={t.nextTurn}
           disabled={complete >= turns.length}
           onClick={() => seekTo(complete + 1)}
           icon={<SkipForward />}
         />
         <button
           type="button"
-          aria-label={`Speed: ${clock.speed}×. Change speed`}
+          aria-label={format(t.speed, { speed: clock.speed })}
           onClick={() => clock.setSpeed(clock.speed === 1 ? 2 : 1)}
           className="type-label h-8 min-w-10 rounded-full px-3 transition-colors duration-150"
         >
@@ -222,7 +232,7 @@ export function SessionReplay({
         </button>
         <div className="flex min-w-24 flex-1 items-center gap-3 px-2">
           <label htmlFor={progress} className="sr-only">
-            Turns shown
+            {t.turnsShown}
           </label>
           <input
             id={progress}
@@ -232,7 +242,10 @@ export function SessionReplay({
             step={1}
             value={everything ? turns.length : complete}
             onChange={(event) => seekTo(Number(event.target.value))}
-            aria-valuetext={`${everything ? turns.length : complete} of ${turns.length} turns`}
+            aria-valuetext={format(t.turnsOf, {
+              shown: everything ? turns.length : complete,
+              total: turns.length,
+            })}
             className="h-1 w-full cursor-pointer accent-[#60a5fa]"
           />
           <span
@@ -244,7 +257,7 @@ export function SessionReplay({
         </div>
         <ControlButton
           onClick={() => setExpanded((open) => !open)}
-          text={expanded ? "Collapse" : "Expand all"}
+          text={expanded ? t.collapse : t.expandAll}
           icon={expanded ? <ChevronsDownUp /> : <ChevronsUpDown />}
           pressed={expanded}
         />
@@ -324,13 +337,14 @@ function Turn({
   typing: { chars: number; parts: number } | null;
   expanded: boolean;
 }) {
+  const t = useBlockText();
   const prompt = typing ? typedPrefix(turn.prompt, typing.chars) : turn.prompt;
   const rise = animate ? "animate-[replay-in_250ms_ease-out_both]" : "";
   return (
     <li className={cn(!onScreen && "sr-only", onScreen && rise)}>
       <div className="grid gap-3">
         <div className="border-l-2 border-[#60a5fa] pl-3">
-          <p className={cn(label, "mb-1 text-[#60a5fa]")}>You</p>
+          <p className={cn(label, "mb-1 text-[#60a5fa]")}>{t.you}</p>
           {typing ? <span className="sr-only">{turn.prompt}</span> : null}
           <p
             aria-hidden={typing ? true : undefined}
@@ -366,10 +380,11 @@ function Turn({
 }
 
 function Part({ part, expanded }: { part: ReplayPart; expanded: boolean }) {
+  const t = useBlockText();
   if (part.kind === "text")
     return (
       <div>
-        <p className={cn(label, "mb-1 text-[#a1a1a6]")}>Agent</p>
+        <p className={cn(label, "mb-1 text-[#a1a1a6]")}>{t.agent}</p>
         <div className="grid gap-2 break-words text-[#f5f5f7] [&_a]:text-[#93c5fd] [&_a]:underline [&_code]:rounded-sm [&_code]:bg-[#262626] [&_code]:px-1 [&_li]:ml-5 [&_ol]:list-decimal [&_pre]:overflow-x-auto [&_pre]:rounded-md [&_pre]:bg-[#171717] [&_pre]:p-3 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_ul]:list-disc">
           {part.body}
         </div>
@@ -383,7 +398,7 @@ function Part({ part, expanded }: { part: ReplayPart; expanded: boolean }) {
             aria-hidden="true"
             className="size-4 transition-transform duration-150 group-open/thinking:rotate-90"
           />
-          Thinking
+          {t.thinking}
         </summary>
         <p className="mt-1 break-words whitespace-pre-wrap pl-5 italic">
           <Redacted text={part.text} />
@@ -394,6 +409,7 @@ function Part({ part, expanded }: { part: ReplayPart; expanded: boolean }) {
 }
 
 function Cut({ text, open }: { text: string; open: boolean }) {
+  const t = useBlockText();
   const [all, setAll] = useState(false);
   const lines = text.split("\n");
   const long = lines.length > CUT;
@@ -409,7 +425,7 @@ function Cut({ text, open }: { text: string; open: boolean }) {
           onClick={() => setAll(true)}
           className="type-label mt-1 rounded-sm text-[#93c5fd] underline underline-offset-2"
         >
-          Show all {lines.length} lines
+          {format(t.showAllLines, { count: lines.length })}
         </button>
       ) : null}
     </>
@@ -423,6 +439,7 @@ function ToolCall({
   part: Extract<ReplayPart, { kind: "tool" }>;
   expanded: boolean;
 }) {
+  const t = useBlockText();
   const [all, setAll] = useState(false);
   return (
     <details
@@ -460,7 +477,7 @@ function ToolCall({
         ) : null}
         {part.output ? (
           <div>
-            <p className={cn(label, "mb-1 text-[#8e8e93]")}>Output</p>
+            <p className={cn(label, "mb-1 text-[#8e8e93]")}>{t.output}</p>
             <Cut text={part.output} open={expanded} />
           </div>
         ) : null}
@@ -478,6 +495,7 @@ function DiffLines({
   all: boolean;
   onAll: () => void;
 }) {
+  const t = useBlockText();
   const long = lines.length > CUT;
   const showing = long && !all ? lines.slice(0, CUT) : lines;
   return (
@@ -496,9 +514,9 @@ function DiffLines({
               <span
                 aria-label={
                   line.type === "add"
-                    ? "added"
+                    ? t.added
                     : line.type === "remove"
-                      ? "removed"
+                      ? t.removed
                       : undefined
                 }
                 className={cn(
@@ -522,7 +540,7 @@ function DiffLines({
           onClick={onAll}
           className="type-label rounded-sm text-left text-[#93c5fd] underline underline-offset-2"
         >
-          Show all {lines.length} lines
+          {format(t.showAllLines, { count: lines.length })}
         </button>
       ) : null}
     </>

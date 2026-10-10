@@ -10,6 +10,8 @@ import {
 import type { FlowLayout } from "@/lib/blog/flowLayout";
 import { cn } from "@/lib/cn";
 import { useReveal } from "./useReveal";
+import { format } from "@/lib/i18n/format";
+import { useBlockText } from "./useBlockText";
 
 export type FlowNodeView = {
   id: string;
@@ -47,6 +49,7 @@ export function FlowCanvas({
   const [scale, setScale] = useState(1);
   const [active, setActive] = useState<string | null>(null);
   useReveal(ref);
+  const t = useBlockText();
 
   useEffect(() => {
     const element = frame.current;
@@ -68,7 +71,7 @@ export function FlowCanvas({
   const rect = new Map(layout.items.map((item) => [item.id, item]));
   const boxes = nodes.filter((node) => !node.group);
   const groups = nodes.filter((node) => node.group);
-  const label = `Diagram: ${nodes[0]?.label ?? "flow"}`;
+  const label = format(t.diagram, { title: nodes[0]?.label ?? t.flow });
   const tint = (style: string) => `var(--diagram-${style})`;
   const nodeCount = nodes.length;
   const connected = (index: number) =>
