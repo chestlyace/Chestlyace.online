@@ -456,3 +456,9 @@ export const CREATIVES_UI: Record<Lang, CreativesUi> = {
     nextPicture: "Photo suivante",
   },
 };
+
+/** The status text of the brand loader (design.md §13.64), read by screen readers. */
+export const LOADING: Record<Lang, string> = {
+  en: "Loading",
+  fr: "Chargement",
+};

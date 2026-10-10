@@ -7,6 +7,7 @@ import type { Lang } from "@/lib/i18n";
 import type { PublicSiteKey } from "@/lib/sites";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { LangProvider } from "./LangProvider";
+import { NavigationProgress } from "./NavigationProgress";
 import { LanguageSuggestion } from "./LanguageSuggestion";
 import { Providers } from "./Providers";
 import { SiteFooter } from "./SiteFooter";
@@ -41,6 +42,7 @@ export function SiteDocument({
       <body className="flex min-h-dvh flex-col bg-background font-sans text-foreground antialiased">
         <LangProvider lang={lang}>
           <Providers>
+            <NavigationProgress />
             <SkipLink label={getMessages(lang).chrome.skipToContent} />
             <SiteHeader site={site} lang={lang} />
             {lang === "en" && (
