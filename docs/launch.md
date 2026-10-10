@@ -315,6 +315,26 @@ Before the cutover, check:
 - **Taking French offline** (if ever needed): `FRENCH_PUBLIC = false` in
   `lib/i18n/index.ts` makes every `/fr` address answer 404 in production.
 
+## 8b. Letting an AI agent help (Phase 13)
+
+An agent (Claude Code, Claude Desktop or any MCP client) can do what you do in the admin,
+within the limits you give it. Nothing to set up on Vercel: it is part of the admin site.
+
+1. In the admin open **Settings → Agent access**, choose **New token**, name it for the
+   agent, pick its scopes (see below) and an expiry, and copy the token (`cmcp_…`). It is
+   shown once; revoke it there at any time.
+2. Connect the agent to `https://admin.chestlyace.online/mcp` with the header
+   `Authorization: Bearer <token>`. Claude Code:
+   `claude mcp add --transport http chestly https://admin.chestlyace.online/mcp --header "Authorization: Bearer <token>"`.
+3. Ask it to run `whoami`; the call shows in **Settings → Activity**.
+
+Scopes: **read** (always), **write** (create and change; new things are unpublished),
+**publish** (put things live, switch the French version or the newsletter box on or off),
+**delete** (delete, with the item's name repeated, and moderate comments), **media**
+(upload pictures and the résumé). Start with read, write and media and publish what the
+agent drafts yourself. Limits: 120 requests and 30 writes a minute per token; the Activity
+log keeps 90 days.
+
 ## 9. Later
 
 - In Search Console add each host (the blog and the creatives site included) and

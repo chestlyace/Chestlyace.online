@@ -1,5 +1,6 @@
 import type { AnyTool } from "../tool";
 import { blogTools } from "./blog";
+import { creativesTools } from "./creatives";
 import { portfolioTools } from "./portfolio";
 import { generalTools } from "./general";
 import { mediaTools } from "./media";
