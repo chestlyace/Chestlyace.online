@@ -448,8 +448,17 @@ export type CreativeImage = {
   height: number;
   alt: string;
   caption?: string;
+  /** The French `alt` and `caption` (docs/i18n.md §5: a sibling key). */
+  altFr?: string;
+  captionFr?: string;
 };
-export type EventCredit = { role: string; name: string; url?: string };
+export type EventCredit = {
+  role: string;
+  name: string;
+  url?: string;
+  /** The French `role`. */
+  roleFr?: string;
+};
 
 export const designPieces = pgTable("design_pieces", {
   id: serial("id").primaryKey(),

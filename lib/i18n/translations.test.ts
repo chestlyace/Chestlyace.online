@@ -235,8 +235,10 @@ describe("the admin's editors", () => {
       "items",
     ]);
     expect(translatableNames(adminConfig("skills")!)).toEqual([]);
-    // the creatives' pieces and events have their own editors (11b.5)
-    expect(translatableNames(adminConfig("design")!)).toEqual([]);
+    // the creatives' pieces and events have their own editors (11b.5): their lists
+    // still show the French chip, so every listed field counts
+    expect(translatableNames(adminConfig("design")!)).toContain("title");
+    expect(translatableNames(adminConfig("photography")!)).toContain("covered");
     expect(translatableNames(adminConfig("experience")!)).toContain("role");
     expect(translatableNames(adminConfig("profile")!)).toContain("resumeUrl");
   });

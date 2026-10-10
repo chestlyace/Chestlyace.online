@@ -39,6 +39,10 @@ export const fr: Messages = {
       contact: "Contact",
       posts: "Articles",
       tags: "Thèmes",
+      work: "Réalisations",
+      design: "Design",
+      photography: "Photographie",
+      services: "Services",
     },
     footer: {
       nav: "Pied de page",
@@ -438,6 +442,32 @@ Utilisez le [formulaire de contact]({contact}) de mon site principal.
     },
   },
 
+  // Le texte du site Créations tel qu’écrit au départ (voir `creativesDefaults` en anglais).
+  creativesDefaults: {
+    heroStatement: "Design & Photographie",
+    heroLine:
+      "Identités visuelles et reportages d’événements par Chestly Ace (Amahndong Chestly).",
+    designIntro:
+      "Logos, affiches, campagnes pour les réseaux sociaux et visuels de marque, conçus pour avoir l’air voulus.",
+    photographyIntro:
+      "Événements, portraits et histoires de marque, à partir des moments qui valent la peine d’être gardés.",
+    portalsTitle: "Deux façons de travailler",
+    portalDesignText: "Identité visuelle, affiches et visuels de campagne.",
+    portalPhotographyText: "Événements et portraits, racontés en images.",
+    marqueeWords: [
+      "Design graphique",
+      "Photographie",
+      "Identité visuelle",
+      "Événements",
+    ],
+    contactStatement: "Un projet ou un événement à couvrir ?",
+    contactText:
+      "Dites-moi ce que vous avez en tête et je reviendrai vers vous avec des idées et un devis.",
+    contactNote: "Je réponds en général sous un jour.",
+    seoDescription:
+      "Design graphique, identité visuelle et photographie par Chestly Ace (Amahndong Chestly).",
+  },
+
   seo: {
     main: {
       title: "{name} ({legalName}) — Ingénierie logicielle",
@@ -446,6 +476,11 @@ Utilisez le [formulaire de contact]({contact}) de mon site principal.
       jobTitle: "Ingénieur logiciel",
     },
     project: "{title} — Chestly Ace",
+    creatives: {
+      title: "Chestly Ace — Design & Photographie",
+      description:
+        "Design graphique, identité visuelle et photographie par Chestly Ace (Amahndong Chestly).",
+    },
     blog: {
       title: "Chestly Ace — Blog",
       description:

@@ -12,12 +12,26 @@ export type Picture = {
   height: number;
   alt: string;
   caption?: string;
+  /** The French alt text and caption (docs/i18n.md §5). */
+  altFr?: string;
+  captionFr?: string;
 };
 export type Cover = { url: string; width: number; height: number };
-export type Credit = { role: string; name: string; url: string };
+export type Credit = {
+  role: string;
+  name: string;
+  url: string;
+  /** The French role. */
+  roleFr?: string;
+};
+
+/** The French of the entry's text fields (plain names, `coverAlt` included). */
+export type FrenchValues = Record<string, string | string[]>;
 
 export type PieceForm = {
   fields: Values;
+  /** The French version of the text (docs/i18n.md §5), by plain field name. */
+  french: FrenchValues;
   cover: Cover | null;
   coverAlt: string;
   images: Picture[];
@@ -37,8 +51,34 @@ const pictures = (value: unknown): Picture[] =>
       height: Number(p.height) || 0,
       alt: text(p.alt),
       ...(p.caption ? { caption: String(p.caption) } : {}),
+      ...(p.altFr ? { altFr: String(p.altFr) } : {}),
+      ...(p.captionFr ? { captionFr: String(p.captionFr) } : {}),
     };
   });
+
+/** The French values stored on a row (`translations.fr`), text and lists only. */
+const frenchOf = (row: AdminRow): FrenchValues => {
+  const stored = (row.translations as { fr?: Record<string, unknown> } | null)
+    ?.fr;
+  const out: FrenchValues = {};
+  for (const [name, value] of Object.entries(stored ?? {})) {
+    if (Array.isArray(value)) out[name] = value.map(String);
+    else if (typeof value === "string") out[name] = value;
+  }
+  return out;
+};
+
+/** What goes in a request's `translations`: the French that was written. */
+const translationsOf = (french: FrenchValues) => {
+  const fr: FrenchValues = {};
+  for (const [name, value] of Object.entries(french)) {
+    if (Array.isArray(value)) {
+      const items = value.filter((item) => item.trim() !== "");
+      if (items.length > 0) fr[name] = items;
+    } else if (value.trim() !== "") fr[name] = value;
+  }
+  return Object.keys(fr).length > 0 ? { fr } : {};
+};
 
 const coverOf = (row: AdminRow): Cover | null =>
   row.coverUrl
@@ -66,6 +106,7 @@ export const emptyPiece = (): PieceForm => ({
   cover: null,
   coverAlt: "",
   images: [],
+  french: {},
 });
 
 export const emptyEvent = (): EventForm => ({
@@ -86,6 +127,7 @@ export const emptyEvent = (): EventForm => ({
   cover: null,
   coverAlt: "",
   images: [],
+  french: {},
   credits: [],
 });
 
@@ -107,6 +149,7 @@ export function pieceFromRow(row: AdminRow): PieceForm {
     cover: coverOf(row),
     coverAlt: text(row.coverAlt),
     images: pictures(row.images),
+    french: frenchOf(row),
   };
 }
 
@@ -129,9 +172,15 @@ export function eventFromRow(row: AdminRow): EventForm {
     cover: coverOf(row),
     coverAlt: text(row.coverAlt),
     images: pictures(row.images),
+    french: frenchOf(row),
     credits: list(row.credits).map((item) => {
       const c = item as Partial<Credit>;
-      return { role: text(c.role), name: text(c.name), url: text(c.url) };
+      return {
+        role: text(c.role),
+        name: text(c.name),
+        url: text(c.url),
+        ...(c.roleFr ? { roleFr: text(c.roleFr) } : {}),
+      };
     }),
   };
 }
@@ -150,6 +199,8 @@ const picturesBody = (images: Picture[], captions: boolean) =>
     height: p.height,
     alt: p.alt,
     ...(captions && p.caption?.trim() ? { caption: p.caption } : {}),
+    ...(p.altFr?.trim() ? { altFr: p.altFr } : {}),
+    ...(captions && p.captionFr?.trim() ? { captionFr: p.captionFr } : {}),
   }));
 
 export function pieceBody(form: PieceForm): Record<string, unknown> {
@@ -157,6 +208,7 @@ export function pieceBody(form: PieceForm): Record<string, unknown> {
     ...form.fields,
     ...coverBody(form),
     images: picturesBody(form.images, false),
+    translations: translationsOf(form.french),
   };
 }
 
@@ -169,7 +221,9 @@ export function eventBody(form: EventForm): Record<string, unknown> {
       role: c.role,
       name: c.name,
       ...(c.url.trim() ? { url: c.url } : {}),
+      ...(c.roleFr?.trim() ? { roleFr: c.roleFr } : {}),
     })),
+    translations: translationsOf(form.french),
   };
 }
 
@@ -179,7 +233,9 @@ const place = (path: PropertyKey[]): string => {
   const key = String(path[0] ?? "_");
   return key === "coverUrl" || key === "coverWidth" || key === "coverHeight"
     ? "cover"
-    : key;
+    : key === "translations"
+      ? "french"
+      : key;
 };
 
 const LISTS: Record<string, string> = { images: "Picture", credits: "Credit" };

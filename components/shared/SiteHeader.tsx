@@ -40,7 +40,7 @@ export function SiteHeader({
       : site === "blog"
         ? translate(BLOG_NAV)
         : site === "creatives"
-          ? CREATIVES_NAV
+          ? translate(CREATIVES_NAV)
           : [];
 
   return (

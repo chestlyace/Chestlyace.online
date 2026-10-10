@@ -6,6 +6,7 @@ import type { PublicEvent } from "@/lib/creatives/data";
 import { eventYear } from "@/lib/creatives/events";
 import { prefersReducedMotionNow } from "@/lib/media";
 import { takeFlight } from "./eventFlight";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
 
 const WIDTHS = [960, 1400, 2000, 2800];
 
@@ -13,6 +14,7 @@ const WIDTHS = [960, 1400, 2000, 2800];
 // top-right and the title bottom-left. Coming from an event tile, the cover grows out
 // of the tile's rectangle (700ms, ease-in-out; a 200ms fade with reduced motion).
 export function EventHero({ event }: { event: PublicEvent }) {
+  const t = useCreativesText();
   const root = useRef<HTMLElement>(null);
   const image = responsiveImage(event.cover.url, WIDTHS);
 
@@ -46,7 +48,7 @@ export function EventHero({ event }: { event: PublicEvent }) {
   return (
     <section
       ref={root}
-      aria-label="Cover"
+      aria-label={t.cover}
       className="relative h-[70svh] min-h-[22rem] w-full overflow-hidden bg-tile"
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- Cloudinary, sized by srcset */}

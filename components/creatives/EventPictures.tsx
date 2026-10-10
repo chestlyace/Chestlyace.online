@@ -7,6 +7,8 @@ import { tileRatio } from "@/lib/creatives/gallery";
 import type { PublicEvent } from "@/lib/creatives/data";
 import { PictureLightbox } from "./PictureLightbox";
 import { useMasonry } from "./useMasonry";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
+import { format } from "@/lib/i18n/format";
 
 type Picture = PublicEvent["images"][number];
 
@@ -24,6 +26,7 @@ function PictureTile({
   span: number | null;
   onOpen: (index: number, from: DOMRect) => void;
 }) {
+  const t = useCreativesText();
   const root = useRef<HTMLLIElement>(null);
   useReveal(root);
   const image = responsiveImage(picture.url, WIDTHS);
@@ -37,7 +40,7 @@ function PictureTile({
     >
       <button
         type="button"
-        aria-label={`Open picture ${index + 1}${picture.alt ? `: ${picture.alt}` : ""}`}
+        aria-label={`${format(t.openPicture, { n: index + 1 })}${picture.alt ? `: ${picture.alt}` : ""}`}
         onClick={(click) =>
           onOpen(index, click.currentTarget.getBoundingClientRect())
         }
@@ -68,6 +71,7 @@ function PictureTile({
 // The event's selected pictures (design.md §14.23): the masonry of §13.51 without
 // titles, and a lightbox through them with their captions.
 export function EventPictures({ event }: { event: PublicEvent }) {
+  const t = useCreativesText();
   const pictures = event.images;
   const { grid, spans, ready, style } = useMasonry(pictures);
   const [open, setOpen] = useState<number | null>(null);
@@ -78,7 +82,7 @@ export function EventPictures({ event }: { event: PublicEvent }) {
     <>
       <div ref={grid}>
         <ul
-          aria-label={`Pictures from ${event.title}`}
+          aria-label={format(t.picturesFrom, { title: event.title })}
           className={
             ready
               ? "grid grid-flow-dense items-start"

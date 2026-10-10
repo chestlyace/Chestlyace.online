@@ -9,29 +9,43 @@ import { HeadingDoodle } from "@/components/creatives/home/HeadingDoodle";
 import { getCachedCreativesCopy, getCachedEvents } from "@/lib/creatives/cache";
 import { photographyJsonLd } from "@/lib/creatives/seo";
 import { pageMetadata } from "@/lib/seo";
+import { notFound } from "next/navigation";
+import { isLang } from "@/lib/i18n";
+import { CREATIVES_UI } from "@/lib/i18n/ui";
+import { format } from "@/lib/i18n/format";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const copy = await getCachedCreativesCopy();
+export async function generateMetadata({
+  params,
+}: PageProps<"/sites/creatives/[lang]/photography">): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLang(lang)) return {};
+  const copy = await getCachedCreativesCopy(lang);
   return pageMetadata("creatives", {
     path: "/photography",
-    title: "Photography — Chestly Ace",
+    title: CREATIVES_UI[lang].photographyMetaTitle,
     description: copy.photographyIntro,
+    lang,
   });
 }
 
 // The Photography page (design.md §14.22): the heading, then one tile per event, the
 // featured one first and across both columns, then the contact block. With no
 // published event it is the coming-soon look.
-export default async function PhotographyPage() {
+export default async function PhotographyPage({
+  params,
+}: PageProps<"/sites/creatives/[lang]/photography">) {
+  const { lang } = await params;
+  if (!isLang(lang)) notFound();
+  const t = CREATIVES_UI[lang];
   const [events, copy] = await Promise.all([
-    getCachedEvents(),
-    getCachedCreativesCopy(),
+    getCachedEvents(lang),
+    getCachedCreativesCopy(lang),
   ]);
-  if (events.length === 0) return <ComingSoon site="creatives" />;
+  if (events.length === 0) return <ComingSoon site="creatives" lang={lang} />;
 
   return (
     <>
-      <JsonLd data={photographyJsonLd(events)} />
+      <JsonLd data={photographyJsonLd(events, undefined, lang)} />
       <div className="pt-28 pb-24 md:pb-32">
         <Container>
           <div className="relative">
@@ -41,8 +55,8 @@ export default async function PhotographyPage() {
             />
             <SectionHeading
               as="h1"
-              label={`Photography · ${events.length}`}
-              title="Photography"
+              label={format(t.photographyLabel, { count: events.length })}
+              title={t.photographyTitle}
               intro={copy.photographyIntro}
             />
           </div>
@@ -61,11 +75,11 @@ export default async function PhotographyPage() {
             })}
           </div>
           {events.length === 1 && (
-            <p className="type-label mt-14 text-muted">More coming soon</p>
+            <p className="type-label mt-14 text-muted">{t.moreComingSoon}</p>
           )}
         </Container>
       </div>
-      <ContactBlock />
+      <ContactBlock lang={lang} />
     </>
   );
 }

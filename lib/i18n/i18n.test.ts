@@ -3,6 +3,7 @@ import { getMessages } from "@/content/messages";
 import { en } from "@/content/messages/en";
 import { fr } from "@/content/messages/fr";
 import { format, plural } from "./format";
+import { BLOCK_TEXT, CREATIVES_UI } from "./ui";
 import {
   DEFAULT_LANG,
   LANGS,
@@ -192,6 +193,8 @@ describe("messages", () => {
     "home.faq.title",
     "seo.project",
     "seo.blog.title",
+    "chrome.nav.design",
+    "chrome.nav.services",
     "blog.footer.rss",
     "blog.home.label",
     "blog.home.title",
@@ -232,4 +235,62 @@ describe("format and plural", () => {
     expect(plural(fr, 0, "fr")).toBe("0 message");
     expect(plural(fr, 2, "fr")).toBe("2 messages");
   });
+});
+
+describe("the small word tables (lib/i18n/ui.ts)", () => {
+  const flat = (value: unknown, prefix = ""): [string, string][] =>
+    value && typeof value === "object"
+      ? Object.entries(value).flatMap(([k, v]) => flat(v, `${prefix}${k}.`))
+      : [[prefix.slice(0, -1), String(value)]];
+  const placeholders = (text: string) =>
+    [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+  // The same in both languages on purpose (names, one word spelled alike).
+  const SAME = new Set([
+    "terminal",
+    "note",
+    "instagram",
+    "whatsapp",
+    "faqLabel",
+    "faqTitle",
+    "contactLabel",
+    "servicesLabel",
+    "servicesTitle",
+    "designTitle",
+    "pieces.other",
+    "photos.one",
+    "photos.other",
+    "termClient",
+    "termDate",
+    "cover",
+    "termEvent",
+    "termRole",
+    "agent",
+    "pause",
+    "flow",
+    "teaserLabel",
+    "view",
+    "filterAll",
+    "quizQuestion",
+    "pictureOf",
+    "selectedItem",
+  ]);
+
+  for (const [name, table] of [
+    ["BLOCK_TEXT", BLOCK_TEXT],
+    ["CREATIVES_UI", CREATIVES_UI],
+  ] as const) {
+    it(`${name} has the same keys and placeholders in French, and no English left`, () => {
+      const en = new Map(flat(table.en));
+      const fr = flat(table.fr);
+      expect(fr.map(([k]) => k).sort()).toEqual([...en.keys()].sort());
+      for (const [key, text] of fr) {
+        expect(text.trim(), key).not.toBe("");
+        expect(placeholders(text), key).toEqual(placeholders(en.get(key)!));
+      }
+      const same = fr
+        .filter(([key, text]) => en.get(key) === text && !SAME.has(key))
+        .map(([key]) => key);
+      expect(same).toEqual([]);
+    });
+  }
 });

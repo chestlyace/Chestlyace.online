@@ -13,6 +13,7 @@ import {
   rippleLeave,
   rippleMove,
 } from "@/components/main/projectRipple";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
 
 const LABEL = 76; // the cursor label's diameter, px
 
@@ -34,6 +35,7 @@ export function SectionPortal({
   href: string;
   image: PublicImage | null;
 }) {
+  const t = useCreativesText();
   const panel = useRef<HTMLAnchorElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const label = useRef<HTMLSpanElement>(null);
@@ -124,7 +126,7 @@ export function SectionPortal({
         </span>
         <span className="max-w-[32ch] text-lead text-[#f5f5f7]">{text}</span>
         <span className="type-label inline-flex items-center gap-1 text-[#fb923c]">
-          View the work
+          {t.viewWork}
           <ArrowUpRight className="size-3.5" aria-hidden="true" />
         </span>
       </span>
@@ -134,7 +136,7 @@ export function SectionPortal({
         style={{ width: LABEL, height: LABEL, opacity: 0 }}
         className="type-label pointer-events-none absolute top-0 left-0 z-10 hidden scale-50 place-items-center rounded-full bg-primary text-primary-foreground [@media(hover:hover)_and_(pointer:fine)]:grid"
       >
-        View
+        {t.view}
       </span>
     </Link>
   );

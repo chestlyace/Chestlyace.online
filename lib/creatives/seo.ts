@@ -1,3 +1,6 @@
+import { getMessages } from "@/content/messages";
+import { DEFAULT_LANG, localizedPath, type Lang } from "@/lib/i18n";
+import { CREATIVES_UI } from "@/lib/i18n/ui";
 import { PERSON_NAME, siteOrigin } from "@/lib/seo";
 import type {
   PublicEvent,
@@ -6,21 +9,27 @@ import type {
   PublicService,
 } from "./data";
 
+const siteName = (lang: Lang) => getMessages(lang).seo.creatives.title;
+const at = (origin: string, path: string, lang: Lang) =>
+  `${origin}${localizedPath(path, lang)}`;
+
 // Structured data for the creatives pages (design.md §14.21): the gallery as a
 // CollectionPage whose pieces are CreativeWorks with their image.
 export function designJsonLd(
   pieces: readonly PublicPiece[],
   origin: string = siteOrigin("creatives"),
+  lang: Lang = DEFAULT_LANG,
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Graphic design",
-    url: `${origin}/design`,
+    name: CREATIVES_UI[lang].groupDesign,
+    url: at(origin, "/design", lang),
+    inLanguage: lang,
     isPartOf: {
       "@type": "WebSite",
-      name: `${PERSON_NAME} — Design & Photography`,
-      url: origin,
+      name: siteName(lang),
+      url: at(origin, "/", lang),
     },
     hasPart: pieces.map((piece) => ({
       "@type": "CreativeWork",
@@ -41,22 +50,24 @@ export function designJsonLd(
 export function photographyJsonLd(
   events: readonly PublicEvent[],
   origin: string = siteOrigin("creatives"),
+  lang: Lang = DEFAULT_LANG,
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Photography",
-    url: `${origin}/photography`,
+    name: CREATIVES_UI[lang].groupPhotography,
+    url: at(origin, "/photography", lang),
+    inLanguage: lang,
     isPartOf: {
       "@type": "WebSite",
-      name: `${PERSON_NAME} — Design & Photography`,
-      url: origin,
+      name: siteName(lang),
+      url: at(origin, "/", lang),
     },
     hasPart: events.map((event) => ({
       "@type": "Event",
       name: event.title,
       startDate: event.eventDate,
-      url: `${origin}/photography/${event.slug}`,
+      url: at(origin, `/photography/${event.slug}`, lang),
       image: event.cover.url,
       ...(event.place
         ? { location: { "@type": "Place", name: event.place } }
@@ -69,12 +80,14 @@ export function photographyJsonLd(
 export function eventJsonLd(
   event: PublicEvent,
   origin: string = siteOrigin("creatives"),
+  lang: Lang = DEFAULT_LANG,
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "ImageGallery",
     name: event.title,
-    url: `${origin}/photography/${event.slug}`,
+    url: at(origin, `/photography/${event.slug}`, lang),
+    inLanguage: lang,
     ...(event.description ? { description: event.description } : {}),
     dateCreated: event.eventDate,
     ...(event.place
@@ -104,6 +117,7 @@ export function servicesJsonLd(
   services: readonly PublicService[],
   faqs: readonly PublicFaq[],
   origin: string = siteOrigin("creatives"),
+  lang: Lang = DEFAULT_LANG,
 ): Record<string, unknown>[] {
   const provider = { "@type": "Person", name: PERSON_NAME, url: origin };
   const graph: Record<string, unknown>[] = services.map((service) => ({
@@ -112,14 +126,18 @@ export function servicesJsonLd(
     name: service.title,
     description: service.description,
     serviceType:
-      service.group === "photography" ? "Photography" : "Graphic design",
+      service.group === "photography"
+        ? CREATIVES_UI[lang].groupPhotography
+        : CREATIVES_UI[lang].groupDesign,
     provider,
-    url: `${origin}/services`,
+    inLanguage: lang,
+    url: at(origin, "/services", lang),
   }));
   if (faqs.length > 0) {
     graph.push({
       "@context": "https://schema.org",
       "@type": "FAQPage",
+      inLanguage: lang,
       mainEntity: faqs.map((faq) => ({
         "@type": "Question",
         name: faq.question,
@@ -136,6 +154,7 @@ export function homeJsonLd(
   work: readonly { title: string; href: string; image: { url: string } }[],
   description: string,
   origin: string = siteOrigin("creatives"),
+  lang: Lang = DEFAULT_LANG,
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
@@ -145,20 +164,24 @@ export function homeJsonLd(
         "@id": `${origin}/#person`,
         name: PERSON_NAME,
         url: origin,
-        jobTitle: "Graphic designer and photographer",
+        jobTitle:
+          lang === "fr"
+            ? "Designer graphique et photographe"
+            : "Graphic designer and photographer",
       },
       {
         "@type": "WebSite",
         "@id": `${origin}/#website`,
-        name: `${PERSON_NAME} — Design & Photography`,
-        url: origin,
+        name: siteName(lang),
+        url: at(origin, "/", lang),
+        inLanguage: lang,
         description,
         publisher: { "@id": `${origin}/#person` },
       },
       ...work.map((item) => ({
         "@type": "CreativeWork",
         name: item.title,
-        url: `${origin}${item.href}`,
+        url: `${origin}${localizedPath(item.href, lang)}`,
         image: item.image.url,
         creator: { "@id": `${origin}/#person` },
       })),

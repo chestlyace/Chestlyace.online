@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, type PointerEvent } from "react";
 import { responsiveImage } from "@/lib/cloudinary";
 import type { PublicEvent } from "@/lib/creatives/data";
 import { prefersReducedMotionNow } from "@/lib/media";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
+import { format } from "@/lib/i18n/format";
 
 type Picture = PublicEvent["images"][number];
 
@@ -31,6 +33,7 @@ export function PictureLightbox({
   onStep: (index: number) => void;
   onClose: () => void;
 }) {
+  const t = useCreativesText();
   const dialog = useRef<HTMLDialogElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const flown = useRef(false);
@@ -164,7 +167,11 @@ export function PictureLightbox({
   return (
     <dialog
       ref={dialog}
-      aria-label={`${title}, picture ${index + 1} of ${pictures.length}`}
+      aria-label={format(t.pictureOf, {
+        title,
+        n: index + 1,
+        total: pictures.length,
+      })}
       onCancel={(event) => {
         event.preventDefault();
         close();
@@ -201,7 +208,7 @@ export function PictureLightbox({
             <>
               <button
                 type="button"
-                aria-label="Previous picture"
+                aria-label={t.previousPicture}
                 onClick={() => step(-1)}
                 className="absolute top-1/2 left-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
@@ -209,7 +216,7 @@ export function PictureLightbox({
               </button>
               <button
                 type="button"
-                aria-label="Next picture"
+                aria-label={t.nextPicture}
                 onClick={() => step(1)}
                 className="absolute top-1/2 right-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
@@ -230,7 +237,7 @@ export function PictureLightbox({
       </p>
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t.close}
         onClick={close}
         className="fixed top-3 right-3 z-10 grid size-11 place-items-center rounded-full bg-black/40 hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >

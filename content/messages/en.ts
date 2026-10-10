@@ -50,6 +50,11 @@ export const en = {
       /** The blog's key links. */
       posts: "Posts",
       tags: "Tags",
+      /** The creatives site's key links. */
+      work: "Work",
+      design: "Design",
+      photography: "Photography",
+      services: "Services",
     },
     footer: {
       nav: "Footer",
@@ -468,6 +473,30 @@ Use the [contact form]({contact}) on my main site.
   },
 
   // The titles and descriptions search engines and shared links show (docs/i18n.md §6).
+  // The creatives site's wording as first written. The owner edits it in the admin
+  // (Creatives → Settings), in both languages; these are what a field shows until it
+  // is changed, and what a blank one falls back to (lib/creativesCopy.ts).
+  // PLACEHOLDER — design.md §14.20–14.26.
+  creativesDefaults: {
+    heroStatement: "Design & Photography",
+    heroLine:
+      "Brand visuals and event stories by Chestly Ace (Amahndong Chestly).",
+    designIntro:
+      "Logos, posters, social campaigns and brand visuals made to look intentional.",
+    photographyIntro:
+      "Events, portraits and brand stories, from the moments worth keeping.",
+    portalsTitle: "Two ways I work",
+    portalDesignText: "Brand identity, posters and campaign visuals.",
+    portalPhotographyText: "Events and portraits, told in pictures.",
+    marqueeWords: ["Graphic design", "Photography", "Branding", "Events"],
+    contactStatement: "Have a project or an event to cover?",
+    contactText:
+      "Tell me what you have in mind and I'll get back to you with ideas and a quote.",
+    contactNote: "I usually reply within a day.",
+    seoDescription:
+      "Graphic design, branding, and photography by Chestly Ace (Amahndong Chestly).",
+  },
+
   seo: {
     main: {
       title: "{name} ({legalName}) — Software Engineer",
@@ -476,6 +505,11 @@ Use the [contact form]({contact}) on my main site.
       jobTitle: "Software Engineer",
     },
     project: "{title} — Chestly Ace",
+    creatives: {
+      title: "Chestly Ace — Design & Photography",
+      description:
+        "Graphic design, branding, and photography by Chestly Ace (Amahndong Chestly).",
+    },
     blog: {
       title: "Chestly Ace — Blog",
       description:

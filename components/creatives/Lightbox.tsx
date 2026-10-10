@@ -12,6 +12,8 @@ import { responsiveImage, thumbnailUrl } from "@/lib/cloudinary";
 import type { PublicPiece } from "@/lib/creatives/data";
 import { prefersReducedMotionNow } from "@/lib/media";
 import { Details } from "./Details";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
+import { format } from "@/lib/i18n/format";
 
 const WIDTHS = [800, 1200, 1600, 2400];
 const EASE = "cubic-bezier(0.77, 0, 0.175, 1)";
@@ -39,6 +41,7 @@ export function Lightbox({
   onStep: (slug: string) => void;
   onClose: () => void;
 }) {
+  const t = useCreativesText();
   const dialog = useRef<HTMLDialogElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const flown = useRef(false);
@@ -223,7 +226,7 @@ export function Lightbox({
             <>
               <button
                 type="button"
-                aria-label="Previous piece"
+                aria-label={t.previousPiece}
                 onClick={() => step(-1)}
                 className="absolute top-1/2 left-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
@@ -231,7 +234,7 @@ export function Lightbox({
               </button>
               <button
                 type="button"
-                aria-label="Next piece"
+                aria-label={t.nextPiece}
                 onClick={() => step(1)}
                 className="absolute top-1/2 right-3 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
@@ -242,14 +245,17 @@ export function Lightbox({
 
           {images.length > 1 && (
             <ul
-              aria-label="Images of this piece"
+              aria-label={t.pieceImages}
               className="absolute bottom-3 left-1/2 flex max-w-[calc(100%-2rem)] -translate-x-1/2 gap-2 overflow-x-auto rounded-md bg-black/40 p-2"
             >
               {images.map((thumb, i) => (
                 <li key={thumb.url}>
                   <button
                     type="button"
-                    aria-label={`Image ${i + 1} of ${images.length}`}
+                    aria-label={format(t.imageOf, {
+                      n: i + 1,
+                      total: images.length,
+                    })}
                     aria-current={i === imageIndex}
                     onClick={() => setPicked({ slug, index: i })}
                     className="block size-12 overflow-hidden opacity-60 outline-none aria-current:opacity-100 aria-current:outline-2 aria-current:outline-offset-1 aria-current:outline-[#fb923c] focus-visible:outline-2 focus-visible:outline-ring hover:opacity-100"
@@ -268,23 +274,23 @@ export function Lightbox({
         </div>
 
         <aside
-          aria-label="About this piece"
+          aria-label={t.aboutPiece}
           className="border-t border-white/10 p-6 lg:overflow-y-auto lg:border-t-0 lg:border-l lg:pt-20"
         >
           <h2 className="mb-6 text-h3 leading-tight">{piece.title}</h2>
           <Details
-            heading="About the piece"
+            heading={t.aboutPieceHeading}
             rows={[
-              { term: "Category", value: piece.category },
-              { term: "Client", value: piece.client },
-              { term: "Role", value: piece.role },
-              { term: "Year", value: piece.year },
+              { term: t.termCategory, value: piece.category },
+              { term: t.termClient, value: piece.client },
+              { term: t.termRole, value: piece.role },
+              { term: t.termYear, value: piece.year },
             ]}
-            tags={{ term: "Tools", values: piece.tools }}
+            tags={{ term: t.termTools, values: piece.tools }}
             description={piece.description}
             link={
               piece.linkUrl
-                ? { href: piece.linkUrl, label: "View the project" }
+                ? { href: piece.linkUrl, label: t.viewProject }
                 : null
             }
           />
@@ -301,7 +307,7 @@ export function Lightbox({
       </div>
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t.close}
         onClick={close}
         className="fixed top-3 right-3 z-10 grid size-11 place-items-center rounded-full bg-black/40 hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >

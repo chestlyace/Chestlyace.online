@@ -155,3 +155,65 @@ describe("serverProblems", () => {
     ).toEqual({ cover: "The width is missing.", slug: "Taken." });
   });
 });
+
+describe("the French version in the forms", () => {
+  it("reads and writes a piece's French text and its pictures' French alt", () => {
+    const row = {
+      id: 1,
+      title: "Acme",
+      slug: "acme",
+      category: "Brand",
+      description: "",
+      client: "",
+      role: "",
+      tools: [],
+      year: null,
+      linkUrl: null,
+      isFeatured: false,
+      isPublished: true,
+      coverUrl: cover.url,
+      coverWidth: cover.width,
+      coverHeight: cover.height,
+      coverAlt: "Cover",
+      images: [pic(1, { altFr: "Image 1" })],
+      translations: { fr: { title: "Acme FR", tools: ["x"], category: "  " } },
+    };
+    const form = pieceFromRow(row);
+    expect(form.french).toEqual({
+      title: "Acme FR",
+      tools: ["x"],
+      category: "  ",
+    });
+    expect(form.images[0].altFr).toBe("Image 1");
+    const body = pieceBody(form);
+    expect(body.translations).toEqual({
+      fr: { title: "Acme FR", tools: ["x"] },
+    });
+    expect((body.images as { altFr?: string }[])[0].altFr).toBe("Image 1");
+    expect(pieceProblems(form)).toEqual({});
+    expect(pieceBody(emptyPiece()).translations).toEqual({});
+  });
+
+  it("writes an event's French captions and credit roles, and says where a French problem is", () => {
+    const form = emptyEvent();
+    form.fields = {
+      ...form.fields,
+      title: "Gala",
+      slug: "gala",
+      eventDate: "2026-03-14",
+    };
+    form.cover = cover;
+    form.coverAlt = "Cover";
+    form.images = [
+      pic(1, { caption: "First", captionFr: "Premier", altFr: "Un" }),
+    ];
+    form.credits = [{ role: "Host", roleFr: "Hôte", name: "PyCon", url: "" }];
+    form.french = { title: "Gala FR" };
+    const body = eventBody(form);
+    expect(body.images).toMatchObject([{ captionFr: "Premier", altFr: "Un" }]);
+    expect(body.credits).toMatchObject([{ roleFr: "Hôte" }]);
+    expect(eventProblems(form)).toEqual({});
+    form.french = { title: "x".repeat(400) };
+    expect(Object.keys(eventProblems(form))).toEqual(["french"]);
+  });
+});

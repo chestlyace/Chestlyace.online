@@ -7,6 +7,7 @@ import { tileRatio } from "@/lib/creatives/gallery";
 import type { PublicPiece } from "@/lib/creatives/data";
 import { cn } from "@/lib/cn";
 import { useReveal } from "@/components/blog/blocks/useReveal";
+import { useCreativesText } from "@/components/creatives/useCreativesText";
 
 const WIDTHS = [480, 800, 1200, 1600];
 const SIZES =
@@ -29,6 +30,7 @@ export function GalleryTile({
   priority: boolean;
   onOpen: (slug: string, from: DOMRect) => void;
 }) {
+  const t = useCreativesText();
   const root = useRef<HTMLDivElement>(null);
   useReveal(root);
   const ratio = tileRatio(piece.cover.width, piece.cover.height);
@@ -121,7 +123,7 @@ export function GalleryTile({
               ))}
             </span>
             <span className="type-label inline-flex items-center gap-1 text-[#fb923c]">
-              View
+              {t.view}
               <ArrowUpRight className="size-3.5" />
             </span>
           </span>

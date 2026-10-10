@@ -31,6 +31,9 @@ import { useToast } from "../Toast";
 import { useUnsavedChanges } from "../UnsavedGuard";
 import { CoverField, PictureList } from "./CreativeImages";
 import { CreditsField } from "./CreditsField";
+import { FrenchFields } from "./FrenchFields";
+import { TRANSLATABLE } from "@/lib/i18n/translatable";
+import { cn } from "@/lib/cn";
 
 // The editor of a design piece or a photography event (design.md §14.26): the text
 // fields of the other editors (§13.21), the cover, the pictures, and for an event
@@ -234,6 +237,7 @@ export function CreativeEditor({
   const [saved, setSaved] = useState<Form>(start);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [lang, setLang] = useState<"en" | "fr">("en");
   const [saving, setSaving] = useState(false);
   const [savedRecently, setSavedRecently] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(itemId));
@@ -269,6 +273,11 @@ export function CreativeEditor({
       "credits",
       ...ALBUM_FIELDS.map((f) => f.name),
     ];
+    // A problem in the French text: open that tab.
+    if (found.french) {
+      setLang("fr");
+      return;
+    }
     const first = order.find((name) => found[name]);
     if (!first) return;
     const target =
@@ -404,74 +413,129 @@ export function CreativeEditor({
         </p>
       )}
 
-      <Section>{fieldsOf(design ? DESIGN_FIELDS : EVENT_FIELDS)}</Section>
-
-      <Section
-        title="Cover"
-        helper={
-          design
-            ? "The picture shown in the gallery."
-            : "The picture on the events page and at the top of the event."
-        }
-        error={errors.cover}
+      <div
+        role="tablist"
+        aria-label="Language"
+        className="mb-8 inline-flex rounded-full border border-border bg-tile p-1"
       >
-        <div data-section="cover" tabIndex={-1}>
-          <CoverField
-            cover={form.cover}
-            alt={form.coverAlt}
-            error={errors.cover}
-            onCover={(cover) => {
-              setForm({ ...form, cover });
-              clearError("cover");
-            }}
-            onAlt={(coverAlt) => {
-              setForm({ ...form, coverAlt });
-              clearError("cover");
-            }}
-          />
-        </div>
-      </Section>
-
-      <Section
-        title={design ? "More images" : "Pictures"}
-        helper={
-          design
-            ? "Other views of the piece, shown in its lightbox. Up to 12."
-            : "The pictures you picked from the event. The rest are in the full album. Up to 60."
-        }
-        error={errors.images}
-      >
-        <div data-section="images" tabIndex={-1}>
-          <PictureList
-            pictures={form.images}
-            max={design ? 12 : 60}
-            captions={!design}
-            onChange={(images) => {
-              setForm({ ...form, images });
-              clearError("images");
-            }}
-          />
-        </div>
-      </Section>
-
-      {!design && (
-        <>
-          <Section
-            title="Credits"
-            helper="Who made it happen, in the order they are shown. Yours goes last."
-            error={errors.credits}
+        {(
+          [
+            ["en", "English"],
+            ["fr", "Français"],
+          ] as const
+        ).map(([code, name]) => (
+          <button
+            key={code}
+            type="button"
+            role="tab"
+            id={`creative-tab-${code}`}
+            aria-selected={lang === code}
+            onClick={() => setLang(code)}
+            className={cn(
+              "type-label h-9 rounded-full px-5 transition-colors duration-150",
+              lang === code
+                ? "bg-primary text-primary-foreground"
+                : "text-muted hover:text-foreground",
+            )}
           >
-            <div data-section="credits" tabIndex={-1}>
-              <CreditsField
-                credits={(form as EventForm).credits}
-                onChange={(credits: Credit[]) => {
-                  setForm({ ...form, credits } as Form);
-                  clearError("credits");
+            {name}
+          </button>
+        ))}
+      </div>
+
+      {lang === "fr" ? (
+        <FrenchFields
+          defs={(design ? DESIGN_FIELDS : EVENT_FIELDS).filter((field) =>
+            Object.hasOwn(
+              TRANSLATABLE[design ? "design-pieces" : "photo-events"],
+              field.name,
+            ),
+          )}
+          english={form.fields}
+          french={form.french}
+          onField={(name, value) =>
+            setForm({ ...form, french: { ...form.french, [name]: value } })
+          }
+          coverAlt={form.coverAlt}
+          images={form.images}
+          credits={design ? undefined : (form as EventForm).credits}
+          captions={!design}
+          errors={errors}
+          onImages={(images) => setForm({ ...form, images })}
+          onCredits={(credits) => setForm({ ...form, credits } as Form)}
+        />
+      ) : (
+        <>
+          <Section>{fieldsOf(design ? DESIGN_FIELDS : EVENT_FIELDS)}</Section>
+
+          <Section
+            title="Cover"
+            helper={
+              design
+                ? "The picture shown in the gallery."
+                : "The picture on the events page and at the top of the event."
+            }
+            error={errors.cover}
+          >
+            <div data-section="cover" tabIndex={-1}>
+              <CoverField
+                cover={form.cover}
+                alt={form.coverAlt}
+                error={errors.cover}
+                onCover={(cover) => {
+                  setForm({ ...form, cover });
+                  clearError("cover");
+                }}
+                onAlt={(coverAlt) => {
+                  setForm({ ...form, coverAlt });
+                  clearError("cover");
                 }}
               />
             </div>
           </Section>
-          <Section title="Full album">{fieldsOf(ALBUM_FIELDS)}</Section>
+
+          <Section
+            title={design ? "More images" : "Pictures"}
+            helper={
+              design
+                ? "Other views of the piece, shown in its lightbox. Up to 12."
+                : "The pictures you picked from the event. The rest are in the full album. Up to 60."
+            }
+            error={errors.images}
+          >
+            <div data-section="images" tabIndex={-1}>
+              <PictureList
+                pictures={form.images}
+                max={design ? 12 : 60}
+                captions={!design}
+                onChange={(images) => {
+                  setForm({ ...form, images });
+                  clearError("images");
+                }}
+              />
+            </div>
+          </Section>
+
+          {!design && (
+            <>
+              <Section
+                title="Credits"
+                helper="Who made it happen, in the order they are shown. Yours goes last."
+                error={errors.credits}
+              >
+                <div data-section="credits" tabIndex={-1}>
+                  <CreditsField
+                    credits={(form as EventForm).credits}
+                    onChange={(credits: Credit[]) => {
+                      setForm({ ...form, credits } as Form);
+                      clearError("credits");
+                    }}
+                  />
+                </div>
+              </Section>
+              <Section title="Full album">{fieldsOf(ALBUM_FIELDS)}</Section>
+            </>
+          )}
         </>
       )}
 

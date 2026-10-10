@@ -42,6 +42,31 @@ describe("the seeded Services page", () => {
     expect(faqs.every((f) => f.group === "design")).toBe(true);
   });
 
+  it("reads a service and a question in French, field by field", async () => {
+    const [first] = await db.select().from(schema.creativeServices).limit(1);
+    await db
+      .update(schema.creativeServices)
+      .set({ translations: { fr: { title: "Titre", items: ["un", "deux"] } } })
+      .where(eq(schema.creativeServices.id, first.id));
+    const [faq] = await db.select().from(schema.creativeFaqs).limit(1);
+    await db
+      .update(schema.creativeFaqs)
+      .set({ translations: { fr: { question: "Question ?" } } })
+      .where(eq(schema.creativeFaqs.id, faq.id));
+    const services = await listPublishedServices(db, "fr");
+    const one = services.find((s) => s.id === first.id)!;
+    expect(one.title).toBe("Titre");
+    expect(one.items).toEqual(["un", "deux"]);
+    expect(one.description).toBe(first.description); // not translated: English
+    const faqs = await listPublishedFaqs(db, "fr");
+    const q = faqs.find((f) => f.id === faq.id);
+    expect(q?.question).toBe("Question ?");
+    expect(q?.answer).toBe(faq.answer);
+    expect(
+      (await listPublishedServices(db)).find((s) => s.id === first.id)?.title,
+    ).toBe(first.title);
+  });
+
   it("describes each service and the questions as structured data", async () => {
     const services = await listPublishedServices(db);
     const faqs = await listPublishedFaqs(db);

@@ -59,6 +59,8 @@ function siteCopy(site: PublicSiteKey, lang: Lang) {
   if (lang === DEFAULT_LANG) return SITE_COPY[site];
   if (site === "blog")
     return { ...SITE_COPY.blog, ...getMessages(lang).seo.blog };
+  if (site === "creatives")
+    return { ...SITE_COPY.creatives, ...getMessages(lang).seo.creatives };
   if (site !== "main") return SITE_COPY[site];
   const { title, description } = getMessages(lang).seo.main;
   const values = { name: PERSON_NAME, legalName: PERSON_LEGAL_NAME };

@@ -6,8 +6,8 @@ import { siteUrl } from "@/lib/sites";
 // each of its events; the home page's remaining parts follow (10b.6–10b.7).
 export async function GET() {
   const [pieces, events] = await Promise.all([
-    getCachedPieces(),
-    getCachedEvents(),
+    getCachedPieces("en"),
+    getCachedEvents("en"),
   ]);
   return textResponse(
     sitemapXml([

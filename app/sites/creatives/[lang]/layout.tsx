@@ -8,8 +8,14 @@ import { getCachedHomepageData } from "@/lib/portfolio";
 import { LANGS, isLang } from "@/lib/i18n";
 import { siteMetadata } from "@/lib/seo";
 import "../../../globals.css";
+import { CREATIVES_UI } from "@/lib/i18n/ui";
 
-export const metadata: Metadata = siteMetadata("creatives");
+export async function generateMetadata({
+  params,
+}: LayoutProps<"/sites/creatives/[lang]">): Promise<Metadata> {
+  const { lang } = await params;
+  return siteMetadata("creatives", isLang(lang) ? lang : undefined);
+}
 
 // Both languages are built ahead of time; the layout answers any other value with a
 // 404 (docs/i18n.md §3). `dynamicParams = false` is not used: it makes Next fail to
@@ -43,7 +49,7 @@ export default async function CreativesLayout({
     const digits = profile.whatsappNumber?.replace(/\D/g, "");
     if (digits)
       contact.push({
-        label: "WhatsApp",
+        label: CREATIVES_UI[lang].whatsapp,
         href: `https://wa.me/${digits}`,
         external: true,
       });

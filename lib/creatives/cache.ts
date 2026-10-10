@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { getDb } from "@/lib/db";
+import type { Lang } from "@/lib/i18n";
 import {
   getCreativesCopy,
   listCreativesSocials,
@@ -27,18 +28,20 @@ function cached<Args extends unknown[], Result>(
   });
 }
 
-export const getCachedPieces = cached("pieces", () =>
-  listPublishedPieces(getDb()),
+export const getCachedPieces = cached("pieces", (lang: Lang) =>
+  listPublishedPieces(getDb(), lang),
 );
-export const getCachedEvents = cached("events", () =>
-  listPublishedEvents(getDb()),
+export const getCachedEvents = cached("events", (lang: Lang) =>
+  listPublishedEvents(getDb(), lang),
 );
-export const getCachedServices = cached("services", () =>
-  listPublishedServices(getDb()),
+export const getCachedServices = cached("services", (lang: Lang) =>
+  listPublishedServices(getDb(), lang),
 );
-export const getCachedFaqs = cached("faqs", () => listPublishedFaqs(getDb()));
-export const getCachedCreativesCopy = cached("copy", () =>
-  getCreativesCopy(getDb()),
+export const getCachedFaqs = cached("faqs", (lang: Lang) =>
+  listPublishedFaqs(getDb(), lang),
+);
+export const getCachedCreativesCopy = cached("copy", (lang: Lang) =>
+  getCreativesCopy(getDb(), lang),
 );
 export const getCachedCreativesSocials = cached("socials", () =>
   listCreativesSocials(getDb()),
