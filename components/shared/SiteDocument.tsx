@@ -7,6 +7,7 @@ import type { Lang } from "@/lib/i18n";
 import type { PublicSiteKey } from "@/lib/sites";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { LangProvider } from "./LangProvider";
+import { LanguageSuggestion } from "./LanguageSuggestion";
 import { Providers } from "./Providers";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
@@ -42,6 +43,11 @@ export function SiteDocument({
           <Providers>
             <SkipLink label={getMessages(lang).chrome.skipToContent} />
             <SiteHeader site={site} lang={lang} />
+            {lang === "en" && (
+              <LanguageSuggestion
+                labels={getMessages("fr").language.suggestion}
+              />
+            )}
             <main
               id="main"
               tabIndex={-1}

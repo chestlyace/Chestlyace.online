@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  bothLanguages,
   imagePath,
   indexingEnabled,
   jsonLdText,
+  languageAlternates,
   mainJsonLd,
   pageMetadata,
   robotsTxt,
@@ -231,6 +233,62 @@ describe("sitemapXml", () => {
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
     expect(xml).toContain("<loc>https://chestlyace.online/</loc>");
     expect(xml).toContain("<loc>https://x.vercel.app/?site=main&amp;a=1</loc>");
+  });
+});
+
+describe("sitemapXml with languages", () => {
+  it("lists both addresses of a page, each with its alternates and x-default", () => {
+    const xml = sitemapXml(bothLanguages("blog", "/tags"));
+    expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+    expect(xml.match(/<url>/g)).toHaveLength(2);
+    expect(xml).toContain("<loc>https://blog.chestlyace.online/tags</loc>");
+    expect(xml).toContain("<loc>https://blog.chestlyace.online/fr/tags</loc>");
+    expect(xml).toContain(
+      '<xhtml:link rel="alternate" hreflang="fr" href="https://blog.chestlyace.online/fr/tags"/>',
+    );
+    expect(xml).toContain(
+      '<xhtml:link rel="alternate" hreflang="x-default" href="https://blog.chestlyace.online/tags"/>',
+    );
+  });
+
+  it("adds the namespace only when there are alternates", () => {
+    expect(sitemapXml(["https://a.test/"])).not.toContain("xhtml");
+  });
+});
+
+describe("language alternates in the metadata", () => {
+  it("gives a page in both languages its hreflang set, and English as the default", () => {
+    expect(languageAlternates("/projects/x")).toEqual({
+      en: "/projects/x",
+      fr: "/fr/projects/x",
+      "x-default": "/projects/x",
+    });
+    expect(languageAlternates("/")).toEqual({
+      en: "/",
+      fr: "/fr",
+      "x-default": "/",
+    });
+    const french = pageMetadata("main", {
+      path: "/projects/x",
+      title: "t",
+      description: "d",
+      lang: "fr",
+    });
+    expect(french.alternates?.canonical).toBe("/fr/projects/x");
+    expect(french.alternates?.languages).toEqual(
+      languageAlternates("/projects/x"),
+    );
+  });
+
+  it("leaves the alternates out for a page with no counterpart", () => {
+    const alone = pageMetadata("blog", {
+      path: "/only-english",
+      title: "t",
+      description: "d",
+      translated: false,
+    });
+    expect(alone.alternates?.languages).toBeUndefined();
+    expect(alone.alternates?.canonical).toBe("/only-english");
   });
 });
 

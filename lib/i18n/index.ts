@@ -14,11 +14,11 @@ export function isLang(value: unknown): value is Lang {
 }
 
 /**
- * Whether French is reachable in production. It stays `false` until the last build
- * step of Phase 11 (11b.6) switches it on, so no half-French site can be visited;
+ * Whether French is reachable in production: `true` since the last build step of
+ * Phase 11 (11b.6). Kept as a switch so French can be taken offline in one line;
  * previews and development always reach it (docs/i18n.md §11).
  */
-export const FRENCH_PUBLIC = false;
+export const FRENCH_PUBLIC = true;
 
 /** The Intl locale of each language: dates, numbers, plurals. */
 export const LOCALES: Record<Lang, string> = { en: "en-GB", fr: "fr-FR" };
@@ -55,6 +55,15 @@ export function localizedPath(path: string, lang: Lang): string {
   const clean = rest === "" ? "/" : rest;
   if (lang === DEFAULT_LANG) return clean;
   return clean === "/" ? `/${lang}` : `/${lang}${clean}`;
+}
+
+/**
+ * The path without the internal site prefix the host is rewritten to
+ * (`/sites/blog/en/x` → `/en/x`). A statically rendered page may still report the
+ * internal path before the browser corrects it; both mean the same page.
+ */
+export function stripSitePrefix(raw: string): string {
+  return raw.replace(/^\/sites\/[a-z]+(?=\/|$)/, "") || "/";
 }
 
 /** The same page in another language, from the current public path. */

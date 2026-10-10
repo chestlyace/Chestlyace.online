@@ -69,6 +69,8 @@ export type PostSummary = {
   readingMinutes: number;
   /** The language the text is in: French only for a post with a published French version. */
   lang: Lang;
+  /** Whether the post has a published French version (the alternates need it). */
+  hasFrench: boolean;
 };
 
 export type Post = PostSummary & {

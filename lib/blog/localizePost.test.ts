@@ -25,6 +25,7 @@ describe("inLanguage", () => {
       readingMinutes: 3,
       series: null,
       lang: "en",
+      hasFrench: true, // the post has French; this reader just reads English
     });
   });
 
@@ -44,6 +45,7 @@ describe("inLanguage", () => {
     expect(result.lang).toBe("en");
     expect(result.title).toBe("Hello");
     expect(result.readingMinutes).toBe(3);
+    expect(result.hasFrench).toBe(false);
   });
 });
 

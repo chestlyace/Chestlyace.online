@@ -1,6 +1,7 @@
 import { getMessages } from "@/content/messages";
 import { localizedPath, type Lang } from "@/lib/i18n";
 import { PUBLIC_SITE_KEYS, siteUrl, type PublicSiteKey } from "@/lib/sites";
+import { languageLabels } from "@/lib/i18n/labels";
 import { BLOG_NAV } from "@/lib/blog/nav";
 import { CREATIVES_NAV } from "@/lib/creatives/nav";
 import { MAIN_NAV, type NavLink } from "@/lib/sections";
@@ -63,6 +64,7 @@ export function SiteHeader({
         sites: m.sites,
         youAreHere: m.youAreHere,
         theme: m.theme,
+        language: languageLabels(lang),
       }}
     />
   );

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AboutSection } from "@/components/main/AboutSection";
 import { ContactSection } from "@/components/main/ContactSection";
 import { ExperienceSection } from "@/components/main/ExperienceSection";
@@ -12,12 +13,20 @@ import { getMessages } from "@/content/messages";
 import { isLang } from "@/lib/i18n";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { getCachedHomepageData } from "@/lib/portfolio";
-import { mainJsonLd } from "@/lib/seo";
+import { mainJsonLd, homeAlternates } from "@/lib/seo";
 import {
   sectionBands,
   sectionNumbers,
   type HomeSectionId,
 } from "@/lib/sections";
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/sites/main/[lang]">): Promise<Metadata> {
+  const { lang } = await params;
+  // The home page's hreflang set; the layout's metadata is for every page.
+  return isLang(lang) ? { alternates: homeAlternates("main", lang) } : {};
+}
 
 export default async function Home({
   params,

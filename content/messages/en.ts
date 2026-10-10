@@ -13,6 +13,13 @@ export const en = {
     names: { en: "English", fr: "Français" },
     /** The switcher's accessible name for a language, e.g. "Switch to Français". */
     switchTo: "Switch to {language}",
+    /** The French suggestion shown on an English page to a browser set to French. */
+    suggestion: {
+      region: "Language",
+      text: "This site is also available in French.",
+      link: "View in French",
+      close: "Close",
+    },
   },
 
   // The header, the footer and everything every page has (design.md §13.6–13.9).
