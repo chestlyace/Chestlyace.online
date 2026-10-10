@@ -23,6 +23,8 @@ before the phase starts.
 | 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 done (PR #86) | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 done (PR #102); 10c launch prep done (PR #104) | Q1, Q12 (decided 2026-10-08) |
 | 11 | Languages (English and French) | 11a design done (PR #110); 11b.1 done (PR #112); 11b.2 done (PR #114); 11b.3 done (PR #116); 11b.4 done (PR #118); 11b.5 in review (issue #119); 11b.6 after it | Decided 2026-10-10 (D89) |
+| 12 | Loading states and not-found pages | 12a design done (the docs PR, issue #121); 12b.1–12b.4 after it | Decided 2026-10-11 (D91) |
+| 13 | MCP server | 13a design done (the docs PR, issue #121); 13b.1–13b.6 after it | Decided 2026-10-11 (D92) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
@@ -354,3 +356,53 @@ tags last, so no half-French site is linked):
 
 **Done when:** every page of the three sites reads in French, content translated in
 the admin appears without a deploy, and English is unchanged.
+
+---
+
+## Phase 12 — Loading states and not-found pages
+
+**Goal:** no spinners and no bare 404s (D91). The brand mark draws itself while
+something loads, content areas show skeletons shaped like what is coming, small waits
+have small states, and the not-found and error pages are real pages of each site.
+Specs: `design.md` §13.64–13.67.
+
+**12a — Design (docs only).** §13.64–13.67, D91, these rows (done in the same docs PR as
+13a).
+
+**12b — Build**, four steps, delivered without waiting for merges (D90), each its own
+issue and stacked pull request:
+
+| Step | Content | Status |
+|---|---|---|
+| 12b.1 Brand loader and navigation | The loader component (three sizes, reduced motion), the top bar and the 400ms overlay on the three public sites, `loading.tsx` shells | Not started |
+| 12b.2 Skeletons | The skeletons of §13.65 and a `loading.tsx` per route, comments' skeleton, the shimmer | Not started |
+| 12b.3 Inline and admin states | `Button loading`, comments/likes/forms, uploads, the lightbox image, the admin's loading (`md` loader, list skeletons) | Not started |
+| 12b.4 Not-found and error pages | The four 404 pages (three public, one plain admin), `error.tsx` and `global-error.tsx`, English and French | Not started |
+
+**Done when:** no spinner remains, every route shows something shaped like itself at once
+and the brand loader only after 400ms, and every unknown address shows its site's page
+with the right status code.
+
+---
+
+## Phase 13 — MCP server
+
+**Goal:** an agent can do everything the owner can in the admin (D92). Everything is in
+[`mcp.md`](./mcp.md).
+
+**13a — Design (docs only).** `mcp.md`, D92, these rows.
+
+**13b — Build**, six steps, delivered without waiting for merges (D90):
+
+| Step | Content | Status |
+|---|---|---|
+| 13b.1 Tokens, auth, activity | Migration 0012, token create/verify/revoke, the rate limiter, the activity log, **Settings → Agent access** and Activity screens | Not started |
+| 13b.2 Server, general and media tools | `@modelcontextprotocol/sdk`, `/mcp` on the admin host, `whoami`, `list_resources`, `get_guide`, uploads | Not started |
+| 13b.3 Blog tools | Posts (with French), validation, publish, duplicate, delete, comments moderation | Not started |
+| 13b.4 Portfolio tools | Projects, skills, experience, volunteering, certifications, services, FAQ, socials, profile | Not started |
+| 13b.5 Creatives and settings tools | Pieces, events, creative services and FAQ, the two settings | Not started |
+| 13b.6 Docs and end-to-end | `launch.md` section, prompts and resources, an end-to-end run with the SDK client | Not started |
+
+**Done when:** an MCP client with a token can write and publish a blog post with a
+picture, add a project and a creatives piece, and the sites show them; a token without a
+scope is refused; a revoked token stops working; every call is in the Activity screen.
