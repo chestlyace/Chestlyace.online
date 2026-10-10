@@ -17,11 +17,11 @@ before the phase starts.
 | 3 | Design system & shared layout | Done (placeholder baseline, D30) | Q13, Q18 (decided) |
 | 4 | Database | Done | Q19 (decided) |
 | 5 | Main site homepage | Done (5a: PRs #18–#24; 5b: PRs #26–#36). Q5 stays open: the About text is a placeholder | Q4, Q6–Q11, Q22 answered (issue #15); Q5 open |
-| 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 in review | Q14, Q15, Q21 (decided) |
+| 6 | Admin panel | 6a done (PR #38); 6b.1 done (PR #40); 6b.2 done (PR #42); 6b.3 done (PR #44); 6b.4 done (PR #46) | Q14, Q15, Q21 (decided) |
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
-| 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b in review (issue #59); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
-| 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 in review (issue #85) | Q12 (blog: decided), Q16 (decided) |
-| 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 in review (issue #101) | Q1, Q12 (decided 2026-10-08) |
+| 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b done (PR #60); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
+| 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 done (PR #86) | Q12 (blog: decided), Q16 (decided) |
+| 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 done (PR #102); 10c launch prep in review (issue #103) | Q1, Q12 (decided 2026-10-08) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
@@ -171,7 +171,7 @@ Q21 (decisions D71, D72), and the doc changes that follow from the admin moving 
 | 6b.1 Host, login, shell — issue #39 | The `admin` host and per-host API routing; login/logout, session cookie, rate limit; the shell, dashboard and admin 404; `pnpm admin:hash` | Done (PR #40) |
 | 6b.2 API and simple resources — issue #41 | `/api/admin/*` with Zod; the list, editor, switch, field, dialog, toast and save-bar components; skills, services, certifications, socials, FAQ; revalidation | Done (PR #42) |
 | 6b.3 Projects, experience, volunteering, profile — issue #43 | The remaining resources, with the slug and gallery fields, the Experience tabs, and the profile editor | Done (PR #44) |
-| 6b.4 Uploads — issue #45 | Cloudinary signature route and the upload field wired into every image and file field | In review |
+| 6b.4 Uploads — issue #45 | Cloudinary signature route and the upload field wired into every image and file field | Done (PR #46) |
 
 The whole of 6b covers:
 
@@ -224,7 +224,7 @@ Split into PRs (owner, 2026-10-07; Q17 and Q20 answered; 8.4 added for the launc
 | 8.2 Analytics — issue #53 | Vercel Web Analytics on the public sites (not the admin) | Done (PR #54) |
 | 8.3 Launch runbook — issue #55 | Per-site `SITE_INDEXING`; `docs/launch.md`: accounts, environment variables, preview checks, DNS and Vercel domains for main + admin, verification, the 14-day grace period and shutdown of the old EC2 site | Done (PR #56) |
 | 8.4a Placeholder design and launch decisions — issue #57 | Docs only: `design.md` §14.12 (the coming-soon page for creatives and blog), `docs/launch.md` (creatives and blog at cutover and indexed; `hello@chestlyace.online` on Zoho Mail), D81, Q23 | Done (PR #58) |
-| 8.4b Placeholder pages — issue #59 | Build §14.12: the `ComingSoon` page on creatives (`/` and `/services`) and blog | In review |
+| 8.4b Placeholder pages — issue #59 | Build §14.12: the `ComingSoon` page on creatives (`/` and `/services`) and blog | Done (PR #60) |
 
 **Done when:** chestlyace.online is served by Vercel with the owner's real
 content, and the owner has checked it. (The cutover itself is the owner's,
@@ -260,7 +260,7 @@ reviewed and merged before the next:
 | 9b.5c Comment moderation | The Comments screen in the admin: hide, show, delete, ban a reader, mark the author's account | Done (PR #80) |
 | 9b.6a Agent sessions: upload | The session file parser, the redaction rules, the `agent_sessions` table, upload, and the editor's Agent session form (turn picker, redaction review) | Done (PR #82) |
 | 9b.6b Agent sessions: replay | The public replay block and the markdown `session` block | Done (PR #84) |
-| 9b.7 Newsletter | The signup box, double opt-in, the confirmation page | In review (issue #85) |
+| 9b.7 Newsletter | The signup box, double opt-in, the confirmation page | Done (PR #86) |
 
 **Dependencies 9b adds** (named here so merging 9a approves them, D82–D85; each
 is installed in the step that first needs it): `unified`, `remark-parse`,
@@ -310,6 +310,6 @@ the blog's 9b was):
 | 10b.4 Photography | The events page and the event pages | Done (PR #96) |
 | 10b.5 Services and launch work | The services page, the import of the old entries, SEO and redirects | Done (PR #98) |
 | 10b.6 Home: the doodle hero | The full-screen doodle scene and the hero | Done (PR #100) |
-| 10b.7 Home: the rest | The marquee, the portals, the pinned strip, the services teaser | In review (issue #101) |
+| 10b.7 Home: the rest | The marquee, the portals, the pinned strip, the services teaser | Done (PR #102) |
 
 **Done when:** content published in the admin appears on the site without a deploy.

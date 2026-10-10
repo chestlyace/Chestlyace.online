@@ -16,7 +16,7 @@ server is shut down.
 | `www.chestlyace.online` | Redirects to the apex | — |
 | `admin.chestlyace.online` | Live on Vercel | Never |
 | `blog.chestlyace.online` | Live on Vercel with the blog (Phase 9). It shows the "coming soon" page until the first post is published | Yes (D81) |
-| `creatives.chestlyace.online` | Live on Vercel with a short "coming soon" page (`design.md` §14.12) until Phase 10 | Yes (D81) |
+| `creatives.chestlyace.online` | Live on Vercel with the creatives site (Phase 10): home, Design, Photography, Services. Each gallery shows the "coming soon" page until you publish its first piece or event | Yes (D81) |
 
 ## 1. Accounts to set up first
 
@@ -114,7 +114,8 @@ need the same verified Resend domain (new comments go to `CONTACT_TO_EMAIL`, or
 the profile's email).
 
 Not needed yet: `NEXT_PUBLIC_*_URL` (the production defaults are right),
-`REVALIDATE_SECRET` and `CMS_*` (creatives, later).
+`REVALIDATE_SECRET`. The creatives site has no other settings: it uses the same
+Cloudinary variables as the rest of the admin.
 
 ### 2a. Setting up the blog's services
 
@@ -209,20 +210,45 @@ back within minutes. The old server must still be running (§8).
 ## 6. The creatives and blog hosts at launch
 
 Owner decision (2026-10-07, D81): both hosts go live at the same time as the main
-site and are findable by search engines. The blog (Phase 9) is built; the
-creatives site (Phase 10) is not.
+site and are findable by search engines. The blog (Phase 9) and the creatives
+site (Phase 10) are both built.
 
 - [ ] Add `creatives.chestlyace.online` and `blog.chestlyace.online` to the
       Vercel project with the other domains (§5) and the DNS records Vercel shows.
 - The blog shows the short "coming soon" page (`design.md` §14.12) until you
-  publish the first post, then the real blog. The creatives host shows the same
-  page until Phase 10 replaces it; `creatives.chestlyace.online/services` shows it
-  too, so the old `graphic-design.html` and `photography.html` links land on a
-  real page.
-- They are indexed (`SITE_INDEXING=on`), but a short placeholder gives a search
-  engine little to rank; expect them to matter once the real sites ship. The
-  creatives sitemap lists just its homepage until then, and the blog's lists its
-  published posts and tags.
+  publish the first post, then the real blog.
+- They are indexed (`SITE_INDEXING=on`). Their sitemaps list what is published:
+  the blog its posts and tags, the creatives site its home, Services, and (once
+  they have content) Design, Photography and each event.
+
+### 6a. Filling the creatives site (admin → Creatives)
+
+The database migration (§3) already puts the **services** and **FAQ** wording
+from the old pages into Creatives → Services and Questions, and the old
+`graphic-design.html` and `photography.html` addresses redirect to
+`/services`. The rest starts empty, on purpose (the old entries were stock
+photos). Do this on the preview first:
+
+- [ ] **Graphic design:** Creatives → Design → New. Upload a cover (and
+      more images), write alt text for every image, then choose a category, client,
+      role, tools and year. Tick **Featured** on the best few.
+- [ ] **Photography:** Creatives → Photography → New. A cover, the date,
+      place, your role, what you covered, the story, the selected pictures (with
+      captions), the credits, and the address of the full album (Google Photos,
+      Google Drive or Behance, with the service's name). Tick **Featured** on one
+      event to span the Photography page and on others to show on the home page.
+- [ ] **Home page:** the featured pieces and events fill the six frames of the
+      doodle hero, the portals and the selected-work strip. Edit the hero
+      statement and line, the marquee words, the portal text and the contact
+      wording in Creatives → Settings.
+- [ ] **Services and FAQ:** read the seeded cards and questions and make them
+      yours (Creatives → Services, Questions).
+- [ ] **Socials:** in admin → Socials, tick **Creatives** under "Show on" for
+      Instagram and TikTok; they appear in the creatives footer and contact block.
+      The contact block's WhatsApp and email come from your profile.
+- [ ] Until a gallery has something published, its page (and Services, with no
+      cards and no questions) shows the "coming soon" page. Publish at least one
+      piece and one event before you announce the site.
 
 ## 7. After the cutover
 
@@ -234,8 +260,13 @@ creatives site (Phase 10) is not.
       `/sitemap.xml` lists the homepage and each published project; the page
       source says `index, follow`.
 - [ ] The same for `creatives.chestlyace.online` and `blog.chestlyace.online`
-      (`robots.txt`, `sitemap.xml`, `index, follow`), and
-      `creatives.chestlyace.online/services` shows the coming-soon page.
+      (`robots.txt`, `sitemap.xml`, `index, follow`).
+- [ ] On the creatives site: the home page's hero draws itself and reacts to the
+      mouse; each header link opens its page (Work, Design, Photography,
+      Services); a design piece opens its lightbox and an event opens its page
+      with the "View the full album" button; the Services buttons open WhatsApp
+      with the message; the old `/graphic-design.html` and `/photography.html`
+      land on `/services`.
 - [ ] On the blog: sign in with GitHub and Google and post a comment; subscribe to
       the newsletter once with your own address and open the link in the email.
 - [ ] Send yourself a message through the contact form; it arrives.
@@ -264,6 +295,7 @@ creatives site (Phase 10) is not.
 
 ## 9. Later
 
-- When Phase 10 ships the creatives site, nothing in the indexing settings
-  changes (`SITE_INDEXING=on` already covers every host); in Search Console add
-  each host (including the blog) and submit its `sitemap.xml`.
+- In Search Console add each host (the blog and the creatives site included) and
+  submit its `sitemap.xml`; `SITE_INDEXING=on` already covers every host.
+- Videography is a later addition to the creatives site (a third section); it
+  will get its own steps and a line here.
