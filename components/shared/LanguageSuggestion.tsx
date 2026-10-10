@@ -5,7 +5,7 @@ import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { langCookie, prefersFrench, readLangCookie } from "@/lib/i18n/cookie";
-import { switchPath } from "@/lib/i18n";
+import { stripSitePrefix, switchPath } from "@/lib/i18n";
 import { Container } from "./Container";
 
 // The French suggestion (design.md §13.62): a slim line under the header on an English
@@ -35,7 +35,7 @@ function snapshot(): string {
 }
 
 export function LanguageSuggestion({ labels }: { labels: SuggestionLabels }) {
-  const pathname = usePathname();
+  const pathname = stripSitePrefix(usePathname());
   const state = useSyncExternalStore(subscribe, snapshot, () => "hide");
   if (state !== "show") return null;
 

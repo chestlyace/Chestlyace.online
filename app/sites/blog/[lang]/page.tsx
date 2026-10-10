@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ComingSoon } from "@/components/shared/ComingSoon";
 import { Container } from "@/components/shared/Container";
@@ -10,7 +11,15 @@ import { getMessages } from "@/content/messages";
 import { getCachedPosts } from "@/lib/blog/cache";
 import { blogJsonLd } from "@/lib/blog/seo";
 import { isLang } from "@/lib/i18n";
-import { siteOrigin } from "@/lib/seo";
+import { siteOrigin, homeAlternates } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/sites/blog/[lang]">): Promise<Metadata> {
+  const { lang } = await params;
+  // The home page's hreflang set; the layout's metadata is for every page.
+  return isLang(lang) ? { alternates: homeAlternates("blog", lang) } : {};
+}
 
 // The blog's front page (design.md §14.13): every published post, newest first. On
 // the French blog every post is listed; one without French is marked "EN" and read

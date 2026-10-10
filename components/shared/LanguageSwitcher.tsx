@@ -3,7 +3,7 @@
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { langCookie } from "@/lib/i18n/cookie";
-import { LANGS, switchPath, type Lang } from "@/lib/i18n";
+import { LANGS, stripSitePrefix, switchPath, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/cn";
 import { useLang } from "./LangProvider";
 
@@ -28,7 +28,7 @@ export function LanguageSwitcher({
   className?: string;
 }) {
   const current = useLang();
-  const pathname = usePathname();
+  const pathname = stripSitePrefix(usePathname());
 
   return (
     <nav aria-label={labels.nav} className={className}>

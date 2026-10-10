@@ -57,6 +57,15 @@ export function localizedPath(path: string, lang: Lang): string {
   return clean === "/" ? `/${lang}` : `/${lang}${clean}`;
 }
 
+/**
+ * The path without the internal site prefix the host is rewritten to
+ * (`/sites/blog/en/x` → `/en/x`). A statically rendered page may still report the
+ * internal path before the browser corrects it; both mean the same page.
+ */
+export function stripSitePrefix(raw: string): string {
+  return raw.replace(/^\/sites\/[a-z]+(?=\/|$)/, "") || "/";
+}
+
 /** The same page in another language, from the current public path. */
 export function switchPath(pathname: string, to: Lang): string {
   return localizedPath(splitLang(pathname).rest, to);

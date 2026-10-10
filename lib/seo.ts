@@ -105,6 +105,22 @@ export function languageAlternates(path: string): Record<string, string> {
   return { en, fr: localizedPath(path, "fr"), "x-default": en };
 }
 
+/**
+ * The `alternates` of a site's home page: its canonical, the language alternates and
+ * the blog's feed. The layout's metadata is for every page, so it cannot carry the
+ * home's `hreflang` set (a page that sets no `languages` of its own would inherit it).
+ */
+export function homeAlternates(
+  site: PublicSiteKey,
+  lang: Lang,
+): NonNullable<Metadata["alternates"]> {
+  return {
+    canonical: localizedPath("/", lang),
+    languages: languageAlternates("/"),
+    ...feedLinks(site, lang),
+  };
+}
+
 // A site's layout metadata: its title and description, the canonical address of
 // every page (relative to `metadataBase`), and the Open Graph and Twitter tags.
 export function siteMetadata(
@@ -121,7 +137,6 @@ export function siteMetadata(
     description,
     alternates: {
       canonical: localizedPath("/", lang),
-      languages: languageAlternates("/"),
       ...feedLinks(site, lang),
     },
     robots: robotsMeta(site),
