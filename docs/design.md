@@ -2901,8 +2901,8 @@ viewport): the dots start as a scattered cloud and gather into form 1.
 |---|---|
 | Stage | The wordmark area becomes a stage `16 / 7` from `md` (about 560px at 1280px) and `4 / 3` on phones; the words span the container's width at the stage's vertical centre (as the solid wordmark of §13.8); the other forms fit in 70% of the stage's height |
 | Dots (N) | 36,000 on desktop (fine pointer, `lg` and up), 22,000 on tablets, 12,000 on phones |
-| Dot size | 1.6–2.6 CSS px (random per dot), times the device pixel ratio (capped at 2), round, 85% opacity |
-| Colour | The text colour (`foreground`): dark dots on the light footer, light dots on the dark one, re-read when the theme changes. The orange (`primary-text`, the site's accent §4) only for the press blob |
+| Dot size | 1.4–2.4 CSS px (random per dot), times the device pixel ratio (capped at 2), round, 85% opacity |
+| Colour | The text colour (`foreground`): dark dots on the light footer, light dots on the dark one, re-read when the theme changes. The site's accent (`primary-text`, §4: orange on Creatives) only for the press blob |
 | Morph | 1.8s `ease-in-out`; each dot starts after a delay of 0–35% of the morph set by its place; mid-way each dot is pushed along a smooth noise field (up to 120 CSS px at the middle, 0 at both ends), which is the "distortion" |
 | Turning | Forms 3 to 9 that are 3D turn slowly (about 0.15 turn per second, about the vertical axis); words and flat forms stay still, with a barely visible 2px drift per dot |
 | Pointer | A dot within 140 CSS px of the pointer is pushed away, up to 70px, strongest at the pointer (squared falloff); the push eases in and out over 300ms so the dots flow back |

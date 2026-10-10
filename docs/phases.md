@@ -327,5 +327,5 @@ pointer and morph through code, design and photography forms and words
 
 | Step | Content | Status |
 |---|---|---|
-| F.1 Design | The spec (§13.61, §13.8) and D88; docs only | In review (issue #105) |
-| F.2 Build | The particle wordmark in the shared footer, with its tests and fallbacks | Not started |
+| F.1 Design | The spec (§13.61, §13.8) and D88; docs only | Done (PR #106) |
+| F.2 Build | The particle wordmark in the shared footer, with its tests and fallbacks | In review (issue #107) |
