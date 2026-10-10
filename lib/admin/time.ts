@@ -21,3 +21,6 @@ export function relativeTime(
   }
   return "just now";
 }
+
+/** The current time, for a server-rendered screen that must show "5 minutes ago". */
+export const serverNow = () => new Date();

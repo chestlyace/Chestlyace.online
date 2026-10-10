@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/shared/Button";
 import { IconButton } from "@/components/shared/IconButton";
 import { Tag } from "@/components/shared/Tag";
+import { Chip } from "../Chip";
 import type { BlogPostSummary } from "@/lib/admin/blogApi";
 import { cn } from "@/lib/cn";
 import { useConfirm } from "../ConfirmDialog";
@@ -219,21 +220,17 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
                     </Tag>
                   )}
                   {item.french !== "none" && (
-                    <Tag
+                    <Chip
+                      tone={item.french === "live" ? "on" : "off"}
                       title={
                         item.french === "live"
                           ? "French version published"
                           : "French version is a draft"
                       }
-                      className={cn(
-                        "ml-2",
-                        item.french === "live"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-transparent shadow-[inset_0_0_0_1px_var(--border)]",
-                      )}
+                      className="ml-2"
                     >
                       FR
-                    </Tag>
+                    </Chip>
                   )}
                 </span>
                 <Switch
