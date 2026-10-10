@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicEvent, PublicPiece } from "./data";
-import { featuredWork, statementLines } from "./home";
+import { featuredWork, portalImages, statementLines } from "./home";
 
 const image = (url: string) => ({ url, width: 10, height: 10, alt: url });
 const piece = (slug: string, isFeatured: boolean) =>
@@ -42,5 +42,17 @@ describe("statementLines", () => {
   it("keeps a statement without one on a line", () => {
     expect(statementLines("  Making   things ")).toEqual(["Making things"]);
     expect(statementLines("& Only")).toEqual(["& Only"]);
+  });
+});
+
+describe("portalImages", () => {
+  it("prefers the featured one, else the first, else nothing", () => {
+    const both = portalImages(
+      [piece("a", false), piece("b", true)],
+      [event("x", false), event("y", false)],
+    );
+    expect(both.design?.url).toBe("b");
+    expect(both.photography?.url).toBe("x");
+    expect(portalImages([], [])).toEqual({ design: null, photography: null });
   });
 });

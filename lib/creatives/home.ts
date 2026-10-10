@@ -54,3 +54,15 @@ export function statementLines(statement: string): string[] {
   if (at <= 0) return [text];
   return [text.slice(0, at).trim(), text.slice(at).trim()];
 }
+
+// The image of each portal (design.md §13.59): the latest featured piece or event,
+// else the first published one; null when there is none.
+export function portalImages(
+  pieces: readonly PublicPiece[],
+  events: readonly PublicEvent[],
+): { design: PublicImage | null; photography: PublicImage | null } {
+  const pick = <T extends { isFeatured: boolean; cover: PublicImage }>(
+    items: readonly T[],
+  ) => (items.find((item) => item.isFeatured) ?? items[0])?.cover ?? null;
+  return { design: pick(pieces), photography: pick(events) };
+}

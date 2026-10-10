@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/shared/JsonLd";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { ContactBlock } from "@/components/creatives/ContactBlock";
 import { DesignGallery } from "@/components/creatives/DesignGallery";
+import { HeadingDoodle } from "@/components/creatives/home/HeadingDoodle";
 import { getCachedCreativesCopy, getCachedPieces } from "@/lib/creatives/cache";
 import { designJsonLd } from "@/lib/creatives/seo";
 import { pageMetadata } from "@/lib/seo";
@@ -33,12 +34,18 @@ export default async function DesignPage() {
       <JsonLd data={designJsonLd(pieces)} />
       <div className="pt-28 pb-24 md:pb-32">
         <Container className="2xl:max-w-[calc(1600px+4rem)]">
-          <SectionHeading
-            as="h1"
-            label={`Graphic design · ${pieces.length}`}
-            title="Design"
-            intro={copy.designIntro}
-          />
+          <div className="relative">
+            <HeadingDoodle
+              kind="star"
+              className="absolute top-8 right-2 md:right-24"
+            />
+            <SectionHeading
+              as="h1"
+              label={`Graphic design · ${pieces.length}`}
+              title="Design"
+              intro={copy.designIntro}
+            />
+          </div>
           <div className="mt-12 md:mt-16">
             <DesignGallery pieces={pieces} />
           </div>

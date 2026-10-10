@@ -33,7 +33,7 @@ export async function ContactBlock() {
   return (
     <section
       id="contact"
-      aria-labelledby="creatives-contact"
+      aria-label="Contact"
       className="bg-background-alt py-24 md:py-32"
     >
       <Container>
