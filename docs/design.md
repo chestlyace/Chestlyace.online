@@ -896,7 +896,10 @@ bottom. anubi.io's oversized closing type.
      - **Contact** — email (`chestlyace@gmail.com`, Q9), WhatsApp, Resume ↓.
    - All column links use the **text roll** (§13.3).
 2. **Giant wordmark** — "CHESTLY ACE" in Bebas, `foreground`, spanning the full
-   width of the wide container (1280px max) edge to edge.
+   width of the wide container (1280px max) edge to edge. From 2026-10-10 it is
+   drawn as **particles** that morph through the owner's structures and words
+   (§13.61, D88); the solid Bebas text described here is what shows with reduced
+   motion, `Save-Data`, no WebGL, and before the particles are ready.
 3. **Bottom bar** — a 1px `border` line, then: "© 2026 Chestly Ace" (`label`,
    `muted`; the year is the current year) on the left, **Back to top ↑**
    (text roll) on the right.
@@ -2857,6 +2860,87 @@ WhatsApp number, email and socials, so the copy is editable.
 fade up with a 80ms stagger. Reduced motion: final state.
 
 **Accessibility.** The block is a labelled `<section>`; the statement is an `<h2>`.
+
+### 13.61 Particle wordmark
+
+**Purpose.** The footer's closing brand moment (§13.8), made of particles: the
+name "CHESTLY ACE" that breaks apart, reacts to the pointer, and re-forms as the
+things Chestly works on, in code, design and photography.
+
+**References.** Owner (2026-10-10): the particle word "code" of anubi.io/code,
+shown in a screencast. In the video, about forty thousand small dots form a word,
+dissolve into a rotating torus and a twisted ribbon and re-form; a "+" cursor pushes
+the dots away as it moves; pressing gathers them into a compact orange blob that
+follows the pointer, and releasing sends them back. The owner asked for the same
+behaviour, with the forms below instead of the torus and ribbon.
+
+**Anatomy.** One `<canvas>` (WebGL, drawn with `ogl`, already a dependency) in the
+footer's wordmark area (§13.8, item 2), drawing one `Points` object of **N dots**.
+The dots belong to one *form* at a time. The loop:
+
+| # | Form | Kind | Held |
+|---|---|---|---|
+| 1 | **CHESTLY ACE** | the word, spanning the container's width, Bebas | 3.5s |
+| 2 | **Braces**: a large pair of curly braces `{ }` | code | 2.5s |
+| 3 | **Lattice**: a 5 × 5 × 5 cube of nodes with its edges, turning slowly about its vertical axis | engineering | 2.5s |
+| 4 | **DEVELOPER** | the word | 3.5s |
+| 5 | **Bézier**: a pen-tool curve with its two anchor points and their handles | design | 2.5s |
+| 6 | **Colour wheel**: a ring with six wedge rays | design | 2.5s |
+| 7 | **DESIGNER** | the word | 3.5s |
+| 8 | **Camera**: a camera outline with its lens | photography | 2.5s |
+| 9 | **Aperture**: a circle with six blades | photography | 2.5s |
+| 10 | **PHOTOGRAPHER** | the word | 3.5s |
+| | back to 1 | | |
+
+A whole loop takes about 45 seconds. The first appearance (footer enters the
+viewport): the dots start as a scattered cloud and gather into form 1.
+
+**Values.**
+
+| Property | Value |
+|---|---|
+| Stage | The wordmark area becomes a stage `16 / 7` from `md` (about 560px at 1280px) and `4 / 3` on phones; the words span the container's width at the stage's vertical centre (as the solid wordmark of §13.8); the other forms fit in 70% of the stage's height |
+| Dots (N) | 36,000 on desktop (fine pointer, `lg` and up), 22,000 on tablets, 12,000 on phones |
+| Dot size | 1.6–2.6 CSS px (random per dot), times the device pixel ratio (capped at 2), round, 85% opacity |
+| Colour | The text colour (`foreground`): dark dots on the light footer, light dots on the dark one, re-read when the theme changes. The orange (`primary-text`, the site's accent §4) only for the press blob |
+| Morph | 1.8s `ease-in-out`; each dot starts after a delay of 0–35% of the morph set by its place; mid-way each dot is pushed along a smooth noise field (up to 120 CSS px at the middle, 0 at both ends), which is the "distortion" |
+| Turning | Forms 3 to 9 that are 3D turn slowly (about 0.15 turn per second, about the vertical axis); words and flat forms stay still, with a barely visible 2px drift per dot |
+| Pointer | A dot within 140 CSS px of the pointer is pushed away, up to 70px, strongest at the pointer (squared falloff); the push eases in and out over 300ms so the dots flow back |
+| Press | Pressing and holding for 250ms (a mouse; 400ms on touch) gathers every dot into one compact blob (about 80px across) that follows the pointer with a lag, the dots turn orange; releasing sends them back to the current form |
+| Tap | A quick click or tap (no hold) moves on to the next form at once |
+
+**How it is built.** The dots' positions for each form are computed once on the
+CPU (words and the camera, brackets and aperture drawn into a hidden 2D canvas and
+sampled; the lattice, bézier, colour wheel by formula), N points per form, with the
+first form ready immediately and the others prepared one per idle frame. The
+graphics card does the rest: each dot has its position in the current form and in
+the next, and a vertex shader blends them with the morph, the noise, the pointer
+push and the press blob, so the work per frame is one draw call. The chunk (this
+component and the sampling code) is loaded when the footer is within 1.5
+viewports of the screen, so nothing waits on it; the shared `ogl` chunk is the one
+the project ripple already uses.
+
+**States.**
+
+- *Before ready:* the solid wordmark of §13.8 (text, in the HTML), at the same
+  size; when the first frame is drawn it fades out over 300ms while the dots
+  fade in. It stays in the page, hidden, to keep the layout.
+- *Off-screen or tab hidden:* drawing stops completely and resumes when it returns.
+- *Slow device:* if frames average over 24ms for 2 seconds, N drops once to 60%.
+- *Reduced motion, `Save-Data`, no WebGL, or a lost context:* the solid wordmark of
+  §13.8 stays, with its scroll reveal when motion is allowed. Nothing is lost.
+- *Light and dark:* the dots follow the text colour; the footer's background is
+  unchanged.
+
+**Accessibility.** The canvas is `aria-hidden` and decorative, with no keyboard
+interaction (the brand block already names the site); the footer's links are not
+covered (the canvas stays inside the wordmark area, below the link grid).
+`touch-action: pan-y`, so a finger scrolling the page is never captured.
+
+**Testing.** The shape sampling (counts, bounds, the word's pixels) and the loop's
+timing are pure functions with unit tests; the drawing is checked in a real
+browser: the loop, the pointer, the press, the theme change, a phone, reduced
+motion and no WebGL.
 
 ## 14. Page and section specs
 

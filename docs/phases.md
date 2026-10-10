@@ -21,7 +21,7 @@ before the phase starts.
 | 7 | SEO & redirects | Done (7.1: PR #48; 7.2: PR #50) | — |
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b done (PR #60); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
 | 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 done (PR #86) | Q12 (blog: decided), Q16 (decided) |
-| 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 done (PR #102); 10c launch prep in review (issue #103) | Q1, Q12 (decided 2026-10-08) |
+| 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 done (PR #102); 10c launch prep done (PR #104) | Q1, Q12 (decided 2026-10-08) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
@@ -313,3 +313,19 @@ the blog's 9b was):
 | 10b.7 Home: the rest | The marquee, the portals, the pinned strip, the services teaser | Done (PR #102) |
 
 **Done when:** content published in the admin appears on the site without a deploy.
+
+**10c — Launch prep.** `docs/launch.md` for the creatives host and an end-to-end
+check. Done (PR #104).
+
+---
+
+## Footer particle wordmark (owner request, 2026-10-10; D88)
+
+**Goal:** the footer's big "CHESTLY ACE" drawn as WebGL particles that react to the
+pointer and morph through code, design and photography forms and words
+(`design.md` §13.61), on all three sites.
+
+| Step | Content | Status |
+|---|---|---|
+| F.1 Design | The spec (§13.61, §13.8) and D88; docs only | In review (issue #105) |
+| F.2 Build | The particle wordmark in the shared footer, with its tests and fallbacks | Not started |
