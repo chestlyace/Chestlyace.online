@@ -3124,6 +3124,8 @@ link is not needed.
 | Blog | The **0** is an open book glyph (line icon); under the line "Maybe it was never written. These are the latest posts": the 3 latest posts as small list items (§13.27, no cover) | All posts · Tags |
 | Admin | A plain page: "Page not found", one line and a "Back to the dashboard" button; no animation, no 404 number | Back to the dashboard |
 
+**Status code.** An unknown address answers a real **404**: the catch-all page is outside the `loading.tsx` boundaries (the home pages and the tag and photography lists sit in route groups), and a missing post, project, tag or event is answered by a layout above its loading skeleton (a `notFound()` inside a streamed boundary arrives after the 200 was sent).
+
 **Error page** (`error.tsx`, `global-error.tsx`). Same shape with "500"-style text "Oops"
 and "Something broke on our side": a **Try again** button (calls `reset`) and Home; the
 `md` loader is shown for 600ms after Try again. Public sites only; the admin has the plain

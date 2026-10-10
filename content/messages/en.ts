@@ -79,7 +79,6 @@ export const en = {
       /** e.g. "Theme: System. Switch to Light." */
       switch: "Theme: {current}. Switch to {next}.",
     },
-    notFound: "404 — page not found",
     /** The words the footer's particles spell (design.md §13.61). */
     wordmark: {
       developer: "DEVELOPER",
