@@ -1,5 +1,10 @@
 import { PERSON_NAME, siteOrigin } from "@/lib/seo";
-import type { PublicEvent, PublicPiece } from "./data";
+import type {
+  PublicEvent,
+  PublicFaq,
+  PublicPiece,
+  PublicService,
+} from "./data";
 
 // Structured data for the creatives pages (design.md §14.21): the gallery as a
 // CollectionPage whose pieces are CreativeWorks with their image.
@@ -91,4 +96,36 @@ export function eventJsonLd(
         : {}),
     },
   };
+}
+
+// The Services page (design.md §14.24): each service as a Service, and the questions
+// as a FAQPage. Returned as one list for the page's JSON-LD.
+export function servicesJsonLd(
+  services: readonly PublicService[],
+  faqs: readonly PublicFaq[],
+  origin: string = siteOrigin("creatives"),
+): Record<string, unknown>[] {
+  const provider = { "@type": "Person", name: PERSON_NAME, url: origin };
+  const graph: Record<string, unknown>[] = services.map((service) => ({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.description,
+    serviceType:
+      service.group === "photography" ? "Photography" : "Graphic design",
+    provider,
+    url: `${origin}/services`,
+  }));
+  if (faqs.length > 0) {
+    graph.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer },
+      })),
+    });
+  }
+  return graph;
 }
