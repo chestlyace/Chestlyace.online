@@ -578,3 +578,40 @@ export const creativesSettings = pgTable(
   },
   (t) => [check("creatives_settings_single_row", sql`${t.id} = 1`)],
 );
+
+// ---- Agent access (docs/mcp.md §3, D92) ----------------------------------------------
+// API tokens an agent uses to reach the MCP endpoint, created by the owner in the admin.
+// Only the SHA-256 hash of a token is stored, with its first characters to recognise it.
+
+export const agentTokens = pgTable("agent_tokens", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  prefix: text("prefix").notNull(),
+  scopes: text("scopes").array().notNull().default(emptyTextArray),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// What agents did: one row per tool call, kept 90 days. The token's name is copied so a
+// deleted token's history still reads.
+export const agentActivity = pgTable(
+  "agent_activity",
+  {
+    id: serial("id").primaryKey(),
+    tokenId: integer("token_id").references(() => agentTokens.id, {
+      onDelete: "set null",
+    }),
+    tokenName: text("token_name").notNull(),
+    tool: text("tool").notNull(),
+    ok: boolean("ok").notNull(),
+    summary: text("summary").notNull().default(""),
+    error: text("error"),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("agent_activity_at_idx").on(t.at)],
+);
