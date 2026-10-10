@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ContactBlock } from "@/components/creatives/ContactBlock";
 import { Hero } from "@/components/creatives/home/Hero";
 import { Marquee } from "@/components/creatives/home/Marquee";
@@ -22,7 +23,16 @@ import {
 import { homeJsonLd } from "@/lib/creatives/seo";
 import { notFound } from "next/navigation";
 import { isLang } from "@/lib/i18n";
+import { homeAlternates } from "@/lib/seo";
 import { CREATIVES_UI } from "@/lib/i18n/ui";
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/sites/creatives/[lang]">): Promise<Metadata> {
+  const { lang } = await params;
+  // The home page's hreflang set; the layout's metadata is for every page.
+  return isLang(lang) ? { alternates: homeAlternates("creatives", lang) } : {};
+}
 
 // The creatives home page (design.md §14.20): the doodle hero, the marquee, the two
 // portals, the selected work, the services teaser and the contact block. The wording

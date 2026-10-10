@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { stripSitePrefix, switchPath } from "./index";
 import {
   cookieDomain,
   langCookie,
@@ -38,5 +39,19 @@ describe("prefersFrench", () => {
     expect(prefersFrench(["frequent"])).toBe(false);
     expect(prefersFrench([])).toBe(false);
     expect(prefersFrench(undefined)).toBe(false);
+  });
+});
+
+describe("the switcher's path", () => {
+  it("works from the internal path a static page may still report", () => {
+    expect(stripSitePrefix("/sites/blog/en/post")).toBe("/en/post");
+    expect(stripSitePrefix("/sites/main/fr")).toBe("/fr");
+    expect(stripSitePrefix("/sites/main")).toBe("/");
+    expect(stripSitePrefix("/projects/x")).toBe("/projects/x");
+    expect(switchPath(stripSitePrefix("/sites/blog/en/post"), "fr")).toBe(
+      "/fr/post",
+    );
+    expect(switchPath(stripSitePrefix("/sites/main/fr"), "en")).toBe("/");
+    expect(switchPath(stripSitePrefix("/fr/design"), "en")).toBe("/design");
   });
 });
