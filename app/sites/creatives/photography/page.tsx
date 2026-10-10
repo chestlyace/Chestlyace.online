@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/shared/JsonLd";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { ContactBlock } from "@/components/creatives/ContactBlock";
 import { EventTile } from "@/components/creatives/EventTile";
+import { HeadingDoodle } from "@/components/creatives/home/HeadingDoodle";
 import { getCachedCreativesCopy, getCachedEvents } from "@/lib/creatives/cache";
 import { photographyJsonLd } from "@/lib/creatives/seo";
 import { pageMetadata } from "@/lib/seo";
@@ -33,12 +34,18 @@ export default async function PhotographyPage() {
       <JsonLd data={photographyJsonLd(events)} />
       <div className="pt-28 pb-24 md:pb-32">
         <Container>
-          <SectionHeading
-            as="h1"
-            label={`Photography · ${events.length}`}
-            title="Photography"
-            intro={copy.photographyIntro}
-          />
+          <div className="relative">
+            <HeadingDoodle
+              kind="squiggle"
+              className="absolute top-8 right-2 md:right-24"
+            />
+            <SectionHeading
+              as="h1"
+              label={`Photography · ${events.length}`}
+              title="Photography"
+              intro={copy.photographyIntro}
+            />
+          </div>
           <div className="mt-12 grid gap-x-6 gap-y-14 md:mt-16 md:grid-cols-2 md:gap-y-16">
             {events.map((event, index) => {
               const featured = event.isFeatured && index === 0;
