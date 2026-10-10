@@ -19,6 +19,7 @@ export function BrandLoader({
   label,
   className,
   decorative = false,
+  tone = "auto",
 }: {
   size?: Size;
   /** The status text; default "Loading" / "Chargement". */
@@ -26,6 +27,8 @@ export function BrandLoader({
   className?: string;
   /** Inside something that already says it is busy (a button): no status of its own. */
   decorative?: boolean;
+  /** `light` for the lightboxes' dark layer (the letters in near-white). */
+  tone?: "auto" | "light";
 }) {
   const lang = useLang();
   const text = label ?? LOADING[lang];
@@ -63,7 +66,10 @@ export function BrandLoader({
     ) : (
       <span
         aria-hidden="true"
-        className="grid justify-items-center gap-4 text-foreground"
+        className={cn(
+          "grid justify-items-center gap-4",
+          tone === "light" ? "text-[#f5f5f7]" : "text-foreground",
+        )}
       >
         <span
           className={cn(

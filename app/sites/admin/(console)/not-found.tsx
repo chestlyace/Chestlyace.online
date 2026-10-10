@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AdminLink as Link } from "@/components/admin/AdminLink";
 
 // The admin's own 404, inside the shell.
 export default function AdminNotFound() {

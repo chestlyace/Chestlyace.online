@@ -19,7 +19,7 @@ import {
   Briefcase,
   type LucideIcon,
 } from "lucide-react";
-import Link from "next/link";
+import { AdminLink as Link } from "@/components/admin/AdminLink";
 import { usePathname, useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useConfirm } from "./ConfirmDialog";

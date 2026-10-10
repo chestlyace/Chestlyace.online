@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { AdminLink as Link } from "@/components/admin/AdminLink";
 import { ArrowUpRight } from "lucide-react";
 import { getDashboard } from "@/lib/admin/dashboard";
 import { RESOURCES } from "@/lib/admin/resources";

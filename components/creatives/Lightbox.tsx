@@ -12,6 +12,7 @@ import { responsiveImage, thumbnailUrl } from "@/lib/cloudinary";
 import type { PublicPiece } from "@/lib/creatives/data";
 import { prefersReducedMotionNow } from "@/lib/media";
 import { Details } from "./Details";
+import { LightboxImage } from "./LightboxImage";
 import { useCreativesText } from "@/components/creatives/useCreativesText";
 import { format } from "@/lib/i18n/format";
 
@@ -209,8 +210,7 @@ export function Lightbox({
           onPointerUp={onPointerUp}
           className="relative flex min-h-[60dvh] items-center justify-center p-6 pt-16 lg:min-h-0"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- Cloudinary, sized by srcset */}
-          <img
+          <LightboxImage
             key={`${piece.slug}-${imageIndex}`}
             src={sources.src}
             srcSet={sources.srcSet}

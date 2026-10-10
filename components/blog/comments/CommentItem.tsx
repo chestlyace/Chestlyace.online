@@ -213,7 +213,7 @@ export function CommentItem({
                 aria-pressed={comment.liked}
                 aria-label={`${text.likeComment}, ${plural(text.likes, comment.likeCount, lang)}`}
                 onClick={() => void like()}
-                className={action}
+                className={cn(action, busy === "like" && "pending-pulse")}
               >
                 <Heart
                   className={cn(
@@ -242,7 +242,7 @@ export function CommentItem({
                   type="button"
                   disabled={reported || busy === "report"}
                   onClick={() => setConfirm("report")}
-                  className={action}
+                  className={cn(action, busy === "report" && "pending-pulse")}
                 >
                   {reported ? (
                     <Check className="size-4" aria-hidden="true" />
@@ -257,7 +257,7 @@ export function CommentItem({
                   type="button"
                   disabled={busy === "delete"}
                   onClick={() => setConfirm("delete")}
-                  className={action}
+                  className={cn(action, busy === "delete" && "pending-pulse")}
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
                   {text.delete}

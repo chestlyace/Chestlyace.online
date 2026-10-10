@@ -41,6 +41,7 @@ export function ReactionBar({
   });
   const [popKey, setPopKey] = useState(0);
   const busy = useRef(false);
+  const [pending, setPending] = useState(false);
   const endpoint = `/api/blog/posts/${encodeURIComponent(slug)}/like`;
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export function ReactionBar({
   const toggle = async () => {
     if (busy.current) return;
     busy.current = true;
+    setPending(true);
     const before = state;
     const liking = !before.liked;
     setState({
@@ -72,6 +74,7 @@ export function ReactionBar({
       setState(before);
     }
     busy.current = false;
+    setPending(false);
   };
 
   return (
@@ -84,6 +87,7 @@ export function ReactionBar({
         className={cn(
           "type-label flex h-10 items-center gap-2 rounded-full border bg-surface px-4 text-foreground transition-colors duration-150 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [@media(hover:hover)]:hover:bg-tile-hover",
           state.liked ? "border-primary/40" : "border-border",
+          pending && "pending-pulse",
         )}
       >
         <motion.span

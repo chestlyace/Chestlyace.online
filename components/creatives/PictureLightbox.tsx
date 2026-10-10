@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, type PointerEvent } from "react";
 import { responsiveImage } from "@/lib/cloudinary";
 import type { PublicEvent } from "@/lib/creatives/data";
 import { prefersReducedMotionNow } from "@/lib/media";
+import { LightboxImage } from "./LightboxImage";
 import { useCreativesText } from "@/components/creatives/useCreativesText";
 import { format } from "@/lib/i18n/format";
 
@@ -191,8 +192,7 @@ export function PictureLightbox({
           }}
           className="relative flex min-h-0 items-center justify-center p-6 pt-16"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- Cloudinary, sized by srcset */}
-          <img
+          <LightboxImage
             key={picture.url}
             src={sources.src}
             srcSet={sources.srcSet}
