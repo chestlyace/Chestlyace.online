@@ -3,6 +3,7 @@
 import { ChevronDown, LogOut, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/shared/Button";
+import { SkeletonBlock } from "@/components/shared/Skeleton";
 import { authClient } from "@/lib/blog/authClient";
 import type { ProviderId } from "@/lib/blog/auth";
 import type { CommentView } from "@/lib/blog/comments";
@@ -263,10 +264,10 @@ export function Comments({
             >
               {[0, 1, 2].map((row) => (
                 <div key={row} className="flex items-start gap-3">
-                  <div className="size-8 shrink-0 rounded-full bg-surface" />
+                  <SkeletonBlock className="size-8 shrink-0 rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-1/4 rounded-sm bg-surface" />
-                    <div className="h-4 w-3/4 rounded-sm bg-surface" />
+                    <SkeletonBlock className="h-4 w-1/4 rounded-sm" />
+                    <SkeletonBlock className="h-4 w-3/4 rounded-sm" />
                   </div>
                 </div>
               ))}

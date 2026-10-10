@@ -1125,3 +1125,47 @@ html.lenis body {
     animation: nav-veil 1ms linear 400ms both;
   }
 }
+
+/* ---- Skeletons (design.md §13.65) ---------------------------------------------------- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--tile);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    var(--tile-hover) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+/* The creatives' shimmer is the brand line's colour at 8%. */
+[data-site="creatives"] .skeleton::after {
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    color-mix(in srgb, var(--primary) 8%, transparent) 50%,
+    transparent 70%
+  );
+}
+
+@keyframes skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+    display: none;
+  }
+}
