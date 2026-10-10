@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/shared/BrandLoader";
 import { ArrowRight, ArrowUpRight, Download, Mail } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -229,6 +230,17 @@ export default function DesignSystemPage() {
           title="Skills"
           intro="A mono index above a huge Bebas title. The letters rise as it scrolls into view."
         />
+      </Section>
+
+      <Section title="Brand loader (§13.64)">
+        <div className="flex flex-wrap items-end gap-16">
+          <BrandLoader size="lg" />
+          <BrandLoader size="md" />
+          <p className="flex items-center gap-3 text-sm text-muted">
+            <BrandLoader size="sm" decorative /> sm, inside a button or next to
+            a label
+          </p>
+        </div>
       </Section>
 
       <Section title="Tags and status pill (§13.4, §13.5)">
