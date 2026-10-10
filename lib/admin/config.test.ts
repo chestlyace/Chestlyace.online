@@ -89,6 +89,8 @@ describe("toValues and validate", () => {
       issuedOn: "",
       badgeUrl: "/certs/a.png",
       credentialUrl: "",
+      // the French of a certification's name (empty here)
+      "fr:name": "",
     });
   });
 
