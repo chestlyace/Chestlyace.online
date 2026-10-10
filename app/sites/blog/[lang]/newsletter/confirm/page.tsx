@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 // coming-soon page's look. Not indexed.
 export default async function ConfirmPage({
   searchParams,
-}: PageProps<"/sites/blog/newsletter/confirm">) {
+}: PageProps<"/sites/blog/[lang]/newsletter/confirm">) {
   const { token } = await searchParams;
   const secret = process.env.NEWSLETTER_SECRET;
   const apiKey = process.env.RESEND_API_KEY;

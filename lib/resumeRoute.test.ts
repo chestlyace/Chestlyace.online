@@ -7,7 +7,7 @@ vi.mock("@/lib/portfolio", () => ({
   getCachedHomepageData: async () => ({ profile: data.profile }),
 }));
 
-import { GET } from "../app/sites/main/resume.pdf/route";
+import { GET } from "../app/sites/main/[lang]/resume.pdf/route";
 
 const call = () => GET(new Request("https://chestlyace.online/resume.pdf"));
 

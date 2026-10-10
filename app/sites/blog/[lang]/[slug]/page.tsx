@@ -23,7 +23,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/sites/blog/[slug]">): Promise<Metadata> {
+}: PageProps<"/sites/blog/[lang]/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const page = await getCachedPost(slug);
   if (!page) return {};
@@ -46,7 +46,7 @@ export async function generateMetadata({
 // and the way on to the next post. The newsletter box comes with its own step.
 export default async function PostPage({
   params,
-}: PageProps<"/sites/blog/[slug]">) {
+}: PageProps<"/sites/blog/[lang]/[slug]">) {
   const { slug } = await params;
   const page = await getCachedPost(slug);
   if (!page) notFound();

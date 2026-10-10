@@ -15,7 +15,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/sites/blog/tags/[tag]">): Promise<Metadata> {
+}: PageProps<"/sites/blog/[lang]/tags/[tag]">): Promise<Metadata> {
   const { tag } = await params;
   const posts = await getCachedPostsByTag(tag);
   if (posts.length === 0) return {};
@@ -29,7 +29,7 @@ export async function generateMetadata({
 // The posts with one tag (design.md §14.15).
 export default async function TagPage({
   params,
-}: PageProps<"/sites/blog/tags/[tag]">) {
+}: PageProps<"/sites/blog/[lang]/tags/[tag]">) {
   const { tag } = await params;
   const posts = await getCachedPostsByTag(tag);
   if (posts.length === 0) notFound();
