@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Activity,
   Award,
+  Bot,
   CircleHelp,
   FolderKanban,
   HeartHandshake,
@@ -76,6 +78,13 @@ const GROUPS: { title: string; items: Item[] }[] = [
       { href: "/blog/newsletter", label: "Newsletter", icon: Mail },
     ],
   },
+  {
+    title: "Settings",
+    items: [
+      { href: "/agent", label: "Agent access", icon: Bot },
+      { href: "/agent/activity", label: "Activity", icon: Activity },
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -88,6 +97,8 @@ function isActive(pathname: string, href: string) {
         !pathname.startsWith("/blog/newsletter"))
     );
   }
+  // Agent access is not also current on the Activity screen beside it.
+  if (href === "/agent") return pathname === "/agent" || pathname === "/agent/";
   return href === "/"
     ? pathname === "/"
     : pathname === href || pathname.startsWith(`${href}/`);
