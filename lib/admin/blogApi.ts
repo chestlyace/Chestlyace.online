@@ -22,6 +22,8 @@ export type BlogPostSummary = {
   updatedAt: string;
   likeCount: number;
   commentCount: number;
+  /** "live": French published; "draft": French text waiting; "none". */
+  french: "live" | "draft" | "none";
 };
 
 const invalid = (fields: Record<string, string>): Failure => ({
@@ -45,9 +47,13 @@ function uniqueViolation(error: unknown): Failure | null {
 
 // A post can only go live when it is whole: a description, and blocks that can
 // be read (an image without alt text, a quiz without a right answer…).
+//
+// The French version, when it is switched on, is held to the same rule for its text: it
+// needs its own body, and that body's blocks must be readable (docs/i18n.md §5).
 export function publishProblems(post: {
   description: string;
   content: string;
+  translations?: { fr?: Record<string, unknown> } | null;
 }): Record<string, string> {
   const fields: Record<string, string> = {};
   if (!post.description.trim())
@@ -56,6 +62,19 @@ export function publishProblems(post: {
     (problem) => problem.level === "error",
   );
   if (first) fields.content = first.message;
+
+  const fr = post.translations?.fr;
+  if (fr?.published === true) {
+    const french = typeof fr.content === "string" ? fr.content : "";
+    if (!french.trim())
+      fields["fr:content"] = "Add the French text before publishing it.";
+    else {
+      const problem = findProblems(french).find(
+        (item) => item.level === "error",
+      );
+      if (problem) fields["fr:content"] = problem.message;
+    }
+  }
   return fields;
 }
 
@@ -72,6 +91,9 @@ export async function listPosts(db: Database): Promise<BlogPostSummary[]> {
       updatedAt: sql<string>`to_char(${blogPosts.updatedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       likeCount: blogPosts.likeCount,
       commentCount: sql<number>`(select count(*)::int from blog_comments c where c.post_id = blog_posts.id and c.status = 'visible')`,
+      french: sql<
+        "live" | "draft" | "none"
+      >`case when btrim(coalesce(${blogPosts.translations} -> 'fr' ->> 'content', '')) = '' then 'none' when ${blogPosts.translations} -> 'fr' ->> 'published' = 'true' then 'live' else 'draft' end`,
     })
     .from(blogPosts)
     .orderBy(
@@ -214,6 +236,10 @@ export async function duplicatePost(
       commentsEnabled: source.commentsEnabled,
       canonicalUrl: null,
       series: source.series,
+      // The French text comes along, switched off like the draft itself.
+      translations: source.translations.fr
+        ? { fr: { ...source.translations.fr, published: false } }
+        : {},
       status: "draft",
     });
     if (created.ok || created.status !== 422 || !created.fields.slug)

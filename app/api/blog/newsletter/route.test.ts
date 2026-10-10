@@ -10,7 +10,8 @@ import { verifyToken } from "@/lib/newsletterServer";
 let settings = withDefaults(null);
 vi.mock("@/lib/db", () => ({ getDb: () => ({}) }));
 vi.mock("@/lib/blog/data", () => ({
-  getNewsletterCopy: async () => toCopy(settings),
+  getNewsletterCopy: async (_db: unknown, lang: "en" | "fr" = "en") =>
+    toCopy(lang === "fr" ? withDefaults(null, "fr") : settings),
 }));
 
 const SECRET = "a-long-enough-secret-for-testing-0123456789";
@@ -67,6 +68,30 @@ describe("POST /api/blog/newsletter", () => {
     const mail = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(mail.subject).toBe("Welcome aboard");
     expect(mail.text).toContain("Yes, subscribe me");
+  });
+
+  it("sends the French email, and a link to the French page, for a signup from /fr", async () => {
+    const response = await POST(
+      post({ email: "ada@example.com", lang: "fr" }, "7.7.7.7"),
+    );
+    expect(response.status).toBe(200);
+    const mail = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(mail.subject).toBe(
+      "Confirmez votre abonnement au blog de Chestly Ace",
+    );
+    const link = mail.text.match(/https?:\/\/\S+/)[0];
+    expect(new URL(link).pathname).toBe("/fr/newsletter/confirm");
+    expect(verifyToken(new URL(link).searchParams.get("token"), SECRET)).toBe(
+      "ada@example.com",
+    );
+  });
+
+  it("falls back to English for a language it does not know", async () => {
+    await POST(post({ email: "ada@example.com", lang: "de" }, "7.7.7.8"));
+    const mail = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(new URL(mail.text.match(/https?:\/\/\S+/)[0]).pathname).toBe(
+      "/newsletter/confirm",
+    );
   });
 
   it("refuses when the owner has turned the newsletter off", async () => {

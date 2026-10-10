@@ -1,3 +1,5 @@
+import { getMessages } from "@/content/messages";
+import { DEFAULT_LANG, localizedPath, type Lang } from "@/lib/i18n";
 import { imagePath, siteOrigin } from "@/lib/seo";
 import { siteUrl } from "@/lib/sites";
 import type { Post, PostSummary } from "./data";
@@ -7,22 +9,25 @@ import type { Post, PostSummary } from "./data";
 
 type JsonLd = Record<string, unknown>;
 
-const BLOG_TITLE = "Chestly Ace — Blog";
-const BLOG_DESCRIPTION =
-  "Writing on software engineering, web development, and building things.";
+// The blog's name and description in a language (content/messages, `seo.blog`).
+const blogCopy = (lang: Lang) => getMessages(lang).seo.blog;
 
 // The author is the same Person as on the main site (its @id).
 const authorOf = () => ({ "@id": `${siteOrigin("main")}/#person` });
 
-export function blogJsonLd(origin: string = siteOrigin("blog")): JsonLd {
+export function blogJsonLd(
+  origin: string = siteOrigin("blog"),
+  lang: Lang = DEFAULT_LANG,
+): JsonLd {
+  const { title, description } = blogCopy(lang);
   return {
     "@context": "https://schema.org",
     "@type": "Blog",
     "@id": `${origin}/#blog`,
-    url: `${origin}/`,
-    name: BLOG_TITLE,
-    description: BLOG_DESCRIPTION,
-    inLanguage: "en",
+    url: `${origin}${localizedPath("/", lang)}`,
+    name: title,
+    description,
+    inLanguage: lang,
     publisher: authorOf(),
   };
 }
@@ -31,11 +36,13 @@ export function blogPostingJsonLd(
   post: Post,
   origin: string = siteOrigin("blog"),
 ): JsonLd {
-  const url = post.canonicalUrl ?? `${origin}/${post.slug}`;
+  // The address of the text the page shows: a post without French has its English one.
+  const path = localizedPath(`/${post.slug}`, post.lang);
+  const url = post.canonicalUrl ?? `${origin}${path}`;
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "@id": `${origin}/${post.slug}#post`,
+    "@id": `${origin}${path}#post`,
     mainEntityOfPage: url,
     url,
     headline: post.title,
@@ -46,7 +53,7 @@ export function blogPostingJsonLd(
       ? new URL(imagePath(post.coverUrl), origin).toString()
       : undefined,
     keywords: post.tags.length > 0 ? post.tags.join(", ") : undefined,
-    inLanguage: "en",
+    inLanguage: post.lang,
     isPartOf: { "@id": `${origin}/#blog` },
     author: authorOf(),
     publisher: authorOf(),
@@ -67,10 +74,12 @@ const rfc822 = (timestamp: string) => new Date(timestamp).toUTCString();
 export function rssXml(
   posts: readonly PostSummary[],
   origin: string = siteOrigin("blog"),
+  lang: Lang = DEFAULT_LANG,
 ): string {
+  const { title, description } = blogCopy(lang);
   const items = posts
     .map((post) => {
-      const link = `${origin}/${post.slug}`;
+      const link = `${origin}${localizedPath(`/${post.slug}`, lang)}`;
       return [
         "    <item>",
         `      <title>${escapeXml(post.title)}</title>`,
@@ -91,12 +100,12 @@ export function rssXml(
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escapeXml(BLOG_TITLE)}</title>
-    <link>${escapeXml(`${origin}/`)}</link>
-    <description>${escapeXml(BLOG_DESCRIPTION)}</description>
-    <language>en</language>
+    <title>${escapeXml(title)}</title>
+    <link>${escapeXml(`${origin}${localizedPath("/", lang)}`)}</link>
+    <description>${escapeXml(description)}</description>
+    <language>${lang}</language>
     <lastBuildDate>${built}</lastBuildDate>
-    <atom:link href="${escapeXml(`${origin}/rss.xml`)}" rel="self" type="application/rss+xml"/>
+    <atom:link href="${escapeXml(`${origin}${localizedPath("/rss.xml", lang)}`)}" rel="self" type="application/rss+xml"/>
 ${items}
   </channel>
 </rss>

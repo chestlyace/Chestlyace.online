@@ -47,6 +47,9 @@ export const en = {
       projects: "Projects",
       experience: "Experience",
       contact: "Contact",
+      /** The blog's key links. */
+      posts: "Posts",
+      tags: "Tags",
     },
     footer: {
       nav: "Footer",
@@ -244,6 +247,226 @@ export const en = {
     },
   },
 
+  // The blog (design.md §13.27–13.37, §14.13–14.18).
+  blog: {
+    footer: { privacy: "Privacy", rss: "RSS" },
+    home: {
+      label: "Blog",
+      title: "Blog",
+      intro:
+        "Writing on software engineering, web development, and building things.",
+    },
+    /** The date and the reading time in a post's mono meta line. */
+    meta: {
+      minRead: "{minutes} MIN READ",
+      minuteRead: {
+        one: "{count} minute read",
+        other: "{count} minute read",
+      },
+      updated: "UPDATED",
+    },
+    /** A post that has no version in the page's language (French blog, English post). */
+    onlyEnglish: {
+      mark: "EN",
+      markLabel: "In English",
+      notice: "This article is only available in English.",
+    },
+    post: {
+      allPosts: "All posts",
+      tags: "Tags",
+      moreLabel: "More posts",
+      previous: "Previous",
+      next: "Next",
+      previousPost: "Previous post: {title}",
+      nextPost: "Next post: {title}",
+      onThisPage: "On this page",
+      title: "{title} — Chestly Ace",
+    },
+    tags: {
+      label: "Tags",
+      title: "Tags",
+      intro: "Browse posts by topic.",
+      listLabel: "Tags",
+      tagLabel: "Tag",
+      allTags: "All tags",
+      posts: { one: "{count} post", other: "{count} posts" },
+      pageTitle: "Tags — Chestly Ace",
+      pageDescription: "Browse the blog's posts by topic.",
+      tagTitle: "Posts tagged {tag} — Chestly Ace",
+      tagDescription: "Posts on the blog tagged {tag}.",
+    },
+    reactions: {
+      like: "Like this post",
+      likes: { one: "{count} like", other: "{count} likes" },
+    },
+    share: {
+      share: "Share",
+      menu: "Share this post",
+      copyLink: "Copy link",
+      linkCopied: "Link copied",
+      onX: "Share on X",
+      onLinkedIn: "Share on LinkedIn",
+      onWhatsApp: "Share on WhatsApp",
+      byEmail: "Share by email",
+    },
+    comments: {
+      title: "Comments",
+      signedInAs: "Signed in as",
+      signOut: "Sign out",
+      deleteAccount: "Delete my account",
+      loading: "Loading comments",
+      loadError: "Comments couldn't load.",
+      tryAgain: "Try again",
+      none: "No comments yet. Be the first.",
+      loadMore: "Load more comments",
+      removed: "This comment was removed.",
+      author: "AUTHOR",
+      commentBy: "Comment by {name}",
+      likeComment: "Like this comment",
+      likes: { one: "{count} like", other: "{count} likes" },
+      reply: "Reply",
+      report: "Report",
+      reported: "Reported",
+      delete: "Delete",
+      cancel: "Cancel",
+      close: "Close",
+      repliesTo: "Replies to {name}",
+      repliesToRemoved: "Replies to a removed comment",
+      showReplies: "Show {count} replies",
+      justNow: "just now",
+      addComment: "Add a comment",
+      addReply: "Add a reply",
+      words: "{count} / {max} words",
+      post: "Post comment",
+      signInEnded: "Your sign-in ended. Please sign in again.",
+      forbidden: "You can't comment here.",
+      slowDown: "Slow down a little, then try again.",
+      failed: "That didn't work. Please try again.",
+      offline: "Couldn't reach the server. Check your connection.",
+      reportDone: "Reported. Thank you.",
+      reportFailed: "Couldn't send that. Please try again.",
+      deleteFailed: "Couldn't delete that. Please try again.",
+      reportTitle: "Report this comment?",
+      reportText:
+        "The owner is told and will take a look. Each reader can report a comment once.",
+      deleteTitle: "Delete your comment?",
+      deleteWithReplies:
+        "It will read “This comment was removed.” so the replies keep their place.",
+      deleteForGood: "It is removed for good.",
+      deleteAccountTitle: "Delete your account?",
+      deleteAccountText:
+        "Your account and your sign-in are removed. Your comments stay, shown as “Deleted user”, and your likes on comments go.",
+      deleteAccountFailed:
+        "That didn't work. Sign out, sign in again, and try once more.",
+      deletedUser: "Deleted user",
+      invalid: {
+        empty: "Write something first.",
+        tooLong: "That comment is too long.",
+        tooManyWords: "Keep it to {max} words or fewer (it is {words}).",
+        noParent: "That comment isn't there to reply to.",
+        duplicate: "You've already posted that.",
+        ownComment: "You can't report your own comment.",
+      },
+    },
+    signIn: {
+      title: "Sign in to comment",
+      text: "We use your name and picture from GitHub or Google. Your email is never shown.",
+      privacy: "Privacy",
+      failed: "Sign-in didn't complete. Please try again.",
+      unavailable: "Sign-in isn't available yet.",
+      github: "Continue with GitHub",
+      google: "Continue with Google",
+    },
+    newsletter: {
+      region: "Newsletter",
+      email: "Email",
+      subscribe: "Subscribe",
+      website: "Website",
+      pageTitle: "Newsletter — Chestly Ace",
+    },
+    // The newsletter's wording as first written. The owner edits it in the admin
+    // (Blog → Newsletter), in both languages; these are what a field shows until it
+    // is changed, and what a blank one falls back to (lib/newsletterCopy.ts).
+    // PLACEHOLDER — the box and the page were approved with the Phase 9a spec; the
+    // confirmation email is a DRAFT (9b.7).
+    newsletterDefaults: {
+      boxLabel: "Newsletter",
+      boxTitle: "New posts, in your inbox",
+      boxText: "A short email when I publish something new. Nothing else.",
+      boxHelper:
+        "You can unsubscribe at any time. Prefer a feed? Use the RSS link in the footer.",
+      boxSuccess:
+        "Check your inbox. I've sent you a link to confirm your address.",
+      boxError: "That didn't work. Please try again in a moment.",
+      boxInvalid: "Enter a valid email address.",
+      boxRateLimited:
+        "Too many tries from here. Please try again a little later.",
+      confirmedLabel: "Subscribed",
+      confirmedTitle: "You're on the list",
+      confirmedLead:
+        "Thanks for confirming. You'll get an email when there's a new post.",
+      confirmedButton: "Read the blog",
+      failedLabel: "Link expired",
+      failedTitle: "That link didn't work",
+      failedLead:
+        "It may have expired or already been used. You can subscribe again from the bottom of any post.",
+      failedButton: "Go to the blog",
+      emailSubject: "Confirm your subscription to the Chestly Ace blog",
+      emailIntro:
+        "Thanks for subscribing to new posts from the Chestly Ace blog.",
+      emailAction: "Confirm my subscription",
+      emailExpires: "This link works for 48 hours.",
+      emailIgnore:
+        "If you didn't ask for this, just ignore this email. Nobody is subscribed until the link is opened.",
+    },
+    privacy: {
+      label: "Privacy",
+      title: "Privacy",
+      pageTitle: "Privacy — Chestly Ace",
+      description: "What the blog stores about readers, and why.",
+      updatedLabel: "Last updated {date}",
+      /** ISO date of the last change to the text below (update it with the text). */
+      updated: "2026-10-08",
+      // DRAFT WORDING for the owner's approval (design.md §14.18, Phase 9b.5b).
+      // `{contact}` is the contact form's address.
+      text: `
+This blog keeps very little about you. This page says what, and why.
+
+## What is stored
+
+- **Likes.** When you like a post, your browser gets a cookie called \`blog_visitor\` holding a random code. I keep only a scrambled (hashed) copy of it next to the post, so a like counts once. It can't be turned back into the code, and it says nothing about who you are.
+- **Your account, if you sign in to comment.** GitHub or Google shares your **name, email address and profile picture** with me, and I store them. A sign-in cookie (\`reader.session_token\`) keeps you signed in for up to 30 days.
+- **Your comments**, the likes you give to comments, and any comments you report.
+- **Newsletter.** If you subscribe, I keep your **email address** in Resend, the email service I send the newsletter with. It is not stored in this blog's own database. I only add it after you open the link in the confirmation email; if you never do, it is not kept.
+
+## Why
+
+To make likes count once, to let you comment, to keep you signed in, to email you new posts if you subscribe, and so I can tell who wrote what and deal with spam or abuse. Nothing is used for advertising, and nothing is sold.
+
+## Who sees it
+
+- Your **name, picture and comments are public**, next to your comments.
+- Your **email address is never shown** to other readers. Only I can see it. The same goes for a newsletter address: only I and Resend see it, and I never share the list.
+- When someone comments, I get an email with their name and their comment (not their email address). The site runs on Vercel, with its database and the email service Resend, which handle this data for me.
+
+## How long
+
+- The likes cookie lasts a year.
+- A sign-in lasts up to 30 days.
+- Your account and comments stay until you delete them or I remove them.
+- A newsletter address stays until you unsubscribe.
+
+## Deleting your data
+
+Sign in, open the menu on your name under the comments, and choose **Delete my account**. That removes your name, email address, picture, sign-in and your likes on comments. Your comments stay, shown as "Deleted user"; you can delete each of them yourself first. Every newsletter email has an unsubscribe link, which stops the emails. If you would like your address removed from the list altogether, or anything else removed, ask me.
+
+## Questions
+
+Use the [contact form]({contact}) on my main site.
+`,
+    },
+  },
+
   // The titles and descriptions search engines and shared links show (docs/i18n.md §6).
   seo: {
     main: {
@@ -253,6 +476,11 @@ export const en = {
       jobTitle: "Software Engineer",
     },
     project: "{title} — Chestly Ace",
+    blog: {
+      title: "Chestly Ace — Blog",
+      description:
+        "Writing on software engineering, web development, and building things.",
+    },
   },
 };
 

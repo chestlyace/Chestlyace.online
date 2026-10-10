@@ -18,6 +18,8 @@ type SectionHeadingProps = {
   /** The title's size: `xl` (default) or the smaller `lg` (a blog post's title). */
   size?: "xl" | "lg";
   className?: string;
+  /** The language of the title and intro when it differs from the page's. */
+  lang?: string;
 };
 
 // useLayoutEffect on the client (so the hidden start state is set before
@@ -38,6 +40,7 @@ export function SectionHeading({
   as: Heading = "h2",
   size = "xl",
   className,
+  lang,
 }: SectionHeadingProps) {
   const reduced = usePrefersReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -107,6 +110,7 @@ export function SectionHeading({
       )}
       <Heading
         ref={titleRef}
+        lang={lang}
         tabIndex={-1}
         data-section-heading
         className={cn(
@@ -119,6 +123,7 @@ export function SectionHeading({
       {intro && (
         <p
           data-heading-extra
+          lang={lang}
           className="mt-6 max-w-[52ch] text-lead text-muted"
         >
           {intro}

@@ -8,6 +8,8 @@ import { usePrefersReducedMotion } from "@/lib/media";
 import { CopyButton } from "./CopyButton";
 import { useClock } from "./useClock";
 import { useReveal } from "./useReveal";
+import { format } from "@/lib/i18n/format";
+import { useBlockText } from "./useBlockText";
 
 // `terminal` (design.md §13.44): a terminal window. Always dark, in both
 // themes. Commands type at 22ms a character and their output prints after them;
@@ -26,6 +28,7 @@ export function Terminal({
   const total = totalTerminalMs(rows);
   const clock = useClock(total);
   useReveal(ref, clock.start);
+  const t = useBlockText();
 
   const state = reduced
     ? { shown: rows.length, typing: null, done: true }
@@ -51,7 +54,7 @@ export function Terminal({
       className="my-8 overflow-hidden rounded-lg border border-border bg-[#0a0a0a] text-[#f5f5f7]"
     >
       <div className="flex h-10 items-center justify-between border-b border-[#262626] bg-[#171717] pr-1.5 pl-4 text-[#a1a1a6]">
-        <span className="type-label truncate">{title ?? "terminal"}</span>
+        <span className="type-label truncate">{title ?? t.terminal}</span>
         <div className="flex items-center gap-0.5 [&_button]:text-[#a1a1a6] [&_button:hover]:bg-white/10 [&_button:hover]:text-[#f5f5f7]">
           {clock.playing && (
             <button
@@ -62,7 +65,7 @@ export function Terminal({
               }}
               className="type-label rounded-full px-3 py-1.5 transition-colors duration-150"
             >
-              Skip
+              {t.skip}
             </button>
           )}
           {!reduced && (
@@ -73,20 +76,18 @@ export function Terminal({
                 if (clock.playing) clock.skip();
                 else clock.replay();
               }}
-              aria-label={
-                clock.playing ? "Finish the session" : "Replay the session"
-              }
+              aria-label={clock.playing ? t.finishSession : t.replaySession}
               className="relative grid size-8 place-items-center rounded-full transition-colors duration-150 before:absolute before:-inset-1 before:content-['']"
             >
               <RotateCcw className="size-4" aria-hidden="true" />
             </button>
           )}
-          <CopyButton text={commands.join("\n")} label="Copy commands" />
+          <CopyButton text={commands.join("\n")} label={t.copyCommands} />
         </div>
       </div>
       <div
         role="region"
-        aria-label={`${title ?? "Terminal"} session`}
+        aria-label={format(t.terminalSession, { title: title ?? t.terminal })}
         tabIndex={0}
         className="overflow-x-auto outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
       >

@@ -114,6 +114,98 @@ describe("createPost", () => {
   });
 });
 
+describe("the French version", () => {
+  const fr = (over: Record<string, unknown> = {}) => ({
+    title: "Titre",
+    content: "Un paragraphe.",
+    published: true,
+    ...over,
+  });
+  const live = (over: Record<string, unknown> = {}) => ({
+    description: "About it",
+    content: "Some English.",
+    status: "published",
+    ...over,
+  });
+
+  it("stores the French text and keeps only what was written", async () => {
+    const post = await made({
+      translations: { fr: fr({ description: "   ", series: "" }) },
+    });
+    expect(post.translations).toEqual({
+      fr: { title: "Titre", content: "Un paragraphe.", published: true },
+    });
+  });
+
+  it("refuses unknown French fields and a French text that is too long", async () => {
+    const unknown = await createPost(
+      db,
+      draft({ translations: { fr: { tags: ["x"] } } }),
+    );
+    expect(unknown.ok).toBe(false);
+    const long = await createPost(
+      db,
+      draft({ translations: { fr: { content: "x".repeat(200_001) } } }),
+    );
+    expect(long.ok).toBe(false);
+  });
+
+  it("will not publish the French version without its text, or with a block it cannot read", async () => {
+    const empty = await createPost(
+      db,
+      draft(live({ translations: { fr: { published: true } } })),
+    );
+    expect(empty).toMatchObject({
+      ok: false,
+      fields: { "fr:content": "Add the French text before publishing it." },
+    });
+    const broken = await createPost(
+      db,
+      draft(
+        live({
+          slug: "broken",
+          translations: {
+            fr: fr({ content: "![](https://x.test/a.webp)" }),
+          },
+        }),
+      ),
+    );
+    expect(broken).toMatchObject({
+      ok: false,
+      fields: { "fr:content": expect.stringContaining("alt") },
+    });
+  });
+
+  it("lets a French draft wait, and checks again when it is switched on", async () => {
+    const post = await made(
+      live({ translations: { fr: fr({ published: false, content: "" }) } }),
+    );
+    const on = await updatePost(db, post.id, {
+      translations: { fr: fr({ content: "", published: true }) },
+    });
+    expect(on.ok).toBe(false);
+    const ok = await updatePost(db, post.id, {
+      translations: { fr: fr({ published: true }) },
+    });
+    expect(ok.ok).toBe(true);
+  });
+
+  it("lists whether a post has French, and a copy brings it along switched off", async () => {
+    const post = await made({ translations: { fr: fr() } });
+    await made({ slug: "no-french" });
+    expect((await listPosts(db)).map((p) => [p.slug, p.french])).toEqual(
+      expect.arrayContaining([
+        ["a-post", "live"],
+        ["no-french", "none"],
+      ]),
+    );
+    const copy = await duplicatePost(db, post.id);
+    expect(copy.ok && copy.post.translations).toEqual({
+      fr: { title: "Titre", content: "Un paragraphe.", published: false },
+    });
+  });
+});
+
 describe("updatePost", () => {
   it("changes only what is sent, and an empty change is refused", async () => {
     const post = await made({ description: "Keep me" });

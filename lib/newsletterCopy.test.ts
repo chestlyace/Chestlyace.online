@@ -42,3 +42,43 @@ describe("toCopy", () => {
     expect(copy.email.expires).toBe(NEWSLETTER_DEFAULTS.emailExpires);
   });
 });
+
+describe("withDefaults in French", () => {
+  it("is the French built-in wording when nothing is stored", () => {
+    expect(withDefaults(null, "fr").boxTitle).toBe(
+      "Les nouveaux articles, dans votre boîte mail",
+    );
+    for (const field of NEWSLETTER_FIELDS)
+      expect(withDefaults(null, "fr")[field]).not.toBe(
+        NEWSLETTER_DEFAULTS[field],
+      );
+  });
+
+  it("takes the French the owner wrote, then the built-in French for an English field they left alone, then their English", () => {
+    const settings = withDefaults(
+      {
+        boxTitle: NEWSLETTER_DEFAULTS.boxTitle, // saved with the form, unchanged
+        boxText: "My own text",
+        boxLabel: "Letters",
+        translations: { fr: { boxLabel: "Lettres", boxHelper: "  " } },
+      },
+      "fr",
+    );
+    expect(settings.boxLabel).toBe("Lettres");
+    expect(settings.boxText).toBe("My own text");
+    expect(settings.boxTitle).toBe(
+      "Les nouveaux articles, dans votre boîte mail",
+    );
+    expect(settings.boxHelper).toBe(withDefaults(null, "fr").boxHelper);
+  });
+
+  it("leaves English alone, and the switch is shared", () => {
+    const stored = {
+      boxLabel: "Letters",
+      enabled: false,
+      translations: { fr: { boxLabel: "Lettres" } },
+    };
+    expect(withDefaults(stored).boxLabel).toBe("Letters");
+    expect(withDefaults(stored, "fr").enabled).toBe(false);
+  });
+});

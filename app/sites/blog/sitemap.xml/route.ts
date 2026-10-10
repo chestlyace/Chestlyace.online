@@ -4,7 +4,10 @@ import { sitemapXml, textResponse } from "@/lib/seo";
 
 // The home, the tags index, every post and every tag.
 export async function GET() {
-  const [posts, tags] = await Promise.all([getCachedPosts(), getCachedTags()]);
+  const [posts, tags] = await Promise.all([
+    getCachedPosts("en"),
+    getCachedTags("en"),
+  ]);
   return textResponse(
     sitemapXml(
       blogSitemapUrls(

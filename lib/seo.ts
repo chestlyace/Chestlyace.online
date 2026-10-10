@@ -54,9 +54,12 @@ const SITE_COPY: Record<
 type OgImage = { path: string; width: number; height: number };
 
 // The title and description of a site in a language. The main site's come from the
-// dictionaries (docs/i18n.md §6); the blog's and Creatives' follow with their steps.
+// dictionaries (docs/i18n.md §6), the blog's too; Creatives' follow with their step.
 function siteCopy(site: PublicSiteKey, lang: Lang) {
-  if (site !== "main" || lang === DEFAULT_LANG) return SITE_COPY[site];
+  if (lang === DEFAULT_LANG) return SITE_COPY[site];
+  if (site === "blog")
+    return { ...SITE_COPY.blog, ...getMessages(lang).seo.blog };
+  if (site !== "main") return SITE_COPY[site];
   const { title, description } = getMessages(lang).seo.main;
   const values = { name: PERSON_NAME, legalName: PERSON_LEGAL_NAME };
   return {
@@ -86,8 +89,10 @@ export function robotsMeta(
 }
 
 // The blog's feed, for readers that look for it in <head> (design.md §14.17).
-const feedLinks = (site: PublicSiteKey) =>
-  site === "blog" ? { types: { "application/rss+xml": "/rss.xml" } } : {};
+const feedLinks = (site: PublicSiteKey, lang: Lang) =>
+  site === "blog"
+    ? { types: { "application/rss+xml": localizedPath("/rss.xml", lang) } }
+    : {};
 
 // A site's layout metadata: its title and description, the canonical address of
 // every page (relative to `metadataBase`), and the Open Graph and Twitter tags.
@@ -103,7 +108,10 @@ export function siteMetadata(
     metadataBase: new URL(siteOrigin(site)),
     title,
     description,
-    alternates: { canonical: localizedPath("/", lang), ...feedLinks(site) },
+    alternates: {
+      canonical: localizedPath("/", lang),
+      ...feedLinks(site, lang),
+    },
     robots: robotsMeta(site),
     openGraph: {
       type: "website",
@@ -150,7 +158,7 @@ export function pageMetadata(
   return {
     title: page.title,
     description: page.description,
-    alternates: { canonical: page.canonical ?? path, ...feedLinks(site) },
+    alternates: { canonical: page.canonical ?? path, ...feedLinks(site, lang) },
     openGraph: {
       ...(page.article
         ? {

@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { getDb } from "@/lib/db";
+import type { Lang } from "@/lib/i18n";
 import {
   getAgentSession,
   getNewsletterCopy,
@@ -26,15 +27,17 @@ function cached<Args extends unknown[], Result>(
   return unstable_cache(read, ["blog", name, deployment], { tags: [BLOG_TAG] });
 }
 
-export const getCachedPosts = cached("posts", () =>
-  listPublishedPosts(getDb()),
+export const getCachedPosts = cached("posts", (lang: Lang) =>
+  listPublishedPosts(getDb(), lang),
 );
-export const getCachedPost = cached("post", (slug: string) =>
-  getPublishedPost(getDb(), slug),
+export const getCachedPost = cached("post", (slug: string, lang: Lang) =>
+  getPublishedPost(getDb(), slug, lang),
 );
-export const getCachedTags = cached("tags", () => listTags(getDb()));
-export const getCachedPostsByTag = cached("by-tag", (tag: string) =>
-  listPostsByTag(getDb(), tag),
+export const getCachedTags = cached("tags", (lang: Lang) =>
+  listTags(getDb(), lang),
+);
+export const getCachedPostsByTag = cached("by-tag", (tag: string, lang: Lang) =>
+  listPostsByTag(getDb(), tag, lang),
 );
 export const getCachedBlogSocials = cached("socials", () =>
   listBlogSocials(getDb()),
@@ -42,6 +45,6 @@ export const getCachedBlogSocials = cached("socials", () =>
 export const getCachedSession = cached("session", (id: string) =>
   getAgentSession(getDb(), id),
 );
-export const getCachedNewsletterCopy = cached("newsletter", () =>
-  getNewsletterCopy(getDb()),
+export const getCachedNewsletterCopy = cached("newsletter", (lang: Lang) =>
+  getNewsletterCopy(getDb(), lang),
 );

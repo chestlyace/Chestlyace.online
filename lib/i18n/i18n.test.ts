@@ -191,6 +191,13 @@ describe("messages", () => {
     "home.faq.label",
     "home.faq.title",
     "seo.project",
+    "seo.blog.title",
+    "blog.footer.rss",
+    "blog.home.label",
+    "blog.home.title",
+    "blog.onlyEnglish.mark",
+    "blog.post.title",
+    "blog.privacy.updated",
   ]);
 
   it("translates every French text that is not a name", () => {

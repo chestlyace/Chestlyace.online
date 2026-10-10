@@ -61,7 +61,10 @@ export async function POST(
 
   const parsed = body.safeParse(await request.json().catch(() => undefined));
   if (!parsed.success)
-    return reply({ error: "invalid", message: "Write something first." }, 422);
+    return reply(
+      { error: "invalid", code: "empty", message: "Write something first." },
+      422,
+    );
 
   const { slug } = await params;
   const db = getDb();
@@ -79,7 +82,13 @@ export async function POST(
     return reply(
       {
         error: result.error,
-        ...("message" in result ? { message: result.message } : {}),
+        ...("message" in result
+          ? {
+              code: result.code,
+              message: result.message,
+              values: result.values,
+            }
+          : {}),
       },
       result.status,
     );

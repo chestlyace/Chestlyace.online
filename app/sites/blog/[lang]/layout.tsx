@@ -5,10 +5,17 @@ import { getCachedBlogSocials } from "@/lib/blog/cache";
 import type { FooterLink } from "@/lib/chrome";
 import { isHttpUrl } from "@/lib/links";
 import { LANGS, isLang } from "@/lib/i18n";
+import { getMessages } from "@/content/messages";
+import { localizedPath } from "@/lib/i18n";
 import { siteMetadata } from "@/lib/seo";
 import "../../../globals.css";
 
-export const metadata: Metadata = siteMetadata("blog");
+export async function generateMetadata({
+  params,
+}: LayoutProps<"/sites/blog/[lang]">): Promise<Metadata> {
+  const { lang } = await params;
+  return siteMetadata("blog", isLang(lang) ? lang : undefined);
+}
 
 // Both languages are built ahead of time; the layout answers any other value with a
 // 404 (docs/i18n.md §3). `dynamicParams = false` is not used: it makes Next fail to
@@ -24,6 +31,7 @@ export default async function BlogLayout({
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   // The footer's Connect column: the socials shown on the blog, then the feed.
+  const m = getMessages(lang).blog;
   const socials = await getCachedBlogSocials();
   const connect: FooterLink[] = [
     ...socials
@@ -33,13 +41,16 @@ export default async function BlogLayout({
         href: social.url,
         external: true,
       })),
-    { label: "RSS", href: "/rss.xml" },
+    { label: m.footer.rss, href: localizedPath("/rss.xml", lang) },
   ];
   return (
     <SiteDocument
       lang={lang}
       site="blog"
-      footer={{ connect, contact: [{ label: "Privacy", href: "/privacy" }] }}
+      footer={{
+        connect,
+        contact: [{ label: m.footer.privacy, href: "/privacy" }],
+      }}
     >
       {children}
     </SiteDocument>

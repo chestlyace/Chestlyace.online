@@ -1,6 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
+import { eq } from "drizzle-orm";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
@@ -119,6 +120,120 @@ describe("blog reads", () => {
   });
 });
 
+describe("blog reads in French", () => {
+  const withFrench = (
+    published: boolean,
+    extra: Record<string, unknown> = {},
+  ) => ({
+    fr: {
+      title: "Titre français",
+      description: "À propos",
+      content: "mot ".repeat(650),
+      published,
+      ...extra,
+    },
+  });
+
+  beforeEach(async () => {
+    await db
+      .update(schema.blogPosts)
+      .set({ translations: withFrench(true, { series: "Série" }) })
+      .where(eq(schema.blogPosts.slug, "newest"));
+    await db
+      .update(schema.blogPosts)
+      .set({ translations: withFrench(false) })
+      .where(eq(schema.blogPosts.slug, "oldest"));
+  });
+
+  it("changes nothing for English", async () => {
+    const posts = await listPublishedPosts(db);
+    expect(posts[0].title).toBe("NEWEST");
+    expect(posts.every((p) => p.lang === "en")).toBe(true);
+    expect(posts[0]).not.toHaveProperty("fr");
+    expect(posts[0]).not.toHaveProperty("frenchLive");
+  });
+
+  it("lists every post in French, the ones with a published French version in French", async () => {
+    const posts = await listPublishedPosts(db, "fr");
+    expect(posts.map((p) => [p.slug, p.lang])).toEqual([
+      ["newest", "fr"],
+      ["middle", "en"],
+      ["oldest", "en"], // a French draft waits
+    ]);
+    expect(posts[0].title).toBe("Titre français");
+    expect(posts[0].description).toBe("À propos");
+    expect(posts[0].readingMinutes).toBe(4); // the French text's 650 words
+    expect(posts[1].title).toBe("MIDDLE");
+  });
+
+  it("keeps the English for a French field that is blank", async () => {
+    await db
+      .update(schema.blogPosts)
+      .set({ translations: withFrench(true, { title: "  " }) })
+      .where(eq(schema.blogPosts.slug, "newest"));
+    const [first] = await listPublishedPosts(db, "fr");
+    expect(first.title).toBe("NEWEST");
+    expect(first.description).toBe("À propos");
+    expect(first.lang).toBe("fr");
+  });
+
+  it("is English when the French has no text, even if switched on", async () => {
+    await db
+      .update(schema.blogPosts)
+      .set({ translations: withFrench(true, { content: "  " }) })
+      .where(eq(schema.blogPosts.slug, "newest"));
+    expect((await listPublishedPosts(db, "fr"))[0].lang).toBe("en");
+  });
+
+  it("gets the post in French, with its French text, series and neighbours", async () => {
+    const page = await getPublishedPost(db, "newest", "fr");
+    expect(page?.post.lang).toBe("fr");
+    expect(page?.post.title).toBe("Titre français");
+    expect(page?.post.series).toBe("Série");
+    expect(page?.post.content.startsWith("mot mot")).toBe(true);
+    expect(page?.post.canonicalUrl).toBeNull();
+    expect(page?.previous?.slug).toBe("middle");
+
+    const english = await getPublishedPost(db, "newest");
+    expect(english?.post.title).toBe("NEWEST");
+    expect(english?.post.content.startsWith("word")).toBe(true);
+  });
+
+  it("reads an English-only post as English on the French blog", async () => {
+    const page = await getPublishedPost(db, "middle", "fr");
+    expect(page?.post.lang).toBe("en");
+    expect(page?.post.content).toBe("short");
+    const draft = await getPublishedPost(db, "oldest", "fr");
+    expect(draft?.post.lang).toBe("en");
+    expect(draft?.post.title).toBe("OLDEST");
+  });
+
+  it("keeps the cross-post canonical on the English text only", async () => {
+    await db
+      .update(schema.blogPosts)
+      .set({ canonicalUrl: "https://dev.to/x/newest" })
+      .where(eq(schema.blogPosts.slug, "newest"));
+    expect((await getPublishedPost(db, "newest"))?.post.canonicalUrl).toBe(
+      "https://dev.to/x/newest",
+    );
+    expect(
+      (await getPublishedPost(db, "newest", "fr"))?.post.canonicalUrl,
+    ).toBeNull();
+  });
+
+  it("counts tags and lists tag pages from the posts with French only", async () => {
+    expect(await listTags(db, "fr")).toEqual([{ tag: "nextjs", count: 1 }]);
+    expect(
+      (await listPostsByTag(db, "nextjs", "fr")).map((p) => p.slug),
+    ).toEqual(["newest"]);
+    expect(await listPostsByTag(db, "web", "fr")).toEqual([]);
+    expect((await listPostsByTag(db, "nextjs")).map((p) => p.slug)).toEqual([
+      "newest",
+      "oldest",
+    ]);
+  });
+});
+
 describe("countTags", () => {
   it("counts a tag once per post and orders by count, then name", () => {
     expect(
@@ -169,5 +284,25 @@ describe("getNewsletterCopy", () => {
     expect(copy.box.title).toBe("Join in");
     expect(copy.confirmed.title).toBe("Welcome");
     expect(copy.failed.title).toBe("That link didn't work");
+  });
+
+  it("follows the language: French built-in wording, the owner's French first", async () => {
+    await db.delete(schema.newsletterSettings);
+    expect((await getNewsletterCopy(db, "fr")).box.title).toBe(
+      "Les nouveaux articles, dans votre boîte mail",
+    );
+    await db.insert(schema.newsletterSettings).values({
+      id: 1,
+      boxTitle: "Join in",
+      confirmedTitle: "Welcome",
+      translations: { fr: { boxTitle: "Rejoignez-nous" } },
+    });
+    const copy = await getNewsletterCopy(db, "fr");
+    expect(copy.box.title).toBe("Rejoignez-nous");
+    // The owner's English with no French beside it is the fallback.
+    expect(copy.confirmed.title).toBe("Welcome");
+    // Nothing of theirs: the French built-in wording.
+    expect(copy.failed.title).toBe("Ce lien n’a pas fonctionné");
+    expect((await getNewsletterCopy(db)).box.title).toBe("Join in");
   });
 });

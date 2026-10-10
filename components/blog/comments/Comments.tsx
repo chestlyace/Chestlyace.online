@@ -7,8 +7,11 @@ import { authClient } from "@/lib/blog/authClient";
 import type { ProviderId } from "@/lib/blog/auth";
 import type { CommentView } from "@/lib/blog/comments";
 import { cn } from "@/lib/cn";
+import type { Messages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
 import { Avatar } from "./Avatar";
 import { CommentItem } from "./CommentItem";
+import { CommentsTextProvider } from "./CommentsText";
 import { Composer } from "./Composer";
 import { Dialog } from "./Dialog";
 import { SignInDialog, SignInPanel } from "./SignIn";
@@ -49,7 +52,18 @@ const dropComment = (items: CommentView[], id: number): CommentView[] =>
 // The comments under a post (design.md §13.37): the count, the composer or the
 // sign-in panel, the list. Loaded after the page from the blog's API, so the post
 // page itself stays cached.
-export function Comments({ slug }: { slug: string }) {
+export function Comments({
+  slug,
+  lang,
+  text,
+  signIn: signInText,
+}: {
+  slug: string;
+  lang: Lang;
+  /** The comments' words and the sign-in panel's, in the page's language. */
+  text: Messages["blog"]["comments"];
+  signIn: Messages["blog"]["signIn"];
+}) {
   const [data, setData] = useState<Loaded | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [more, setMore] = useState<"idle" | "loading">("idle");
@@ -151,213 +165,219 @@ export function Comments({ slug }: { slug: string }) {
   const reader = data?.reader ?? null;
 
   return (
-    <section
-      id="comments"
-      aria-labelledby="comments-title"
-      className="scroll-mt-24"
-    >
-      <h2 id="comments-title" className="text-h3 text-foreground">
-        Comments{" "}
-        {data && <span className="font-mono text-muted">{data.total}</span>}
-      </h2>
+    <CommentsTextProvider value={{ lang, text, signIn: signInText }}>
+      <section
+        id="comments"
+        aria-labelledby="comments-title"
+        className="scroll-mt-24"
+      >
+        <h2 id="comments-title" className="text-h3 text-foreground">
+          {text.title}{" "}
+          {data && <span className="font-mono text-muted">{data.total}</span>}
+        </h2>
 
-      <div className="mt-6">
-        {state === "ready" &&
-          data &&
-          (reader ? (
-            <>
-              <div
-                className="mb-5 flex items-center justify-between gap-3"
-                ref={menuRoot}
-              >
-                <p className="text-sm text-muted">Signed in as</p>
-                <div className="relative flex items-center gap-1">
-                  <button
-                    type="button"
-                    aria-haspopup="menu"
-                    aria-expanded={menu}
-                    onClick={() => setMenu((value) => !value)}
-                    className="flex h-9 items-center gap-2 rounded-full pr-2 pl-1 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-tile"
-                  >
-                    <Avatar name={reader.name} image={reader.image} size={28} />
-                    {reader.name}
-                    <ChevronDown
-                      className="size-4 text-muted"
-                      aria-hidden="true"
-                    />
-                  </button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    magnetic={false}
-                    onClick={() => void signOut()}
-                    trailingIcon={<LogOut />}
-                    iconNudge="none"
-                  >
-                    Sign out
-                  </Button>
-                  {menu && (
-                    <div
-                      role="menu"
-                      className="absolute top-full left-0 z-10 mt-1 w-52 rounded-md border border-border/60 bg-surface-raised p-1 shadow-float-lifted"
+        <div className="mt-6">
+          {state === "ready" &&
+            data &&
+            (reader ? (
+              <>
+                <div
+                  className="mb-5 flex items-center justify-between gap-3"
+                  ref={menuRoot}
+                >
+                  <p className="text-sm text-muted">{text.signedInAs}</p>
+                  <div className="relative flex items-center gap-1">
+                    <button
+                      type="button"
+                      aria-haspopup="menu"
+                      aria-expanded={menu}
+                      onClick={() => setMenu((value) => !value)}
+                      className="flex h-9 items-center gap-2 rounded-full pr-2 pl-1 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-tile"
                     >
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => {
-                          setMenu(false);
-                          setDeleting(true);
-                        }}
-                        className="flex h-10 w-full items-center gap-2 rounded-sm px-3 text-left text-sm text-danger hover:bg-tile"
+                      <Avatar
+                        name={reader.name}
+                        image={reader.image}
+                        size={28}
+                      />
+                      {reader.name}
+                      <ChevronDown
+                        className="size-4 text-muted"
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      magnetic={false}
+                      onClick={() => void signOut()}
+                      trailingIcon={<LogOut />}
+                      iconNudge="none"
+                    >
+                      {text.signOut}
+                    </Button>
+                    {menu && (
+                      <div
+                        role="menu"
+                        className="absolute top-full left-0 z-10 mt-1 w-52 rounded-md border border-border/60 bg-surface-raised p-1 shadow-float-lifted"
                       >
-                        <Trash2 className="size-4" aria-hidden="true" />
-                        Delete my account
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenu(false);
+                            setDeleting(true);
+                          }}
+                          className="flex h-10 w-full items-center gap-2 rounded-sm px-3 text-left text-sm text-danger hover:bg-tile"
+                        >
+                          <Trash2 className="size-4" aria-hidden="true" />
+                          {text.deleteAccount}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <Composer
-                slug={slug}
-                reader={reader}
-                maxWords={data.maxWords}
-                onPosted={(comment) =>
-                  update((current) => ({
-                    ...current,
-                    items: [comment, ...current.items],
-                    total: current.total + 1,
-                  }))
-                }
-              />
-            </>
-          ) : (
-            <SignInPanel providers={data.providers} failed={failed} />
-          ))}
-      </div>
-
-      <div className="mt-10">
-        {state === "loading" && (
-          <div
-            aria-label="Loading comments"
-            role="status"
-            className="flex flex-col gap-6"
-          >
-            {[0, 1, 2].map((row) => (
-              <div key={row} className="flex items-start gap-3">
-                <div className="size-8 shrink-0 rounded-full bg-surface" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-1/4 rounded-sm bg-surface" />
-                  <div className="h-4 w-3/4 rounded-sm bg-surface" />
-                </div>
-              </div>
+                <Composer
+                  slug={slug}
+                  reader={reader}
+                  maxWords={data.maxWords}
+                  onPosted={(comment) =>
+                    update((current) => ({
+                      ...current,
+                      items: [comment, ...current.items],
+                      total: current.total + 1,
+                    }))
+                  }
+                />
+              </>
+            ) : (
+              <SignInPanel providers={data.providers} failed={failed} />
             ))}
-          </div>
-        )}
+        </div>
 
-        {state === "error" && (
-          <p role="alert" className="text-sm text-danger">
-            Comments couldn&apos;t load.{" "}
-            <button
-              type="button"
-              onClick={() => void reload()}
-              className="link-inline text-foreground"
+        <div className="mt-10">
+          {state === "loading" && (
+            <div
+              aria-label={text.loading}
+              role="status"
+              className="flex flex-col gap-6"
             >
-              Try again
-            </button>
-          </p>
-        )}
-
-        {state === "ready" &&
-          data &&
-          (data.items.length === 0 ? (
-            <p className="text-muted">No comments yet. Be the first.</p>
-          ) : (
-            <>
-              <ul className="flex flex-col gap-8">
-                {data.items.map((comment) => (
-                  <CommentItem
-                    key={comment.id}
-                    comment={comment}
-                    slug={slug}
-                    signedIn={Boolean(reader)}
-                    reader={reader}
-                    maxWords={data.maxWords}
-                    onNeedSignIn={() => setSignIn(true)}
-                    onPosted={(parentId, created) =>
-                      update((current) => ({
-                        ...current,
-                        total: current.total + 1,
-                        items: current.items.map((item) =>
-                          item.id === parentId
-                            ? { ...item, replies: [...item.replies, created] }
-                            : item,
-                        ),
-                      }))
-                    }
-                    onChanged={(id, change) =>
-                      update((current) => ({
-                        ...current,
-                        items: mapComments(current.items, id, change),
-                      }))
-                    }
-                    onDeleted={(id) =>
-                      update((current) => ({
-                        ...current,
-                        total: Math.max(0, current.total - 1),
-                        items: dropComment(current.items, id),
-                      }))
-                    }
-                  />
-                ))}
-              </ul>
-              {data.nextCursor && (
-                <div className={cn("mt-8")}>
-                  <Button
-                    variant="ghost"
-                    magnetic={false}
-                    loading={more === "loading"}
-                    onClick={() => void loadMore()}
-                  >
-                    Load more comments
-                  </Button>
+              {[0, 1, 2].map((row) => (
+                <div key={row} className="flex items-start gap-3">
+                  <div className="size-8 shrink-0 rounded-full bg-surface" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-1/4 rounded-sm bg-surface" />
+                    <div className="h-4 w-3/4 rounded-sm bg-surface" />
+                  </div>
                 </div>
-              )}
-            </>
-          ))}
-      </div>
+              ))}
+            </div>
+          )}
 
-      {signIn && data && (
-        <SignInDialog
-          providers={data.providers}
-          onClose={() => setSignIn(false)}
-        />
-      )}
-      {deleting && (
-        <Dialog title="Delete your account?" onClose={() => setDeleting(false)}>
-          <p className="text-body text-muted">
-            Your account and your sign-in are removed. Your comments stay, shown
-            as “Deleted user”, and your likes on comments go.
-          </p>
-          {accountError && (
-            <p role="alert" className="mt-3 text-sm text-danger">
-              That didn&apos;t work. Sign out, sign in again, and try once more.
+          {state === "error" && (
+            <p role="alert" className="text-sm text-danger">
+              {text.loadError}{" "}
+              <button
+                type="button"
+                onClick={() => void reload()}
+                className="link-inline text-foreground"
+              >
+                {text.tryAgain}
+              </button>
             </p>
           )}
-          <div className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="secondary"
-              magnetic={false}
-              autoFocus
-              onClick={() => setDeleting(false)}
-            >
-              Cancel
-            </Button>
-            <Button magnetic={false} onClick={() => void deleteAccount()}>
-              Delete my account
-            </Button>
-          </div>
-        </Dialog>
-      )}
-    </section>
+
+          {state === "ready" &&
+            data &&
+            (data.items.length === 0 ? (
+              <p className="text-muted">{text.none}</p>
+            ) : (
+              <>
+                <ul className="flex flex-col gap-8">
+                  {data.items.map((comment) => (
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                      slug={slug}
+                      signedIn={Boolean(reader)}
+                      reader={reader}
+                      maxWords={data.maxWords}
+                      onNeedSignIn={() => setSignIn(true)}
+                      onPosted={(parentId, created) =>
+                        update((current) => ({
+                          ...current,
+                          total: current.total + 1,
+                          items: current.items.map((item) =>
+                            item.id === parentId
+                              ? { ...item, replies: [...item.replies, created] }
+                              : item,
+                          ),
+                        }))
+                      }
+                      onChanged={(id, change) =>
+                        update((current) => ({
+                          ...current,
+                          items: mapComments(current.items, id, change),
+                        }))
+                      }
+                      onDeleted={(id) =>
+                        update((current) => ({
+                          ...current,
+                          total: Math.max(0, current.total - 1),
+                          items: dropComment(current.items, id),
+                        }))
+                      }
+                    />
+                  ))}
+                </ul>
+                {data.nextCursor && (
+                  <div className={cn("mt-8")}>
+                    <Button
+                      variant="ghost"
+                      magnetic={false}
+                      loading={more === "loading"}
+                      onClick={() => void loadMore()}
+                    >
+                      {text.loadMore}
+                    </Button>
+                  </div>
+                )}
+              </>
+            ))}
+        </div>
+
+        {signIn && data && (
+          <SignInDialog
+            providers={data.providers}
+            onClose={() => setSignIn(false)}
+          />
+        )}
+        {deleting && (
+          <Dialog
+            title={text.deleteAccountTitle}
+            onClose={() => setDeleting(false)}
+          >
+            <p className="text-body text-muted">{text.deleteAccountText}</p>
+            {accountError && (
+              <p role="alert" className="mt-3 text-sm text-danger">
+                {text.deleteAccountFailed}
+              </p>
+            )}
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                variant="secondary"
+                magnetic={false}
+                autoFocus
+                onClick={() => setDeleting(false)}
+              >
+                {text.cancel}
+              </Button>
+              <Button magnetic={false} onClick={() => void deleteAccount()}>
+                {text.deleteAccount}
+              </Button>
+            </div>
+          </Dialog>
+        )}
+      </section>
+    </CommentsTextProvider>
   );
 }

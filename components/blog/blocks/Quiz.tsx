@@ -12,6 +12,9 @@ import {
 import { Button } from "@/components/shared/Button";
 import { cn } from "@/lib/cn";
 import { useReveal } from "./useReveal";
+import { format } from "@/lib/i18n/format";
+import type { BlockText } from "@/lib/i18n/ui";
+import { useBlockText } from "./useBlockText";
 
 export type QuizQuestionView = {
   question: ReactNode;
@@ -21,12 +24,12 @@ export type QuizQuestionView = {
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
-const message = (score: number, total: number) =>
+const message = (score: number, total: number, t: BlockText) =>
   score === total
-    ? "Perfect."
+    ? t.quizPerfect
     : score >= total / 2
-      ? "Nicely done. Worth another look at the ones you missed."
-      : "Worth reading the post again, then try once more.";
+      ? t.quizGood
+      : t.quizRetry;
 
 // `quiz` (design.md §13.46): a short multiple-choice quiz. One answer per
 // question, locked once chosen; the right answer and the explanation appear;
@@ -34,6 +37,7 @@ const message = (score: number, total: number) =>
 export function Quiz({ questions }: { questions: QuizQuestionView[] }) {
   const ref = useRef<HTMLDivElement>(null);
   useReveal(ref);
+  const t = useBlockText();
   const id = useId();
   const [index, setIndex] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
@@ -89,12 +93,12 @@ export function Quiz({ questions }: { questions: QuizQuestionView[] }) {
     >
       {finished ? (
         <div role="status">
-          <p className="type-label text-muted">Result</p>
+          <p className="type-label text-muted">{t.quizResult}</p>
           <p className="mt-2 text-h3 text-foreground">
-            You got {score} of {questions.length}.
+            {format(t.quizScore, { score, total: questions.length })}
           </p>
           <p className="mt-2 text-body text-muted">
-            {message(score, questions.length)}
+            {message(score, questions.length, t)}
           </p>
           <Button
             variant="ghost"
@@ -103,13 +107,16 @@ export function Quiz({ questions }: { questions: QuizQuestionView[] }) {
             onClick={restart}
             className="mt-5"
           >
-            Try again
+            {t.quizAgain}
           </Button>
         </div>
       ) : (
         <>
           <p className="type-label text-muted">
-            Question {index + 1} / {questions.length}
+            {format(t.quizQuestion, {
+              n: index + 1,
+              total: questions.length,
+            })}
           </p>
           <div
             key={index}
@@ -158,13 +165,13 @@ export function Quiz({ questions }: { questions: QuizQuestionView[] }) {
                     {right && (
                       <span className="flex items-center gap-1 text-sm text-[var(--diff-add)]">
                         <Check className="size-4" aria-hidden="true" />
-                        Correct
+                        {t.quizCorrect}
                       </span>
                     )}
                     {wrong && (
                       <span className="flex items-center gap-1 text-sm text-danger">
                         <X className="size-4" aria-hidden="true" />
-                        Not quite
+                        {t.quizNotQuite}
                       </span>
                     )}
                   </button>
@@ -180,14 +187,14 @@ export function Quiz({ questions }: { questions: QuizQuestionView[] }) {
                 tabIndex={-1}
                 className="rounded-md bg-surface-raised p-4 text-body leading-[1.7] text-foreground outline-none"
               >
-                {question.options[chosen].correct ? "Correct. " : "Not quite. "}
+                {question.options[chosen].correct
+                  ? `${t.quizCorrect}. `
+                  : `${t.quizNotQuite}. `}
                 {question.explanation}
               </div>
               <div>
                 <Button size="md" magnetic={false} onClick={next}>
-                  {index + 1 >= questions.length
-                    ? "See result"
-                    : "Next question"}
+                  {index + 1 >= questions.length ? t.quizSeeResult : t.quizNext}
                 </Button>
               </div>
             </div>

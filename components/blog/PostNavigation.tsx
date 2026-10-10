@@ -1,20 +1,29 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "@/components/shared/Link";
+import { getMessages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
+import { format } from "@/lib/i18n/format";
 import type { PostSummary } from "@/lib/blog/data";
 import { cn } from "@/lib/cn";
 
 function Block({
   post,
   direction,
+  lang,
 }: {
   post: PostSummary;
   direction: "previous" | "next";
+  lang: Lang;
 }) {
+  const m = getMessages(lang).blog.post;
   const next = direction === "next";
   return (
     <Link
       href={`/${post.slug}`}
-      aria-label={`${next ? "Next" : "Previous"} post: ${post.title}`}
+      aria-label={format(next ? m.nextPost : m.previousPost, {
+        title: post.title,
+      })}
+      lang={post.lang !== lang ? post.lang : undefined}
       className={cn(
         "group/nav block rounded-md p-8 outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring",
         next && "md:text-right",
@@ -32,7 +41,7 @@ function Block({
             aria-hidden="true"
           />
         )}
-        {next ? "Next" : "Previous"}
+        {next ? m.next : m.previous}
         {next && (
           <ArrowRight
             className="size-4 transition-transform duration-150 ease-out group-hover/nav:translate-x-1"
@@ -51,18 +60,22 @@ function Block({
 export function PostNavigation({
   previous,
   next,
+  lang,
 }: {
   previous: PostSummary | null;
   next: PostSummary | null;
+  lang: Lang;
 }) {
   if (!previous && !next) return null;
   return (
     <nav
-      aria-label="More posts"
+      aria-label={getMessages(lang).blog.post.moreLabel}
       className="grid border-y border-border md:grid-cols-2 md:divide-x md:divide-border max-md:divide-y max-md:divide-border"
     >
-      <div>{previous && <Block post={previous} direction="previous" />}</div>
-      <div>{next && <Block post={next} direction="next" />}</div>
+      <div>
+        {previous && <Block post={previous} direction="previous" lang={lang} />}
+      </div>
+      <div>{next && <Block post={next} direction="next" lang={lang} />}</div>
     </nav>
   );
 }

@@ -4,12 +4,14 @@ import { Check, Flag, Heart, Reply, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/shared/Button";
 import { Tag } from "@/components/shared/Tag";
-import { pieces } from "@/lib/blog/commentText";
+import { DELETED_USER, pieces } from "@/lib/blog/commentText";
 import type { CommentView } from "@/lib/blog/comments";
 import { fullDate, relativeTime } from "@/lib/blog/relativeTime";
 import { cn } from "@/lib/cn";
+import { format, plural } from "@/lib/i18n/format";
 import { RollingCount } from "../RollingCount";
 import { Avatar } from "./Avatar";
+import { useCommentsText } from "./CommentsText";
 import { Composer } from "./Composer";
 import { Dialog } from "./Dialog";
 
@@ -73,6 +75,7 @@ export function CommentItem({
   const [reported, setReported] = useState(false);
   const [note, setNote] = useState("");
   const [up, setUp] = useState(true);
+  const { lang, text } = useCommentsText();
 
   const call = async (path: string, method = "POST") => {
     const response = await fetch(`/api/blog/comments/${comment.id}${path}`, {
@@ -120,10 +123,10 @@ export function CommentItem({
       const response = await call("/report");
       if (response.ok) {
         setReported(true);
-        setNote("Reported. Thank you.");
-      } else setNote("Couldn't send that. Please try again.");
+        setNote(text.reportDone);
+      } else setNote(text.reportFailed);
     } catch {
-      setNote("Couldn't send that. Please try again.");
+      setNote(text.reportFailed);
     }
     setBusy(null);
   };
@@ -144,9 +147,9 @@ export function CommentItem({
         else onDeleted(comment.id);
         return;
       }
-      setNote("Couldn't delete that. Please try again.");
+      setNote(text.deleteFailed);
     } catch {
-      setNote("Couldn't delete that. Please try again.");
+      setNote(text.deleteFailed);
     }
     setBusy(null);
   };
@@ -157,7 +160,7 @@ export function CommentItem({
   if (comment.removed) {
     return (
       <li className={cn(isReply && "ml-6 sm:ml-10")}>
-        <p className="text-sm text-muted">This comment was removed.</p>
+        <p className="text-sm text-muted">{text.removed}</p>
         <Replies
           {...{
             comment,
@@ -178,27 +181,29 @@ export function CommentItem({
   }
 
   const author = comment.author!;
+  const authorName =
+    author.name === DELETED_USER ? text.deletedUser : author.name;
 
   return (
     <li className={cn(isReply && "ml-6 sm:ml-10")}>
       <article
-        aria-label={`Comment by ${author.name}`}
+        aria-label={format(text.commentBy, { name: authorName })}
         className="animate-[comment-in_300ms_ease-out] motion-reduce:animate-none"
       >
         <div className="flex items-start gap-3">
-          <Avatar name={author.name} image={author.image} />
+          <Avatar name={authorName} image={author.image} />
           <div className="min-w-0 flex-1">
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
               <span className="font-semibold text-foreground">
-                {author.name}
+                {authorName}
               </span>
-              {author.isAuthor && <Tag>AUTHOR</Tag>}
+              {author.isAuthor && <Tag>{text.author}</Tag>}
               <time
                 dateTime={comment.createdAt}
-                title={fullDate(comment.createdAt)}
+                title={fullDate(comment.createdAt, lang)}
                 className="text-muted"
               >
-                {relativeTime(comment.createdAt)}
+                {relativeTime(comment.createdAt, undefined, lang, text.justNow)}
               </time>
             </p>
             <Text body={comment.body} />
@@ -206,7 +211,7 @@ export function CommentItem({
               <button
                 type="button"
                 aria-pressed={comment.liked}
-                aria-label={`Like this comment, ${comment.likeCount} ${comment.likeCount === 1 ? "like" : "likes"}`}
+                aria-label={`${text.likeComment}, ${plural(text.likes, comment.likeCount, lang)}`}
                 onClick={() => void like()}
                 className={action}
               >
@@ -229,7 +234,7 @@ export function CommentItem({
                   className={action}
                 >
                   <Reply className="size-4" aria-hidden="true" />
-                  Reply
+                  {text.reply}
                 </button>
               )}
               {signedIn && !comment.mine && (
@@ -244,7 +249,7 @@ export function CommentItem({
                   ) : (
                     <Flag className="size-4" aria-hidden="true" />
                   )}
-                  {reported ? "Reported" : "Report"}
+                  {reported ? text.reported : text.report}
                 </button>
               )}
               {comment.mine && (
@@ -255,7 +260,7 @@ export function CommentItem({
                   className={action}
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
-                  Delete
+                  {text.delete}
                 </button>
               )}
             </div>
@@ -271,7 +276,7 @@ export function CommentItem({
                   parentId={comment.id}
                   reader={reader}
                   maxWords={maxWords}
-                  label="Add a reply"
+                  label={text.addReply}
                   autoFocus
                   onCancel={() => setReplying(false)}
                   onPosted={(created) => {
@@ -305,11 +310,8 @@ export function CommentItem({
         </div>
       )}
       {confirm === "report" && (
-        <Dialog title="Report this comment?" onClose={() => setConfirm(null)}>
-          <p className="text-body text-muted">
-            The owner is told and will take a look. Each reader can report a
-            comment once.
-          </p>
+        <Dialog title={text.reportTitle} onClose={() => setConfirm(null)}>
+          <p className="text-body text-muted">{text.reportText}</p>
           <div className="mt-6 flex justify-end gap-3">
             <Button
               variant="secondary"
@@ -317,20 +319,20 @@ export function CommentItem({
               autoFocus
               onClick={() => setConfirm(null)}
             >
-              Cancel
+              {text.cancel}
             </Button>
             <Button magnetic={false} onClick={() => void report()}>
-              Report
+              {text.report}
             </Button>
           </div>
         </Dialog>
       )}
       {confirm === "delete" && (
-        <Dialog title="Delete your comment?" onClose={() => setConfirm(null)}>
+        <Dialog title={text.deleteTitle} onClose={() => setConfirm(null)}>
           <p className="text-body text-muted">
             {comment.replies.length > 0
-              ? "It will read “This comment was removed.” so the replies keep their place."
-              : "It is removed for good."}
+              ? text.deleteWithReplies
+              : text.deleteForGood}
           </p>
           <div className="mt-6 flex justify-end gap-3">
             <Button
@@ -339,10 +341,10 @@ export function CommentItem({
               autoFocus
               onClick={() => setConfirm(null)}
             >
-              Cancel
+              {text.cancel}
             </Button>
             <Button magnetic={false} onClick={() => void remove()}>
-              Delete
+              {text.delete}
             </Button>
           </div>
         </Dialog>
@@ -378,6 +380,7 @@ function Replies({
   onChanged: (id: number, change: Partial<CommentView>) => void;
   onDeleted: (id: number) => void;
 }) {
+  const { text } = useCommentsText();
   const replies = comment.replies;
   if (replies.length === 0) return null;
   if (replies.length > 2 && !showAll) {
@@ -388,14 +391,23 @@ function Replies({
           onClick={() => setShowAll(true)}
           className="link-inline text-sm text-muted hover:text-foreground"
         >
-          Show {replies.length} replies
+          {format(text.showReplies, { count: replies.length })}
         </button>
       </div>
     );
   }
   return (
     <ul
-      aria-label={`Replies to ${comment.author?.name ?? "a removed comment"}`}
+      aria-label={
+        comment.author
+          ? format(text.repliesTo, {
+              name:
+                comment.author.name === DELETED_USER
+                  ? text.deletedUser
+                  : comment.author.name,
+            })
+          : text.repliesToRemoved
+      }
       className="flex flex-col gap-5"
     >
       {replies.map((reply) => (

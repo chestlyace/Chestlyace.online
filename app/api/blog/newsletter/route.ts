@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { cleanEmail } from "@/lib/newsletter";
 import { buildConfirmEmail, signToken } from "@/lib/newsletterServer";
 import { sendContactEmail } from "@/lib/contactMail";
+import { DEFAULT_LANG, isLang, localizedPath } from "@/lib/i18n";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { siteUrl } from "@/lib/sites";
 
@@ -59,7 +60,10 @@ export async function POST(request: Request) {
   const email = cleanEmail(body.email);
   if (!email) return reply({ error: "invalid" }, 422);
 
-  const copy = await getNewsletterCopy(getDb());
+  // The wording, the confirmation email and the link's page follow the page the
+  // signup came from (docs/i18n.md §8).
+  const lang = isLang(body.lang) ? body.lang : DEFAULT_LANG;
+  const copy = await getNewsletterCopy(getDb(), lang);
   if (!copy.enabled) return reply({ error: "disabled" }, 404);
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -69,7 +73,10 @@ export async function POST(request: Request) {
 
   const link = siteUrl(
     "blog",
-    `/newsletter/confirm?token=${encodeURIComponent(signToken(email, secret))}`,
+    localizedPath(
+      `/newsletter/confirm?token=${encodeURIComponent(signToken(email, secret))}`,
+      lang,
+    ),
   );
   const sent = await sendContactEmail(
     buildConfirmEmail(email, link, copy.email, process.env.CONTACT_FROM_EMAIL),

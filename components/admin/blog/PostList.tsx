@@ -218,6 +218,23 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
                       Draft
                     </Tag>
                   )}
+                  {item.french !== "none" && (
+                    <Tag
+                      title={
+                        item.french === "live"
+                          ? "French version published"
+                          : "French version is a draft"
+                      }
+                      className={cn(
+                        "ml-2",
+                        item.french === "live"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-transparent shadow-[inset_0_0_0_1px_var(--border)]",
+                      )}
+                    >
+                      FR
+                    </Tag>
+                  )}
                 </span>
                 <Switch
                   checked={published}

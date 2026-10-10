@@ -8,6 +8,8 @@ import { FormField, fieldControl } from "@/components/shared/FormField";
 import { Reveal } from "@/components/shared/Reveal";
 import { cn } from "@/lib/cn";
 import { cleanEmail } from "@/lib/newsletter";
+import type { Messages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
 import type { NewsletterCopy } from "@/lib/newsletterCopy";
 
 type Status = "idle" | "sending" | "sent" | "failed";
@@ -20,9 +22,14 @@ type Status = "idle" | "sending" | "sent" | "failed";
 // takes focus and is announced.
 export function NewsletterBox({
   copy,
+  labels,
+  lang,
   className,
 }: {
   copy: NewsletterCopy["box"];
+  /** The fixed words (field label, button, trap field) in the page's language. */
+  labels: Messages["blog"]["newsletter"];
+  lang: Lang;
   className?: string;
 }) {
   const [email, setEmail] = useState("");
@@ -57,6 +64,7 @@ export function NewsletterBox({
         body: JSON.stringify({
           email,
           website: honeypot.current?.value ?? "",
+          lang,
         }),
       });
       if (response.ok) {
@@ -79,7 +87,7 @@ export function NewsletterBox({
   return (
     <Reveal className={className}>
       <section
-        aria-label="Newsletter"
+        aria-label={labels.region}
         className="rounded-xl bg-surface p-6 sm:p-8"
       >
         <div className="max-w-[36rem]">
@@ -127,7 +135,11 @@ export function NewsletterBox({
                       {failure}
                     </p>
                   )}
-                  <FormField id="newsletter-email" label="Email" error={error}>
+                  <FormField
+                    id="newsletter-email"
+                    label={labels.email}
+                    error={error}
+                  >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                       <input
                         ref={input}
@@ -155,7 +167,7 @@ export function NewsletterBox({
                         loading={status === "sending"}
                         className="w-full sm:w-auto"
                       >
-                        Subscribe
+                        {labels.subscribe}
                       </Button>
                     </div>
                   </FormField>
@@ -166,7 +178,7 @@ export function NewsletterBox({
                     className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
                   >
                     <label>
-                      Website
+                      {labels.website}
                       <input
                         ref={honeypot}
                         type="text"

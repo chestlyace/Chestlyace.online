@@ -3,13 +3,14 @@
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { useBlockText } from "./useBlockText";
 
 // The small copy control in a block's header (design.md §13.30): a Lucide
 // `copy` that becomes `check` for 2 seconds, with a polite "Copied" for screen
 // readers. `text` is exactly what goes on the clipboard.
 export function CopyButton({
   text,
-  label = "Copy code",
+  label,
   className,
 }: {
   text: string;
@@ -17,6 +18,7 @@ export function CopyButton({
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const t = useBlockText();
 
   async function copy() {
     try {
@@ -33,7 +35,7 @@ export function CopyButton({
       <button
         type="button"
         onClick={copy}
-        aria-label={label}
+        aria-label={label ?? t.copyCode}
         className={cn(
           "relative grid size-8 shrink-0 place-items-center rounded-full transition-colors duration-150 before:absolute before:-inset-1 before:content-[''] hover:bg-tile-hover",
           className,
@@ -46,7 +48,7 @@ export function CopyButton({
         )}
       </button>
       <span role="status" className="sr-only">
-        {copied ? "Copied" : ""}
+        {copied ? t.copied : ""}
       </span>
     </>
   );

@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   EMPTY_DETAILS,
+  EMPTY_FRENCH,
   bodyOf,
   canAutosave,
   changesOf,
   detailProblems,
   snapshotOf,
+  translationsOf,
   type PostSnapshot,
 } from "./blogForm";
 
@@ -23,6 +25,38 @@ const row = {
   canonicalUrl: null,
   series: null,
 };
+
+describe("the French version in the form", () => {
+  const fr = { title: "Titre", content: "Texte", published: true };
+
+  it("reads the French of a row, and an empty one when there is none", () => {
+    expect(snapshotOf({ ...row, translations: { fr } }).french).toEqual({
+      title: "Titre",
+      description: "",
+      coverAlt: "",
+      series: "",
+      content: "Texte",
+      published: true,
+    });
+    expect(snapshotOf(row).french).toEqual(EMPTY_FRENCH);
+  });
+
+  it("sends only what was written, and nothing at all for an empty French", () => {
+    expect(bodyOf(snapshotOf({ ...row, translations: { fr } }))).toMatchObject({
+      translations: { fr },
+    });
+    expect(bodyOf(snapshotOf(row)).translations).toEqual({});
+    expect(translationsOf({ ...EMPTY_FRENCH, published: true })).toEqual({
+      fr: { published: true },
+    });
+  });
+
+  it("counts a change to the French as a change", () => {
+    const saved = snapshotOf({ ...row, translations: { fr } });
+    const now = { ...saved, french: { ...saved.french, content: "Autre" } };
+    expect(Object.keys(changesOf(saved, now))).toEqual(["translations"]);
+  });
+});
 
 describe("blog form", () => {
   it("reads a row into the editor's shape (empty text for nulls, a date)", () => {
