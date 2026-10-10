@@ -8,6 +8,12 @@ import type {
 } from "drizzle-orm/pg-core";
 import { Pool } from "pg";
 import * as schema from "@/db/schema";
+import { DEFAULT_LANG, type Lang } from "@/lib/i18n";
+import { localize } from "@/lib/i18n/localize";
+import {
+  TRANSLATABLE,
+  type TranslatableResource,
+} from "@/lib/i18n/translatable";
 
 // Any Drizzle Postgres database with our schema: node-postgres in the app,
 // PGlite in tests.
@@ -42,6 +48,17 @@ function publicColumns<
   ) as Omit<T["_"]["columns"], "createdAt" | "updatedAt">;
 }
 
+// Rows in a language (docs/i18n.md §5): the French of each translatable field where it
+// exists, the English everywhere else. English returns the rows as they are.
+function localized<T extends object>(
+  rows: readonly T[],
+  resource: TranslatableResource,
+  lang: Lang,
+): T[] {
+  const fields = Object.keys(TRANSLATABLE[resource]) as (keyof T)[];
+  return rows.map((row) => localize(row, lang, fields));
+}
+
 // Featured projects first, then the owner's order — on the homepage grid, in
 // the project page's "next project", and in the slug list.
 function publishedProjects(db: Database) {
@@ -56,7 +73,10 @@ function publishedProjects(db: Database) {
     );
 }
 
-export async function getHomepageData(db: Database = getDb()) {
+export async function getHomepageData(
+  db: Database = getDb(),
+  lang: Lang = DEFAULT_LANG,
+) {
   const {
     profile,
     skills,
@@ -120,16 +140,17 @@ export async function getHomepageData(db: Database = getDb()) {
 
   return {
     // Indexing a possibly-empty result: say so, so callers must handle null.
-    profile:
-      (profileRows[0] as (typeof profileRows)[number] | undefined) ?? null,
+    profile: profileRows[0]
+      ? localized([profileRows[0]], "profile", lang)[0]
+      : null,
     skills: skillRows,
-    services: serviceRows,
-    certifications: certificationRows,
-    projects: projectRows,
-    experience: experienceRows,
-    volunteering: volunteeringRows,
+    services: localized(serviceRows, "services", lang),
+    certifications: localized(certificationRows, "certifications", lang),
+    projects: localized(projectRows, "projects", lang),
+    experience: localized(experienceRows, "journey", lang),
+    volunteering: localized(volunteeringRows, "volunteering", lang),
     socials: socialRows,
-    faqs: faqRows,
+    faqs: localized(faqRows, "faqs", lang),
   };
 }
 
@@ -151,8 +172,12 @@ export type NextProject = {
 // One published project and the one after it in homepage order, wrapping from
 // the last back to the first (design.md §14.10). `next` is null when it is the
 // only project. Unknown or unpublished slugs return null.
-export async function getProjectBySlug(slug: string, db: Database = getDb()) {
-  const projects = await publishedProjects(db);
+export async function getProjectBySlug(
+  slug: string,
+  db: Database = getDb(),
+  lang: Lang = DEFAULT_LANG,
+) {
+  const projects = localized(await publishedProjects(db), "projects", lang);
   const index = projects.findIndex((project) => project.slug === slug);
   if (index === -1) return null;
 

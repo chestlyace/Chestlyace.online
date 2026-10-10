@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import type { Lang } from "@/lib/i18n";
 import {
   getDb,
   getHomepageData,
@@ -25,12 +26,14 @@ function cached<Args extends unknown[], Result>(
   return unstable_cache(read, [name, deployment], { tags: [PORTFOLIO_TAG] });
 }
 
-export const getCachedHomepageData = cached("homepage", () =>
-  getHomepageData(getDb()),
+// The language is part of the cache key (its argument), so each language is cached
+// on its own; the tag is shared, so an admin write refreshes both (docs/i18n.md §5).
+export const getCachedHomepageData = cached("homepage", (lang?: Lang) =>
+  getHomepageData(getDb(), lang),
 );
 
-export const getCachedProject = cached("project", (slug: string) =>
-  getProjectBySlug(slug, getDb()),
+export const getCachedProject = cached("project", (slug: string, lang?: Lang) =>
+  getProjectBySlug(slug, getDb(), lang),
 );
 
 export const getCachedProjectSlugs = cached("project-slugs", () =>

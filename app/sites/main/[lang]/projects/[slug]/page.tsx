@@ -29,7 +29,7 @@ export async function generateMetadata({
 }: PageProps<"/sites/main/[lang]/projects/[slug]">): Promise<Metadata> {
   const { slug, lang: raw } = await params;
   const lang = isLang(raw) ? raw : "en";
-  const data = await getCachedProject(slug);
+  const data = await getCachedProject(slug, lang);
   if (!data) return {};
   return pageMetadata("main", {
     path: `/projects/${slug}`,
@@ -49,7 +49,7 @@ export default async function ProjectPage({
   const { slug, lang } = await params;
   if (!isLang(lang)) notFound();
   const m = getMessages(lang).project;
-  const data = await getCachedProject(slug);
+  const data = await getCachedProject(slug, lang);
   if (!data) notFound();
   const { project, next } = data;
 

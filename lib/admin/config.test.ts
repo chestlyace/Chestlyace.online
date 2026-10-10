@@ -9,7 +9,11 @@ describe("adminConfig", () => {
       const editor = config.groups
         .flatMap((g) => g.fields.map((f) => f.name))
         .sort();
-      expect(editor).toEqual(Object.keys(config.schema.shape).sort());
+      expect(editor).toEqual(
+        Object.keys(config.schema.shape)
+          .filter((name) => name !== "translations")
+          .sort(),
+      );
       // the profile's values come from its row; the others start from defaults
       if (!config.single) {
         expect(Object.keys(config.defaults).sort()).toEqual(editor);
@@ -85,6 +89,8 @@ describe("toValues and validate", () => {
       issuedOn: "",
       badgeUrl: "/certs/a.png",
       credentialUrl: "",
+      // the French of a certification's name (empty here)
+      "fr:name": "",
     });
   });
 

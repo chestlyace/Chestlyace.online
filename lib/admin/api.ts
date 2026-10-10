@@ -3,6 +3,7 @@ import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 import * as schema from "@/db/schema";
 import type { Database } from "@/lib/db";
+import type { Translations } from "@/lib/i18n/localize";
 import {
   withCreativesDefaults,
   type CreativesSettings,
@@ -364,19 +365,25 @@ export async function updateProfile(
 // The newsletter's wording is one row (`id = 1`) that may not exist yet or hold
 // blanks: reading gives the wording in use (stored, or the built-in one), and a
 // change creates the row if needed.
-export async function getNewsletter(db: Database): Promise<NewsletterSettings> {
+export async function getNewsletter(
+  db: Database,
+): Promise<NewsletterSettings & { translations: Translations }> {
   const [row] = await db
     .select()
     .from(schema.newsletterSettings)
     .where(eq(schema.newsletterSettings.id, 1))
     .limit(1);
-  return withDefaults(row);
+  // The French wording is returned beside the wording in use (docs/i18n.md §5).
+  return { ...withDefaults(row), translations: row?.translations ?? {} };
 }
 
 export async function updateNewsletter(
   db: Database,
   input: unknown,
-): Promise<{ ok: true; row: NewsletterSettings } | Failure> {
+): Promise<
+  | { ok: true; row: NewsletterSettings & { translations: Translations } }
+  | Failure
+> {
   const parsed = newsletterSchema.partial().safeParse(input);
   if (!parsed.success) {
     return {
@@ -408,19 +415,25 @@ export async function updateNewsletter(
 // gives the wording in use, a change creates the row if needed.
 export async function getCreativesSettings(
   db: Database,
-): Promise<CreativesSettings> {
+): Promise<CreativesSettings & { translations: Translations }> {
   const [row] = await db
     .select()
     .from(schema.creativesSettings)
     .where(eq(schema.creativesSettings.id, 1))
     .limit(1);
-  return withCreativesDefaults(row);
+  return {
+    ...withCreativesDefaults(row),
+    translations: row?.translations ?? {},
+  };
 }
 
 export async function updateCreativesSettings(
   db: Database,
   input: unknown,
-): Promise<{ ok: true; row: CreativesSettings } | Failure> {
+): Promise<
+  | { ok: true; row: CreativesSettings & { translations: Translations } }
+  | Failure
+> {
   const parsed = creativesSettingsSchema.partial().safeParse(input);
   if (!parsed.success) {
     return {

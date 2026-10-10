@@ -3,6 +3,7 @@
 // updated_at current on every UPDATE.
 import { sql } from "drizzle-orm";
 import type { SessionTurn } from "@/lib/blog/session/types";
+import type { Translations } from "@/lib/i18n/localize";
 import {
   type AnyPgColumn,
   boolean,
@@ -25,6 +26,15 @@ const timestamps = {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+};
+
+// The French version of a row's text (docs/i18n.md §5): `{ "fr": { "<field>": value } }`.
+// The fields that may appear are listed in lib/i18n/translatable.ts.
+const translationsColumn = {
+  translations: jsonb("translations")
+    .$type<Translations>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
 };
 
 const ordering = {
@@ -58,6 +68,7 @@ export const profile = pgTable(
       .array()
       .notNull()
       .default(emptyTextArray),
+    ...translationsColumn,
     ...timestamps,
   },
   (t) => [
@@ -95,6 +106,7 @@ export const services = pgTable("services", {
   icon: text("icon").notNull(),
   items: text("items").array().notNull().default(emptyTextArray),
   ...ordering,
+  ...translationsColumn,
   ...timestamps,
 });
 
@@ -119,6 +131,7 @@ export const projects = pgTable("projects", {
   outcome: text("outcome"),
   galleryUrls: text("gallery_urls").array().notNull().default(emptyTextArray),
   ...ordering,
+  ...translationsColumn,
   ...timestamps,
 });
 
@@ -141,6 +154,7 @@ export const journey = pgTable(
     ...timelineColumns,
     type: text("type").notNull(),
     ...ordering,
+    ...translationsColumn,
     ...timestamps,
   },
   (t) => [check("journey_type", sql`${t.type} IN ('work', 'education')`)],
@@ -149,6 +163,7 @@ export const journey = pgTable(
 export const volunteering = pgTable("volunteering", {
   ...timelineColumns,
   ...ordering,
+  ...translationsColumn,
   ...timestamps,
 });
 
@@ -161,6 +176,7 @@ export const certifications = pgTable("certifications", {
   badgeUrl: text("badge_url"),
   credentialUrl: text("credential_url"),
   ...ordering,
+  ...translationsColumn,
   ...timestamps,
 });
 
@@ -182,6 +198,7 @@ export const faqs = pgTable("faqs", {
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   ...ordering,
+  ...translationsColumn,
   ...timestamps,
 });
 
@@ -207,6 +224,7 @@ export const blogPosts = pgTable(
     devtoId: integer("devto_id"),
     devtoUrl: text("devto_url"),
     likeCount: integer("like_count").notNull().default(0),
+    ...translationsColumn,
     ...timestamps,
   },
   (t) => [
@@ -413,6 +431,7 @@ export const newsletterSettings = pgTable(
     emailAction: text("email_action"),
     emailExpires: text("email_expires"),
     emailIgnore: text("email_ignore"),
+    ...translationsColumn,
     ...timestamps,
   },
   (t) => [check("newsletter_settings_single_row", sql`${t.id} = 1`)],
@@ -453,6 +472,7 @@ export const designPieces = pgTable("design_pieces", {
   linkUrl: text("link_url"),
   isFeatured: boolean("is_featured").notNull().default(false),
   ...ordering,
+  ...translationsColumn,
   ...timestamps,
 });
 
@@ -482,6 +502,7 @@ export const photoEvents = pgTable("photo_events", {
   albumLabel: text("album_label"),
   isFeatured: boolean("is_featured").notNull().default(false),
   ...ordering,
+  ...translationsColumn,
   ...timestamps,
 });
 
@@ -495,6 +516,7 @@ export const creativeServices = pgTable(
     groupName: text("group_name").notNull(),
     items: text("items").array().notNull().default(emptyTextArray),
     ...ordering,
+    ...translationsColumn,
     ...timestamps,
   },
   (t) => [
@@ -513,6 +535,7 @@ export const creativeFaqs = pgTable(
     answer: text("answer").notNull(),
     groupName: text("group_name").notNull(),
     ...ordering,
+    ...translationsColumn,
     ...timestamps,
   },
   (t) => [
@@ -541,6 +564,7 @@ export const creativesSettings = pgTable(
     contactText: text("contact_text"),
     contactNote: text("contact_note"),
     seoDescription: text("seo_description"),
+    ...translationsColumn,
     ...timestamps,
   },
   (t) => [check("creatives_settings_single_row", sql`${t.id} = 1`)],

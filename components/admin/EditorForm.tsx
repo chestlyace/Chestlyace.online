@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   adminConfig,
+  emptyFrenchValues,
+  englishValues,
+  frenchFields,
+  isFrName,
   toValues,
+  translatableNames,
+  translationsBody,
   validate,
   type AdminConfig,
   type AdminRow,
@@ -39,8 +45,12 @@ export function EditorForm({
   const toast = useToast();
   const confirm = useConfirm();
 
-  const [values, setValues] = useState<Values>(initial);
-  const [saved, setSaved] = useState<Values>(initial);
+  // The French fields start empty for a new entry (docs/i18n.md §10).
+  const start = { ...emptyFrenchValues(config), ...initial };
+  const [values, setValues] = useState<Values>(start);
+  const [saved, setSaved] = useState<Values>(start);
+  const hasFrench = translatableNames(config).length > 0;
+  const [lang, setLang] = useState<"en" | "fr">("en");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -105,6 +115,15 @@ export function EditorForm({
     router.push(resource.href);
   };
 
+  // Focus a field once it is on screen (a French field needs the French view first).
+  const focusField = (name: string) => {
+    window.setTimeout(() => {
+      formRef.current
+        ?.querySelector<HTMLElement>(`[name="${name}"], [id^="field-${name}-"]`)
+        ?.focus();
+    }, 0);
+  };
+
   const save = async (event?: FormEvent) => {
     event?.preventDefault();
     if (saving || !dirty) return;
@@ -112,26 +131,45 @@ export function EditorForm({
     const found = validate(config, values);
     setErrors(found);
     setFormError(null);
-    const fields = config.groups.flatMap((group) => group.fields);
+    const fields = [
+      ...config.groups.flatMap((group) => group.fields),
+      ...frenchFields(config, values),
+    ];
     const first = fields.find((field) => found[field.name]);
     if (first) {
-      formRef.current
-        ?.querySelector<HTMLElement>(
-          `[name="${first.name}"], [id^="field-${first.name}-"]`,
-        )
-        ?.focus();
+      // An error in a French field shows the French fields first.
+      if (isFrName(first.name)) setLang("fr");
+      focusField(first.name);
       return;
     }
 
     // Editing sends what changed; a new entry sends everything.
-    const body = editing
-      ? Object.fromEntries(
-          Object.entries(values).filter(
-            ([key, value]) =>
-              JSON.stringify(value) !== JSON.stringify(saved[key]),
-          ),
-        )
-      : values;
+    const english = englishValues(values);
+    const frenchChanged = Object.keys(values).some(
+      (key) =>
+        isFrName(key) &&
+        JSON.stringify(values[key]) !== JSON.stringify(saved[key]),
+    );
+    const translations = translationsBody(values);
+    const hasTranslations = Object.keys(translations.fr).length > 0;
+    const body = {
+      ...(editing
+        ? Object.fromEntries(
+            Object.entries(english).filter(
+              ([key, value]) =>
+                JSON.stringify(value) !== JSON.stringify(saved[key]),
+            ),
+          )
+        : english),
+      // The French is sent whole (replacing what was stored) when it changed.
+      ...(editing
+        ? frenchChanged
+          ? { translations }
+          : {}
+        : hasTranslations
+          ? { translations }
+          : {}),
+    };
 
     setSaving(true);
     try {
@@ -183,12 +221,10 @@ export function EditorForm({
         setErrors(rest);
         setFormError(general ?? null);
         const bad = fields.find((field) => rest[field.name]);
-        if (bad)
-          formRef.current
-            ?.querySelector<HTMLElement>(
-              `[name="${bad.name}"], [id^="field-${bad.name}-"]`,
-            )
-            ?.focus();
+        if (bad) {
+          if (isFrName(bad.name)) setLang("fr");
+          focusField(bad.name);
+        }
       } else {
         setFormError("Couldn't save. Check your connection and try again.");
       }
@@ -225,27 +261,50 @@ export function EditorForm({
         </p>
       )}
 
-      {config.groups.map((group, index) => (
+      {hasFrench && (
         <div
-          key={group.title ?? index}
-          className={
-            group.title ? "mt-10 border-t border-border pt-6" : undefined
-          }
+          role="tablist"
+          aria-label="Language"
+          className="mb-8 inline-flex rounded-full border border-border bg-tile p-1"
         >
-          {group.title && <h2 className="mb-5 text-h3">{group.title}</h2>}
-          <div className="flex flex-col gap-6">
-            {group.fields.map((field) => (
+          {(
+            [
+              ["en", "English"],
+              ["fr", "Français"],
+            ] as const
+          ).map(([code, name]) => (
+            <button
+              key={code}
+              type="button"
+              role="tab"
+              id={`tab-${code}`}
+              aria-selected={lang === code}
+              aria-controls="editor-fields"
+              onClick={() => setLang(code)}
+              className={
+                "type-label h-9 rounded-full px-5 transition-colors duration-150 " +
+                (lang === code
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted hover:text-foreground")
+              }
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div
+        id="editor-fields"
+        role={hasFrench ? "tabpanel" : undefined}
+        aria-labelledby={hasFrench ? `tab-${lang}` : undefined}
+      >
+        {lang === "fr" && hasFrench ? (
+          <div lang="fr" className="flex flex-col gap-6">
+            {frenchFields(config, values).map((field) => (
               <AdminField
                 key={field.name}
-                field={
-                  field.type === "slug" && itemId
-                    ? {
-                        ...field,
-                        helper:
-                          "Changing the address breaks links to the old one.",
-                      }
-                    : field
-                }
+                field={field}
                 value={values[field.name]}
                 error={errors[field.name]}
                 onChange={(value) => change(field.name, value)}
@@ -260,8 +319,46 @@ export function EditorForm({
               />
             ))}
           </div>
-        </div>
-      ))}
+        ) : (
+          config.groups.map((group, index) => (
+            <div
+              key={group.title ?? index}
+              className={
+                group.title ? "mt-10 border-t border-border pt-6" : undefined
+              }
+            >
+              {group.title && <h2 className="mb-5 text-h3">{group.title}</h2>}
+              <div className="flex flex-col gap-6">
+                {group.fields.map((field) => (
+                  <AdminField
+                    key={field.name}
+                    field={
+                      field.type === "slug" && itemId
+                        ? {
+                            ...field,
+                            helper:
+                              "Changing the address breaks links to the old one.",
+                          }
+                        : field
+                    }
+                    value={values[field.name]}
+                    error={errors[field.name]}
+                    onChange={(value) => change(field.name, value)}
+                    onBlur={(fixed) =>
+                      check(
+                        field.name,
+                        fixed === undefined
+                          ? values
+                          : { ...values, [field.name]: fixed },
+                      )
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       <SaveBar
         dirty={dirty}

@@ -15,8 +15,9 @@ export async function generateMetadata({
   return siteMetadata("main", isLang(lang) ? lang : "en");
 }
 
-// Both languages are built ahead of time; any other value is a 404 (docs/i18n.md §3).
-export const dynamicParams = false;
+// Both languages are built ahead of time; the layout answers any other value with a
+// 404 (docs/i18n.md §3). `dynamicParams = false` is not used: it makes Next fail to
+// refresh a page after the admin changes content (NoFallbackError).
 export function generateStaticParams() {
   return LANGS.map((lang) => ({ lang }));
 }
@@ -29,7 +30,7 @@ export default async function MainLayout({
   if (!isLang(lang)) notFound();
   // The footer's Connect and Contact columns come from the database.
   const { footer } = getMessages(lang).chrome;
-  const links = footerLinks(await getCachedHomepageData(), {
+  const links = footerLinks(await getCachedHomepageData(lang), {
     whatsapp: footer.whatsapp,
     resume: footer.resume,
   });
