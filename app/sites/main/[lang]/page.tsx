@@ -7,6 +7,9 @@ import { ProjectsSection } from "@/components/main/ProjectsSection";
 import { ServicesSection } from "@/components/main/ServicesSection";
 import { SkillsSection } from "@/components/main/SkillsSection";
 import { VolunteeringSection } from "@/components/main/VolunteeringSection";
+import { notFound } from "next/navigation";
+import { getMessages } from "@/content/messages";
+import { isLang } from "@/lib/i18n";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { getCachedHomepageData } from "@/lib/portfolio";
 import { mainJsonLd } from "@/lib/seo";
@@ -16,7 +19,11 @@ import {
   type HomeSectionId,
 } from "@/lib/sections";
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: PageProps<"/sites/main/[lang]">) {
+  const { lang } = await params;
+  if (!isLang(lang)) notFound();
   const data = await getCachedHomepageData();
   const { profile } = data;
 
@@ -25,7 +32,7 @@ export default async function Home() {
   if (!profile) {
     return (
       <div className="flex flex-1 items-center justify-center px-4 pt-32 pb-24">
-        <p className="text-muted">Portfolio content isn&rsquo;t loaded yet.</p>
+        <p className="text-muted">{getMessages(lang).home.unavailable}</p>
       </div>
     );
   }
@@ -47,10 +54,11 @@ export default async function Home() {
 
   return (
     <>
-      <JsonLd data={mainJsonLd(data)} />
-      <Hero profile={profile} socials={data.socials} />
+      <JsonLd data={mainJsonLd(data, undefined, lang)} />
+      <Hero lang={lang} profile={profile} socials={data.socials} />
       {shown.includes("about") && (
         <AboutSection
+          lang={lang}
           profile={profile}
           index={numbers.about}
           band={bands.about}
@@ -58,6 +66,7 @@ export default async function Home() {
       )}
       {shown.includes("skills") && (
         <SkillsSection
+          lang={lang}
           skills={data.skills}
           certifications={data.certifications}
           index={numbers.skills}
@@ -66,6 +75,7 @@ export default async function Home() {
       )}
       {shown.includes("services") && (
         <ServicesSection
+          lang={lang}
           services={data.services}
           index={numbers.services}
           band={bands.services}
@@ -73,6 +83,7 @@ export default async function Home() {
       )}
       {shown.includes("projects") && (
         <ProjectsSection
+          lang={lang}
           projects={data.projects}
           index={numbers.projects}
           band={bands.projects}
@@ -80,6 +91,7 @@ export default async function Home() {
       )}
       {shown.includes("experience") && (
         <ExperienceSection
+          lang={lang}
           entries={data.experience}
           index={numbers.experience}
           band={bands.experience}
@@ -87,19 +99,26 @@ export default async function Home() {
       )}
       {shown.includes("volunteering") && (
         <VolunteeringSection
+          lang={lang}
           entries={data.volunteering}
           index={numbers.volunteering}
           band={bands.volunteering}
         />
       )}
       <ContactSection
+        lang={lang}
         profile={profile}
         socials={data.socials}
         index={numbers.contact}
         band={bands.contact}
       />
       {shown.includes("faq") && (
-        <FaqSection faqs={data.faqs} index={numbers.faq} band={bands.faq} />
+        <FaqSection
+          lang={lang}
+          faqs={data.faqs}
+          index={numbers.faq}
+          band={bands.faq}
+        />
       )}
     </>
   );

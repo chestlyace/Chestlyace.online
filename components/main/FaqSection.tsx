@@ -1,6 +1,8 @@
 import { Plus } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
 import { SectionHeading } from "@/components/shared/SectionHeading";
+import { getMessages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
 import type { HomepageData } from "@/lib/db";
 import type { Band } from "@/lib/sections";
 import { Section } from "./Section";
@@ -9,17 +11,20 @@ import { Section } from "./Section";
 // it works without JavaScript and with find-in-page. Several can be open at
 // once. The motion is CSS (globals.css).
 export function FaqSection({
+  lang,
   faqs,
   index,
   band,
 }: {
+  lang: Lang;
   faqs: HomepageData["faqs"];
   index: string;
   band: Band;
 }) {
+  const m = getMessages(lang).home.faq;
   return (
     <Section id="faq" band={band} narrow>
-      <SectionHeading index={index} label="FAQ" title="FAQ" />
+      <SectionHeading index={index} label={m.label} title={m.title} />
       <Reveal stagger={0.05} className="mt-16 border-t border-border md:mt-24">
         {faqs.map((faq) => (
           <details

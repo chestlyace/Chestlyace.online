@@ -1,5 +1,7 @@
 import { Reveal } from "@/components/shared/Reveal";
 import { SectionHeading } from "@/components/shared/SectionHeading";
+import { getMessages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
 import type { HomepageData } from "@/lib/db";
 import type { Band } from "@/lib/sections";
 import { groupSkills, skillIcon } from "@/lib/skills";
@@ -10,21 +12,24 @@ import { SkillLogo } from "./SkillLogo";
 // Skills and certifications (design.md §14.3, §13.17): groups of logo tiles, then
 // the certification badges under a mono label.
 export function SkillsSection({
+  lang,
   skills,
   certifications,
   index,
   band,
 }: {
+  lang: Lang;
   skills: HomepageData["skills"];
   certifications: HomepageData["certifications"];
   index: string;
   band: Band;
 }) {
-  const groups = groupSkills(skills);
+  const m = getMessages(lang).home.skills;
+  const groups = groupSkills(skills, m.groups);
 
   return (
     <Section id="skills" band={band}>
-      <SectionHeading index={index} label="Skills" title="Skills" />
+      <SectionHeading index={index} label={m.label} title={m.title} />
 
       <div className="mt-12 flex flex-col gap-12 md:mt-16">
         {groups.map((group) => (
@@ -70,7 +75,7 @@ export function SkillsSection({
           className="mt-24 md:mt-24"
         >
           <h3 id="skills-certifications" className="type-label mb-6 text-muted">
-            Certifications
+            {m.certifications}
           </h3>
           <Reveal
             className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
@@ -80,7 +85,11 @@ export function SkillsSection({
           >
             {certifications.map((certification) => (
               <div key={certification.id} data-reveal className="h-full">
-                <CertificationItem certification={certification} />
+                <CertificationItem
+                  certification={certification}
+                  lang={lang}
+                  verifyLabel={m.verifyCredential}
+                />
               </div>
             ))}
           </Reveal>

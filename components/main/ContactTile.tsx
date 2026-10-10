@@ -35,7 +35,13 @@ export function ContactTile({
   href: string;
   external?: boolean;
   /** Adds the copy button: what is copied and what it is called. */
-  copy?: { text: string; buttonLabel: string; announcement: string };
+  copy?: {
+    text: string;
+    buttonLabel: string;
+    announcement: string;
+    /** The small "Copied" bubble. */
+    copiedLabel: string;
+  };
   className?: string;
   /** Extra controls in the bottom-right corner (the WhatsApp QR button). */
   children?: ReactNode;
@@ -126,7 +132,7 @@ export function ContactTile({
                   style={{ transformOrigin: "bottom right" }}
                   className="type-label pointer-events-none absolute right-0 bottom-[calc(100%+4px)] rounded-sm bg-surface-raised px-2 py-1 whitespace-nowrap text-foreground shadow-float"
                 >
-                  Copied
+                  {copy.copiedLabel}
                 </motion.span>
               )}
             </AnimatePresence>

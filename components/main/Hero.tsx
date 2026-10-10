@@ -5,7 +5,10 @@ import react from "devicon/icons/react/react-original.svg";
 import typescript from "devicon/icons/typescript/typescript-original.svg";
 import Image, { type StaticImageData } from "next/image";
 import type { CSSProperties } from "react";
-import { HERO_QUOTE, HERO_TAGLINE, heroIntro } from "@/content/copy";
+import { getMessages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
+import { format } from "@/lib/i18n/format";
+import { NEW_TAB } from "@/lib/i18n/ui";
 import { Button } from "@/components/shared/Button";
 import { Container } from "@/components/shared/Container";
 import { MessageIcon } from "@/components/shared/IconlyIcon";
@@ -116,7 +119,15 @@ function Sticker({
   );
 }
 
-function Portrait({ profile }: { profile: Profile }) {
+function Portrait({
+  profile,
+  quote,
+  verified,
+}: {
+  profile: Profile;
+  quote: { handle: string; text: string };
+  verified: string;
+}) {
   const source = imageSource(profile.heroImageUrl);
   const imageClass =
     "hero-arch-image h-auto w-full object-cover grayscale contrast-125 transition-[filter] duration-700 ease-out group-hover:grayscale-0";
@@ -222,15 +233,15 @@ function Portrait({ profile }: { profile: Profile }) {
             <figure className="hero-quote material rounded-lg rounded-bl-none border border-border/60 p-4 shadow-float">
               <figcaption className="mb-2 flex items-center gap-1.5">
                 <span className="text-sm font-medium text-muted">
-                  {HERO_QUOTE.handle}
+                  {quote.handle}
                 </span>
                 <BadgeCheck
                   className="size-3.5 text-primary-text"
-                  aria-label="Verified"
+                  aria-label={verified}
                 />
               </figcaption>
               <blockquote className="text-sm leading-relaxed italic">
-                {HERO_QUOTE.text}
+                {quote.text}
               </blockquote>
             </figure>
           </div>
@@ -245,13 +256,24 @@ function Portrait({ profile }: { profile: Profile }) {
 // entrance is CSS (globals.css), the rest is HeroMotion, HeroGrid, and
 // RotatingWords.
 export function Hero({
+  lang,
   profile,
   socials,
 }: {
+  lang: Lang;
   profile: Profile;
   socials: HomepageData["socials"];
 }) {
+  const m = getMessages(lang).home.hero;
   const lines = splitHeadline(profile.headline);
+  const who =
+    profile.legalName && profile.legalName !== profile.name
+      ? format(m.introKnownAs, {
+          legalName: profile.legalName,
+          name: profile.name,
+        })
+      : profile.name;
+  const heroIntro = format(m.intro, { who });
   const phone = profile.phone ? phoneHref(profile.phone) : null;
   const links = socials.filter((social) => isHttpUrl(social.url));
 
@@ -274,7 +296,12 @@ export function Hero({
           )}
 
           <h1 className="sr-only">
-            {heroSrText(profile.name, profile.legalName, profile.headline)}
+            {heroSrText(
+              profile.name,
+              profile.legalName,
+              profile.headline,
+              m.alsoKnownAs,
+            )}
           </h1>
           <div aria-hidden="true" className="select-none">
             <div
@@ -307,7 +334,7 @@ export function Hero({
             )}
             style={fadeUp(500).style}
           >
-            {HERO_TAGLINE}
+            {m.tagline}
           </p>
           <p
             data-exit="fade"
@@ -317,7 +344,7 @@ export function Hero({
             )}
             style={fadeUp(570).style}
           >
-            {heroIntro(profile.name, profile.legalName)}
+            {heroIntro}
           </p>
 
           <div
@@ -333,7 +360,7 @@ export function Hero({
               trailingIcon={<ArrowRight />}
               className="w-full sm:w-auto"
             >
-              View Projects
+              {m.viewProjects}
             </Button>
             <Button
               href="#contact"
@@ -342,7 +369,7 @@ export function Hero({
               trailingIcon={<MessageIcon />}
               className="w-full sm:w-auto"
             >
-              Get In Touch
+              {m.getInTouch}
             </Button>
           </div>
 
@@ -375,7 +402,7 @@ export function Hero({
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={`${social.platform} (opens in a new tab)`}
+                      aria-label={`${social.platform} (${NEW_TAB[lang]})`}
                       className="relative grid size-8 place-items-center rounded-full text-muted transition-colors duration-150 before:absolute before:-inset-1.5 before:content-[''] hover:text-foreground"
                     >
                       <SocialIcon name={social.icon} className="size-5" />
@@ -388,14 +415,14 @@ export function Hero({
         </div>
 
         <div className="lg:col-span-5">
-          <Portrait profile={profile} />
+          <Portrait profile={profile} quote={m.quote} verified={m.verified} />
         </div>
       </Container>
 
       <a
         href="#about"
         data-exit="cue"
-        aria-label="Scroll to About"
+        aria-label={m.scrollToAbout}
         className="hero-fade absolute bottom-8 left-1/2 hidden -translate-x-1/2 rounded-full text-muted transition-colors duration-150 hover:text-foreground lg:block"
         style={{ "--delay": "1400ms" } as CSSProperties}
       >

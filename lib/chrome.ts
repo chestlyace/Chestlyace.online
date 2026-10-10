@@ -6,7 +6,13 @@ export type FooterLink = { label: string; href: string; external?: boolean };
 
 // The footer's Connect and Contact columns, built from the profile and the
 // socials shown on the main site. Anything missing is simply left out.
-export function footerLinks(data: Pick<HomepageData, "profile" | "socials">): {
+export function footerLinks(
+  data: Pick<HomepageData, "profile" | "socials">,
+  labels: { whatsapp: string; resume: string } = {
+    whatsapp: "WhatsApp",
+    resume: "Resume",
+  },
+): {
   connect: FooterLink[];
   contact: FooterLink[];
 } {
@@ -27,7 +33,7 @@ export function footerLinks(data: Pick<HomepageData, "profile" | "socials">): {
     const digits = profile.whatsappNumber?.replace(/\D/g, "");
     if (digits) {
       contact.push({
-        label: "WhatsApp",
+        label: labels.whatsapp,
         href: `https://wa.me/${digits}`,
         external: true,
       });
@@ -35,7 +41,7 @@ export function footerLinks(data: Pick<HomepageData, "profile" | "socials">): {
 
     if (profile.resumeUrl) {
       const { href, external } = resumeHref(profile.resumeUrl);
-      contact.push({ label: "Resume", href, external });
+      contact.push({ label: labels.resume, href, external });
     }
   }
 

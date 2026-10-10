@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import type { HomepageData } from "@/lib/db";
+import { getMessages } from "@/content/messages";
+import { DEFAULT_LANG, OG_LOCALES, localizedPath, type Lang } from "@/lib/i18n";
+import { format } from "@/lib/i18n/format";
 import { isHttpUrl } from "@/lib/links";
 import { siteUrl, type PublicSiteKey } from "@/lib/sites";
 
@@ -50,6 +53,19 @@ const SITE_COPY: Record<
 
 type OgImage = { path: string; width: number; height: number };
 
+// The title and description of a site in a language. The main site's come from the
+// dictionaries (docs/i18n.md §6); the blog's and Creatives' follow with their steps.
+function siteCopy(site: PublicSiteKey, lang: Lang) {
+  if (site !== "main" || lang === DEFAULT_LANG) return SITE_COPY[site];
+  const { title, description } = getMessages(lang).seo.main;
+  const values = { name: PERSON_NAME, legalName: PERSON_LEGAL_NAME };
+  return {
+    ...SITE_COPY.main,
+    title: format(title, values),
+    description: format(description, values),
+  };
+}
+
 export function siteOrigin(site: PublicSiteKey): string {
   return new URL(siteUrl(site)).origin;
 }
@@ -75,8 +91,11 @@ const feedLinks = (site: PublicSiteKey) =>
 
 // A site's layout metadata: its title and description, the canonical address of
 // every page (relative to `metadataBase`), and the Open Graph and Twitter tags.
-export function siteMetadata(site: PublicSiteKey): Metadata {
-  const { title, description, image } = SITE_COPY[site];
+export function siteMetadata(
+  site: PublicSiteKey,
+  lang: Lang = DEFAULT_LANG,
+): Metadata {
+  const { title, description, image } = siteCopy(site, lang);
   const images = image
     ? [{ url: image.path, width: image.width, height: image.height }]
     : undefined;
@@ -84,15 +103,15 @@ export function siteMetadata(site: PublicSiteKey): Metadata {
     metadataBase: new URL(siteOrigin(site)),
     title,
     description,
-    alternates: { canonical: "/", ...feedLinks(site) },
+    alternates: { canonical: localizedPath("/", lang), ...feedLinks(site) },
     robots: robotsMeta(site),
     openGraph: {
       type: "website",
       siteName: PERSON_NAME,
       title,
       description,
-      url: "/",
-      locale: "en_US",
+      url: localizedPath("/", lang),
+      locale: OG_LOCALES[lang],
       images,
     },
     // The main image is portrait, so the small card is the one that shows it whole.
@@ -117,8 +136,12 @@ export function pageMetadata(
     article?: { publishedTime: string; modifiedTime: string; tags: string[] };
     /** An absolute canonical address, when the page is cross-posted. */
     canonical?: string | null;
+    /** The language of the page (its address gets the language's prefix). */
+    lang?: Lang;
   },
 ): Metadata {
+  const lang = page.lang ?? DEFAULT_LANG;
+  const path = localizedPath(page.path, lang);
   const images = page.image
     ? [{ url: imagePath(page.image) }]
     : SITE_COPY[site].image
@@ -127,7 +150,7 @@ export function pageMetadata(
   return {
     title: page.title,
     description: page.description,
-    alternates: { canonical: page.canonical ?? page.path, ...feedLinks(site) },
+    alternates: { canonical: page.canonical ?? path, ...feedLinks(site) },
     openGraph: {
       ...(page.article
         ? {
@@ -140,8 +163,8 @@ export function pageMetadata(
       siteName: PERSON_NAME,
       title: page.title,
       description: page.description,
-      url: page.path,
-      locale: "en_US",
+      url: path,
+      locale: OG_LOCALES[lang],
       images,
     },
     twitter: {
@@ -160,6 +183,7 @@ type JsonLd = Record<string, unknown>;
 export function mainJsonLd(
   data: Pick<HomepageData, "profile" | "socials" | "faqs">,
   origin: string = siteOrigin("main"),
+  lang: Lang = DEFAULT_LANG,
 ): JsonLd | null {
   const { profile, socials, faqs } = data;
   if (!profile) return null;
@@ -174,8 +198,8 @@ export function mainJsonLd(
     "@id": personId,
     name: profile.name,
     alternateName: profile.legalName ?? undefined,
-    jobTitle: "Software Engineer",
-    url: `${origin}/`,
+    jobTitle: getMessages(lang).seo.main.jobTitle,
+    url: `${origin}${localizedPath("/", lang)}`,
     image: profile.heroImageUrl
       ? new URL(imagePath(profile.heroImageUrl), origin).toString()
       : undefined,
@@ -187,10 +211,10 @@ export function mainJsonLd(
     {
       "@type": "WebSite",
       "@id": `${origin}/#website`,
-      url: `${origin}/`,
-      name: SITE_COPY.main.title,
-      description: SITE_COPY.main.description,
-      inLanguage: "en",
+      url: `${origin}${localizedPath("/", lang)}`,
+      name: siteCopy("main", lang).title,
+      description: siteCopy("main", lang).description,
+      inLanguage: lang,
       publisher: { "@id": personId },
     },
   ];

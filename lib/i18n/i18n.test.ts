@@ -8,6 +8,7 @@ import {
   LANGS,
   isLang,
   langOfPath,
+  localizeHref,
   localizedPath,
   splitLang,
   switchPath,
@@ -52,6 +53,29 @@ describe("addresses", () => {
     expect(switchPath(switchPath("/a/b", "fr"), "en")).toBe("/a/b");
     expect(langOfPath("/fr/a")).toBe("fr");
     expect(langOfPath("/a")).toBe("en");
+  });
+});
+
+describe("localizeHref", () => {
+  it("prefixes the pages of the site in French and nothing else", () => {
+    expect(localizeHref("/projects/x", "fr")).toBe("/fr/projects/x");
+    expect(localizeHref("/", "fr")).toBe("/fr");
+    expect(localizeHref("/#about", "fr")).toBe("/fr#about");
+    expect(localizeHref("/design?piece=a", "fr")).toBe("/fr/design?piece=a");
+    expect(localizeHref("/fr/design", "fr")).toBe("/fr/design");
+    // Left alone: other sites, files, bare hashes, mail and API routes.
+    expect(localizeHref("https://blog.chestlyace.online/", "fr")).toBe(
+      "https://blog.chestlyace.online/",
+    );
+    expect(localizeHref("/resume.pdf", "fr")).toBe("/resume.pdf");
+    expect(localizeHref("#top", "fr")).toBe("#top");
+    expect(localizeHref("mailto:a@b.co", "fr")).toBe("mailto:a@b.co");
+    expect(localizeHref("//cdn.example/x", "fr")).toBe("//cdn.example/x");
+  });
+
+  it("changes nothing in English", () => {
+    expect(localizeHref("/projects/x", "en")).toBe("/projects/x");
+    expect(localizeHref("/#about", "en")).toBe("/#about");
   });
 });
 
@@ -134,6 +158,47 @@ describe("messages", () => {
         placeholders(english.get(key) ?? ""),
       );
     }
+  });
+
+  // Text that is the same in both languages on purpose: names, one-word terms that are
+  // spelled alike, handles and the like. Everything else must differ, so English left in
+  // the French dictionary is caught.
+  const SAME = new Set([
+    "language.names.en",
+    "language.names.fr",
+    "chrome.siteNames.main",
+    "chrome.siteNames.blog",
+    "chrome.sites",
+    "chrome.menuNav",
+    "chrome.footer.sites",
+    "chrome.footer.contact",
+    "chrome.footer.copyright",
+    "chrome.footer.whatsapp",
+    "chrome.nav.contact",
+    "home.services.label",
+    "home.services.title",
+    "chrome.wordmark.designer",
+    "chrome.brandHome",
+    "comingSoon.blog.title",
+    "home.hero.quote.handle",
+    "home.skills.certifications",
+    "home.skills.groups.framework",
+    "home.skills.groups.cloud",
+    "home.contact.label",
+    "home.contact.tiles.whatsapp",
+    "home.contact.form.message",
+    "home.contact.form.subjects.Collaboration",
+    "home.faq.label",
+    "home.faq.title",
+    "seo.project",
+  ]);
+
+  it("translates every French text that is not a name", () => {
+    const english = new Map(leaves(en));
+    const same = leaves(fr)
+      .filter(([key, text]) => english.get(key) === text && !SAME.has(key))
+      .map(([key]) => key);
+    expect(same).toEqual([]);
   });
 
   it("gives each language its dictionary", () => {

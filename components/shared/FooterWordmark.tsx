@@ -25,7 +25,13 @@ const useIsomorphicLayoutEffect =
 // as particles instead (§13.61, D88): the solid text stays in the page as the
 // fallback and fades out once the particles are drawing. Decorative: the brand
 // block already names the site.
-export function FooterWordmark() {
+export type WordmarkWords = {
+  developer: string;
+  designer: string;
+  photographer: string;
+};
+
+export function FooterWordmark({ words }: { words: WordmarkWords }) {
   const reduced = usePrefersReducedMotion();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -119,6 +125,7 @@ export function FooterWordmark() {
         {particles && near && (
           <ParticleStageLazy
             fontSource={textRef}
+            words={words}
             onReady={() => setReady(true)}
             onFail={() => {
               setReady(false);

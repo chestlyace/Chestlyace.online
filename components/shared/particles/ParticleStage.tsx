@@ -167,11 +167,14 @@ const PRESS_MS = { mouse: 250, touch: 400 };
 // formulas); the loop and the tap are `Timeline`. Decorative: `aria-hidden`.
 export default function ParticleStage({
   fontSource,
+  words,
   onReady,
   onFail,
 }: {
   /** The solid wordmark: its font is the one the words are drawn in. */
   fontSource: RefObject<HTMLElement | null>;
+  /** The three words after the name, in the page's language. */
+  words: { developer: string; designer: string; photographer: string };
   onReady: () => void;
   onFail: () => void;
 }) {
@@ -309,7 +312,9 @@ export default function ParticleStage({
       const aspect = uniforms.uAspect.value;
       switch (form.kind) {
         case "word": {
-          const mask = wordMask(form.text ?? "", family);
+          const text =
+            (words as Record<string, string>)[form.id] ?? form.text ?? "";
+          const mask = wordMask(text, family);
           if (!mask) return cloudForm(count, aspect, rng);
           const box = wordBox(mask.width, mask.height, aspect);
           return sampleMask(
@@ -556,7 +561,7 @@ export default function ParticleStage({
       cleanups.forEach((run) => run());
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [fontSource]);
+  }, [fontSource, words]);
 
   return (
     <div

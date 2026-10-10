@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { ReactNode } from "react";
 import { fontVariables } from "@/lib/fonts";
 import type { FooterLink } from "@/lib/chrome";
+import { getMessages } from "@/content/messages";
 import type { Lang } from "@/lib/i18n";
 import type { PublicSiteKey } from "@/lib/sites";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -39,8 +40,8 @@ export function SiteDocument({
       <body className="flex min-h-dvh flex-col bg-background font-sans text-foreground antialiased">
         <LangProvider lang={lang}>
           <Providers>
-            <SkipLink />
-            <SiteHeader site={site} />
+            <SkipLink label={getMessages(lang).chrome.skipToContent} />
+            <SiteHeader site={site} lang={lang} />
             <main
               id="main"
               tabIndex={-1}
@@ -50,6 +51,7 @@ export function SiteDocument({
             </main>
             <SiteFooter
               site={site}
+              lang={lang}
               connect={footer?.connect}
               contact={footer?.contact}
             />

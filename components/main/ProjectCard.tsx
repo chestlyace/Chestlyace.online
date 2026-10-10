@@ -3,7 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { motion, useMotionValue, useSpring } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/shared/Link";
 import { useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { cn } from "@/lib/cn";
 import type { HomepageData } from "@/lib/db";
@@ -27,8 +27,11 @@ export function ProjectCard({
   project,
   featured,
   offset,
+  viewLabel,
 }: {
   project: Project;
+  /** The hover circle's word ("View"). */
+  viewLabel: string;
   featured: boolean;
   /** In the grid's right-hand column, pushed down 96px from `md`. */
   offset: boolean;
@@ -189,7 +192,7 @@ export function ProjectCard({
               transition={{ duration: 0.2, ease: EASE_OUT }}
               className="type-label pointer-events-none absolute top-0 left-0 z-10 grid place-items-center rounded-full bg-primary text-primary-foreground"
             >
-              View ↗
+              {viewLabel} ↗
             </motion.span>
           )}
         </div>

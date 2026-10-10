@@ -7,6 +7,9 @@ import {
   whatsappHref,
   whatsappText,
 } from "./contact";
+import { en } from "@/content/messages/en";
+
+const messages = en.home.contact.form.errors;
 
 const good = {
   name: "Ada",
@@ -17,27 +20,29 @@ const good = {
 
 describe("fieldError", () => {
   it("checks each field", () => {
-    expect(fieldError("name", "  ")).toMatch(/name/i);
-    expect(fieldError("name", "Ada")).toBeNull();
-    expect(fieldError("email", "nope")).toMatch(/valid email/i);
-    expect(fieldError("email", "a@b.co")).toBeNull();
-    expect(fieldError("subject", "Other")).toMatch(/choose/i);
-    expect(fieldError("subject", "Job Opportunity")).toBeNull();
-    expect(fieldError("message", "short")).toMatch(/more detail/i);
-    expect(fieldError("message", "x".repeat(5001))).toMatch(/too long/i);
+    expect(fieldError("name", "  ", messages)).toMatch(/name/i);
+    expect(fieldError("name", "Ada", messages)).toBeNull();
+    expect(fieldError("email", "nope", messages)).toMatch(/valid email/i);
+    expect(fieldError("email", "a@b.co", messages)).toBeNull();
+    expect(fieldError("subject", "Other", messages)).toMatch(/choose/i);
+    expect(fieldError("subject", "Job Opportunity", messages)).toBeNull();
+    expect(fieldError("message", "short", messages)).toMatch(/more detail/i);
+    expect(fieldError("message", "x".repeat(5001), messages)).toMatch(
+      /too long/i,
+    );
   });
 });
 
 describe("validateContact", () => {
   it("returns trimmed values when everything is fine", () => {
-    expect(validateContact({ ...good, name: "  Ada " })).toEqual({
+    expect(validateContact({ ...good, name: "  Ada " }, messages)).toEqual({
       ok: true,
       values: good,
     });
   });
 
   it("lists every problem, and survives junk input", () => {
-    const result = validateContact({ name: 5, email: "x" });
+    const result = validateContact({ name: 5, email: "x" }, messages);
     expect(result.ok).toBe(false);
     if (!result.ok)
       expect(Object.keys(result.errors).sort()).toEqual([
@@ -46,7 +51,7 @@ describe("validateContact", () => {
         "name",
         "subject",
       ]);
-    expect(validateContact(null).ok).toBe(false);
+    expect(validateContact(null, messages).ok).toBe(false);
   });
 });
 

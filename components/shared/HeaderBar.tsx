@@ -23,8 +23,20 @@ import { Brand } from "./Brand";
 import { IconButton } from "./IconButton";
 import { useSmoothScroll } from "./SmoothScroll";
 import { TextLink } from "./TextLink";
-import { ThemeToggle } from "./ThemeToggle";
+import { ThemeToggle, type ThemeLabels } from "./ThemeToggle";
 import { useActiveNavLink } from "./useActiveSection";
+
+/** The header's own words, in the page's language (from the server parent). */
+export type HeaderLabels = {
+  brandHome: string;
+  menuOpen: string;
+  menuClose: string;
+  mainNav: string;
+  menuNav: string;
+  sites: string;
+  youAreHere: string;
+  theme: ThemeLabels;
+};
 
 export type HeaderSite = {
   key: PublicSiteKey;
@@ -73,10 +85,12 @@ function publicPath(raw: string): string {
 export function HeaderBar({
   links,
   sites,
+  labels,
   activeBy = "section",
 }: {
   links: readonly NavLink[];
   sites: readonly HeaderSite[];
+  labels: HeaderLabels;
   /** What makes a link active: the section in view (main) or the route (blog). */
   activeBy?: "section" | "blog" | "creatives";
 }) {
@@ -244,11 +258,14 @@ export function HeaderBar({
                 scrolled ? "h-[46px]" : "h-[54px]",
               )}
             >
-              <Brand wordmarkClassName="md:hidden lg:inline" />
+              <Brand
+                homeLabel={labels.brandHome}
+                wordmarkClassName="md:hidden lg:inline"
+              />
 
               {links.length > 0 && (
                 <nav
-                  aria-label="Main"
+                  aria-label={labels.mainNav}
                   className="hidden items-center gap-6 md:flex"
                 >
                   <LayoutGroup id="header-nav">
@@ -277,7 +294,7 @@ export function HeaderBar({
                     sitesOpen && "bg-tile-hover",
                   )}
                 >
-                  Sites
+                  {labels.sites}
                   <ChevronDown
                     className={cn(
                       "size-3.5 transition-transform duration-200 ease-out",
@@ -286,10 +303,10 @@ export function HeaderBar({
                     aria-hidden="true"
                   />
                 </button>
-                <ThemeToggle />
+                <ThemeToggle labels={labels.theme} />
                 <IconButton
                   ref={menuButtonRef}
-                  label={menuOpen ? "Close menu" : "Open menu"}
+                  label={menuOpen ? labels.menuClose : labels.menuOpen}
                   iconKey={menuOpen ? "close" : "menu"}
                   aria-expanded={menuOpen}
                   aria-controls={panelId}
@@ -318,7 +335,7 @@ export function HeaderBar({
                   className="max-h-[calc(100dvh-5.5rem)] overflow-y-auto px-6 pt-2 pb-6 md:hidden"
                 >
                   {links.length > 0 && (
-                    <nav aria-label="Menu">
+                    <nav aria-label={labels.menuNav}>
                       <ul className="flex flex-col gap-1">
                         {links.map((link, index) => (
                           <MenuItem key={link.id} index={index}>
@@ -338,11 +355,15 @@ export function HeaderBar({
                     </nav>
                   )}
                   <MenuItem index={links.length} as="div" className="mt-6">
-                    <p className="type-label mb-2 text-muted">Sites</p>
+                    <p className="type-label mb-2 text-muted">{labels.sites}</p>
                     <ul className="flex flex-col">
                       {sites.map((site) => (
                         <li key={site.key}>
-                          <SiteRow site={site} onNavigate={closeMenu} />
+                          <SiteRow
+                            site={site}
+                            youAreHere={labels.youAreHere}
+                            onNavigate={closeMenu}
+                          />
                         </li>
                       ))}
                     </ul>
@@ -380,7 +401,11 @@ export function HeaderBar({
                 <ul>
                   {sites.map((site) => (
                     <li key={site.key}>
-                      <SiteRow site={site} onNavigate={() => closeSites()} />
+                      <SiteRow
+                        site={site}
+                        youAreHere={labels.youAreHere}
+                        onNavigate={() => closeSites()}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -431,9 +456,11 @@ function MenuItem({
 // here" for the current site (design.md §13.7).
 function SiteRow({
   site,
+  youAreHere,
   onNavigate,
 }: {
   site: HeaderSite;
+  youAreHere: string;
   onNavigate: () => void;
 }) {
   const body = (
@@ -443,7 +470,7 @@ function SiteRow({
       </span>
       {site.current ? (
         <span className="type-label whitespace-nowrap text-muted">
-          You&rsquo;re here
+          {youAreHere}
         </span>
       ) : (
         <ArrowUpRight className="size-4 text-muted" aria-hidden="true" />

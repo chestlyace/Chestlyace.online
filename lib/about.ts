@@ -13,21 +13,24 @@ export type Fact = { label: string; value: string };
 // The facts list beside the About text (a proposal in the spec, built from
 // existing profile fields). Rows with nothing to show are left out. STATUS only
 // exists for "open" — the other availability states aren't designed yet (D29).
-export function aboutFacts(profile: {
-  location: string | null;
-  headline: string;
-  tagline: string | null;
-  availability: string | null;
-}): Fact[] {
+export function aboutFacts(
+  profile: {
+    location: string | null;
+    headline: string;
+    tagline: string | null;
+    availability: string | null;
+  },
+  labels = { basedIn: "Based in", role: "Role", status: "Status" },
+): Fact[] {
   const facts: Fact[] = [];
   const location = profile.location?.trim();
-  if (location) facts.push({ label: "Based in", value: location });
+  if (location) facts.push({ label: labels.basedIn, value: location });
   if (profile.headline.trim()) {
-    facts.push({ label: "Role", value: profile.headline.trim() });
+    facts.push({ label: labels.role, value: profile.headline.trim() });
   }
   const status = profile.tagline?.trim();
   if (status && profile.availability === "open") {
-    facts.push({ label: "Status", value: status });
+    facts.push({ label: labels.status, value: status });
   }
   return facts;
 }

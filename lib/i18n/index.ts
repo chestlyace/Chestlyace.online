@@ -1,3 +1,5 @@
+import { isPagePath } from "../links";
+
 // Languages (docs/i18n.md, D89): the list, the French switch, and the pure helpers
 // that turn a path into the other language's. No React, no DOM.
 
@@ -63,4 +65,19 @@ export function switchPath(pathname: string, to: Lang): string {
 /** The language a public path is in (English when it has no prefix). */
 export function langOfPath(pathname: string): Lang {
   return splitLang(pathname).lang ?? DEFAULT_LANG;
+}
+
+/**
+ * An internal link in a language: a page path (`/projects/x`, `/#about`, `/design?piece=a`)
+ * gets the language's prefix; anything else (an external address, a file such as
+ * `/resume.pdf`, a bare `#hash`, an API route) is left as it is.
+ */
+export function localizeHref(href: string, lang: Lang): string {
+  if (!href.startsWith("/") || href.startsWith("//") || !isPagePath(href)) {
+    return href;
+  }
+  const at = href.search(/[?#]/);
+  const base = at === -1 ? href : href.slice(0, at);
+  const suffix = at === -1 ? "" : href.slice(at);
+  return localizedPath(base, lang) + suffix;
 }

@@ -2,7 +2,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Link from "next/link";
+import { Link } from "@/components/shared/Link";
 import { useEffect, useRef } from "react";
 import { placeholderUrl, resizedUrl } from "@/lib/cloudinary";
 import type { FeaturedWork } from "@/lib/creatives/home";
