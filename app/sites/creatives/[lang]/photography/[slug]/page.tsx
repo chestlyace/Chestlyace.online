@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/sites/creatives/photography/[slug]">): Promise<Metadata> {
+}: PageProps<"/sites/creatives/[lang]/photography/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const event = (await getCachedEvents()).find((e) => e.slug === slug);
   if (!event) return {};
@@ -37,7 +37,7 @@ export async function generateMetadata({
 // selected pictures, the credits, the next event and the contact block.
 export default async function EventPage({
   params,
-}: PageProps<"/sites/creatives/photography/[slug]">) {
+}: PageProps<"/sites/creatives/[lang]/photography/[slug]">) {
   const { slug } = await params;
   const events = await getCachedEvents();
   const event = events.find((e) => e.slug === slug);

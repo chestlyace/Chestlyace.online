@@ -12,6 +12,7 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import { blogActiveLink } from "@/lib/blog/nav";
+import { splitLang } from "@/lib/i18n";
 import { creativesActiveLink } from "@/lib/creatives/nav";
 import { cn } from "@/lib/cn";
 import { useIsPhone } from "@/lib/media";
@@ -61,6 +62,14 @@ function NavItem({ link, active }: { link: NavLink; active: boolean }) {
   );
 }
 
+// The route without the site's internal prefix (`/sites/creatives/fr/design`) and
+// without the language (`/fr/design`): the server may still see the internal path the
+// host was rewritten to, the browser sees the public one; both mean the same.
+function publicPath(raw: string): string {
+  const unprefixed = raw.replace(/^\/sites\/[a-z]+(?=\/|$)/, "");
+  return splitLang(unprefixed).rest || "/";
+}
+
 export function HeaderBar({
   links,
   sites,
@@ -74,7 +83,7 @@ export function HeaderBar({
   const sectionActive = useActiveNavLink();
   // Server-side the path may still be the internal one (`/sites/creatives/design`)
   // the host was rewritten to; the browser's is `/design`. Both mean the same.
-  const pathname = usePathname().replace(/^\/sites\/[a-z]+(?=\/|$)/, "") || "/";
+  const pathname = publicPath(usePathname());
   const active: string | null =
     activeBy === "blog"
       ? blogActiveLink(pathname)

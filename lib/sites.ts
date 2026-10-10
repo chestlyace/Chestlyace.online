@@ -1,3 +1,5 @@
+import { FRENCH_PUBLIC, splitLang, type Lang } from "./i18n";
+
 export const SITES = {
   main: { host: "chestlyace.online", devHost: "localhost:3000" },
   creatives: {
@@ -92,10 +94,14 @@ export type RoutingDecision =
   | { kind: "not-found" }
   | { kind: "redirect"; location: string }
   | { kind: "pass-through"; site: SiteKey }
+  /** The same page without `/en` in its address (a permanent redirect, same host). */
+  | { kind: "redirect-path"; pathname: string }
   | {
       kind: "rewrite";
       site: SiteKey;
       pathname: string;
+      /** The language of a public site's page; the admin has none. */
+      lang?: Lang;
       setPreviewCookie?: SiteKey;
     };
 
@@ -178,9 +184,42 @@ export function decideRoute(input: RoutingInput): RoutingDecision {
     if (destination) return { kind: "redirect", location: destination };
   }
 
-  const pathname =
-    input.pathname === "/"
-      ? `/sites/${site}`
-      : `/sites/${site}${input.pathname}`;
-  return { kind: "rewrite", site, pathname, setPreviewCookie };
+  // The admin has no language and is never translated (docs/i18n.md §1).
+  if (site === "admin") {
+    const pathname =
+      input.pathname === "/"
+        ? `/sites/${site}`
+        : `/sites/${site}${input.pathname}`;
+    return { kind: "rewrite", site, pathname, setPreviewCookie };
+  }
+
+  // A public site's pages live under `[lang]` (docs/i18n.md §3): `/fr/x` is French,
+  // everything else English, and `/en/x` is not an address (the plain one is).
+  const { lang, rest } = splitLang(input.pathname);
+  if (lang === "en") return { kind: "redirect-path", pathname: rest };
+  const language: Lang = lang ?? "en";
+  // French stays unreachable in production until the last build step opens it.
+  if (language === "fr" && !FRENCH_PUBLIC && !input.allowOverride) {
+    return { kind: "not-found" };
+  }
+  // The site-level files have no language: one robots.txt, one sitemap.
+  if (SITE_LEVEL_FILES.has(rest)) {
+    if (lang) return { kind: "not-found" };
+    return {
+      kind: "rewrite",
+      site,
+      pathname: `/sites/${site}${rest}`,
+      setPreviewCookie,
+    };
+  }
+  const base = `/sites/${site}/${language}`;
+  return {
+    kind: "rewrite",
+    site,
+    lang: language,
+    pathname: rest === "/" ? base : `${base}${rest}`,
+    setPreviewCookie,
+  };
 }
+
+const SITE_LEVEL_FILES = new Set(["/robots.txt", "/sitemap.xml"]);

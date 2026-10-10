@@ -37,13 +37,14 @@ describe("decideRoute", () => {
     expect(decideRoute(base)).toEqual({
       kind: "rewrite",
       site: "main",
-      pathname: "/sites/main",
+      lang: "en",
+      pathname: "/sites/main/en",
     });
     expect(
       decideRoute({ ...base, host: "blog.chestlyace.online" }),
     ).toMatchObject({
       kind: "rewrite",
-      pathname: "/sites/blog",
+      pathname: "/sites/blog/en",
     });
   });
 
@@ -54,12 +55,12 @@ describe("decideRoute", () => {
         host: "creatives.chestlyace.online",
         pathname: "/a/b",
       }),
-    ).toMatchObject({ pathname: "/sites/creatives/a/b" });
+    ).toMatchObject({ pathname: "/sites/creatives/en/a/b" });
   });
 
   it("cannot reach another site's folder by path", () => {
     expect(decideRoute({ ...base, pathname: "/sites/blog" })).toMatchObject({
-      pathname: "/sites/main/sites/blog",
+      pathname: "/sites/main/en/sites/blog",
     });
   });
 
@@ -164,7 +165,10 @@ describe("decideRoute", () => {
         host: "blog.chestlyace.online",
         pathname: "/administrator",
       }),
-    ).toMatchObject({ kind: "rewrite", pathname: "/sites/blog/administrator" });
+    ).toMatchObject({
+      kind: "rewrite",
+      pathname: "/sites/blog/en/administrator",
+    });
   });
 
   describe("preview override", () => {
@@ -174,7 +178,8 @@ describe("decideRoute", () => {
       expect(decideRoute({ ...preview, siteParam: "blog" })).toEqual({
         kind: "rewrite",
         site: "blog",
-        pathname: "/sites/blog",
+        lang: "en",
+        pathname: "/sites/blog/en",
         setPreviewCookie: "blog",
       });
     });
@@ -238,6 +243,106 @@ describe("decideRoute", () => {
     expect(
       decideRoute({ ...base, siteParam: "blog", siteCookie: "creatives" }),
     ).toMatchObject({ site: "main", setPreviewCookie: undefined });
+  });
+});
+
+describe("languages in the address (docs/i18n.md §2–§3)", () => {
+  const base: RoutingInput = {
+    host: "chestlyace.online",
+    pathname: "/",
+    siteParam: null,
+    siteCookie: undefined,
+    allowOverride: true, // French is reachable in previews and development
+  };
+
+  it("rewrites a French address to the site's French folder", () => {
+    expect(decideRoute({ ...base, pathname: "/fr" })).toEqual({
+      kind: "rewrite",
+      site: "main",
+      lang: "fr",
+      pathname: "/sites/main/fr",
+    });
+    expect(
+      decideRoute({
+        ...base,
+        host: "blog.chestlyace.online",
+        pathname: "/fr/some-post",
+      }),
+    ).toMatchObject({ lang: "fr", pathname: "/sites/blog/fr/some-post" });
+  });
+
+  it("serves English from its own folder, whatever the path", () => {
+    expect(decideRoute({ ...base, pathname: "/projects/x" })).toMatchObject({
+      lang: "en",
+      pathname: "/sites/main/en/projects/x",
+    });
+  });
+
+  it("does not take a longer first segment for a language", () => {
+    expect(decideRoute({ ...base, pathname: "/frequently" })).toMatchObject({
+      lang: "en",
+      pathname: "/sites/main/en/frequently",
+    });
+    expect(decideRoute({ ...base, pathname: "/english" })).toMatchObject({
+      lang: "en",
+      pathname: "/sites/main/en/english",
+    });
+  });
+
+  it("sends /en/… to the plain address", () => {
+    expect(decideRoute({ ...base, pathname: "/en/projects/x" })).toEqual({
+      kind: "redirect-path",
+      pathname: "/projects/x",
+    });
+    expect(decideRoute({ ...base, pathname: "/en" })).toEqual({
+      kind: "redirect-path",
+      pathname: "/",
+    });
+  });
+
+  it("keeps robots.txt and the sitemap at the site's level, in English only", () => {
+    expect(decideRoute({ ...base, pathname: "/robots.txt" })).toMatchObject({
+      kind: "rewrite",
+      pathname: "/sites/main/robots.txt",
+    });
+    expect(
+      decideRoute({
+        ...base,
+        host: "blog.chestlyace.online",
+        pathname: "/sitemap.xml",
+      }),
+    ).toMatchObject({ pathname: "/sites/blog/sitemap.xml" });
+    expect(decideRoute({ ...base, pathname: "/fr/robots.txt" })).toEqual({
+      kind: "not-found",
+    });
+  });
+
+  it("keeps French unreachable in production until it is switched on", () => {
+    expect(
+      decideRoute({ ...base, allowOverride: false, pathname: "/fr/projects" }),
+    ).toEqual({ kind: "not-found" });
+    // English is unaffected.
+    expect(
+      decideRoute({ ...base, allowOverride: false, pathname: "/projects" }),
+    ).toMatchObject({ kind: "rewrite", lang: "en" });
+  });
+
+  it("has no language on the admin or the API", () => {
+    expect(
+      decideRoute({
+        ...base,
+        host: "admin.chestlyace.online",
+        pathname: "/fr/anything",
+      }),
+    ).toEqual({
+      kind: "rewrite",
+      site: "admin",
+      pathname: "/sites/admin/fr/anything",
+    });
+    expect(decideRoute({ ...base, pathname: "/api/contact" })).toEqual({
+      kind: "pass-through",
+      site: "main",
+    });
   });
 });
 

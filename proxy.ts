@@ -21,6 +21,11 @@ export function proxy(request: NextRequest) {
   if (decision.kind === "redirect") {
     return NextResponse.redirect(decision.location, 308);
   }
+  if (decision.kind === "redirect-path") {
+    const url = request.nextUrl.clone();
+    url.pathname = decision.pathname;
+    return NextResponse.redirect(url, 308);
+  }
   if (decision.kind === "not-found") {
     return new NextResponse("Not Found", { status: 404 });
   }
