@@ -176,18 +176,17 @@ describe("the French version in the forms", () => {
       coverHeight: cover.height,
       coverAlt: "Cover",
       images: [pic(1, { altFr: "Image 1" })],
-      translations: { fr: { title: "Acme FR", tools: ["x"], category: "  " } },
+      translations: { fr: { title: "Acme FR", category: "  " } },
     };
     const form = pieceFromRow(row);
     expect(form.french).toEqual({
       title: "Acme FR",
-      tools: ["x"],
       category: "  ",
     });
     expect(form.images[0].altFr).toBe("Image 1");
     const body = pieceBody(form);
     expect(body.translations).toEqual({
-      fr: { title: "Acme FR", tools: ["x"] },
+      fr: { title: "Acme FR" },
     });
     expect((body.images as { altFr?: string }[])[0].altFr).toBe("Image 1");
     expect(pieceProblems(form)).toEqual({});
