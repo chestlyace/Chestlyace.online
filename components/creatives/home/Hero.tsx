@@ -116,7 +116,7 @@ export function Hero({
                     aria-hidden="true"
                     viewBox="0 0 400 100"
                     preserveAspectRatio="none"
-                    className="pointer-events-none absolute -inset-x-[4%] -inset-y-[6%] h-[112%] w-[108%] overflow-visible"
+                    className="pointer-events-none absolute -inset-x-[4%] -inset-y-[14%] h-[128%] w-[108%] overflow-visible"
                     stroke="currentColor"
                     strokeWidth={2.5}
                     strokeLinecap="round"

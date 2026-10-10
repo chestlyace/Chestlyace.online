@@ -34,7 +34,7 @@ const WIDE = {
     { x: 1250, y: 300, width: 150, height: 190, rotate: 5, polaroid: true },
     { x: 150, y: 640, width: 150, height: 190, rotate: 4, polaroid: true },
     { x: 1290, y: 590, width: 190, height: 140, rotate: -4 },
-    { x: 620, y: 105, width: 160, height: 110, rotate: 3 },
+    { x: 640, y: 140, width: 150, height: 100, rotate: 3 },
     { x: 870, y: 815, width: 170, height: 120, rotate: -3 },
   ] satisfies Framed[],
   doodles: [
@@ -61,8 +61,8 @@ const NARROW = {
     { x: 320, y: 730, width: 130, height: 100, rotate: -4 },
   ] satisfies Framed[],
   doodles: [
-    { kind: "camera", x: 230, y: 60, scale: 0.8, rotate: -8 },
-    { kind: "aperture", x: 385, y: 70, scale: 0.7, rotate: 10 },
+    { kind: "camera", x: 225, y: 125, scale: 0.7, rotate: -8 },
+    { kind: "aperture", x: 385, y: 120, scale: 0.6, rotate: 10 },
     { kind: "nib", x: 225, y: 855, scale: 0.8, rotate: -6 },
     { kind: "pencil", x: 340, y: 850, scale: 0.8, rotate: 6 },
     { kind: "star", x: 30, y: 60, scale: 0.8, accent: true },
