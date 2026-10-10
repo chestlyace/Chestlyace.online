@@ -22,7 +22,7 @@ export function ServicesTeaser({
         />
         <Reveal
           stagger={0.06}
-          className="mt-14 grid gap-x-10 gap-y-4 sm:grid-cols-2"
+          className="mt-14 grid gap-x-10 gap-y-4 lg:grid-cols-2"
         >
           {services.slice(0, 6).map((service) => (
             <div
@@ -32,6 +32,7 @@ export function ServicesTeaser({
             >
               <TextLink
                 tone="menu"
+                className="text-title!"
                 href={`/services#services-${service.group}`}
                 icon="right"
               >
