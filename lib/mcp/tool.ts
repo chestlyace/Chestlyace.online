@@ -59,3 +59,30 @@ export type AnyTool = Omit<ToolDef, "run" | "input"> & {
   input: z.ZodRawShape;
   run: (args: never, context: ToolContext) => Promise<ToolOutput>;
 };
+
+/** Turns an admin-logic failure into a refusal written for the agent. */
+export function refuse(
+  failure: { status: 404 } | { status: 422; fields: Record<string, string> },
+  what: string,
+): never {
+  if (failure.status === 404)
+    throw new ToolError(
+      `No ${what} with that id. Use ${what}_list to see them.`,
+    );
+  throw new ToolError(
+    `That ${what} was not saved. Fix these and try again:`,
+    failure.fields,
+  );
+}
+
+/** A delete must repeat the item's name (docs/mcp.md §4). */
+export function requireConfirm(
+  confirm: string,
+  expected: string,
+  what: string,
+) {
+  if (confirm.trim() !== expected)
+    throw new ToolError(
+      `Not deleted. To delete this ${what}, send confirm: "${expected}" exactly.`,
+    );
+}
