@@ -37,6 +37,7 @@ export async function generateMetadata({
     // A post without French, read on the French blog, is the English page: it is
     // described, and its canonical address given, as the English one.
     lang: post.lang,
+    translated: post.hasFrench,
     title: format(getMessages(post.lang).blog.post.title, {
       title: post.title,
     }),

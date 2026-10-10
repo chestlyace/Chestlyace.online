@@ -157,6 +157,12 @@
   --animate-pulse-ring: pulse-ring 2s var(--ease-out) infinite;
 }
 
+@keyframes lang-suggestion {
+  from {
+    opacity: 0;
+  }
+}
+
 @keyframes pulse-ring {
   from {
     transform: scale(1);

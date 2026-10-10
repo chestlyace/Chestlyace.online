@@ -1,9 +1,8 @@
 import { getCachedEvents, getCachedPieces } from "@/lib/creatives/cache";
-import { sitemapXml, textResponse } from "@/lib/seo";
-import { siteUrl } from "@/lib/sites";
+import { bothLanguages, sitemapXml, textResponse } from "@/lib/seo";
 
-// The homepage, the Graphic design page once it has pieces, and Photography with
-// each of its events; the home page's remaining parts follow (10b.6–10b.7).
+// The homepage, Services, the Graphic design page once it has pieces, and Photography
+// with each of its events, each in both languages (docs/i18n.md §6).
 export async function GET() {
   const [pieces, events] = await Promise.all([
     getCachedPieces("en"),
@@ -11,14 +10,14 @@ export async function GET() {
   ]);
   return textResponse(
     sitemapXml([
-      siteUrl("creatives", "/"),
-      siteUrl("creatives", "/services"),
-      ...(pieces.length > 0 ? [siteUrl("creatives", "/design")] : []),
+      ...bothLanguages("creatives", "/"),
+      ...bothLanguages("creatives", "/services"),
+      ...(pieces.length > 0 ? bothLanguages("creatives", "/design") : []),
       ...(events.length > 0
         ? [
-            siteUrl("creatives", "/photography"),
-            ...events.map((event) =>
-              siteUrl("creatives", `/photography/${event.slug}`),
+            ...bothLanguages("creatives", "/photography"),
+            ...events.flatMap((event) =>
+              bothLanguages("creatives", `/photography/${event.slug}`),
             ),
           ]
         : []),

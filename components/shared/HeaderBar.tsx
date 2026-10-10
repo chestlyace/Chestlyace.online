@@ -23,6 +23,7 @@ import { Brand } from "./Brand";
 import { IconButton } from "./IconButton";
 import { useSmoothScroll } from "./SmoothScroll";
 import { TextLink } from "./TextLink";
+import { LanguageSwitcher, type LanguageLabels } from "./LanguageSwitcher";
 import { ThemeToggle, type ThemeLabels } from "./ThemeToggle";
 import { useActiveNavLink } from "./useActiveSection";
 
@@ -36,6 +37,7 @@ export type HeaderLabels = {
   sites: string;
   youAreHere: string;
   theme: ThemeLabels;
+  language: LanguageLabels;
 };
 
 export type HeaderSite = {
@@ -303,6 +305,10 @@ export function HeaderBar({
                     aria-hidden="true"
                   />
                 </button>
+                <LanguageSwitcher
+                  labels={labels.language}
+                  className="hidden md:block"
+                />
                 <ThemeToggle labels={labels.theme} />
                 <IconButton
                   ref={menuButtonRef}
@@ -367,6 +373,9 @@ export function HeaderBar({
                         </li>
                       ))}
                     </ul>
+                  </MenuItem>
+                  <MenuItem index={links.length + 1} as="div" className="mt-4">
+                    <LanguageSwitcher labels={labels.language} />
                   </MenuItem>
                 </motion.div>
               )}

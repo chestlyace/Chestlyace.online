@@ -317,10 +317,10 @@ describe("languages in the address (docs/i18n.md §2–§3)", () => {
     });
   });
 
-  it("keeps French unreachable in production until it is switched on", () => {
+  it("serves French in production now that it is switched on (11b.6)", () => {
     expect(
       decideRoute({ ...base, allowOverride: false, pathname: "/fr/projects" }),
-    ).toEqual({ kind: "not-found" });
+    ).toMatchObject({ kind: "rewrite", lang: "fr" });
     // English is unaffected.
     expect(
       decideRoute({ ...base, allowOverride: false, pathname: "/projects" }),

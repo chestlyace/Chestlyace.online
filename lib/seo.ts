@@ -96,6 +96,15 @@ const feedLinks = (site: PublicSiteKey, lang: Lang) =>
     ? { types: { "application/rss+xml": localizedPath("/rss.xml", lang) } }
     : {};
 
+/**
+ * The language alternates of a page that exists in both languages (docs/i18n.md §6):
+ * `hreflang` for each and `x-default` = English. Relative to `metadataBase`.
+ */
+export function languageAlternates(path: string): Record<string, string> {
+  const en = localizedPath(path, "en");
+  return { en, fr: localizedPath(path, "fr"), "x-default": en };
+}
+
 // A site's layout metadata: its title and description, the canonical address of
 // every page (relative to `metadataBase`), and the Open Graph and Twitter tags.
 export function siteMetadata(
@@ -112,6 +121,7 @@ export function siteMetadata(
     description,
     alternates: {
       canonical: localizedPath("/", lang),
+      languages: languageAlternates("/"),
       ...feedLinks(site, lang),
     },
     robots: robotsMeta(site),
@@ -148,6 +158,11 @@ export function pageMetadata(
     canonical?: string | null;
     /** The language of the page (its address gets the language's prefix). */
     lang?: Lang;
+    /**
+     * Whether the page also exists in the other language (default: yes). `false` for a
+     * page that has no counterpart, such as a post without a French version.
+     */
+    translated?: boolean;
   },
 ): Metadata {
   const lang = page.lang ?? DEFAULT_LANG;
@@ -160,7 +175,13 @@ export function pageMetadata(
   return {
     title: page.title,
     description: page.description,
-    alternates: { canonical: page.canonical ?? path, ...feedLinks(site, lang) },
+    alternates: {
+      canonical: page.canonical ?? path,
+      ...(page.translated === false
+        ? {}
+        : { languages: languageAlternates(page.path) }),
+      ...feedLinks(site, lang),
+    },
     openGraph: {
       ...(page.article
         ? {
@@ -257,11 +278,50 @@ const xmlEscape = (text: string) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-export function sitemapXml(urls: string[]): string {
+/** A sitemap address, with the other-language versions of the same page (`hreflang`). */
+export type SitemapEntry =
+  string | { loc: string; alternates: { lang: string; href: string }[] };
+
+/**
+ * A page that exists in both languages: one entry per language, each listing both
+ * addresses and `x-default` (English), as search engines ask (docs/i18n.md §6).
+ */
+export function bothLanguages(
+  site: PublicSiteKey,
+  path: string,
+): SitemapEntry[] {
+  const en = siteUrl(site, localizedPath(path, "en"));
+  const fr = siteUrl(site, localizedPath(path, "fr"));
+  const alternates = [
+    { lang: "en", href: en },
+    { lang: "fr", href: fr },
+    { lang: "x-default", href: en },
+  ];
+  return [
+    { loc: en, alternates },
+    { loc: fr, alternates },
+  ];
+}
+
+export function sitemapXml(urls: readonly SitemapEntry[]): string {
+  const alternate = urls.some((url) => typeof url !== "string");
   const entries = urls
-    .map((url) => `  <url>\n    <loc>${xmlEscape(url)}</loc>\n  </url>`)
+    .map((url) => {
+      const { loc, alternates } =
+        typeof url === "string" ? { loc: url, alternates: [] } : url;
+      const links = alternates
+        .map(
+          (link) =>
+            `\n    <xhtml:link rel="alternate" hreflang="${xmlEscape(link.lang)}" href="${xmlEscape(link.href)}"/>`,
+        )
+        .join("");
+      return `  <url>\n    <loc>${xmlEscape(loc)}</loc>${links}\n  </url>`;
+    })
     .join("\n");
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+  const namespaces = alternate
+    ? ' xmlns:xhtml="http://www.w3.org/1999/xhtml"'
+    : "";
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${namespaces}>\n${entries}\n</urlset>\n`;
 }
 
 // The host's robots.txt: everything open and the sitemap listed once indexing is

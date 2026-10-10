@@ -15,8 +15,10 @@ export async function generateMetadata({
   const { lang } = await params;
   if (!isLang(lang)) return {};
   const m = getMessages(lang).blog.tags;
+  const translated = lang === "fr" || (await getCachedTags("fr")).length > 0;
   return pageMetadata("blog", {
     path: "/tags",
+    translated,
     title: m.pageTitle,
     description: m.pageDescription,
     lang,

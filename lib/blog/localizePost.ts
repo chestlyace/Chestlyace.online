@@ -20,7 +20,11 @@ type Base = { readingMinutes: number };
 
 const FIELDS = ["title", "description", "coverAlt", "series"];
 
-type Result<T> = Omit<T, keyof FrenchColumns> & { lang: Lang };
+type Result<T> = Omit<T, keyof FrenchColumns> & {
+  lang: Lang;
+  /** Whether the post has a published French version (in either language). */
+  hasFrench: boolean;
+};
 
 /**
  * The post as `lang` reads it, and the language its text is in (`lang`): French only
@@ -43,9 +47,10 @@ export function inLanguage<T extends Base & FrenchColumns>(
       ...text,
       readingMinutes: readingMinutesFr,
       lang: "fr",
+      hasFrench: true,
     } as unknown as Result<T>;
   }
-  return { ...base, lang: "en" } as unknown as Result<T>;
+  return { ...base, lang: "en", hasFrench: frenchLive } as unknown as Result<T>;
 }
 
 /** The posts that are written in `lang` (the French feed, tags and sitemap). */

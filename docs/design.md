@@ -2954,7 +2954,7 @@ reader that a French version exists, without ever redirecting anyone (D89,
 
 **Anatomy.** The **switcher** is two mono `label` choices, "EN" and "FR", in the
 header between the Sites chip and the theme toggle, and again in the footer's
-Contact column. The current language is `foreground` with the 4px `primary` dot
+bottom bar (between the copyright and "Back to top"; every site has one). The current language is `foreground` with the 4px `primary` dot
 below it (as an active nav link, §13.3); the other is `muted` and is a link to the same
 page in that language. On phones the two sit side by side in the menu's bottom row
 (Sites, language, theme). The **suggestion** is a slim line under the header on an

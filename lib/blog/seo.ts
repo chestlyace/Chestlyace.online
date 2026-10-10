@@ -1,7 +1,6 @@
 import { getMessages } from "@/content/messages";
 import { DEFAULT_LANG, localizedPath, type Lang } from "@/lib/i18n";
 import { imagePath, siteOrigin } from "@/lib/seo";
-import { siteUrl } from "@/lib/sites";
 import type { Post, PostSummary } from "./data";
 
 // What search engines and feed readers get from the blog (ia-content.md §4):
@@ -110,18 +109,4 @@ ${items}
   </channel>
 </rss>
 `;
-}
-
-// The blog's sitemap addresses: the home, and (once there are posts) the tags
-// index, every post and every tag.
-export function blogSitemapUrls(
-  posts: readonly Pick<PostSummary, "slug">[],
-  tags: readonly string[],
-): string[] {
-  return [
-    siteUrl("blog", "/"),
-    ...(tags.length > 0 ? [siteUrl("blog", "/tags")] : []),
-    ...posts.map((post) => siteUrl("blog", `/${post.slug}`)),
-    ...tags.map((tag) => siteUrl("blog", `/tags/${tag}`)),
-  ];
 }

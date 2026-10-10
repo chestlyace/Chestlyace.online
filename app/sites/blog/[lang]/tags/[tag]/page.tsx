@@ -24,8 +24,12 @@ export async function generateMetadata({
   const posts = await getCachedPostsByTag(tag, lang);
   if (posts.length === 0) return {};
   const m = getMessages(lang).blog.tags;
+  // The French tag page exists only for a tag a French post has.
+  const translated =
+    lang === "fr" || (await getCachedPostsByTag(tag, "fr")).length > 0;
   return pageMetadata("blog", {
     path: `/tags/${tag}`,
+    translated,
     title: format(m.tagTitle, { tag }),
     description: format(m.tagDescription, { tag }),
     lang,

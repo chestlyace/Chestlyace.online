@@ -293,6 +293,28 @@ photos). Do this on the preview first:
         its Elastic IP and delete its snapshots/volumes you no longer need.
   - [ ] Remove any DNS records still pointing at the old host.
 
+## 8a. French (Phase 11)
+
+French is public with the rest: each site has its French version under `/fr`
+(`chestlyace.online/fr`, `blog.chestlyace.online/fr`, `creatives.chestlyace.online/fr`),
+linked by the EN | FR switcher in the header, the menu and the footer, and by a
+dismissible line for visitors whose browser is set to French. Nothing redirects anyone.
+
+Before the cutover, check:
+
+- **Read the French.** All of it was drafted for your review: the site's text is in
+  `content/messages/fr.ts` and `lib/i18n/ui.ts`; the privacy page's French (a legal
+  text, have it reviewed) is `blog.privacy` in `fr.ts`. Edit the file, or write French
+  in the admin: every editor has an **English | Français** switch; blog posts have a
+  "Publish the French version" switch; **Newsletter** and **Creatives → Settings** have
+  French fields.
+- **Résumé.** Upload a French résumé in Profile → Français if you have one;
+  `/fr/resume.pdf` serves it, otherwise the English file.
+- **Search engines.** Every page declares `hreflang` alternates and the sitemaps list
+  both addresses; after launch re-submit each host's `sitemap.xml` in Search Console.
+- **Taking French offline** (if ever needed): `FRENCH_PUBLIC = false` in
+  `lib/i18n/index.ts` makes every `/fr` address answer 404 in production.
+
 ## 9. Later
 
 - In Search Console add each host (the blog and the creatives site included) and
