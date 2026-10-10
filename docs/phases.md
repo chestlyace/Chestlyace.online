@@ -22,6 +22,7 @@ before the phase starts.
 | 8 | Main site launch | 8.1 done (PR #52); 8.2 done (PR #54); 8.3 done (PR #56); 8.4a done (PR #58); 8.4b done (PR #60); then the owner runs the cutover (`docs/launch.md`) | Q17, Q20 (answered 2026-10-07) |
 | 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 done (PR #86) | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 done (PR #102); 10c launch prep done (PR #104) | Q1, Q12 (decided 2026-10-08) |
+| 11 | Languages (English and French) | 11a design: in review (issue #109); 11b.1–11b.6 after it | Decided 2026-10-10 (D89) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
@@ -329,3 +330,27 @@ pointer and morph through code, design and photography forms and words
 |---|---|---|
 | F.1 Design | The spec (§13.61, §13.8) and D88; docs only | Done (PR #106) |
 | F.2 Build | The particle wordmark in the shared footer, with its tests and fallbacks | In review (issue #107) |
+
+---
+
+## Phase 11 — Languages (English and French)
+
+**Goal:** all three sites in English and French, with the content editable in both
+languages in the admin (D89). Everything is in [`i18n.md`](./i18n.md).
+
+**11a — Design (docs only).** `i18n.md`, `design.md` §13.62–13.63, D89, these rows.
+
+**11b — Build**, after 11a is merged, in six steps (the switcher and the search-engine
+tags last, so no half-French site is linked):
+
+| Step | Content | Status |
+|---|---|---|
+| 11b.1 Foundation | `[lang]` routing, `proxy.ts`, `lib/i18n.ts`, the dictionaries scaffold, the localize helper | Not started |
+| 11b.2 Main site text | The main site's code-held text in French | Not started |
+| 11b.3 Content in the database | The `translations` column, schemas, localized reads, the admin's EN \| FR editors | Not started |
+| 11b.4 Blog | French posts, feed, newsletter and its emails, privacy page | Not started |
+| 11b.5 Creatives | The creatives pages, settings, seeds and wordmark words in French | Not started |
+| 11b.6 Switcher and search engines | The switcher, suggestion, hreflang, sitemaps, `launch.md`, an end-to-end check | Not started |
+
+**Done when:** every page of the three sites reads in French, content translated in
+the admin appears without a deploy, and English is unchanged.

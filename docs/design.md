@@ -2942,6 +2942,68 @@ timing are pure functions with unit tests; the drawing is checked in a real
 browser: the loop, the pointer, the press, the theme change, a phone, reduced
 motion and no WebGL.
 
+### 13.62 Language switcher and suggestion
+
+**Purpose.** Lets a visitor read the site in English or French, and tells a French
+reader that a French version exists, without ever redirecting anyone (D89,
+`i18n.md` §7).
+
+**Anatomy.** The **switcher** is two mono `label` choices, "EN" and "FR", in the
+header between the Sites chip and the theme toggle, and again in the footer's
+Contact column. The current language is `foreground` with the 4px `primary` dot
+below it (as an active nav link, §13.3); the other is `muted` and is a link to the same
+page in that language. On phones the two sit side by side in the menu's bottom row
+(Sites, language, theme). The **suggestion** is a slim line under the header on an
+English page: "Ce site est aussi disponible en français." (the line is in French, so
+the person it is for can read it), a **"Voir en français"** text link and a close
+button.
+
+**Values.**
+
+| Part | Value |
+|---|---|
+| Switcher choices | `label` size, 44px tap height (padding), 8px apart; a `title` and an `aria-label` in the target language ("Français", "English") |
+| Active mark | The `primary` dot of §13.3, 4px, 6px below the label |
+| Suggestion | Full width under the header, `background-alt`, 40px tall (two lines on phones), `sm` text, `foreground`; the link is an inline link (§13.3), the close button a 44px icon button (§13.2) |
+| Place | The page below the header; it pushes the content down (it is not floating) |
+
+**Behaviour.** The switcher is a plain link: it opens the same page in the other
+language (`switchPath`) and remembers the choice in the `lang` cookie. The suggestion
+shows only for a browser whose first preferred language is French, with no `lang`
+cookie, on an English page; closing it, or using the switcher, sets the cookie. It is
+drawn by JavaScript after the page loads (the pages stay static), with a 150ms fade,
+and none with reduced motion.
+
+**Accessibility.** The switcher is in a `<nav aria-label="Language">`; each choice is
+a link with `lang` set to its own language and `hreflang`; the current one has
+`aria-current="true"`. The suggestion is a `<div role="region" aria-label="Langue">`
+(not an alert), the close button is named "Fermer".
+
+### 13.63 Admin translation fields
+
+**Purpose.** Edit the French beside the English in the same editor (D89,
+`i18n.md` §10).
+
+**Anatomy.** Above the form of every resource with translatable text, a two-option
+**segmented control** "English | Français" (the tab pattern of the admin, §13.20 style).
+"English" shows the form as it is; "Français" shows the translatable fields only,
+each with its English text as the placeholder and a one-line hint "Empty: the English
+is shown". Other fields (images, slugs, dates, links) are shown only in English. Image
+lists show a French `alt` / caption field beside each English one. The save bar saves
+both languages together.
+
+**Lists.** A **FR** chip in each row: filled `primary` when every translatable field
+of the entry has French, outlined when some or all are missing; a "Missing French"
+filter beside the other filters. A blog post's French also has a **"Publish the French
+version"** switch (the post can be saved in French and stay hidden).
+
+**Values.** The control is 36px tall, sits 16px above the form, `label` text; the chip
+is the status pill of the admin lists (§13.25), `label` size. Dark mode as the rest of
+the admin.
+
+**Accessibility.** The control is a `role="tablist"` with `aria-selected`; the French
+fields have `lang="fr"` so a screen reader and the spell checker use French.
+
 ## 14. Page and section specs
 
 The main site's homepage (`/`) and the project page (`/projects/[slug]`). Each
