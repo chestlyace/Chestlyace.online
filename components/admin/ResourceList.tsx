@@ -9,6 +9,8 @@ import { IconButton } from "@/components/shared/IconButton";
 import { Tag } from "@/components/shared/Tag";
 import {
   adminConfig,
+  frenchStatus,
+  translatableNames,
   type AdminConfig,
   type AdminRow,
 } from "@/lib/admin/config";
@@ -63,8 +65,12 @@ export function ResourceList({
   // Experience has tabs (All / Work / Education): the list shows one of them and
   // reorders within it.
   const [tab, setTab] = useState("all");
+  // "Missing French" shows only the entries whose French is not complete.
+  const hasFrench = translatableNames(config).length > 0;
+  const [missingOnly, setMissingOnly] = useState(false);
   const inTab = (item: AdminRow) =>
-    tab === "all" || !config.tabs || item[config.tabs.field] === tab;
+    (tab === "all" || !config.tabs || item[config.tabs.field] === tab) &&
+    (!missingOnly || frenchStatus(config, item) === "missing");
   const visible = items.filter(inTab);
 
   // New data from the server (after a refresh) replaces the local copy.
@@ -162,9 +168,26 @@ export function ResourceList({
         </div>
       )}
       <div className="mb-6 flex items-center justify-between gap-4">
-        <p className="text-sm text-muted">
-          {visible.length} {visible.length === 1 ? "entry" : "entries"}
-        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <p className="text-sm text-muted">
+            {visible.length} {visible.length === 1 ? "entry" : "entries"}
+          </p>
+          {hasFrench && (
+            <button
+              type="button"
+              aria-pressed={missingOnly}
+              onClick={() => setMissingOnly((value) => !value)}
+              className={cn(
+                "type-label h-8 rounded-full border px-3 transition-colors duration-150",
+                missingOnly
+                  ? "border-transparent bg-primary text-primary-foreground"
+                  : "border-border text-muted [@media(hover:hover)]:hover:text-foreground",
+              )}
+            >
+              Missing French
+            </button>
+          )}
+        </div>
         <Button
           href={`${resource.href}/new`}
           magnetic={false}
@@ -269,6 +292,7 @@ function Row({
 }) {
   const controls = useDragControls();
   const { title, subtitle } = config.row(item);
+  const french = frenchStatus(config, item);
   const thumb = config.thumb?.(item) ?? null;
   const featured = config.featured?.(item) ?? false;
   const published = config.hasPublished ? Boolean(item.isPublished) : true;
@@ -372,6 +396,23 @@ function Row({
         </span>
         <span className="block truncate text-sm text-muted">{subtitle}</span>
       </Link>
+
+      {french !== "none" && (
+        <span
+          title={french === "done" ? "French is complete" : "French is missing"}
+          className={cn(
+            "type-label hidden h-6 items-center rounded-full px-2.5 md:inline-flex",
+            french === "done"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted shadow-[inset_0_0_0_1px_var(--border)]",
+          )}
+        >
+          FR
+          <span className="sr-only">
+            {french === "done" ? ": complete" : ": missing"}
+          </span>
+        </span>
+      )}
 
       {featured && <Tag className="hidden md:inline-flex">Featured</Tag>}
 

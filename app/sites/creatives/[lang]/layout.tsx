@@ -11,8 +11,9 @@ import "../../../globals.css";
 
 export const metadata: Metadata = siteMetadata("creatives");
 
-// Both languages are built ahead of time; any other value is a 404 (docs/i18n.md §3).
-export const dynamicParams = false;
+// Both languages are built ahead of time; the layout answers any other value with a
+// 404 (docs/i18n.md §3). `dynamicParams = false` is not used: it makes Next fail to
+// refresh a page after the admin changes content (NoFallbackError).
 export function generateStaticParams() {
   return LANGS.map((lang) => ({ lang }));
 }

@@ -184,6 +184,7 @@ export function AdminField({ field, value, error, onChange, onBlur }: Props) {
             id={id}
             name={field.name}
             value={text}
+            placeholder={field.placeholder}
             onChange={(event) => onChange(event.target.value)}
             onBlur={() => onBlur()}
             aria-invalid={invalid}

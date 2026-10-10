@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  TRANSLATABLE,
+  TRANSLATION_LIMITS,
+  type TranslatableResource,
+} from "@/lib/i18n/translatable";
 import { SERVICE_ICONS } from "./serviceIcons";
 
 // What each admin resource accepts (design.md §14.11), used by the API to
@@ -10,6 +15,49 @@ const clean = (value: unknown) =>
   value === undefined || (typeof value === "string" && value.trim() === "")
     ? null
     : value;
+
+// The French version of a resource's text (docs/i18n.md §5): `translations: { fr: {…} }`
+// with only the fields named in `lib/i18n/translatable.ts`, each optional. Blank values
+// are dropped, so the stored object only holds what has been translated.
+function translationsSchema(resource: TranslatableResource) {
+  const shape: Record<string, z.ZodType> = {};
+  for (const [field, kind] of Object.entries(TRANSLATABLE[resource])) {
+    const limit = TRANSLATION_LIMITS[kind];
+    shape[field] =
+      kind === "list"
+        ? z.array(z.string().trim().max(limit)).max(20)
+        : z.string().trim().max(limit, "That is too long.");
+  }
+  const fr = z
+    .object(shape)
+    .partial()
+    .strict()
+    .transform((value) => {
+      const kept: Record<string, unknown> = {};
+      for (const [field, entry] of Object.entries(value)) {
+        const list = Array.isArray(entry)
+          ? entry.filter((item) => item !== "")
+          : entry;
+        if (
+          list !== undefined &&
+          list !== "" &&
+          !(Array.isArray(list) && list.length === 0)
+        )
+          kept[field] = list;
+      }
+      return kept;
+    });
+  return z.object({ fr: fr.optional() }).strict();
+}
+
+function withTranslations<T extends z.ZodObject>(
+  schema: T,
+  resource: TranslatableResource,
+) {
+  return schema.extend({
+    translations: translationsSchema(resource).optional(),
+  });
+}
 
 /** Required text, trimmed. */
 const text = (label: string, max: number) =>
@@ -136,7 +184,7 @@ export const skillSchema = z
   })
   .strict();
 
-export const serviceSchema = z
+const serviceBase = z
   .object({
     title: text("title", 80),
     description: text("description", 400),
@@ -146,7 +194,9 @@ export const serviceSchema = z
   })
   .strict();
 
-export const certificationSchema = z
+export const serviceSchema = withTranslations(serviceBase, "services");
+
+const certificationBase = z
   .object({
     name: text("name", 120),
     issuer: text("issuer", 80),
@@ -156,6 +206,11 @@ export const certificationSchema = z
     isPublished: published,
   })
   .strict();
+
+export const certificationSchema = withTranslations(
+  certificationBase,
+  "certifications",
+);
 
 export const socialSchema = z
   .object({
@@ -172,13 +227,15 @@ export const socialSchema = z
   })
   .strict();
 
-export const faqSchema = z
+const faqBase = z
   .object({
     question: text("question", 200),
     answer: text("answer", 1500),
     isPublished: published,
   })
   .strict();
+
+export const faqSchema = withTranslations(faqBase, "faqs");
 
 const longText = (label: string, max: number) =>
   z.preprocess(
@@ -201,7 +258,7 @@ export const WORK_TYPES = [
   ["education", "Education"],
 ] as const;
 
-export const projectSchema = z
+const projectBase = z
   .object({
     title: text("title", 80),
     slug: z
@@ -231,6 +288,8 @@ export const projectSchema = z
   })
   .strict();
 
+export const projectSchema = withTranslations(projectBase, "projects");
+
 // Experience and volunteering share their fields (design.md §13.13); experience
 // adds the type.
 const timelineFields = {
@@ -246,16 +305,23 @@ const timelineFields = {
   isPublished: published,
 };
 
-export const journeySchema = z
+const journeyBase = z
   .object({
     type: z.enum(values(WORK_TYPES), { error: "Choose work or education." }),
     ...timelineFields,
   })
   .strict();
 
-export const volunteeringSchema = z.object(timelineFields).strict();
+export const journeySchema = withTranslations(journeyBase, "journey");
 
-export const profileSchema = z
+const volunteeringBase = z.object(timelineFields).strict();
+
+export const volunteeringSchema = withTranslations(
+  volunteeringBase,
+  "volunteering",
+);
+
+const profileBase = z
   .object({
     name: text("name", 80),
     legalName: longText("name", 80),
@@ -303,6 +369,8 @@ export const profileSchema = z
     location: longText("place", 80),
   })
   .strict();
+
+export const profileSchema = withTranslations(profileBase, "profile");
 
 export const reorderSchema = z
   .object({
@@ -404,7 +472,12 @@ export const blogPostSchema = z
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const fields: Record<string, string> = {};
   for (const issue of error.issues) {
-    const key = issue.path.length > 0 ? String(issue.path[0]) : "_";
+    const key =
+      issue.path[0] === "translations" && issue.path.length >= 3
+        ? `fr:${String(issue.path[2])}`
+        : issue.path.length > 0
+          ? String(issue.path[0])
+          : "_";
     if (!(key in fields)) fields[key] = issue.message;
   }
   return fields;
@@ -414,7 +487,7 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
 // here (the form shows the wording in use), at most as long as the layout allows.
 const copyText = (label: string, max: number) => text(label, max);
 
-export const newsletterSchema = z
+const newsletterBase = z
   .object({
     enabled: z.boolean({ error: "Choose on or off." }),
     boxLabel: copyText("label", 30),
@@ -440,6 +513,8 @@ export const newsletterSchema = z
     emailIgnore: copyText("closing note", 300),
   })
   .strict();
+
+export const newsletterSchema = withTranslations(newsletterBase, "newsletter");
 
 // ---- Creatives (design.md §14.26, content-schema.md §5) ----------------------------
 
@@ -491,7 +566,7 @@ const albumAddress = z.preprocess(
   httpUrl.refine((v) => v.startsWith("https://"), URL_MESSAGE).nullable(),
 );
 
-export const designPieceSchema = z
+const designPieceBase = z
   .object({
     title: text("title", 120),
     slug,
@@ -525,7 +600,12 @@ export const designPieceSchema = z
   })
   .strict();
 
-export const photoEventSchema = z
+export const designPieceSchema = withTranslations(
+  designPieceBase,
+  "design-pieces",
+);
+
+const photoEventBase = z
   .object({
     title: text("title", 120),
     slug,
@@ -564,12 +644,17 @@ export const photoEventSchema = z
   })
   .strict();
 
+export const photoEventSchema = withTranslations(
+  photoEventBase,
+  "photo-events",
+);
+
 export const CREATIVE_GROUPS = [
   ["design", "Graphic design"],
   ["photography", "Photography"],
 ] as const;
 
-export const creativeServiceSchema = z
+const creativeServiceBase = z
   .object({
     title: text("title", 80),
     description: text("description", 400),
@@ -582,7 +667,12 @@ export const creativeServiceSchema = z
   })
   .strict();
 
-export const creativeFaqSchema = z
+export const creativeServiceSchema = withTranslations(
+  creativeServiceBase,
+  "creative-services",
+);
+
+const creativeFaqBase = z
   .object({
     question: text("question", 200),
     answer: text("answer", 1500),
@@ -593,7 +683,12 @@ export const creativeFaqSchema = z
   })
   .strict();
 
-export const creativesSettingsSchema = z
+export const creativeFaqSchema = withTranslations(
+  creativeFaqBase,
+  "creative-faqs",
+);
+
+const creativesSettingsBase = z
   .object({
     heroStatement: text("statement", 60),
     heroLine: text("line", 160),
@@ -612,3 +707,8 @@ export const creativesSettingsSchema = z
     seoDescription: text("description", 200),
   })
   .strict();
+
+export const creativesSettingsSchema = withTranslations(
+  creativesSettingsBase,
+  "creatives-settings",
+);

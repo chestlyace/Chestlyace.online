@@ -1,6 +1,11 @@
 import type { z } from "zod";
 import type { UploadUse } from "@/lib/cloudinary";
 import { thumbnailUrl } from "@/lib/cloudinary";
+import {
+  TRANSLATABLE,
+  TRANSLATION_LIMITS,
+  isTranslatable,
+} from "@/lib/i18n/translatable";
 import { timelineDates } from "@/lib/timeline";
 import { SERVICE_ICONS } from "./serviceIcons";
 import type { CreativesId, ResourceId } from "./resources";
@@ -41,7 +46,7 @@ type Base = {
 
 export type FieldDef =
   | (Base & { type: "text"; max: number; placeholder?: string })
-  | (Base & { type: "long"; max: number })
+  | (Base & { type: "long"; max: number; placeholder?: string })
   | (Base & { type: "url" })
   | (Base & { type: "image"; use: UploadUse })
   | (Base & { type: "date" })
@@ -1022,6 +1027,163 @@ export function adminConfig(id: string): AdminConfig | undefined {
     : undefined;
 }
 
+// --- French (docs/i18n.md §5, §10) -----------------------------------------------------
+//
+// An editor shows the English fields and, behind an English | Français switch, the French
+// ones. In the form's flat values a French field `title` is `fr:title`; on the way to
+// the API they become `translations: { fr: { title } }`.
+
+export const FR_PREFIX = "fr:";
+export const frName = (name: string) => `${FR_PREFIX}${name}`;
+export const isFrName = (name: string) => name.startsWith(FR_PREFIX);
+
+// The resource's name in the API and in lib/i18n/translatable.ts.
+const API_NAME: Partial<Record<AdminConfig["id"], string>> = {
+  experience: "journey",
+  faq: "faqs",
+  design: "design-pieces",
+  photography: "photo-events",
+};
+
+// The editors that have the French switch. The creatives' pieces and events and the
+// blog's posts have their own editors and get theirs with their steps (11b.4, 11b.5).
+const WITH_FRENCH = new Set<string>([
+  "profile",
+  "services",
+  "projects",
+  "experience",
+  "volunteering",
+  "certifications",
+  "faq",
+  "creative-services",
+  "creative-faqs",
+  "creatives-settings",
+  "newsletter",
+]);
+
+/** The translatable fields of an editor, in the editor's order ([] for one without French). */
+export function translatableNames(config: AdminConfig): string[] {
+  if (!WITH_FRENCH.has(config.id)) return [];
+  const api = API_NAME[config.id] ?? config.id;
+  if (!isTranslatable(api)) return [];
+  const allowed = TRANSLATABLE[api] as Record<string, string>;
+  return config.groups
+    .flatMap((group) => group.fields)
+    .map((field) => field.name)
+    .filter((name) => Object.hasOwn(allowed, name));
+}
+
+/** The editor's French fields: each translatable field, renamed `fr:<name>`, optional. */
+export function frenchFields(config: AdminConfig, english: Values): FieldDef[] {
+  const names = new Set(translatableNames(config));
+  const api = API_NAME[config.id] ?? config.id;
+  const kinds = TRANSLATABLE[api as keyof typeof TRANSLATABLE] as Record<
+    string,
+    keyof typeof TRANSLATION_LIMITS
+  >;
+  return config.groups
+    .flatMap((group) => group.fields)
+    .filter((field) => names.has(field.name))
+    .map((field): FieldDef => {
+      const shown = english[field.name];
+      const placeholder =
+        typeof shown === "string"
+          ? shown.replace(/\s+/g, " ").slice(0, 120)
+          : "";
+      const limit = TRANSLATION_LIMITS[kinds[field.name]];
+      const common = {
+        name: frName(field.name),
+        optional: true,
+        helper: "Empty: the English is shown.",
+      };
+      if (field.type === "text")
+        return { ...field, ...common, max: limit, placeholder };
+      if (field.type === "long")
+        return { ...field, ...common, max: limit, placeholder };
+      if (field.type === "tags") return { ...field, ...common, max: 20 };
+      return { ...field, ...common };
+    });
+}
+
+/** The values of the English fields only (the French ones are `fr:…`). */
+export function englishValues(values: Values): Values {
+  return Object.fromEntries(
+    Object.entries(values).filter(([name]) => !isFrName(name)),
+  );
+}
+
+/** The French values of a form, by plain field name, blanks left out. */
+export function frenchValues(
+  values: Values,
+): Record<string, string | string[]> {
+  const out: Record<string, string | string[]> = {};
+  for (const [name, value] of Object.entries(values)) {
+    if (!isFrName(name)) continue;
+    const plain = name.slice(FR_PREFIX.length);
+    if (Array.isArray(value)) {
+      const items = value.filter((item) => item.trim() !== "");
+      if (items.length > 0) out[plain] = items;
+    } else if (typeof value === "string" && value.trim() !== "") {
+      out[plain] = value;
+    }
+  }
+  return out;
+}
+
+/** What goes in a request's `translations`: the French, or nothing. */
+export function translationsBody(values: Values): {
+  fr: Record<string, string | string[]>;
+} {
+  return { fr: frenchValues(values) };
+}
+
+/** A row → the editor's French form values (`fr:<field>`), empty when there is none. */
+function toFrenchValues(config: AdminConfig, row: AdminRow): Values {
+  const out: Values = {};
+  const stored = (
+    (row.translations as { fr?: Record<string, unknown> } | null) ?? {}
+  ).fr;
+  const fields = config.groups.flatMap((group) => group.fields);
+  for (const name of translatableNames(config)) {
+    const field = fields.find((f) => f.name === name);
+    const value = stored?.[name];
+    out[frName(name)] =
+      field?.type === "tags"
+        ? list(value).map(String)
+        : value == null
+          ? ""
+          : String(value);
+  }
+  return out;
+}
+
+/** The empty French values of a new entry. */
+export function emptyFrenchValues(config: AdminConfig): Values {
+  return toFrenchValues(config, { id: 0 });
+}
+
+/**
+ * Whether an entry's French is complete: every translatable field that has English text
+ * has French too. "none" for an editor without French.
+ */
+export function frenchStatus(
+  config: AdminConfig,
+  row: AdminRow,
+): "done" | "missing" | "none" {
+  const names = translatableNames(config);
+  if (names.length === 0) return "none";
+  const stored = (
+    (row.translations as { fr?: Record<string, unknown> } | null) ?? {}
+  ).fr;
+  const filled = (value: unknown) =>
+    Array.isArray(value)
+      ? value.length > 0
+      : typeof value === "string" && value.trim() !== "";
+  const needs = names.filter((name) => filled(row[name]));
+  if (needs.length === 0) return "done";
+  return needs.every((name) => filled(stored?.[name])) ? "done" : "missing";
+}
+
 // A database row → the editor's form values (blank text for missing).
 export function toValues(config: AdminConfig, row: AdminRow): Values {
   const values: Values = {};
@@ -1036,20 +1198,32 @@ export function toValues(config: AdminConfig, row: AdminRow): Values {
       values[field.name] = list(value).map(String);
     } else values[field.name] = value == null ? "" : String(value);
   }
-  return values;
+  return { ...values, ...toFrenchValues(config, row) };
 }
 
-// The first message per field when `values` don't fit the schema.
+// The first message per field when `values` don't fit the schema. The French fields
+// are checked for length only (they are optional); they are `fr:<name>`.
 export function validate(
   config: AdminConfig,
   values: Values,
 ): Record<string, string> {
-  const result = config.schema.safeParse(values);
-  if (result.success) return {};
   const errors: Record<string, string> = {};
-  for (const issue of result.error.issues) {
-    const key = issue.path.length > 0 ? String(issue.path[0]) : "_";
-    if (!(key in errors)) errors[key] = issue.message;
+  const result = config.schema.safeParse(englishValues(values));
+  if (!result.success) {
+    for (const issue of result.error.issues) {
+      const key = issue.path.length > 0 ? String(issue.path[0]) : "_";
+      if (!(key in errors)) errors[key] = issue.message;
+    }
+  }
+  for (const field of frenchFields(config, values)) {
+    const value = values[field.name];
+    if (
+      typeof value === "string" &&
+      (field.type === "text" || field.type === "long") &&
+      value.trim().length > field.max
+    ) {
+      errors[field.name] = `Keep it under ${field.max} characters.`;
+    }
   }
   return errors;
 }

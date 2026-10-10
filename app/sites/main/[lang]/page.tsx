@@ -24,7 +24,7 @@ export default async function Home({
 }: PageProps<"/sites/main/[lang]">) {
   const { lang } = await params;
   if (!isLang(lang)) notFound();
-  const data = await getCachedHomepageData();
+  const data = await getCachedHomepageData(lang);
   const { profile } = data;
 
   // The profile row is the page's source of truth; without it there is nothing
