@@ -65,7 +65,6 @@ export const fr: Messages = {
       states: { system: "Système", light: "Clair", dark: "Sombre" },
       switch: "Thème : {current}. Passer à {next}.",
     },
-    notFound: "404 — page introuvable",
     wordmark: {
       developer: "DÉVELOPPEUR",
       designer: "DESIGNER",

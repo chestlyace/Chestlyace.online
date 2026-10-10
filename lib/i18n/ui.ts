@@ -462,3 +462,72 @@ export const LOADING: Record<Lang, string> = {
   en: "Loading",
   fr: "Chargement",
 };
+
+/**
+ * The words of the not-found and error pages (design.md §13.67), read by client
+ * components. One line per site: the same page, three voices.
+ */
+export type NotFoundText = {
+  headline: string;
+  lineMain: string;
+  lineCreatives: string;
+  lineBlog: string;
+  home: string;
+  projects: string;
+  contact: string;
+  design: string;
+  photography: string;
+  services: string;
+  allPosts: string;
+  tags: string;
+  meanwhile: string;
+  latest: string;
+  errorHeadline: string;
+  errorLine: string;
+  tryAgain: string;
+};
+
+export const NOT_FOUND: Record<Lang, NotFoundText> = {
+  en: {
+    headline: "Page not found — 404",
+    lineMain:
+      "This page took a wrong turn. The address may have changed, or it never existed.",
+    lineCreatives: "This page is not in the gallery.",
+    lineBlog:
+      "Maybe it was never written, or it moved. These are the latest posts.",
+    home: "Home",
+    projects: "Projects",
+    contact: "Contact",
+    design: "Graphic design",
+    photography: "Photography",
+    services: "Services",
+    allPosts: "All posts",
+    tags: "Tags",
+    meanwhile: "Meanwhile, here is some work",
+    latest: "Latest posts",
+    errorHeadline: "Something broke on our side",
+    errorLine: "Nothing you did. Try again, or go back home.",
+    tryAgain: "Try again",
+  },
+  fr: {
+    headline: "Page introuvable — 404",
+    lineMain:
+      "Cette page a pris un mauvais virage. L’adresse a peut-être changé, ou n’a jamais existé.",
+    lineCreatives: "Cette page n’est pas dans la galerie.",
+    lineBlog:
+      "Elle n’a peut-être jamais été écrite, ou elle a déménagé. Voici les derniers articles.",
+    home: "Accueil",
+    projects: "Projets",
+    contact: "Contact",
+    design: "Design graphique",
+    photography: "Photographie",
+    services: "Services",
+    allPosts: "Tous les articles",
+    tags: "Thèmes",
+    meanwhile: "En attendant, voici quelques réalisations",
+    latest: "Derniers articles",
+    errorHeadline: "Un problème est survenu de notre côté",
+    errorLine: "Vous n’y êtes pour rien. Réessayez, ou retournez à l’accueil.",
+    tryAgain: "Réessayer",
+  },
+};

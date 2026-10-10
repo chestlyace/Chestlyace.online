@@ -1,5 +1,5 @@
-import { NotFoundMessage } from "@/components/shared/NotFoundMessage";
+import { MainNotFound } from "@/components/notfound/NotFound";
 
 export default function NotFound() {
-  return <NotFoundMessage />;
+  return <MainNotFound />;
 }
