@@ -129,7 +129,7 @@ export function createMcpServer(
           role: "user",
           content: {
             type: "text",
-            text: `Write a blog post about: ${topic}\n\n1. Read get_guide("blog_markdown") and get_guide("images").\n2. Upload a cover with media_upload_from_url or media_upload_base64 (use "blog").\n3. Create the post as a draft with blog_post_create (title, slug, description, tags, coverUrl and coverAlt, content in the block markdown). Add the French version in translations.fr if asked.\n4. Check it with blog_post_validate and fix every problem.\n5. Tell the owner it is ready; only publish (blog_post_publish) if your token may and the owner asked.`,
+            text: `Write a blog post about: ${topic}\n\n1. Read get_guide("blog_markdown") and get_guide("images").\n2. Upload a cover with media_upload_from_url or media_upload_base64 (use "blog").\n3. Create the post as a draft with blog_create (title, slug, description, tags, coverUrl and coverAlt, content in the block markdown). Add the French version in translations.fr if asked.\n4. Check it with blog_validate and fix every problem.\n5. Tell the owner it is ready; only publish (blog_publish) if your token may and the owner asked.`,
           },
         },
       ],

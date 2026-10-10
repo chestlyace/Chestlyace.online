@@ -24,7 +24,7 @@ before the phase starts.
 | 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 done (PR #102); 10c launch prep done (PR #104) | Q1, Q12 (decided 2026-10-08) |
 | 11 | Languages (English and French) | 11a design done (PR #110); 11b.1 done (PR #112); 11b.2 done (PR #114); 11b.3 done (PR #116); 11b.4 done (PR #118); 11b.5 done (PR #120); 11b.6 in review (issue #123); 11b.6 after it | Decided 2026-10-10 (D89) |
 | 12 | Loading states and not-found pages | 12a design done (PR #122); 12b.1 done (PR #126); 12b.2 done (PR #128); 12b.3 done (PR #130); 12b.4 done (PR #132) | Decided 2026-10-11 (D91) |
-| 13 | MCP server | 13a design done (PR #122); 13b.1 done (PR #134); 13b.2 in review (PR #136); 13b.3 in review (PR #138); 13b.4 in review (PR #140); 13b.5 in review (issue #141); 13b.6 after it | Decided 2026-10-11 (D92) |
+| 13 | MCP server | 13a design done (PR #122); 13b.1 done (PR #134); 13b.2 in review (PR #136); 13b.3 in review (PR #138); 13b.4 in review (PR #140); 13b.5 in review (PR #142); 13b.6 in review (issue #143) | Decided 2026-10-11 (D92) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
 the same foundation.
@@ -400,8 +400,8 @@ with the right status code.
 | 13b.2 Server, general and media tools | `@modelcontextprotocol/sdk`, `/mcp` on the admin host, `whoami`, `list_resources`, `get_guide`, uploads | In review (PR #136) |
 | 13b.3 Blog tools | Posts (with French), validation, publish, duplicate, delete, comments moderation | In review (PR #138) |
 | 13b.4 Portfolio tools | Projects, skills, experience, volunteering, certifications, services, FAQ, socials, profile | In review (PR #140) |
-| 13b.5 Creatives and settings tools | Pieces, events, creative services and FAQ, the two settings | In review (issue #141) |
-| 13b.6 Docs and end-to-end | `launch.md` section, prompts and resources, an end-to-end run with the SDK client | Not started |
+| 13b.5 Creatives and settings tools | Pieces, events, creative services and FAQ, the two settings | In review (PR #142) |
+| 13b.6 Docs and end-to-end | `launch.md` section, prompts and resources, an end-to-end run with the SDK client | In review (issue #143) |
 
 **Done when:** an MCP client with a token can write and publish a blog post with a
 picture, add a project and a creatives piece, and the sites show them; a token without a
