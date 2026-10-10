@@ -9,6 +9,12 @@ export const fr: Messages = {
     label: "Langue",
     names: { en: "English", fr: "Français" },
     switchTo: "Passer en {language}",
+    suggestion: {
+      region: "Langue",
+      text: "Ce site est aussi disponible en français.",
+      link: "Voir en français",
+      close: "Fermer",
+    },
   },
 
   chrome: {

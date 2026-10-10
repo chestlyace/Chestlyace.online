@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Post, PostSummary } from "./data";
-import { blogJsonLd, blogPostingJsonLd, blogSitemapUrls, rssXml } from "./seo";
+import { blogJsonLd, blogPostingJsonLd, rssXml } from "./seo";
 
 const origin = "https://blog.chestlyace.online";
 
@@ -18,6 +18,7 @@ const summary = (
   updatedAt: "2026-11-02T10:00:00Z",
   readingMinutes: 3,
   lang: "en",
+  hasFrench: false,
   ...extra,
 });
 
@@ -93,22 +94,6 @@ describe("rssXml", () => {
     const xml = rssXml([], origin);
     expect(xml).toContain("<channel>");
     expect(xml).not.toContain("<item>");
-  });
-});
-
-describe("blogSitemapUrls", () => {
-  it("lists the home, the tags index, each post and each tag", () => {
-    const urls = blogSitemapUrls([{ slug: "a" }, { slug: "b" }], ["web"]);
-    expect(urls).toHaveLength(5);
-    expect(urls[0]).toMatch(/blog\.chestlyace\.online\/$|localhost|vercel/);
-    expect(urls.some((url) => url.includes("/tags/web"))).toBe(true);
-    expect(urls.some((url) => url.endsWith("/a") || url.includes("/a?"))).toBe(
-      true,
-    );
-  });
-
-  it("is just the home before there are any posts", () => {
-    expect(blogSitemapUrls([], [])).toHaveLength(1);
   });
 });
 

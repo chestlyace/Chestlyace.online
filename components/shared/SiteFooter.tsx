@@ -7,6 +7,8 @@ import { PUBLIC_SITE_KEYS, siteUrl, type PublicSiteKey } from "@/lib/sites";
 import { Brand } from "./Brand";
 import { Container } from "./Container";
 import { FooterWordmark } from "./FooterWordmark";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { languageLabels } from "@/lib/i18n/labels";
 import { TextLink } from "./TextLink";
 
 function Column({
@@ -137,6 +139,7 @@ export function SiteFooter({
           <p className="type-label text-muted">
             {format(m.footer.copyright, { year: new Date().getFullYear() })}
           </p>
+          <LanguageSwitcher labels={languageLabels(lang)} />
           <TextLink href="#top" tone="footer" icon="up">
             {m.footer.backToTop}
           </TextLink>
