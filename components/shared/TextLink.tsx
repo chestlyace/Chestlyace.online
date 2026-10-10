@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowDown,
   ArrowLeft,
@@ -5,10 +7,12 @@ import {
   ArrowUp,
   ArrowUpRight,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "./Link";
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { isPagePath } from "@/lib/links";
+import { NEW_TAB } from "@/lib/i18n/ui";
+import { useLang } from "./LangProvider";
 import { RollText } from "./RollText";
 
 type IconName = "up-right" | "up" | "right" | "down" | "left";
@@ -78,7 +82,8 @@ export function TextLink({
   children,
   ...anchorProps
 }: TextLinkProps) {
-  const hint = [external ? "opens in a new tab" : null, srHint]
+  const lang = useLang();
+  const hint = [external ? NEW_TAB[lang] : null, srHint]
     .filter(Boolean)
     .join(", ");
   const hintNode = hint ? <span className="sr-only"> ({hint})</span> : null;

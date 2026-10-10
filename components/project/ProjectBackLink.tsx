@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/shared/Link";
 import type { MouseEvent } from "react";
 import { RollText } from "@/components/shared/RollText";
 import { cn } from "@/lib/cn";
@@ -13,9 +13,12 @@ import { boxOf, setMorph } from "@/lib/morph";
 export function ProjectBackLink({
   slug,
   imageSrc,
+  label,
 }: {
   slug: string;
   imageSrc: string | null;
+  /** "All projects". */
+  label: string;
 }) {
   const fine = useFinePointer();
   const reduced = usePrefersReducedMotion();
@@ -53,7 +56,7 @@ export function ProjectBackLink({
       )}
     >
       <ArrowLeft className="size-[1em]" aria-hidden="true" />
-      <RollText>All projects</RollText>
+      <RollText>{label}</RollText>
     </Link>
   );
 }

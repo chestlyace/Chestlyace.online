@@ -1,3 +1,5 @@
+import { format } from "@/lib/i18n/format";
+
 // Small pure helpers for the hero (design.md §14.1).
 
 // "Software Engineer" → ["Software", "Engineer"]: the two big lines, split at
@@ -14,9 +16,10 @@ export function heroSrText(
   name: string,
   legalName: string | null,
   headline: string,
+  alsoKnownAs = ", also known as {legalName}",
 ): string {
   const also =
-    legalName && legalName !== name ? `, also known as ${legalName}` : "";
+    legalName && legalName !== name ? format(alsoKnownAs, { legalName }) : "";
   return `${name}${also} — ${headline.toLowerCase()}`;
 }
 

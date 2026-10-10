@@ -1,3 +1,5 @@
+import { format } from "@/lib/i18n/format";
+
 // The contact form (design.md §13.15, §14.8): its fields, their checks, and the
 // links built from the visitor's message. Pure functions, shared by the form
 // (checks as the visitor types) and the API route (checks again, because the
@@ -30,28 +32,43 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 // The message for one field, or null when it is fine. Whitespace around a value
 // is ignored.
-export function fieldError(field: ContactField, raw: string): string | null {
+export type ContactErrorMessages = {
+  nameRequired: string;
+  nameTooLong: string;
+  emailRequired: string;
+  emailInvalid: string;
+  subjectInvalid: string;
+  messageRequired: string;
+  messageShort: string;
+  messageLong: string;
+};
+
+// The messages are passed in (docs/i18n.md §4): the form shows them in the page's
+// language, the server checks with the English ones.
+export function fieldError(
+  field: ContactField,
+  raw: string,
+  messages: ContactErrorMessages,
+): string | null {
   const value = raw.trim();
   switch (field) {
     case "name":
-      if (!value) return "Enter your name.";
-      if (value.length > LIMITS.name) return "That name is too long.";
+      if (!value) return messages.nameRequired;
+      if (value.length > LIMITS.name) return messages.nameTooLong;
       return null;
     case "email":
-      if (!value) return "Enter your email address.";
+      if (!value) return messages.emailRequired;
       if (value.length > LIMITS.email || !EMAIL.test(value))
-        return "Enter a valid email address, like name@example.com.";
+        return messages.emailInvalid;
       return null;
     case "subject":
       return (SUBJECTS as readonly string[]).includes(value)
         ? null
-        : "Choose what this is about.";
+        : messages.subjectInvalid;
     case "message":
-      if (!value) return "Write a message.";
-      if (value.length < LIMITS.messageMin)
-        return "Add a little more detail (at least 10 characters).";
-      if (value.length > LIMITS.message)
-        return "That message is too long. Keep it under 5,000 characters.";
+      if (!value) return messages.messageRequired;
+      if (value.length < LIMITS.messageMin) return messages.messageShort;
+      if (value.length > LIMITS.message) return messages.messageLong;
       return null;
   }
 }
@@ -68,6 +85,7 @@ export type ContactErrors = Partial<Record<ContactField, string>>;
 // Checks every field of an unknown value (a parsed request body).
 export function validateContact(
   input: unknown,
+  messages: ContactErrorMessages,
 ): { ok: true; values: ContactValues } | { ok: false; errors: ContactErrors } {
   const source =
     typeof input === "object" && input !== null
@@ -77,7 +95,7 @@ export function validateContact(
   const errors: ContactErrors = {};
   for (const field of CONTACT_FIELDS) {
     const raw = typeof source[field] === "string" ? source[field] : "";
-    const error = fieldError(field, raw);
+    const error = fieldError(field, raw, messages);
     if (error) errors[field] = error;
     values[field] = raw.trim();
   }
@@ -118,8 +136,11 @@ export function whatsappHref(number: string, text?: string): string | null {
 }
 
 // What "Continue on WhatsApp" opens with after a message was emailed.
-export function whatsappText(values: ContactValues): string {
-  return `Hi Chestly, it's ${values.name}. ${values.subject}: ${values.message}`;
+export function whatsappText(
+  values: ContactValues,
+  template = "Hi Chestly, it's {name}. {subject}: {message}",
+): string {
+  return format(template, values);
 }
 
 // "+237 676 940 247" → "+237 676 940 247" (as stored); "237676940247" → "+237676940247".

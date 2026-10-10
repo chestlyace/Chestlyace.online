@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/shared/Link";
 import { Container } from "@/components/shared/Container";
 import type { NextProject as Next } from "@/lib/db";
 import { imageSource } from "@/lib/hero";
@@ -8,15 +8,18 @@ import { imageSource } from "@/lib/hero";
 // in big type, as one link. After the last project it points to the first. On a
 // hover device the project's image fades in behind the title and the arrow nudges
 // 8px (400ms).
-export function NextProject({ next }: { next: Next }) {
+export function NextProject({
+  next,
+  label,
+}: {
+  next: Next;
+  /** "Next project", the section's accessible name. */
+  label: string;
+}) {
   const image = imageSource(next.imageUrl);
 
   return (
-    <section
-      aria-label="Next project"
-      data-band="alt"
-      className="bg-background-alt"
-    >
+    <section aria-label={label} data-band="alt" className="bg-background-alt">
       <Link
         href={`/projects/${next.slug}`}
         className="group/next relative isolate block overflow-hidden outline-none focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ring"

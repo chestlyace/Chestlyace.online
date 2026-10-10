@@ -1,8 +1,6 @@
-import {
-  CONTACT_FORM_TITLE,
-  CONTACT_HEADING,
-  CONTACT_INTRO,
-} from "@/content/copy";
+import { getMessages } from "@/content/messages";
+import type { Lang } from "@/lib/i18n";
+import { NEW_TAB } from "@/lib/i18n/ui";
 import {
   CallIcon,
   ChatIcon,
@@ -27,16 +25,19 @@ type Profile = NonNullable<HomepageData["profile"]>;
 // Contact (design.md §14.8): heading, intro, tiles and socials on the left, the
 // form on the right; one column on phones and tablets.
 export function ContactSection({
+  lang,
   profile,
   socials,
   index,
   band,
 }: {
+  lang: Lang;
   profile: Profile;
   socials: HomepageData["socials"];
   index: string;
   band: Band;
 }) {
+  const m = getMessages(lang).home.contact;
   const phone = profile.phone ? phoneHref(profile.phone) : null;
   const whatsapp = profile.whatsappNumber
     ? whatsappHref(profile.whatsappNumber)
@@ -54,53 +55,55 @@ export function ContactSection({
         <div className="flex flex-col gap-12 lg:col-span-6 lg:pr-8">
           <SectionHeading
             index={index}
-            label="Contact"
-            title={CONTACT_HEADING}
-            intro={CONTACT_INTRO}
+            label={m.label}
+            title={m.heading}
+            intro={m.intro}
           />
 
           <Reveal className="grid gap-4 sm:grid-cols-2">
             <ContactTile
               className="sm:col-span-2"
               icon={<MessageIcon size={32} />}
-              label="Email"
+              label={m.tiles.email}
               value={profile.email}
               href={`mailto:${profile.email}`}
               copy={{
                 text: profile.email,
-                buttonLabel: "Copy email address",
-                announcement: "Email address copied",
+                buttonLabel: m.tiles.copyEmail,
+                announcement: m.tiles.emailCopied,
+                copiedLabel: m.tiles.copied,
               }}
             />
             {phone && profile.phone && (
               <ContactTile
                 icon={<CallIcon size={32} />}
-                label="Phone"
+                label={m.tiles.phone}
                 value={displayPhone(profile.phone)}
                 href={phone}
                 copy={{
                   text: displayPhone(profile.phone),
-                  buttonLabel: "Copy phone number",
-                  announcement: "Phone number copied",
+                  buttonLabel: m.tiles.copyPhone,
+                  announcement: m.tiles.phoneCopied,
+                  copiedLabel: m.tiles.copied,
                 }}
               />
             )}
             {whatsapp && (
               <ContactTile
                 icon={<ChatIcon size={32} />}
-                label="WhatsApp"
-                value="Chat on WhatsApp"
+                label={m.tiles.whatsapp}
+                value={m.tiles.chat}
                 href={whatsapp}
                 external
               >
-                {qr && <WhatsAppQr size={qr.size} d={qr.d} />}
+                {qr && <WhatsAppQr size={qr.size} d={qr.d} labels={m.qr} />}
               </ContactTile>
             )}
           </Reveal>
 
           {links.length > 0 && (
             <ul
-              aria-label="Social links"
+              aria-label={m.social}
               className="-mx-3 flex flex-wrap gap-x-1 gap-y-1"
             >
               {links.map((social) => (
@@ -115,7 +118,7 @@ export function ContactSection({
                     <span className="sr-only text-sm font-medium sm:not-sr-only">
                       {social.platform}
                     </span>
-                    <span className="sr-only"> (opens in a new tab)</span>
+                    <span className="sr-only"> ({NEW_TAB[lang]})</span>
                   </a>
                 </li>
               ))}
@@ -126,8 +129,8 @@ export function ContactSection({
         {/* The form sits on a card of its own; its fields take the opposite
             tone, so they stay visible on it in both bands. */}
         <div className="self-start rounded-xl bg-tile p-6 [--field-fill:var(--tile-hover)] md:p-8 lg:col-span-6">
-          <h3 className="mb-6 text-h3 text-foreground">{CONTACT_FORM_TITLE}</h3>
-          <ContactForm whatsappNumber={profile.whatsappNumber} />
+          <h3 className="mb-6 text-h3 text-foreground">{m.formTitle}</h3>
+          <ContactForm whatsappNumber={profile.whatsappNumber} form={m.form} />
         </div>
       </Container>
     </section>

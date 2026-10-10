@@ -1,8 +1,10 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "./Link";
 import { cn } from "@/lib/cn";
 
 type BrandProps = {
+  /** The link's accessible name ("Chestly Ace — home"), in the page's language. */
+  homeLabel?: string;
   className?: string;
   /** `md` is the header's 32px logo; `lg` the footer's 40px. */
   size?: "md" | "lg";
@@ -13,6 +15,7 @@ type BrandProps = {
 // The DA logo is a black circle whose lettering is transparent. In dark mode a
 // light backing keeps the letters readable and shows as a thin outline.
 export function Brand({
+  homeLabel = "Chestly Ace — home",
   className,
   size = "md",
   wordmarkClassName,
@@ -21,7 +24,7 @@ export function Brand({
   return (
     <Link
       href="/"
-      aria-label="Chestly Ace — home"
+      aria-label={homeLabel}
       className={cn("inline-flex items-center gap-2 rounded-full", className)}
     >
       <Image

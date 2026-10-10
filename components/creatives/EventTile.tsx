@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/shared/Link";
 import { useRef } from "react";
 import { useReveal } from "@/components/blog/blocks/useReveal";
 import { cn } from "@/lib/cn";

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { en } from "@/content/messages/en";
 import { looksLikeBot, validateContact } from "@/lib/contact";
 import { buildContactEmail, sendContactEmail } from "@/lib/contactMail";
 import { getCachedHomepageData } from "@/lib/portfolio";
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
   if (bot === "honeypot") return reply({ ok: true }, 200);
   if (bot === "too-fast") return reply({ error: "too-fast" }, 400);
 
-  const result = validateContact(body);
+  const result = validateContact(body, en.home.contact.form.errors);
   if (!result.ok)
     return reply({ error: "invalid", fields: result.errors }, 422);
 

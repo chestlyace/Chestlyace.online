@@ -8,7 +8,9 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react";
-import Link from "next/link";
+import { NEW_TAB } from "@/lib/i18n/ui";
+import { Link } from "./Link";
+import { useLang } from "./LangProvider";
 import {
   useEffect,
   useRef,
@@ -114,6 +116,7 @@ export function Button({
   children,
   ...rest
 }: ButtonAsButton | ButtonAsLink) {
+  const lang = useLang();
   const fine = useFinePointer();
   const reduced = usePrefersReducedMotion();
   const ref = useRef<HTMLElement | null>(null);
@@ -280,7 +283,7 @@ export function Button({
       className: classes,
     };
     const hint = external && (
-      <span className="sr-only"> (opens in a new tab)</span>
+      <span className="sr-only"> ({NEW_TAB[lang]})</span>
     );
 
     // Files (a resume PDF) and hash links are plain anchors: <Link> would try to

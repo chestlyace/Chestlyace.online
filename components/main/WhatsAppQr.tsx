@@ -9,7 +9,15 @@ import { EASE_OUT } from "@/lib/motion";
 // popover with the code to scan with a phone. Phones don't show it — they tap
 // the link. The code arrives as ready-made path data (lib/qr.ts), so there is no
 // QR code library in the browser.
-export function WhatsAppQr({ size, d }: { size: number; d: string }) {
+export function WhatsAppQr({
+  size,
+  d,
+  labels,
+}: {
+  size: number;
+  d: string;
+  labels: { label: string; description: string; scan: string };
+}) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
   const id = useId();
@@ -50,7 +58,7 @@ export function WhatsAppQr({ size, d }: { size: number; d: string }) {
           <motion.div
             id={id}
             role="group"
-            aria-label="WhatsApp QR code"
+            aria-label={labels.label}
             initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             exit={{
@@ -67,14 +75,14 @@ export function WhatsAppQr({ size, d }: { size: number; d: string }) {
             <svg
               viewBox={`-2 -2 ${size + 4} ${size + 4}`}
               role="img"
-              aria-label="QR code that opens a WhatsApp chat"
+              aria-label={labels.description}
               shapeRendering="crispEdges"
               className="w-full rounded-sm bg-white"
             >
               <path d={d} fill="#000" />
             </svg>
             <p className="type-label mt-2 text-center text-muted">
-              Scan to connect
+              {labels.scan}
             </p>
           </motion.div>
         )}

@@ -19,10 +19,13 @@ export function ProjectHero({
   slug,
   title,
   image,
+  alt,
 }: {
   slug: string;
   title: string;
   image: ImageSource;
+  /** The picture's alt text ("Title — project preview"). */
+  alt: string;
 }) {
   const reduced = usePrefersReducedMotion();
   const frameRef = useRef<HTMLDivElement>(null);
@@ -121,7 +124,7 @@ export function ProjectHero({
         ) : image.kind === "local" ? (
           <Image
             src={image.src}
-            alt={`${title} — project preview`}
+            alt={alt}
             fill
             priority
             sizes="(min-width: 1280px) 1216px, 100vw"
@@ -130,11 +133,7 @@ export function ProjectHero({
         ) : (
           // Remote hosts aren't configured for next/image; shown as is.
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={image.src}
-            alt={`${title} — project preview`}
-            className="size-full object-cover"
-          />
+          <img src={image.src} alt={alt} className="size-full object-cover" />
         )}
       </div>
     </div>

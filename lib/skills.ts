@@ -17,10 +17,12 @@ export type SkillGroup<T> = { category: string; label: string; skills: T[] };
 // nothing in them are left out.
 export function groupSkills<T extends { category: string }>(
   skills: readonly T[],
+  /** The group names in the page's language, by category. */
+  labels?: Record<string, string>,
 ): SkillGroup<T>[] {
   return SKILL_GROUPS.map(({ category, label }) => ({
     category,
-    label,
+    label: labels?.[category] ?? label,
     skills: skills.filter((skill) => skill.category === category),
   })).filter((group) => group.skills.length > 0);
 }

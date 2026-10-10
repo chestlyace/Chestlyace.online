@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/shared/Link";
 import type { PostSummary } from "@/lib/blog/data";
 import { cn } from "@/lib/cn";
 

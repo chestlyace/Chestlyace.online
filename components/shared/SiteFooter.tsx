@@ -1,12 +1,9 @@
 import type { ReactNode } from "react";
-import { FOOTER_DESCRIPTIONS } from "@/content/copy";
+import { getMessages } from "@/content/messages";
+import { format } from "@/lib/i18n/format";
+import { localizedPath, type Lang } from "@/lib/i18n";
 import type { FooterLink } from "@/lib/chrome";
-import {
-  PUBLIC_SITE_KEYS,
-  SITE_LABELS,
-  siteUrl,
-  type PublicSiteKey,
-} from "@/lib/sites";
+import { PUBLIC_SITE_KEYS, siteUrl, type PublicSiteKey } from "@/lib/sites";
 import { Brand } from "./Brand";
 import { Container } from "./Container";
 import { FooterWordmark } from "./FooterWordmark";
@@ -33,29 +30,32 @@ function Column({
 // the profile and socials data when that is wired in (Phase 5b.2).
 export function SiteFooter({
   site,
+  lang,
   connect,
   contact,
 }: {
   site: PublicSiteKey;
+  lang: Lang;
   connect?: readonly FooterLink[];
   contact?: readonly FooterLink[];
 }) {
+  const m = getMessages(lang).chrome;
   return (
     <footer data-band="alt" className="bg-background-alt">
       <Container className="pt-24 md:pt-32">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <Brand size="lg" />
+            <Brand size="lg" homeLabel={m.brandHome} />
             <p className="mt-6 max-w-[36ch] text-lead text-muted">
-              {FOOTER_DESCRIPTIONS[site]}
+              {m.footerDescriptions[site]}
             </p>
           </div>
 
           <nav
-            aria-label="Footer"
+            aria-label={m.footer.nav}
             className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-7"
           >
-            <Column title="Sites">
+            <Column title={m.footer.sites}>
               {PUBLIC_SITE_KEYS.map((key) => {
                 const current = key === site;
                 return (
@@ -72,17 +72,19 @@ export function SiteFooter({
                           aria-current="page"
                           className="text-foreground"
                         >
-                          {SITE_LABELS[key]}
+                          {m.siteNames[key]}
                         </TextLink>
                       </span>
                     ) : (
                       <TextLink
-                        href={siteUrl(key)}
+                        href={siteUrl(key, localizedPath("/", lang))}
                         tone="footer"
                         icon="up-right"
-                        srHint={`opens the ${SITE_LABELS[key]} site`}
+                        srHint={format(m.opensSite, {
+                          site: m.siteNames[key],
+                        })}
                       >
-                        {SITE_LABELS[key]}
+                        {m.siteNames[key]}
                       </TextLink>
                     )}
                   </li>
@@ -91,7 +93,7 @@ export function SiteFooter({
             </Column>
 
             {connect && connect.length > 0 && (
-              <Column title="Connect">
+              <Column title={m.footer.connect}>
                 {connect.map((link) => (
                   <li key={link.href}>
                     <TextLink
@@ -107,7 +109,10 @@ export function SiteFooter({
             )}
 
             {contact && contact.length > 0 && (
-              <Column title="Contact" className="col-span-2 sm:col-span-1">
+              <Column
+                title={m.footer.contact}
+                className="col-span-2 sm:col-span-1"
+              >
                 {contact.map((link) => (
                   <li key={link.href}>
                     <TextLink
@@ -124,16 +129,16 @@ export function SiteFooter({
           </nav>
         </div>
 
-        <FooterWordmark />
+        <FooterWordmark words={m.wordmark} />
       </Container>
 
       <div className="mt-6 border-t border-border">
         <Container className="flex items-center justify-between gap-4 py-6">
           <p className="type-label text-muted">
-            © {new Date().getFullYear()} Chestly Ace
+            {format(m.footer.copyright, { year: new Date().getFullYear() })}
           </p>
           <TextLink href="#top" tone="footer" icon="up">
-            Back to top
+            {m.footer.backToTop}
           </TextLink>
         </Container>
       </div>

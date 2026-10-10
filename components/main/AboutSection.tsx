@@ -2,7 +2,9 @@ import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { Reveal } from "@/components/shared/Reveal";
 import { SectionHeading } from "@/components/shared/SectionHeading";
+import { getMessages } from "@/content/messages";
 import { aboutFacts, splitParagraphs } from "@/lib/about";
+import type { Lang } from "@/lib/i18n";
 import type { HomepageData } from "@/lib/db";
 import { resumeHref } from "@/lib/links";
 import type { Band } from "@/lib/sections";
@@ -14,21 +16,24 @@ type Profile = NonNullable<HomepageData["profile"]>;
 // About (design.md §14.2): the quote as a scroll-lit statement, then the body
 // text beside a short facts list and the resume button.
 export function AboutSection({
+  lang,
   profile,
   index,
   band,
 }: {
+  lang: Lang;
   profile: Profile;
   index: string;
   band: Band;
 }) {
+  const m = getMessages(lang).home.about;
   const paragraphs = splitParagraphs(profile.aboutBody);
-  const facts = aboutFacts(profile);
+  const facts = aboutFacts(profile, m);
   const resume = profile.resumeUrl ? resumeHref(profile.resumeUrl) : null;
 
   return (
     <Section id="about" band={band} narrow>
-      <SectionHeading index={index} label="About" title="About me" />
+      <SectionHeading index={index} label={m.label} title={m.title} />
 
       {profile.aboutQuote && (
         <ScrollLitStatement
@@ -76,7 +81,7 @@ export function AboutSection({
                     ? {}
                     : { download: "Chestly_Ace_Resume" })}
                 >
-                  Download Resume
+                  {m.download}
                 </Button>
               </div>
             )}

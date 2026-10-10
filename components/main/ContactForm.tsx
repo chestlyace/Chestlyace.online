@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/shared/Button";
 import { FormField, fieldControl } from "@/components/shared/FormField";
 import { Reveal } from "@/components/shared/Reveal";
-import { CONTACT_ERRORS, CONTACT_SUCCESS } from "@/content/copy";
+import type { Messages } from "@/content/messages";
 import { cn } from "@/lib/cn";
 import {
   CONTACT_FIELDS,
@@ -20,6 +20,8 @@ import {
   type ContactValues,
 } from "@/lib/contact";
 
+type FormMessages = Messages["home"]["contact"]["form"];
+
 type Status = "idle" | "sending" | "sent" | "failed";
 
 const EMPTY: ContactValues = { name: "", email: "", subject: "", message: "" };
@@ -32,13 +34,16 @@ const TEXTAREA_MAX = 320;
 // to continue on WhatsApp (Q10).
 export function ContactForm({
   whatsappNumber,
+  form,
 }: {
   whatsappNumber: string | null;
+  /** The form's words, in the page's language. */
+  form: FormMessages;
 }) {
   const [values, setValues] = useState<ContactValues>(EMPTY);
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<Status>("idle");
-  const [failure, setFailure] = useState<string>(CONTACT_ERRORS.failed);
+  const [failure, setFailure] = useState<string>(form.failures.failed);
   const [sentValues, setSentValues] = useState<ContactValues | null>(null);
   const shownAt = useRef(0);
   const formRef = useRef<HTMLFormElement>(null);
@@ -52,7 +57,7 @@ export function ContactForm({
   const check = (field: ContactField, value: string) =>
     setErrors((current) => ({
       ...current,
-      [field]: fieldError(field, value) ?? undefined,
+      [field]: fieldError(field, value, form.errors) ?? undefined,
     }));
 
   const change =
@@ -81,7 +86,7 @@ export function ContactForm({
 
     const next: ContactErrors = {};
     for (const field of CONTACT_FIELDS) {
-      const error = fieldError(field, values[field]);
+      const error = fieldError(field, values[field], form.errors);
       if (error) next[field] = error;
     }
     setErrors(next);
@@ -94,7 +99,7 @@ export function ContactForm({
     }
 
     setStatus("sending");
-    setFailure(CONTACT_ERRORS.failed);
+    setFailure(form.failures.failed);
     // A person can't have filled the form in under a few seconds, so a quick
     // submit simply waits out the rest; the server checks the same clock.
     const wait = MIN_FORM_SECONDS * 1000 - (Date.now() - shownAt.current);
@@ -115,12 +120,19 @@ export function ContactForm({
         setStatus("sent");
         return;
       }
-      if (response.status === 429) setFailure(CONTACT_ERRORS.rateLimited);
+      if (response.status === 429) setFailure(form.failures.rateLimited);
       if (response.status === 422) {
         const body = (await response.json().catch(() => null)) as {
           fields?: ContactErrors;
         } | null;
-        if (body?.fields) setErrors(body.fields);
+        // The server's messages are English; the same checks run here in the
+        // page's language.
+        const fresh: ContactErrors = {};
+        for (const field of CONTACT_FIELDS) {
+          const error = fieldError(field, values[field], form.errors);
+          if (error) fresh[field] = error;
+        }
+        setErrors(Object.keys(fresh).length > 0 ? fresh : (body?.fields ?? {}));
       }
     } catch {
       // network error: the generic message below
@@ -130,7 +142,19 @@ export function ContactForm({
 
   const whatsapp =
     sentValues && whatsappNumber
-      ? whatsappHref(whatsappNumber, whatsappText(sentValues))
+      ? whatsappHref(
+          whatsappNumber,
+          whatsappText(
+            {
+              ...sentValues,
+              subject:
+                form.subjects[
+                  sentValues.subject as keyof typeof form.subjects
+                ] ?? sentValues.subject,
+            },
+            form.whatsappMessage,
+          ),
+        )
       : null;
 
   return (
@@ -146,13 +170,13 @@ export function ContactForm({
             className="flex flex-col items-start gap-4 py-4"
           >
             <CircleCheck className="size-8 text-secondary" aria-hidden="true" />
-            <h3 className="text-h3 text-foreground">{CONTACT_SUCCESS.title}</h3>
+            <h3 className="text-h3 text-foreground">{form.success.title}</h3>
             <p className="max-w-[44ch] text-body text-muted">
-              {CONTACT_SUCCESS.text}
+              {form.success.text}
             </p>
             {whatsapp && (
               <Button href={whatsapp} external variant="secondary">
-                {CONTACT_SUCCESS.whatsapp}
+                {form.success.whatsapp}
               </Button>
             )}
           </motion.div>
@@ -160,7 +184,7 @@ export function ContactForm({
           <motion.form
             key="form"
             ref={formRef}
-            aria-label="Contact form"
+            aria-label={form.label}
             noValidate
             onSubmit={submit}
             exit={{ opacity: 0 }}
@@ -184,7 +208,7 @@ export function ContactForm({
               <FormField
                 data-reveal
                 id="contact-name"
-                label="Name"
+                label={form.name}
                 error={errors.name}
               >
                 <input
@@ -203,7 +227,7 @@ export function ContactForm({
               <FormField
                 data-reveal
                 id="contact-email"
-                label="Email"
+                label={form.email}
                 error={errors.email}
               >
                 <input
@@ -225,7 +249,7 @@ export function ContactForm({
             <FormField
               data-reveal
               id="contact-subject"
-              label="Subject"
+              label={form.subject}
               error={errors.subject}
             >
               <div className="relative">
@@ -244,7 +268,7 @@ export function ContactForm({
                   )}
                 >
                   <option value="" disabled>
-                    Choose a subject
+                    {form.subjectPlaceholder}
                   </option>
                   {SUBJECTS.map((subject) => (
                     <option
@@ -252,7 +276,7 @@ export function ContactForm({
                       value={subject}
                       className="text-foreground"
                     >
-                      {subject}
+                      {form.subjects[subject]}
                     </option>
                   ))}
                 </select>
@@ -266,7 +290,7 @@ export function ContactForm({
             <FormField
               data-reveal
               id="contact-message"
-              label="Message"
+              label={form.message}
               error={errors.message}
             >
               <textarea
@@ -288,7 +312,7 @@ export function ContactForm({
               className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
             >
               <label>
-                Website
+                {form.website}
                 <input
                   ref={honeypotRef}
                   type="text"
@@ -302,7 +326,7 @@ export function ContactForm({
 
             <div data-reveal>
               <Button type="submit" size="lg" loading={status === "sending"}>
-                {status === "sending" ? "Sending…" : "Send message"}
+                {status === "sending" ? form.sending : form.send}
               </Button>
             </div>
           </motion.form>

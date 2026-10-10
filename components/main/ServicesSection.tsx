@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import type { CSSProperties } from "react";
-import { CREATIVES_CARD, SERVICES_INTRO } from "@/content/copy";
+import { getMessages } from "@/content/messages";
+import { localizedPath, type Lang } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { cn } from "@/lib/cn";
 import type { HomepageData } from "@/lib/db";
@@ -78,7 +79,8 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
 
 // The fixed card that ends the stack (design.md §13.12): not a database row, so
 // it can't be deleted by accident. Inverted, and one link to the creatives site.
-function CreativesCard({ index }: { index: number }) {
+function CreativesCard({ index, lang }: { index: number; lang: Lang }) {
+  const card = getMessages(lang).home.services.creativesCard;
   return (
     <li
       data-stack-card
@@ -86,26 +88,22 @@ function CreativesCard({ index }: { index: number }) {
       style={stickyOffsets(index)}
     >
       <a
-        href={siteUrl("creatives")}
+        href={siteUrl("creatives", localizedPath("/", lang))}
         className={cn(
           "group/creatives relative flex h-full flex-col justify-between gap-12 rounded-xl bg-foreground p-6 text-background transition-transform duration-300 ease-out hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-offset-4 md:p-12",
           CARD_HEIGHT,
         )}
       >
-        <span className="type-label opacity-60">{CREATIVES_CARD.label}</span>
+        <span className="type-label opacity-60">{card.label}</span>
         <ArrowUpRight
           className="absolute top-6 right-6 size-8 transition-transform duration-300 ease-out group-hover/creatives:translate-x-1 group-hover/creatives:-translate-y-1 md:top-12 md:right-12"
           aria-hidden="true"
         />
         <span className="flex flex-col gap-4">
-          <span className="max-w-[18ch] text-title">
-            {CREATIVES_CARD.title}
-          </span>
-          <span className="max-w-[40ch] text-lead opacity-70">
-            {CREATIVES_CARD.line}
-          </span>
+          <span className="max-w-[18ch] text-title">{card.title}</span>
+          <span className="max-w-[40ch] text-lead opacity-70">{card.line}</span>
         </span>
-        <span className="sr-only"> (opens the Creatives site)</span>
+        <span className="sr-only"> ({card.hint})</span>
       </a>
     </li>
   );
@@ -114,27 +112,30 @@ function CreativesCard({ index }: { index: number }) {
 // Services (design.md §14.4): heading, intro, then the stacking cards with the
 // Creatives card last.
 export function ServicesSection({
+  lang,
   services,
   index,
   band,
 }: {
+  lang: Lang;
   services: HomepageData["services"];
   index: string;
   band: Band;
 }) {
+  const m = getMessages(lang).home.services;
   return (
     <Section id="services" band={band}>
       <SectionHeading
         index={index}
-        label="Services"
-        title="Services"
-        intro={SERVICES_INTRO}
+        label={m.label}
+        title={m.title}
+        intro={m.intro}
       />
       <ServiceStack className="mt-12 flex flex-col gap-6 md:mt-16">
         {services.map((service, i) => (
           <ServiceCard key={service.id} service={service} index={i} />
         ))}
-        <CreativesCard index={services.length} />
+        <CreativesCard index={services.length} lang={lang} />
       </ServiceStack>
     </Section>
   );

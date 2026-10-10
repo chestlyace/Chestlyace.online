@@ -16,6 +16,9 @@ import { isHttpUrl } from "@/lib/links";
 import { getCachedProject, getCachedProjectSlugs } from "@/lib/portfolio";
 import { caseStudyRows, galleryUrls, projectLinks } from "@/lib/projectPage";
 import { pageMetadata } from "@/lib/seo";
+import { getMessages } from "@/content/messages";
+import { isLang } from "@/lib/i18n";
+import { format } from "@/lib/i18n/format";
 
 export async function generateStaticParams() {
   return (await getCachedProjectSlugs()).map((slug) => ({ slug }));
@@ -24,12 +27,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/sites/main/[lang]/projects/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, lang: raw } = await params;
+  const lang = isLang(raw) ? raw : "en";
   const data = await getCachedProject(slug);
   if (!data) return {};
   return pageMetadata("main", {
     path: `/projects/${slug}`,
-    title: `${data.project.title} — Chestly Ace`,
+    lang,
+    title: format(getMessages(lang).seo.project, { title: data.project.title }),
     description: data.project.summary,
     image: data.project.imageUrl,
   });
@@ -41,15 +46,17 @@ export async function generateMetadata({
 export default async function ProjectPage({
   params,
 }: PageProps<"/sites/main/[lang]/projects/[slug]">) {
-  const { slug } = await params;
+  const { slug, lang } = await params;
+  if (!isLang(lang)) notFound();
+  const m = getMessages(lang).project;
   const data = await getCachedProject(slug);
   if (!data) notFound();
   const { project, next } = data;
 
   const image = imageSource(project.imageUrl);
-  const rows = caseStudyRows(project);
+  const rows = caseStudyRows(project, m.caseStudy);
   const gallery = galleryUrls(project.galleryUrls);
-  const links = projectLinks(project).filter(
+  const links = projectLinks(project, m).filter(
     (link) => link.kind === "private" || isHttpUrl(link.href),
   );
 
@@ -57,6 +64,7 @@ export default async function ProjectPage({
     <>
       <Container className="pt-28 pb-24 md:pb-32">
         <ProjectBackLink
+          label={m.back}
           slug={project.slug}
           imageSrc={image.kind === "none" ? null : image.src}
         />
@@ -101,7 +109,7 @@ export default async function ProjectPage({
                   </Button>
                 ) : (
                   <Tag key={link.label} className="h-9 px-4">
-                    {link.label} · Private
+                    {format(m.privateLink, { label: link.label })}
                   </Tag>
                 ),
               )}
@@ -111,6 +119,7 @@ export default async function ProjectPage({
 
         <div className="mt-10 md:mt-12">
           <ProjectHero
+            alt={format(m.preview, { title: project.title })}
             slug={project.slug}
             title={project.title}
             image={image}
@@ -150,14 +159,17 @@ export default async function ProjectPage({
 
         {gallery.length > 0 && (
           <ul
-            aria-label="Gallery"
+            aria-label={m.gallery}
             className="mt-16 flex flex-col gap-6 md:mt-24"
           >
             {gallery.map((url, i) => (
               <li key={url}>
                 <GalleryImage
                   image={imageSource(url)}
-                  alt={`${project.title} — screenshot ${i + 1}`}
+                  alt={format(m.screenshot, {
+                    title: project.title,
+                    n: i + 1,
+                  })}
                 />
               </li>
             ))}
@@ -165,7 +177,7 @@ export default async function ProjectPage({
         )}
       </Container>
 
-      {next && <NextProject next={next} />}
+      {next && <NextProject next={next} label={m.next} />}
     </>
   );
 }

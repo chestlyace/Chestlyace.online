@@ -101,8 +101,10 @@ function EntryText({ entry }: { entry: TimelineEntry }) {
   );
 }
 
-function Dates({ entry }: { entry: TimelineEntry }) {
-  const dates = timelineDates(entry);
+export type TimelineWords = { education: string; now: string };
+
+function Dates({ entry, now }: { entry: TimelineEntry; now: string }) {
+  const dates = timelineDates(entry, now);
   if (!dates) return null;
   return <time dateTime={timelineDateTime(entry)}>{dates}</time>;
 }
@@ -112,9 +114,11 @@ function Dates({ entry }: { entry: TimelineEntry }) {
 function EntryList({
   entries,
   label,
+  words,
 }: {
   entries: readonly TimelineEntry[];
   label: string;
+  words: TimelineWords;
 }) {
   return (
     <ol aria-label={label} className="border-t border-border">
@@ -126,8 +130,8 @@ function EntryList({
           <Logo url={entry.logoUrl} name={entry.organization} />
           <div className="min-w-0">
             <p className="type-label mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-muted">
-              <Dates entry={entry} />
-              {isEducation(entry) && <Tag>Education</Tag>}
+              <Dates entry={entry} now={words.now} />
+              {isEducation(entry) && <Tag>{words.education}</Tag>}
             </p>
             <EntryText entry={entry} />
           </div>
@@ -144,25 +148,31 @@ function EntryList({
 export function ExperienceWheel({
   entries,
   label,
+  words,
 }: {
   entries: readonly TimelineEntry[];
   /** Names the list for screen readers, e.g. "Experience". */
   label: string;
+  /** The tag of an education entry and the end of an open date range. */
+  words: TimelineWords;
 }) {
   const count = entries.length;
   const motionAllowed = usePrefersMotion();
   const wheel = motionAllowed && count > 1;
 
-  if (!wheel) return <EntryList entries={entries} label={label} />;
-  return <Wheel entries={entries} label={label} />;
+  if (!wheel)
+    return <EntryList entries={entries} label={label} words={words} />;
+  return <Wheel entries={entries} label={label} words={words} />;
 }
 
 function Wheel({
   entries,
   label,
+  words,
 }: {
   entries: readonly TimelineEntry[];
   label: string;
+  words: TimelineWords;
 }) {
   const count = entries.length;
   const { scrollToY } = useSmoothScroll();
@@ -281,7 +291,7 @@ function Wheel({
                   className="flex size-full flex-col justify-center rounded-md text-left"
                 >
                   <span className="font-display text-title font-normal uppercase leading-none text-foreground">
-                    {timelineDates(item) || item.role}
+                    {timelineDates(item, words.now) || item.role}
                   </span>
                   <span className="type-label mt-1.5 truncate text-muted">
                     {item.role}
@@ -301,7 +311,7 @@ function Wheel({
                 {String(count).padStart(2, "0")}
               </span>
               {isEducation(entry) && (
-                <Tag className="bg-tile-hover">Education</Tag>
+                <Tag className="bg-tile-hover">{words.education}</Tag>
               )}
             </p>
             <AnimatePresence mode="wait" initial={false} custom={direction}>
@@ -317,7 +327,7 @@ function Wheel({
                 <Logo url={entry.logoUrl} name={entry.organization} />
                 <div className="min-w-0">
                   <p className="type-label mb-3 text-muted">
-                    <Dates entry={entry} />
+                    <Dates entry={entry} now={words.now} />
                   </p>
                   <EntryText entry={entry} />
                 </div>

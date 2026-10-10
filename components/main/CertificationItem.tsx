@@ -3,6 +3,8 @@ import Image from "next/image";
 import { cn } from "@/lib/cn";
 import type { HomepageData } from "@/lib/db";
 import { imageSource } from "@/lib/hero";
+import type { Lang } from "@/lib/i18n";
+import { NEW_TAB } from "@/lib/i18n/ui";
 import { isHttpUrl } from "@/lib/links";
 
 type Certification = HomepageData["certifications"][number];
@@ -12,8 +14,13 @@ type Certification = HomepageData["certifications"][number];
 // one it is static.
 export function CertificationItem({
   certification,
+  lang,
+  verifyLabel,
 }: {
   certification: Certification;
+  lang: Lang;
+  /** "verify credential", for screen readers. */
+  verifyLabel: string;
 }) {
   const badge = imageSource(certification.badgeUrl);
   const year = certification.issuedOn?.slice(0, 4);
@@ -64,7 +71,7 @@ export function CertificationItem({
           />
           <span className="sr-only">
             {" "}
-            — verify credential (opens in a new tab)
+            — {verifyLabel} ({NEW_TAB[lang]})
           </span>
         </>
       )}

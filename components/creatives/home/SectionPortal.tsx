@@ -2,7 +2,7 @@
 
 import gsap from "gsap";
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/shared/Link";
 import { useEffect, useRef } from "react";
 import { RollText } from "@/components/shared/RollText";
 import { placeholderUrl, resizedUrl } from "@/lib/cloudinary";
