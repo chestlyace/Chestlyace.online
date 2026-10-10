@@ -23,7 +23,7 @@ before the phase starts.
 | 9 | Blog | 9a done (PR #62); 9b.1 done (PR #64); 9b.2 done (PR #66); 9b.3a done (PR #68); 9b.3b done (PR #70); 9b.3c done (PR #72); 9b.4 done (PR #74); 9b.5a done (PR #76); 9b.5b done (PR #78); 9b.5c done (PR #80); 9b.6a done (PR #82); 9b.6b done (PR #84); 9b.7 done (PR #86) | Q12 (blog: decided), Q16 (decided) |
 | 10 | Creatives site | 10a done (PR #88); 10b.1 done (PR #90); 10b.2 done (PR #92); 10b.3 done (PR #94); 10b.4 done (PR #96); 10b.5 done (PR #98); 10b.6 done (PR #100); 10b.7 done (PR #102); 10c launch prep done (PR #104) | Q1, Q12 (decided 2026-10-08) |
 | 11 | Languages (English and French) | 11a design done (PR #110); 11b.1 done (PR #112); 11b.2 done (PR #114); 11b.3 done (PR #116); 11b.4 done (PR #118); 11b.5 done (PR #120); 11b.6 in review (issue #123); 11b.6 after it | Decided 2026-10-10 (D89) |
-| 12 | Loading states and not-found pages | 12a design done (PR #122); 12b.1 done (PR #126); 12b.2 done (PR #128); 12b.3 in review (issue #129); 12b.4 after it | Decided 2026-10-11 (D91) |
+| 12 | Loading states and not-found pages | 12a design done (PR #122); 12b.1 done (PR #126); 12b.2 done (PR #128); 12b.3 done (PR #130); 12b.4 in review (issue #131) | Decided 2026-10-11 (D91) |
 | 13 | MCP server | 13a design done (the docs PR, issue #121); 13b.1–13b.6 after it | Decided 2026-10-11 (D92) |
 
 The main site ships first (Phases 1–8). The blog and creatives site follow on
@@ -376,8 +376,8 @@ issue and stacked pull request:
 |---|---|---|
 | 12b.1 Brand loader and navigation | The loader component (three sizes, reduced motion), the top bar and the 400ms overlay on the three public sites, `loading.tsx` shells | Done (PR #126) |
 | 12b.2 Skeletons | The skeletons of §13.65 and a `loading.tsx` per route, comments' skeleton, the shimmer | Done (PR #128) |
-| 12b.3 Inline and admin states | `Button loading`, comments/likes/forms, uploads, the lightbox image, the admin's loading (`md` loader, list skeletons) | In review (issue #129) |
-| 12b.4 Not-found and error pages | The four 404 pages (three public, one plain admin), `error.tsx` and `global-error.tsx`, English and French | Not started |
+| 12b.3 Inline and admin states | `Button loading`, comments/likes/forms, uploads, the lightbox image, the admin's loading (`md` loader, list skeletons) | Done (PR #130) |
+| 12b.4 Not-found and error pages | The four 404 pages (three public, one plain admin), `error.tsx` and `global-error.tsx`, English and French | In review (issue #131) |
 
 **Done when:** no spinner remains, every route shows something shaped like itself at once
 and the brand loader only after 400ms, and every unknown address shows its site's page
