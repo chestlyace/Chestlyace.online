@@ -43,6 +43,42 @@ export function galleryUrls(urls: readonly string[]): string[] {
   return urls.map((url) => url.trim()).filter(Boolean);
 }
 
+export type GalleryImage = {
+  url: string;
+  /** The picture's size, when it was learned at save time (`projects.gallery_sizes`). */
+  width: number | null;
+  height: number | null;
+};
+
+// The gallery's pictures in order, each with its size when it is known.
+export function galleryImages(
+  urls: readonly string[],
+  sizes:
+    | Readonly<Record<string, { width: number; height: number }>>
+    | null
+    | undefined,
+): GalleryImage[] {
+  return galleryUrls(urls).map((url) => {
+    const size = sizes?.[url];
+    return size && size.width > 0 && size.height > 0
+      ? { url, width: size.width, height: size.height }
+      : { url, width: null, height: null };
+  });
+}
+
+/**
+ * A gallery tile's shape: the picture's own width / height, kept between 2:5 (a very
+ * tall page) and 5:2 (a very wide one) so no tile is a sliver. Wider limits than the
+ * Creatives gallery's, because project pictures are often whole-page screenshots.
+ */
+export const GALLERY_RATIO_MIN = 0.4;
+export const GALLERY_RATIO_MAX = 2.5;
+
+export function galleryRatio(width: number, height: number): number {
+  const ratio = height > 0 ? width / height : 1;
+  return Math.min(GALLERY_RATIO_MAX, Math.max(GALLERY_RATIO_MIN, ratio));
+}
+
 // Which of a project's links are shown as buttons and which as a "Private" tag.
 export function projectLinks(
   project: {

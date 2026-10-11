@@ -3758,8 +3758,15 @@ page shows `description` instead.
 6. **Problem / Approach / Outcome:** each a row — mono `label` in `muted` on the
    left (columns 1–3), the text on the right (columns 4–12, `body`, max 68ch),
    separated by 1px `border` lines, 48px of padding. Phones: label above text.
-7. **Gallery** (when `gallery_urls` has images): the images stacked full-width,
-   radius `lg`, 24px apart.
+7. **Gallery** (when `gallery_urls` has images): a **masonry** (owner, 2026-10-11):
+   the pictures at their **own proportions** (width / height, kept between 2:5 and
+   5:2 so none is a sliver; whole-page screenshots are often tall), in 1 column on
+   phones, 2 from `sm`, 3 from `lg`, 12px gutters, radius `lg`. Each picture goes in
+   the shortest column as it comes, so they read left to right and the columns end
+   level (the arithmetic of §13.51, shared with Creatives). Each picture's size is
+   learned by the server when the project is saved (`projects.gallery_sizes`, by
+   address), so the layout is final before anything loads; a picture saved before that
+   is laid out when it arrives.
 8. **Next project:** a full-width band (`background-alt`): a mono `label` "NEXT
    PROJECT", the next project's title in Bebas at `display-xl`, and `arrow-right`;
    the whole block is a link. After the last project it points to the first.
@@ -3782,7 +3789,8 @@ The header capsule is the same as the homepage, with its key links pointing to
   View Transitions) is decided in the build.* Browsers without support get a
   cross-fade.
 - **Sections:** Problem / Approach / Outcome rows and gallery images use the
-  default entrance (§14.0); gallery images also parallax ±4% inside their frames.
+  default entrance (§14.0); gallery pictures rise 24px and fade in as they come into view
+  (the tiles' entrance of §13.51, no parallax).
 - Reduced motion: no morph — an instant swap with a 150ms cross-fade; reveals show
   their final state.
 

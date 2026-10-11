@@ -25,6 +25,8 @@ function useColumns(): number {
 // count (at most 3) because the event page's pictures sit beside the sidebar.
 export function useMasonry(
   images: readonly { width: number; height: number }[],
+  /** How tall a tile is for an image: width / height. Defaults to the gallery's clamp. */
+  ratioOf: (width: number, height: number) => number = tileRatio,
 ) {
   const grid = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -47,7 +49,7 @@ export function useMasonry(
   const spans = images.map((image) =>
     ready
       ? Math.ceil(
-          (columnWidth / tileRatio(image.width, image.height) + MASONRY_GAP) /
+          (columnWidth / ratioOf(image.width, image.height) + MASONRY_GAP) /
             MASONRY_ROW,
         )
       : null,

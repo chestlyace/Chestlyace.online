@@ -1,9 +1,9 @@
 import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { GalleryImage } from "@/components/project/GalleryImage";
 import { NextProject } from "@/components/project/NextProject";
 import { ProjectBackLink } from "@/components/project/ProjectBackLink";
+import { ProjectGallery } from "@/components/project/ProjectGallery";
 import { ProjectHero } from "@/components/project/ProjectHero";
 import { Button } from "@/components/shared/Button";
 import { Container } from "@/components/shared/Container";
@@ -14,7 +14,7 @@ import { splitParagraphs } from "@/lib/about";
 import { imageSource } from "@/lib/hero";
 import { isHttpUrl } from "@/lib/links";
 import { getCachedProject, getCachedProjectSlugs } from "@/lib/portfolio";
-import { caseStudyRows, galleryUrls, projectLinks } from "@/lib/projectPage";
+import { caseStudyRows, galleryImages, projectLinks } from "@/lib/projectPage";
 import { pageMetadata } from "@/lib/seo";
 import { getMessages } from "@/content/messages";
 import { isLang } from "@/lib/i18n";
@@ -55,7 +55,7 @@ export default async function ProjectPage({
 
   const image = imageSource(project.imageUrl);
   const rows = caseStudyRows(project, m.caseStudy);
-  const gallery = galleryUrls(project.galleryUrls);
+  const gallery = galleryImages(project.galleryUrls, project.gallerySizes);
   const links = projectLinks(project, m).filter(
     (link) => link.kind === "private" || isHttpUrl(link.href),
   );
@@ -158,22 +158,13 @@ export default async function ProjectPage({
         )}
 
         {gallery.length > 0 && (
-          <ul
-            aria-label={m.gallery}
-            className="mt-16 flex flex-col gap-6 md:mt-24"
-          >
-            {gallery.map((url, i) => (
-              <li key={url}>
-                <GalleryImage
-                  image={imageSource(url)}
-                  alt={format(m.screenshot, {
-                    title: project.title,
-                    n: i + 1,
-                  })}
-                />
-              </li>
-            ))}
-          </ul>
+          <ProjectGallery
+            label={m.gallery}
+            images={gallery.map((image, i) => ({
+              ...image,
+              alt: format(m.screenshot, { title: project.title, n: i + 1 }),
+            }))}
+          />
         )}
       </Container>
 

@@ -9,6 +9,7 @@ import {
   type CreativesSettings,
 } from "@/lib/creativesCopy";
 import { withDefaults, type NewsletterSettings } from "@/lib/newsletterCopy";
+import { gallerySizesFor, type GallerySizes } from "./gallerySizes";
 import {
   certificationSchema,
   creativeFaqSchema,
@@ -167,6 +168,22 @@ function resource(name: string): ResourceConfig {
   return config;
 }
 
+// A project's gallery sizes follow its gallery (docs/design.md §14.10): measured for the
+// addresses that are new, kept for the others. Nothing else has any.
+async function measuredGallery(
+  name: string,
+  data: Record<string, unknown>,
+  known: () => Promise<GallerySizes> = async () => ({}),
+): Promise<{ gallerySizes?: GallerySizes }> {
+  if (name !== "projects" || !Array.isArray(data.galleryUrls)) return {};
+  return {
+    gallerySizes: await gallerySizesFor(
+      data.galleryUrls as string[],
+      await known(),
+    ),
+  };
+}
+
 // Rows leave as the database has them, minus nothing: the admin sees drafts too.
 const rowsOf = (rows: unknown[]) => rows as Row[];
 
@@ -217,9 +234,14 @@ export async function createRow(
     const [{ top }] = await db
       .select({ top: max(table.orderIndex) })
       .from(table);
+    const extra = await measuredGallery(name, parsed.data);
     const [row] = await db
       .insert(table)
-      .values({ ...parsed.data, orderIndex: (Number(top) || 0) + 1 } as never)
+      .values({
+        ...parsed.data,
+        ...extra,
+        orderIndex: (Number(top) || 0) + 1,
+      } as never)
       .returning();
     return { ok: true, row: row as Row };
   } catch (error) {
@@ -255,9 +277,17 @@ export async function updateRow(
   }
 
   try {
+    const extra = await measuredGallery(name, parsed.data, async () => {
+      const [current] = await db
+        .select({ sizes: schema.projects.gallerySizes })
+        .from(schema.projects)
+        .where(eq(schema.projects.id, id))
+        .limit(1);
+      return current?.sizes ?? {};
+    });
     const [row] = await db
       .update(table)
-      .set(parsed.data as never)
+      .set({ ...parsed.data, ...extra } as never)
       .where(eq(table.id, id))
       .returning();
     return row ? { ok: true, row: row as Row } : notFound;
