@@ -1,13 +1,14 @@
 "use client";
 
 import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
-import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/shared/Button";
 import { FormField, fieldControl } from "@/components/shared/FormField";
 import { IconButton } from "@/components/shared/IconButton";
 import { cn } from "@/lib/cn";
 import type { FieldDef } from "@/lib/admin/config";
 import { Switch } from "./Switch";
+import { Dropzone, useUploads } from "./BulkUpload";
 import { UploadField } from "./UploadField";
 
 // The admin's field types (design.md §13.21): text, long text, URL, image
@@ -478,6 +479,26 @@ function ImageList({
 }) {
   const set = (index: number, next: string) =>
     onChange(value.map((item, i) => (i === index ? next : item)));
+
+  // Several at once: each finished upload is added to the end, in the order chosen.
+  // Uploads finish later, so they add to the latest list, not the one at the time of choosing.
+  const latest = useRef(value);
+  useEffect(() => {
+    latest.current = value;
+  });
+  const [skipped, setSkipped] = useState(0);
+  const bulk = useUploads(field.use, ({ url }) => {
+    if (latest.current.length >= field.max) return;
+    const next = [...latest.current, url];
+    latest.current = next;
+    onChange(next);
+  });
+  const waiting = bulk.jobs.filter((job) => !job.error).length;
+  const room = Math.max(0, field.max - value.length - waiting);
+  const addMany = (files: File[]) => {
+    setSkipped(Math.max(0, files.length - room));
+    bulk.add(files.slice(0, room));
+  };
   const move = (index: number, by: -1 | 1) => {
     const target = index + by;
     if (target < 0 || target >= value.length) return;
@@ -541,18 +562,42 @@ function ImageList({
           </li>
         ))}
       </ul>
-      {value.length < field.max && (
-        <Button
-          variant="secondary"
-          size="sm"
-          magnetic={false}
-          trailingIcon={<Plus />}
-          iconNudge="none"
-          onClick={() => onChange([...value, ""])}
-          className={value.length > 0 ? "mt-3" : undefined}
+      {value.length < field.max || bulk.jobs.length > 0 ? (
+        <div
+          className={
+            value.length > 0 || bulk.jobs.length > 0 ? "mt-3" : undefined
+          }
         >
-          Add image
-        </Button>
+          <Dropzone
+            use={field.use}
+            multiple
+            label={`Upload images for ${field.label}`}
+            onFiles={addMany}
+            jobs={bulk.jobs}
+            onDismiss={bulk.dismiss}
+          />
+
+          <Button
+            variant="secondary"
+            size="sm"
+            magnetic={false}
+            trailingIcon={<Plus />}
+            iconNudge="none"
+            onClick={() => onChange([...value, ""])}
+            className="mt-3"
+          >
+            Add image
+          </Button>
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted">
+          That is the most ({field.max}).
+        </p>
+      )}
+      {skipped > 0 && (
+        <p role="status" className="mt-2 text-sm text-muted">
+          Only {field.max} images fit; {skipped} not added.
+        </p>
       )}
     </FormField>
   );
