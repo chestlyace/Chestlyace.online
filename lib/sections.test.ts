@@ -54,6 +54,18 @@ describe("sectionBands", () => {
   });
 });
 
+describe("MAIN_NAV", () => {
+  it("sends Projects to its own page and the rest to the home page's sections", () => {
+    const href = Object.fromEntries(
+      MAIN_NAV.map((link) => [link.id, link.href]),
+    );
+    expect(href.projects).toBe("/projects");
+    expect(href.about).toBe("/#about");
+    expect(href.experience).toBe("/#experience");
+    expect(href.contact).toBe("/#contact");
+  });
+});
+
 describe("activeNavLink", () => {
   it("maps each nav link's own section to itself", () => {
     for (const link of MAIN_NAV) {

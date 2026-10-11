@@ -12,3 +12,11 @@ export function rightColumnFlags(featured: readonly boolean[]): boolean[] {
     return right;
   });
 }
+
+// The home page shows the first few projects (featured first, then the owner's order,
+// which is how they arrive); the rest are on the Projects page.
+export const HOME_PROJECT_COUNT = 2;
+
+export function homeProjects<T>(projects: readonly T[]): T[] {
+  return projects.slice(0, HOME_PROJECT_COUNT);
+}

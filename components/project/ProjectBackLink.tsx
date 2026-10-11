@@ -49,7 +49,7 @@ export function ProjectBackLink({
 
   return (
     <Link
-      href="/#projects"
+      href="/projects"
       onClick={onClick}
       className={cn(
         "roll-host inline-flex items-center gap-2 rounded-sm text-body font-medium text-foreground transition-colors duration-150 hover:text-primary-text focus-visible:text-primary-text",

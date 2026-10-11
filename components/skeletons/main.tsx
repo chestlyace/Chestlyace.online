@@ -48,6 +48,26 @@ export function MainHomeSkeleton() {
   );
 }
 
+/** The Projects page: the heading and the grid of tiles. */
+export function ProjectsSkeleton() {
+  return (
+    <SkeletonShell className="pt-36 pb-24 md:pt-48">
+      <Container>
+        <SkeletonBlock className="h-3 w-20" />
+        <SkeletonBlock className="mt-4 h-16 w-64 max-w-full rounded-lg md:h-24" />
+        <div className="mt-12 grid gap-12 md:mt-16 md:grid-cols-2 md:gap-x-8 md:gap-y-16">
+          {Array.from({ length: 4 }, (_, index) => (
+            <SkeletonBlock
+              key={index}
+              className="aspect-[4/3] w-full rounded-lg"
+            />
+          ))}
+        </div>
+      </Container>
+    </SkeletonShell>
+  );
+}
+
 /** A project's page: the hero, the title, the facts and the case study. */
 export function ProjectSkeleton() {
   return (
