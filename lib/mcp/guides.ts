@@ -45,7 +45,9 @@ function imagesGuide(): string {
   );
   return `# Pictures
 
-Upload with \`media_upload_from_url\` (an https address) or \`media_upload_base64\`; both return the
+Upload with \`media_upload_from_url\` (an https address) or \`media_upload_base64\`, or send up to 10
+addresses at once with \`media_upload_many_from_urls\` (one result each, a failure does not stop the
+others); all return the
 hosted address, width and height, which is what the content tools take (\`coverUrl\`, \`coverWidth\`,
 \`coverHeight\`, an image's \`url\`, \`width\`, \`height\`). Always write a description (\`alt\`) for
 people who cannot see the picture. Files are limited to ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB.

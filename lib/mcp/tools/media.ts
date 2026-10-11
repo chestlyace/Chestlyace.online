@@ -36,6 +36,94 @@ const fromUrl = defineTool({
   },
 });
 
+// Many pictures in one call (docs/mcp.md §5): a few at a time, each with its own outcome, so
+// one bad address does not lose the rest. The call stops starting new ones near the
+// function's time limit and says which were left.
+const MANY_MAX = 10;
+const MANY_AT_ONCE = 3;
+const MANY_BUDGET_MS = 40_000;
+
+type ManyResult =
+  | {
+      index: number;
+      url: string;
+      ok: true;
+      hosted: Awaited<ReturnType<typeof uploadFile>>;
+    }
+  | { index: number; url: string; ok: false; error: string };
+
+const fromUrls = defineTool({
+  name: "media_upload_many_from_urls",
+  title: "Upload several pictures from addresses",
+  description: `Fetches up to ${MANY_MAX} pictures from public https addresses (each up to 10 MB; JPG, PNG, WebP or AVIF) and uploads them all for the same \`use\`. Returns one result per address, in the order sent: the hosted \`url\`, \`width\` and \`height\`, or why that one failed. A failure does not stop the others; send the failed ones again.`,
+  scope: "media",
+  write: true,
+  input: {
+    use,
+    urls: z
+      .array(z.string())
+      .min(1)
+      .max(MANY_MAX)
+      .describe(`Public https:// addresses, at most ${MANY_MAX}`),
+  },
+  async run({ use, urls }) {
+    const started = Date.now();
+    const results: ManyResult[] = new Array(urls.length);
+    let next = 0;
+    const worker = async () => {
+      for (;;) {
+        const index = next++;
+        if (index >= urls.length) return;
+        const url = urls[index];
+        if (Date.now() - started > MANY_BUDGET_MS) {
+          results[index] = {
+            index,
+            url,
+            ok: false,
+            error: "Not started: the call ran out of time. Send it again.",
+          };
+          continue;
+        }
+        try {
+          const { bytes, filename } = await fetchPublicFile(url);
+          results[index] = {
+            index,
+            url,
+            ok: true,
+            hosted: await uploadFile(use, bytes, filename),
+          };
+        } catch (error) {
+          results[index] = {
+            index,
+            url,
+            ok: false,
+            error:
+              error instanceof ToolError
+                ? error.message
+                : "The upload failed. Try this one again.",
+          };
+        }
+      }
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(MANY_AT_ONCE, urls.length) }, worker),
+    );
+    const uploaded = results.filter((result) => result.ok).length;
+    return {
+      summary: `Uploaded ${uploaded} of ${urls.length} ${use} pictures`,
+      data: {
+        uploaded,
+        failed: urls.length - uploaded,
+        results: results.map((result) =>
+          result.ok
+            ? { index: result.index, source: result.url, ...result.hosted }
+            : { index: result.index, source: result.url, error: result.error },
+        ),
+      },
+    };
+  },
+});
+
 const fromBase64 = defineTool({
   name: "media_upload_base64",
   title: "Upload a picture from base64",
@@ -129,4 +217,4 @@ async function frenchResume(
   return { translations: { fr: { ...current, resumeUrl: url } } };
 }
 
-export const mediaTools: AnyTool[] = [fromUrl, fromBase64, resume];
+export const mediaTools: AnyTool[] = [fromUrl, fromUrls, fromBase64, resume];

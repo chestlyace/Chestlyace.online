@@ -120,6 +120,7 @@ the agent can act on (field → message, like the admin's 422).
 | Tool | Does | Scope |
 |---|---|---|
 | `media_upload_from_url` | Fetches an `https` image (≤10 MB, image types only) and uploads it to Cloudinary for a `use` (`project`, `logo`, `profile`, `badge`, `blog`, `creatives`, …); returns the hosted URL, width and height | media |
+| `media_upload_many_from_urls` | Up to 10 `https` addresses for the same `use`, uploaded three at a time; one result each in the order sent (the hosted URL, width and height, or why it failed), so one bad address does not lose the rest | media |
 | `media_upload_base64` | The same from base64 data and a file name | media |
 | `resume_upload` | Uploads a PDF (≤5 MB) and, optionally, sets it as the profile's résumé (or its French one) | media |
 
