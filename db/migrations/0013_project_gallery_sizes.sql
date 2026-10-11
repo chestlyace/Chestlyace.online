@@ -1,0 +1,1 @@
+ALTER TABLE "projects" ADD COLUMN "gallery_sizes" jsonb DEFAULT '{}'::jsonb NOT NULL;

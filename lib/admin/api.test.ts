@@ -1,7 +1,8 @@
 import { PGlite } from "@electric-sql/pglite";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as schema from "@/db/schema";
 import { seed } from "@/db/seed";
 import type { Database } from "@/lib/db";
@@ -21,6 +22,22 @@ import {
   updateProfile,
   updateRow,
 } from "./api";
+
+// Measuring a gallery's pictures goes to the network; here it is a stand-in that gives a
+// new https address a size of its own length and keeps the sizes already known.
+vi.mock("./gallerySizes", () => ({
+  gallerySizesFor: vi.fn(
+    async (
+      urls: string[],
+      known: Record<string, { width: number; height: number }>,
+    ) =>
+      Object.fromEntries(
+        urls
+          .filter((url) => url.startsWith("https://"))
+          .map((url) => [url, known[url] ?? { width: url.length, height: 10 }]),
+      ),
+  ),
+}));
 
 let db: Database;
 beforeEach(async () => {
@@ -667,5 +684,80 @@ describe("creatives settings", () => {
       });
     expect(await updateCreativesSettings(db, {})).toMatchObject({ ok: false });
     expect(await db.select().from(schema.creativesSettings)).toHaveLength(0);
+  });
+});
+
+describe("a project's gallery sizes", () => {
+  const base = {
+    slug: "sized",
+    title: "Sized",
+    summary: "s",
+    description: "d",
+    imageUrl: null,
+    liveUrl: null,
+    sourceUrl: null,
+    isLiveUrlPrivate: false,
+    isSourceUrlPrivate: false,
+    categoryLabel: "Full Stack",
+    isFeatured: false,
+    problem: "",
+    approach: "",
+    outcome: "",
+  };
+  const a = "https://x.test/a.png";
+  const b = "https://x.test/bb.png";
+
+  it("are learned when the project is created, for https addresses only", async () => {
+    const made = await createRow(db, "projects", {
+      ...base,
+      galleryUrls: [a, "shots/local.png"],
+    });
+    expect(made.ok).toBe(true);
+    if (made.ok)
+      expect(made.row.gallerySizes).toEqual({
+        [a]: { width: a.length, height: 10 },
+      });
+  });
+
+  it("keep what is known, measure what is new and drop what left the gallery", async () => {
+    const made = await createRow(db, "projects", { ...base, galleryUrls: [a] });
+    if (!made.ok) throw new Error("create");
+    await db
+      .update(schema.projects)
+      .set({ gallerySizes: { [a]: { width: 7, height: 9 } } })
+      .where(eq(schema.projects.id, made.row.id));
+    const changed = await updateRow(db, "projects", made.row.id, {
+      galleryUrls: [b, a],
+    });
+    expect(changed.ok).toBe(true);
+    if (changed.ok)
+      expect(changed.row.gallerySizes).toEqual({
+        [a]: { width: 7, height: 9 },
+        [b]: { width: b.length, height: 10 },
+      });
+    const removed = await updateRow(db, "projects", made.row.id, {
+      galleryUrls: [b],
+    });
+    if (removed.ok)
+      expect(removed.row.gallerySizes).toEqual({
+        [b]: { width: b.length, height: 10 },
+      });
+  });
+
+  it("are left alone by an update that does not touch the gallery, and cannot be sent", async () => {
+    const made = await createRow(db, "projects", { ...base, galleryUrls: [a] });
+    if (!made.ok) throw new Error("create");
+    const renamed = await updateRow(db, "projects", made.row.id, {
+      title: "New",
+    });
+    if (renamed.ok)
+      expect(renamed.row.gallerySizes).toEqual({
+        [a]: { width: a.length, height: 10 },
+      });
+    expect(
+      await updateRow(db, "projects", made.row.id, {
+        gallerySizes: { [a]: { width: 1, height: 1 } },
+      }),
+    ).toMatchObject({ ok: false, status: 422 });
   });
 });

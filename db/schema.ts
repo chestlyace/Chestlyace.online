@@ -130,6 +130,13 @@ export const projects = pgTable("projects", {
   approach: text("approach"),
   outcome: text("outcome"),
   galleryUrls: text("gallery_urls").array().notNull().default(emptyTextArray),
+  // The pixel size of each gallery image, by its address, measured when the project is
+  // saved (lib/admin/gallerySizes.ts). Lets the gallery lay itself out before the pictures
+  // load; an image with no entry is laid out when it arrives.
+  gallerySizes: jsonb("gallery_sizes")
+    .$type<Record<string, { width: number; height: number }>>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   ...ordering,
   ...translationsColumn,
   ...timestamps,
