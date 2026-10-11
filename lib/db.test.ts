@@ -8,6 +8,7 @@ import * as schema from "@/db/schema";
 import { seed, seedData } from "@/db/seed";
 import {
   getHomepageData,
+  poolOptions,
   getProjectBySlug,
   getProjectSlugs,
   type Database,
@@ -23,6 +24,23 @@ async function freshDb(): Promise<Database> {
 let db: Database;
 beforeEach(async () => {
   db = await freshDb();
+});
+
+describe("poolOptions", () => {
+  it("keeps the pool small and lets idle connections go", () => {
+    expect(poolOptions("postgres://x", {})).toMatchObject({
+      connectionString: "postgres://x",
+      max: 2,
+      idleTimeoutMillis: 10_000,
+      allowExitOnIdle: true,
+    });
+  });
+
+  it("takes DATABASE_POOL_MAX when it is a positive whole number", () => {
+    expect(poolOptions("p", { DATABASE_POOL_MAX: "5" }).max).toBe(5);
+    for (const bad of ["", "0", "-1", "abc"])
+      expect(poolOptions("p", { DATABASE_POOL_MAX: bad }).max).toBe(2);
+  });
 });
 
 describe("migrations", () => {

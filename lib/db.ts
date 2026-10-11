@@ -6,7 +6,7 @@ import type {
   PgQueryResultHKT,
   PgTable,
 } from "drizzle-orm/pg-core";
-import { Pool } from "pg";
+import { Pool, type PoolConfig } from "pg";
 import * as schema from "@/db/schema";
 import { DEFAULT_LANG, type Lang } from "@/lib/i18n";
 import { localize } from "@/lib/i18n/localize";
@@ -19,6 +19,26 @@ import {
 // PGlite in tests.
 export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
 
+// How the app's connection pool is set up. The database's direct connection allows only a
+// few connections per role (Prisma Postgres: "too many connections for role"), and every
+// server instance and every build worker has a pool of its own, so each pool is kept small
+// and lets idle connections go quickly. `DATABASE_POOL_MAX` raises it where the database
+// allows more.
+export function poolOptions(
+  connectionString: string,
+  env: Record<string, string | undefined> = process.env,
+): PoolConfig {
+  const max = Number.parseInt(env.DATABASE_POOL_MAX ?? "", 10);
+  return {
+    connectionString,
+    max: Number.isInteger(max) && max > 0 ? max : 2,
+    idleTimeoutMillis: 10_000,
+    // Waiting for a free connection (queries queue behind the few there are).
+    connectionTimeoutMillis: 30_000,
+    allowExitOnIdle: true,
+  };
+}
+
 // One pool per server instance, reused across hot reloads in development.
 const globalForDb = globalThis as unknown as {
   chestlyaceDb?: NodePgDatabase<typeof schema>;
@@ -28,9 +48,12 @@ export function getDb(): Database {
   if (!globalForDb.chestlyaceDb) {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) throw new Error("DATABASE_URL is not set");
-    globalForDb.chestlyaceDb = drizzle(new Pool({ connectionString }), {
-      schema,
-    });
+    globalForDb.chestlyaceDb = drizzle(
+      new Pool(poolOptions(connectionString)),
+      {
+        schema,
+      },
+    );
   }
   return globalForDb.chestlyaceDb;
 }
