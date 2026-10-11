@@ -149,7 +149,7 @@ export function createMcpServer(
           role: "user",
           content: {
             type: "text",
-            text: `Add the project "${name}" to the portfolio.\n\n1. Call list_resources and read the projects fields.\n2. Upload its pictures with media_upload_from_url (use "project").\n3. Create it with projects_create (unpublished unless you may publish and the owner asked).\n4. Add the French text in translations.fr.\n5. Tell the owner what you created.`,
+            text: `Add the project "${name}" to the portfolio.\n\n1. Call list_resources and read the projects fields.\n2. Upload its pictures with media_upload_many_from_urls (use "project"; or media_upload_from_url for one).\n3. Create it with projects_create (unpublished unless you may publish and the owner asked).\n4. Add the French text in translations.fr.\n5. Tell the owner what you created.`,
           },
         },
       ],
