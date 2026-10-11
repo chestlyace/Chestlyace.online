@@ -136,7 +136,12 @@ export const fr: Messages = {
         hint: "ouvre le site Créations",
       },
     },
-    projects: { label: "Projets", title: "Projets", view: "Voir" },
+    projects: {
+      label: "Projets",
+      title: "Projets",
+      view: "Voir",
+      viewAll: "Voir tous les projets",
+    },
     experience: {
       label: "Expérience",
       title: "Expérience",
@@ -481,6 +486,12 @@ Utilisez le [formulaire de contact]({contact}) de mon site principal.
       jobTitle: "Ingénieur logiciel",
     },
     project: "{title} — Chestly Ace",
+    // PLACEHOLDER — the Projects page (design.md §14.5).
+    projects: {
+      title: "Projets — Chestly Ace",
+      description:
+        "Projets logiciels de {name} : applications web, back-ends et API.",
+    },
     creatives: {
       title: "Chestly Ace — Design & Photographie",
       description:

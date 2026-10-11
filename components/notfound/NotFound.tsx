@@ -96,7 +96,7 @@ export function MainNotFound() {
           <Button href="/" size="lg">
             {t.home}
           </Button>
-          <Button href="/#projects" variant="secondary" size="lg">
+          <Button href="/projects" variant="secondary" size="lg">
             {t.projects}
           </Button>
           <Button href="/#contact" variant="secondary" size="lg">

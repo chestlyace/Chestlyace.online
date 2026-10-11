@@ -49,7 +49,7 @@ export type NavLink = { id: string; label: string; href: string };
 // The main site's key links (design.md §13.6).
 export const MAIN_NAV: readonly NavLink[] = [
   { id: "about", label: "About", href: "/#about" },
-  { id: "projects", label: "Projects", href: "/#projects" },
+  { id: "projects", label: "Projects", href: "/projects" },
   { id: "experience", label: "Experience", href: "/#experience" },
   { id: "contact", label: "Contact", href: "/#contact" },
 ];

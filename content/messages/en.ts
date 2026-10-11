@@ -158,7 +158,12 @@ export const en = {
         hint: "opens the Creatives site",
       },
     },
-    projects: { label: "Projects", title: "Projects", view: "View" },
+    projects: {
+      label: "Projects",
+      title: "Projects",
+      view: "View",
+      viewAll: "View all projects",
+    },
     experience: {
       label: "Experience",
       title: "Experience",
@@ -511,6 +516,12 @@ Use the [contact form]({contact}) on my main site.
       jobTitle: "Software Engineer",
     },
     project: "{title} — Chestly Ace",
+    // PLACEHOLDER — the Projects page (design.md §14.5).
+    projects: {
+      title: "Projects — Chestly Ace",
+      description:
+        "Software projects by {name}: web applications, backends and APIs.",
+    },
     creatives: {
       title: "Chestly Ace — Design & Photography",
       description:

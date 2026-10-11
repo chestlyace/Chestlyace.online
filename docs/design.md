@@ -3578,6 +3578,15 @@ title as an `<h3>`.
 project cards (§13.10). Heading "04 — PROJECTS" (old: "Work"); an optional one-line
 intro. No tabs or filters — design and events moved out (D8).
 
+**Home and the Projects page (owner, 2026-10-11).** The home page shows only the
+**first two** projects (the order above), then a **"View all projects"** button
+(`secondary`, `lg`, trailing `arrow-right`) to `/projects`. That page shows **every**
+published project in this same grid (featured rows, then the staggered columns), under
+an `h1` "Projects", with its own title and description for search engines, in the
+sitemap in both languages. The header's Projects link and each project page's
+"← All projects" open `/projects`; the hero's "View Projects" still scrolls to the
+home page's section.
+
 **Layout** (wide container, band `background` in the normal order):
 
 - **Desktop (`md+`):** two columns, 32px column gap, 64px row gap. The **right
@@ -3734,7 +3743,7 @@ page shows `description` instead.
 
 **Layout** (top to bottom; wide container unless noted):
 
-1. **Back link:** "← All projects" (text roll, §13.3) linking to `/#projects`;
+1. **Back link:** "← All projects" (text roll, §13.3) linking to `/projects`;
    112px below the top (clears the capsule).
 2. **Title:** Bebas at `display-xl`, uppercase, `foreground`, max 14ch per line
    break; 24px above the facts row.
