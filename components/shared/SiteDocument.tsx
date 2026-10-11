@@ -13,6 +13,7 @@ import { Providers } from "./Providers";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { SkipLink } from "./SkipLink";
+import { ThemeSync } from "./ThemeSync";
 
 // The <html> class and color-scheme are set by THEME_INIT_SCRIPT before
 // hydration, hence suppressHydrationWarning.
@@ -42,6 +43,7 @@ export function SiteDocument({
       <body className="flex min-h-dvh flex-col bg-background font-sans text-foreground antialiased">
         <LangProvider lang={lang}>
           <Providers>
+            <ThemeSync />
             <NavigationProgress />
             <SkipLink label={getMessages(lang).chrome.skipToContent} />
             <SiteHeader site={site} lang={lang} />
