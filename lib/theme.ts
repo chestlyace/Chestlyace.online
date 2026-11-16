@@ -11,7 +11,7 @@ export const THEME_LABELS: Record<ThemePreference, string> = {
 
 export const THEME_COLORS = { light: "#FFFFFF", dark: "#0A0A0A" } as const;
 
-const ROOT_DOMAIN = "chestlyace.online";
+const ROOT_DOMAIN = "chestlyace.me";
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 const DARK_QUERY = "(prefers-color-scheme: dark)";
 

@@ -165,7 +165,7 @@ This phase is large. Splitting it into sub-issues is an option for the owner.
 **6a — Design (docs only) — issue #37.** Specs for the admin's components and
 screens (`design.md` §13.18–13.26, §14.11), the owner's answers to Q14, Q15 and
 Q21 (decisions D71, D72), and the doc changes that follow from the admin moving to
-`admin.chestlyace.online`.
+`admin.chestlyace.me`.
 
 **6b — Build**, after 6a is merged. Split into four PRs (owner, 2026-10-06):
 
@@ -212,7 +212,7 @@ Split into two PRs (owner, 2026-10-07):
 
 ## Phase 8 — Main site launch
 
-**Goal:** chestlyace.online runs on the new app with real data.
+**Goal:** chestlyace.me runs on the new app with real data.
 
 - One-off migration script: live EC2 database → new schema (`content-schema.md` §6)
 - Load into Prisma Postgres; move files referenced by bare filenames
@@ -226,17 +226,17 @@ Split into PRs (owner, 2026-10-07; Q17 and Q20 answered; 8.4 added for the launc
 | 8.1 Migration from the old live database — issue #51 | `pnpm migrate:old` (dry run by default, `--write` to load), tests, the runbook `docs/migration.md` | Done (PR #52) |
 | 8.2 Analytics — issue #53 | Vercel Web Analytics on the public sites (not the admin) | Done (PR #54) |
 | 8.3 Launch runbook — issue #55 | Per-site `SITE_INDEXING`; `docs/launch.md`: accounts, environment variables, preview checks, DNS and Vercel domains for main + admin, verification, the 14-day grace period and shutdown of the old EC2 site | Done (PR #56) |
-| 8.4a Placeholder design and launch decisions — issue #57 | Docs only: `design.md` §14.12 (the coming-soon page for creatives and blog), `docs/launch.md` (creatives and blog at cutover and indexed; `hello@chestlyace.online` on Zoho Mail), D81, Q23 | Done (PR #58) |
+| 8.4a Placeholder design and launch decisions — issue #57 | Docs only: `design.md` §14.12 (the coming-soon page for creatives and blog), `docs/launch.md` (creatives and blog at cutover and indexed; `hello@chestlyace.me` on Zoho Mail), D81, Q23 | Done (PR #58) |
 | 8.4b Placeholder pages — issue #59 | Build §14.12: the `ComingSoon` page on creatives (`/` and `/services`) and blog | Done (PR #60) |
 
-**Done when:** chestlyace.online is served by Vercel with the owner's real
+**Done when:** chestlyace.me is served by Vercel with the owner's real
 content, and the owner has checked it. (The cutover itself is the owner's,
 following `docs/launch.md`.)
 **Refs:** `architecture.md` §9, §10.
 
 ## Phase 9 — Blog
 
-**Goal:** blog.chestlyace.online: posts written in the admin without typing
+**Goal:** blog.chestlyace.me: posts written in the admin without typing
 markdown, with rich interactive blocks, dev.to import/export, and readers'
 likes, comments and sharing (D82–D85).
 
@@ -287,7 +287,7 @@ can be liked, commented on and shared; a DEV article imports and a post exports.
 
 ## Phase 10 — Creatives site
 
-**Goal:** creatives.chestlyace.online with design and photography work.
+**Goal:** creatives.chestlyace.me with design and photography work.
 
 **10a — Design (docs only).** Specs for the creatives site's components (masonry
 gallery, tile, filters, event tile, lightbox, details and credits, the home page's

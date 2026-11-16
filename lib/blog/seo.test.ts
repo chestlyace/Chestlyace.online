@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Post, PostSummary } from "./data";
 import { blogJsonLd, blogPostingJsonLd, rssXml } from "./seo";
 
-const origin = "https://blog.chestlyace.online";
+const origin = "https://blog.chestlyace.me";
 
 const summary = (
   slug: string,

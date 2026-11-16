@@ -1,6 +1,6 @@
 # Launch runbook
 
-How to take `chestlyace.online` and `admin.chestlyace.online` live on Vercel, and
+How to take `chestlyace.me` and `admin.chestlyace.me` live on Vercel, and
 retire the old EC2 site (Phase 8; decisions Q17, Q20, D76–D79). The owner does
 these steps; nothing here changes code. Tick each box as you go.
 
@@ -12,11 +12,11 @@ server is shut down.
 
 | Host | At launch | Indexed |
 |---|---|---|
-| `chestlyace.online` | Live on Vercel | Yes (`SITE_INDEXING=main`) |
-| `www.chestlyace.online` | Redirects to the apex | — |
-| `admin.chestlyace.online` | Live on Vercel | Never |
-| `blog.chestlyace.online` | Live on Vercel with the blog (Phase 9). It shows the "coming soon" page until the first post is published | Yes (D81) |
-| `creatives.chestlyace.online` | Live on Vercel with the creatives site (Phase 10): home, Design, Photography, Services. Each gallery shows the "coming soon" page until you publish its first piece or event | Yes (D81) |
+| `chestlyace.me` | Live on Vercel | Yes (`SITE_INDEXING=main`) |
+| `www.chestlyace.me` | Redirects to the apex | — |
+| `admin.chestlyace.me` | Live on Vercel | Never |
+| `blog.chestlyace.me` | Live on Vercel with the blog (Phase 9). It shows the "coming soon" page until the first post is published | Yes (D81) |
+| `creatives.chestlyace.me` | Live on Vercel with the creatives site (Phase 10): home, Design, Photography, Services. Each gallery shows the "coming soon" page until you publish its first piece or event | Yes (D81) |
 
 ## 1. Accounts to set up first
 
@@ -27,7 +27,7 @@ server is shut down.
 - [ ] **Cloudinary** (a free account works to start): note the cloud name, API key and API
       secret from the dashboard. Uploads are signed by the app; no upload preset
       is needed.
-- [ ] **Resend**: add and verify `chestlyace.online` (DNS records Resend shows
+- [ ] **Resend**: add and verify `chestlyace.me` (DNS records Resend shows
       you, see "Email" below), then create an API key. Until the domain is
       verified Resend only delivers to your own account address.
 - [ ] **Vercel Web Analytics**: project → Analytics tab → Enable (D79).
@@ -36,9 +36,9 @@ server is shut down.
       either to comment), a **DEV API key** (only if you publish to DEV from the
       admin) and, in Resend, a **segment** for the newsletter.
 
-### Email: hello@chestlyace.online
+### Email: hello@chestlyace.me
 
-`hello@chestlyace.online` is a requirement (owner, 2026-10-07). It needs two
+`hello@chestlyace.me` is a requirement (owner, 2026-10-07). It needs two
 separate things, which use different DNS records and do not conflict:
 
 - **Receiving and replying** (a mailbox): a free **Zoho Mail** account.
@@ -52,7 +52,7 @@ already has MX records; if it does, they would be replaced.
 **A. Zoho Mail (the mailbox)**
 
 - [ ] Sign up for Zoho Mail's **Forever Free** plan with your own domain
-      (`chestlyace.online`). Free-plan limits when this was written: up to 5
+      (`chestlyace.me`). Free-plan limits when this was written: up to 5
       users, 5 GB each, one domain, web and phone app only (no IMAP/POP, so no
       Outlook/Thunderbird/Gmail pulling), 25 MB attachments. Check the current
       terms at sign-up; the paid Mail Lite plan adds IMAP/POP.
@@ -62,12 +62,12 @@ already has MX records; if it does, they would be replaced.
       existing ones), an **SPF** TXT on the root (`v=spf1 include:zoho.<region>
       ~all`), and the **DKIM** TXT (`zoho._domainkey`). Use the exact values Zoho
       displays; the host names depend on the data centre (`.com`, `.eu`, `.in`…).
-- [ ] Send a message to `hello@chestlyace.online` from another address and reply
+- [ ] Send a message to `hello@chestlyace.me` from another address and reply
       to it from Zoho; check both arrive and are not in spam.
 
 **B. Resend (the contact form)**
 
-- [ ] In Resend → Domains → add `chestlyace.online` and add the records it shows
+- [ ] In Resend → Domains → add `chestlyace.me` and add the records it shows
       (a DKIM TXT, and SPF/MX on a `send` subdomain by default, so it does not
       collide with Zoho's SPF on the root; a name can have only **one** SPF
       record, so if Resend ever asks for the root, put both `include:`s in the
@@ -75,13 +75,13 @@ already has MX records; if it does, they would be replaced.
 - [ ] Wait until Resend shows the domain as **Verified**, then create the API key
       and set `RESEND_API_KEY`, `CONTACT_FROM_EMAIL` (see §2).
 - [ ] Optionally add a DMARC record once both work, e.g. a TXT on `_dmarc` with
-      `v=DMARC1; p=none; rua=mailto:hello@chestlyace.online`.
+      `v=DMARC1; p=none; rua=mailto:hello@chestlyace.me`.
 
 **C. On the site**
 
-- The contact form sends from `hello@chestlyace.online` to `CONTACT_TO_EMAIL`
+- The contact form sends from `hello@chestlyace.me` to `CONTACT_TO_EMAIL`
   (default: the profile's email). Whether the **public** email on the site
-  (profile, footer, JSON-LD) becomes `hello@chestlyace.online` instead of
+  (profile, footer, JSON-LD) becomes `hello@chestlyace.me` instead of
   `chestlyace@gmail.com` is an open question (Q23).
 
 ## 2. Environment variables (Vercel → Settings → Environment Variables)
@@ -97,8 +97,8 @@ database and any values you want to test with (`SITE_INDEXING` stays unset there
 | `SESSION_SECRET` | 32+ random characters | `openssl rand -base64 48`. Changing it signs you out |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | from Cloudinary | The admin dashboard warns while any is missing |
 | `RESEND_API_KEY` | from Resend | The dashboard warns while it is missing |
-| `CONTACT_FROM_EMAIL` | `Chestly Ace <hello@chestlyace.online>` | Must be on the verified Resend domain (see "Email" below) |
-| `CONTACT_TO_EMAIL` | optional | Defaults to the profile's email; set it to `hello@chestlyace.online` once that mailbox works |
+| `CONTACT_FROM_EMAIL` | `Chestly Ace <hello@chestlyace.me>` | Must be on the verified Resend domain (see "Email" below) |
+| `CONTACT_TO_EMAIL` | optional | Defaults to the profile's email; set it to `hello@chestlyace.me` once that mailbox works |
 | `BETTER_AUTH_SECRET` | 32+ random characters | `openssl rand -base64 32`. Signs readers' sessions; changing it signs every reader out |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | from the GitHub OAuth app (§2a) | Without both, "Continue with GitHub" is not offered |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | from the Google OAuth client (§2a) | Without both, "Continue with Google" is not offered |
@@ -123,13 +123,13 @@ Cloudinary variables as the rest of the admin.
 keeps only what they share (name, email, picture), as the privacy page says.
 
 - [ ] **GitHub:** github.com → Settings → Developer settings → OAuth Apps → New
-      OAuth App. Homepage URL `https://blog.chestlyace.online`; **Authorization
-      callback URL** `https://blog.chestlyace.online/api/reader/callback/github`.
+      OAuth App. Homepage URL `https://blog.chestlyace.me`; **Authorization
+      callback URL** `https://blog.chestlyace.me/api/reader/callback/github`.
       Create a client secret. Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
 - [ ] **Google:** Google Cloud console → APIs & Services → Credentials → Create
       credentials → OAuth client ID (type "Web application"; set up the consent
       screen first, with the `email`, `profile` and `openid` scopes only).
-      **Authorised redirect URI** `https://blog.chestlyace.online/api/reader/callback/google`.
+      **Authorised redirect URI** `https://blog.chestlyace.me/api/reader/callback/google`.
       Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. Publish the consent screen
       ("In production") so people other than you can sign in.
 - [ ] Set `BETTER_AUTH_SECRET`.
@@ -192,10 +192,10 @@ On the Vercel preview URL (`?site=main`, `?site=admin`, …):
 
 ## 5. DNS and domains
 
-1. Vercel → project → Settings → Domains: add `chestlyace.online`,
-   `www.chestlyace.online` (set it to **redirect** to the apex),
-   `admin.chestlyace.online`, and `creatives.chestlyace.online` and
-   `blog.chestlyace.online` (§6). Vercel shows the exact records each needs; use
+1. Vercel → project → Settings → Domains: add `chestlyace.me`,
+   `www.chestlyace.me` (set it to **redirect** to the apex),
+   `admin.chestlyace.me`, and `creatives.chestlyace.me` and
+   `blog.chestlyace.me` (§6). Vercel shows the exact records each needs; use
    those values, not ones from memory.
 2. **Lower the TTL** of the existing DNS records to 300 seconds a day before, so
    a rollback is quick.
@@ -213,7 +213,7 @@ Owner decision (2026-10-07, D81): both hosts go live at the same time as the mai
 site and are findable by search engines. The blog (Phase 9) and the creatives
 site (Phase 10) are both built.
 
-- [ ] Add `creatives.chestlyace.online` and `blog.chestlyace.online` to the
+- [ ] Add `creatives.chestlyace.me` and `blog.chestlyace.me` to the
       Vercel project with the other domains (§5) and the DNS records Vercel shows.
 - The blog shows the short "coming soon" page (`design.md` §14.12) until you
   publish the first post, then the real blog.
@@ -252,14 +252,14 @@ photos). Do this on the preview first:
 
 ## 7. After the cutover
 
-- [ ] `https://chestlyace.online` loads on Vercel; `https://www.chestlyace.online`
-      redirects to it; `https://admin.chestlyace.online` shows the sign-in page.
+- [ ] `https://chestlyace.me` loads on Vercel; `https://www.chestlyace.me`
+      redirects to it; `https://admin.chestlyace.me` shows the sign-in page.
 - [ ] Each old address redirects (`ia-content.md` §6): `/software-development.html`,
       `/graphic-design.html`, `/photography.html`, `/admin/`, `/admin/index.html`.
 - [ ] `/robots.txt` on the main host now says `Allow: /` and lists the sitemap;
       `/sitemap.xml` lists the homepage and each published project; the page
       source says `index, follow`.
-- [ ] The same for `creatives.chestlyace.online` and `blog.chestlyace.online`
+- [ ] The same for `creatives.chestlyace.me` and `blog.chestlyace.me`
       (`robots.txt`, `sitemap.xml`, `index, follow`).
 - [ ] On the creatives site: the home page's hero draws itself and reacts to the
       mouse; each header link opens its page (Work, Design, Photography,
@@ -273,8 +273,8 @@ photos). Do this on the preview first:
 - [ ] Vercel → Analytics shows your visit.
 - [ ] Check the structured data of the homepage with Google's Rich Results test
       (Person, WebSite, FAQPage).
-- [ ] In Google Search Console add `chestlyace.online`, submit
-      `https://chestlyace.online/sitemap.xml`, and use "Inspect URL" on `/`.
+- [ ] In Google Search Console add `chestlyace.me`, submit
+      `https://chestlyace.me/sitemap.xml`, and use "Inspect URL" on `/`.
 - [ ] Raise the DNS TTLs back to normal.
 
 ## 8. Retiring the old EC2 site (Q20: 14 days)
@@ -296,7 +296,7 @@ photos). Do this on the preview first:
 ## 8a. French (Phase 11)
 
 French is public with the rest: each site has its French version under `/fr`
-(`chestlyace.online/fr`, `blog.chestlyace.online/fr`, `creatives.chestlyace.online/fr`),
+(`chestlyace.me/fr`, `blog.chestlyace.me/fr`, `creatives.chestlyace.me/fr`),
 linked by the EN | FR switcher in the header, the menu and the footer, and by a
 dismissible line for visitors whose browser is set to French. Nothing redirects anyone.
 

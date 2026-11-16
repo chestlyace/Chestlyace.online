@@ -29,7 +29,7 @@ scroll-driven motion of the reference sites.
   reveals, and a few standout WebGL/Rive moments make the site feel alive — never
   at the cost of speed, readability, or accessibility.
 - Personality: confident, precise, engineer-made. Expressive photography/design
-  visuals belong on `creatives.chestlyace.online`.
+  visuals belong on `creatives.chestlyace.me`.
 
 ### References (owner-supplied)
 
@@ -221,7 +221,7 @@ site's root layout.
   system setting.
 - **No flash of the wrong theme**: a tiny inline script in `<head>` reads the
   preference before first paint.
-- The preference is stored in a `theme` cookie on `.chestlyace.online` so it carries
+- The preference is stored in a `theme` cookie on `.chestlyace.me` so it carries
   across all three subdomains (`architecture.md` §7). On `*.localhost` and Vercel
   preview hosts the cookie is host-only — browsers don't share cookies across
   `localhost` subdomains. Logic lives in `lib/theme.ts`.
@@ -329,7 +329,7 @@ waiting on a click — runs longer.
 | `About` | **Spec: §14.2.** Scroll-lit statement, body text, facts list, resume button |
 | `SkillGroup` | **Spec: §14.3.** Mono group label + logo tiles (mono → colour on hover); Certifications grid beneath |
 | `ServiceCard` | **Spec: §13.11.** Large cards that stack on scroll: number, Iconly icon, title, description, items |
-| `CreativesCard` | **Spec: §13.12.** Inverted last card of the service stack, linking to `creatives.chestlyace.online` |
+| `CreativesCard` | **Spec: §13.12.** Inverted last card of the service stack, linking to `creatives.chestlyace.me` |
 | `ProjectCard` | **Spec: §13.10.** Image-forward tile: image, mono category label, title + `↗`; links to the project page. Hover zoom and "View ↗" cursor label |
 | `Timeline` + `TimelineItem` | **Spec: §13.13.** Used by both Experience and Volunteering. Rail that fills blue on scroll, a dot per entry; dates, role, organization, description, optional logo |
 | `ContactCard` | **Spec: §13.14.** Email / phone / WhatsApp tiles with copy buttons |
@@ -376,7 +376,7 @@ shared components in both themes. It returns 404 in production
 Plain and functional, built from the same tokens (D72): sidebar of resources, list
 views with drag-to-reorder and publish toggles, edit forms with inline validation
 errors, image upload field with preview. It is its own site on
-`admin.chestlyace.online` (D71). **Specs: §13.18–13.26 and §14.11.**
+`admin.chestlyace.me` (D71). **Specs: §13.18–13.26 and §14.11.**
 
 | Component | Notes |
 |---|---|
@@ -1065,7 +1065,7 @@ decorative; covered cards are still in the reading order.
 
 ### 13.12 Creatives card
 
-**Purpose.** The fixed link from Services to `creatives.chestlyace.online` (D9).
+**Purpose.** The fixed link from Services to `creatives.chestlyace.me` (D9).
 Not a database row, so it can't be deleted by accident.
 
 **References.** Owner's choice (2026-10-06): **the last card in the service
@@ -1329,7 +1329,7 @@ A linked tile's name is "Name — Issuer, verify credential (opens in a new tab)
 [Upload field](#1322-upload-field) · [Confirm dialog](#1323-confirm-dialog) ·
 [Toast](#1324-toast) · [Save bar](#1325-save-bar) · [Login form](#1326-login-form)
 
-The admin (`admin.chestlyace.online`, D71) is **plain and functional** (D72): the
+The admin (`admin.chestlyace.me`, D71) is **plain and functional** (D72): the
 same tokens, type and radii as the public sites, the main blue accent, and the
 core components (§13.1–13.5, §13.15). It has no smooth scrolling, no scroll-driven
 effects, and no magnetic buttons (`magnetic={false}` everywhere in it); motion is
@@ -1471,7 +1471,7 @@ below, validation on blur, `aria-invalid`); this adds the types the admin needs.
 | Tag list | `tech_stack`, `items`, `headline_words` | A box that holds the entries as removable chips (Tag, §13.4, with an `x` button) and a text input; Enter or comma adds, Backspace on an empty input removes the last chip; chips can be reordered by dragging (same rules as §13.19) or with Alt+← / Alt+→ on a focused chip. Duplicates are refused with a message |
 | Image / file | Hero, logos, badges, project image, resume | The upload field (§13.22) |
 | Image list | `gallery_urls` | A stack of upload fields (§13.22, compact), reorderable like §13.19, with an "Add image" button |
-| Slug | `projects.slug` | A text input that follows the title until edited by hand; lowercase letters, numbers, hyphens; a helper shows the resulting address (`chestlyace.online/projects/<slug>`); a warning notes that changing it breaks links to the old address |
+| Slug | `projects.slug` | A text input that follows the title until edited by hand; lowercase letters, numbers, hyphens; a helper shows the resulting address (`chestlyace.me/projects/<slug>`); a warning notes that changing it breaks links to the old address |
 
 **Layout of an editor screen.** One column, max 720px, fields 24px apart, grouped
 under `h2` group titles (`h3` step) with a 1px `border` line above each group;
@@ -3810,7 +3810,7 @@ screen readers. The `title` and metadata are set per project (SEO — Phase 7).
 **Approved in:** the Phase 6a PR (issue #37).
 
 **References.** Owner's choice (2026-10-06): plain and functional, on our tokens
-(§9, D72). Host: `admin.chestlyace.online` (Q21, D71).
+(§9, D72). Host: `admin.chestlyace.me` (Q21, D71).
 
 **Addresses** (on the admin host):
 
@@ -3841,13 +3841,13 @@ screen readers. The `title` and metadata are set per project (SEO — Phase 7).
 
 **Dashboard (`/`).**
 
-- Title "Dashboard", description "Everything on chestlyace.online, in one place."
+- Title "Dashboard", description "Everything on chestlyace.me, in one place."
 - A grid of one tile per resource (§13.14's tile look, `surface`, radius `lg`,
   padding 20px, three columns from `lg`, two from `sm`, one on phones): the
   resource name, the number of entries as `title`-step text, "x published · y
   drafts" in `sm` `muted`, and "Last edited <relative time>"; the whole tile links
   to the list. Hover as §13.14.
-- Under the grid, a "Site" group with: "View chestlyace.online ↗", and a notice
+- Under the grid, a "Site" group with: "View chestlyace.me ↗", and a notice
   (`surface-raised`, `sm`) for anything the build needs that is missing — "Email
   sending isn't set up (RESEND_API_KEY)", "Uploads aren't set up (Cloudinary)" —
   shown only when true.
@@ -3986,7 +3986,7 @@ always confirm; nothing depends on hover.
 
 ### 14.12 Coming-soon page (creatives and blog)
 
-**Purpose.** What `creatives.chestlyace.online` and `blog.chestlyace.online` show
+**Purpose.** What `creatives.chestlyace.me` and `blog.chestlyace.me` show
 from launch until Phases 9–10 build them. Both hosts are indexed from launch
 (D81), so the page is a real, short page rather than an empty stub: it says what
 will live there and points to the main site. Routes: `/` on both hosts, and
@@ -4007,7 +4007,7 @@ want it to look different.**
 | Label (mono) | "COMING SOON" | "COMING SOON" |
 | Title | "Design & Photography" | "Blog" |
 | Lead | "Graphic design, branding, and photography by Chestly Ace (Amahndong Chestly). A new home for the work is on its way." | "Writing on software engineering, web development, and building things. The first posts are on their way." |
-| Button | "Visit chestlyace.online" → the main site | same |
+| Button | "Visit chestlyace.me" → the main site | same |
 
 Both name forms stay in the creatives lead (`ia-content.md` §4). The page's
 `<title>` and description are the site's existing ones (`ia-content.md` §4,
@@ -4046,7 +4046,7 @@ text. The page has the skip link and landmarks of every page (§13.9).
 
 ### 14.13 Blog home
 
-**Purpose.** The blog's front page (`/` on `blog.chestlyace.online`): every
+**Purpose.** The blog's front page (`/` on `blog.chestlyace.me`): every
 published post, newest first.
 
 **References.** Owner (2026-10-07): [linear.app/blog](https://linear.app/blog)'s
@@ -4208,7 +4208,7 @@ how to ask a question.
 
 ### 14.19 Blog admin pages
 
-**Purpose.** The owner's side of the blog, in the admin (`admin.chestlyace.online`,
+**Purpose.** The owner's side of the blog, in the admin (`admin.chestlyace.me`,
 §14.11): a **Blog** group in the sidebar (§13.18) with **Posts**, **Comments** and
 **Newsletter**.
 
@@ -4229,7 +4229,7 @@ site's admin does with `portfolio`, D74).
 
 **Creatives pages (Phase 10a).**
 
-`creatives.chestlyace.online` has **two sections, Graphic design and Photography**
+`creatives.chestlyace.me` has **two sections, Graphic design and Photography**
 (owner, 2026-10-08; Videography follows as its own step), a home page that shows
 them off, a Services page, and a contact block under every page (§13.60). Specs
 follow the checklist of §12; components are linked, not repeated. **Approved in:**
@@ -4437,7 +4437,7 @@ and accent text of these pages.
 ### 14.26 Creatives admin pages
 
 **Purpose.** Everything on the creatives site is edited in the same admin
-(`admin.chestlyace.online`, D86), in a **Creatives** group of the sidebar (§13.18)
+(`admin.chestlyace.me`, D86), in a **Creatives** group of the sidebar (§13.18)
 beside Content and Blog. Same patterns as the other screens: resource lists
 (§13.19), the editor form (§13.21, §14.11), the image fields (§13.22), the save bar
 (§13.25).

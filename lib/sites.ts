@@ -1,16 +1,16 @@
 import { FRENCH_PUBLIC, splitLang, type Lang } from "./i18n";
 
 export const SITES = {
-  main: { host: "chestlyace.online", devHost: "localhost:3000" },
+  main: { host: "chestlyace.me", devHost: "localhost:3000" },
   creatives: {
-    host: "creatives.chestlyace.online",
+    host: "creatives.chestlyace.me",
     devHost: "creatives.localhost:3000",
   },
-  blog: { host: "blog.chestlyace.online", devHost: "blog.localhost:3000" },
+  blog: { host: "blog.chestlyace.me", devHost: "blog.localhost:3000" },
   // The owner's panel (D71): a host of its own, never listed in the public
   // Sites menu or footer.
   admin: {
-    host: "admin.chestlyace.online",
+    host: "admin.chestlyace.me",
     devHost: "admin.localhost:3000",
   },
 } as const;
@@ -147,7 +147,7 @@ function legacyDestination(pathname: string): string | null {
 }
 
 export function decideRoute(input: RoutingInput): RoutingDecision {
-  // www.chestlyace.online is the same site: one address for search engines.
+  // www.chestlyace.me is the same site: one address for search engines.
   if (
     input.host &&
     hostname(input.host) === `www.${hostname(SITES.main.host)}`

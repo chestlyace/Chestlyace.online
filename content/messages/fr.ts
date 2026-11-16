@@ -74,7 +74,7 @@ export const fr: Messages = {
 
   comingSoon: {
     label: "Bientôt disponible",
-    button: "Visiter chestlyace.online",
+    button: "Visiter chestlyace.me",
     creatives: {
       title: "Design & photographie",
       lead: "Design graphique, identité visuelle et photographie par Chestly Ace (Amahndong Chestly). Un nouvel espace pour ces réalisations arrive bientôt.",

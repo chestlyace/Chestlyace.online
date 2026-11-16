@@ -31,18 +31,18 @@ describe("nextThemePreference", () => {
 
 describe("themeCookieDomain", () => {
   it.each([
-    "chestlyace.online",
-    "creatives.chestlyace.online",
-    "blog.chestlyace.online",
+    "chestlyace.me",
+    "creatives.chestlyace.me",
+    "blog.chestlyace.me",
   ])("shares the cookie across subdomains on %s", (host) => {
-    expect(themeCookieDomain(host)).toBe(".chestlyace.online");
+    expect(themeCookieDomain(host)).toBe(".chestlyace.me");
   });
 
   it.each([
     "localhost",
     "blog.localhost",
     "app.vercel.app",
-    "notchestlyace.online",
+    "notchestlyace.me",
   ])("keeps a host-only cookie on %s", (host) => {
     expect(themeCookieDomain(host)).toBeUndefined();
   });

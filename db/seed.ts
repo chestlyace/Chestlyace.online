@@ -154,7 +154,7 @@ E: Posts are rows in Postgres, written in the admin.
 
 ## Where to next
 
-Read the [portfolio](https://chestlyace.online), or follow the feed from the footer.
+Read the [portfolio](https://chestlyace.me), or follow the feed from the footer.
 `;
 
 export const seedData = {
