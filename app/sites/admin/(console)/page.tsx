@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     <>
       <h1 className="text-title text-foreground">Dashboard</h1>
       <p className="mt-2 mb-8 text-body text-muted">
-        Everything on chestlyace.online, in one place.
+        Everything on chestlyace.me, in one place.
       </p>
 
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
           rel="noopener noreferrer"
           className="link-inline text-body font-medium"
         >
-          View chestlyace.online
+          View chestlyace.me
           <ArrowUpRight
             className="ml-0.5 inline size-[0.85em]"
             aria-hidden="true"

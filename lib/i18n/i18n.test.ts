@@ -65,8 +65,8 @@ describe("localizeHref", () => {
     expect(localizeHref("/design?piece=a", "fr")).toBe("/fr/design?piece=a");
     expect(localizeHref("/fr/design", "fr")).toBe("/fr/design");
     // Left alone: other sites, files, bare hashes, mail and API routes.
-    expect(localizeHref("https://blog.chestlyace.online/", "fr")).toBe(
-      "https://blog.chestlyace.online/",
+    expect(localizeHref("https://blog.chestlyace.me/", "fr")).toBe(
+      "https://blog.chestlyace.me/",
     );
     expect(localizeHref("/resume.pdf", "fr")).toBe("/resume.pdf");
     expect(localizeHref("#top", "fr")).toBe("#top");

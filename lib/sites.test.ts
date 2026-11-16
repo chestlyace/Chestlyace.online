@@ -3,15 +3,15 @@ import { decideRoute, siteFromHost, type RoutingInput } from "@/lib/sites";
 
 describe("siteFromHost", () => {
   it.each([
-    ["chestlyace.online", "main"],
-    ["creatives.chestlyace.online", "creatives"],
-    ["blog.chestlyace.online", "blog"],
-    ["admin.chestlyace.online", "admin"],
+    ["chestlyace.me", "main"],
+    ["creatives.chestlyace.me", "creatives"],
+    ["blog.chestlyace.me", "blog"],
+    ["admin.chestlyace.me", "admin"],
     ["admin.localhost:3000", "admin"],
     ["localhost:3000", "main"],
     ["creatives.localhost:3000", "creatives"],
     ["blog.localhost:4000", "blog"],
-    ["BLOG.Chestlyace.Online", "blog"],
+    ["BLOG.Chestlyace.Me", "blog"],
   ])("%s → %s", (host, site) => {
     expect(siteFromHost(host)).toBe(site);
   });
@@ -26,7 +26,7 @@ describe("siteFromHost", () => {
 
 describe("decideRoute", () => {
   const base: RoutingInput = {
-    host: "chestlyace.online",
+    host: "chestlyace.me",
     pathname: "/",
     siteParam: null,
     siteCookie: undefined,
@@ -41,7 +41,7 @@ describe("decideRoute", () => {
       pathname: "/sites/main/en",
     });
     expect(
-      decideRoute({ ...base, host: "blog.chestlyace.online" }),
+      decideRoute({ ...base, host: "blog.chestlyace.me" }),
     ).toMatchObject({
       kind: "rewrite",
       pathname: "/sites/blog/en",
@@ -52,7 +52,7 @@ describe("decideRoute", () => {
     expect(
       decideRoute({
         ...base,
-        host: "creatives.chestlyace.online",
+        host: "creatives.chestlyace.me",
         pathname: "/a/b",
       }),
     ).toMatchObject({ pathname: "/sites/creatives/en/a/b" });
@@ -68,9 +68,9 @@ describe("decideRoute", () => {
     "returns 404 for %s on creatives, blog and admin",
     (pathname) => {
       for (const host of [
-        "creatives.chestlyace.online",
-        "blog.chestlyace.online",
-        "admin.chestlyace.online",
+        "creatives.chestlyace.me",
+        "blog.chestlyace.me",
+        "admin.chestlyace.me",
       ]) {
         expect(decideRoute({ ...base, host, pathname })).toEqual({
           kind: "not-found",
@@ -83,12 +83,12 @@ describe("decideRoute", () => {
     "serves %s on the admin host only",
     (pathname) => {
       expect(
-        decideRoute({ ...base, host: "admin.chestlyace.online", pathname }),
+        decideRoute({ ...base, host: "admin.chestlyace.me", pathname }),
       ).toEqual({ kind: "pass-through", site: "admin" });
       for (const host of [
-        "chestlyace.online",
-        "creatives.chestlyace.online",
-        "blog.chestlyace.online",
+        "chestlyace.me",
+        "creatives.chestlyace.me",
+        "blog.chestlyace.me",
       ]) {
         expect(decideRoute({ ...base, host, pathname })).toEqual({
           kind: "not-found",
@@ -101,12 +101,12 @@ describe("decideRoute", () => {
     "serves %s on the blog host only",
     (pathname) => {
       expect(
-        decideRoute({ ...base, host: "blog.chestlyace.online", pathname }),
+        decideRoute({ ...base, host: "blog.chestlyace.me", pathname }),
       ).toEqual({ kind: "pass-through", site: "blog" });
       for (const host of [
-        "chestlyace.online",
-        "creatives.chestlyace.online",
-        "admin.chestlyace.online",
+        "chestlyace.me",
+        "creatives.chestlyace.me",
+        "admin.chestlyace.me",
       ]) {
         expect(decideRoute({ ...base, host, pathname })).toEqual({
           kind: "not-found",
@@ -117,9 +117,9 @@ describe("decideRoute", () => {
 
   it("serves /api/revalidate on every host", () => {
     for (const host of [
-      "chestlyace.online",
-      "creatives.chestlyace.online",
-      "admin.chestlyace.online",
+      "chestlyace.me",
+      "creatives.chestlyace.me",
+      "admin.chestlyace.me",
     ]) {
       expect(
         decideRoute({ ...base, host, pathname: "/api/revalidate" }),
@@ -131,7 +131,7 @@ describe("decideRoute", () => {
     expect(
       decideRoute({
         ...base,
-        host: "admin.chestlyace.online",
+        host: "admin.chestlyace.me",
         pathname: "/login",
       }),
     ).toEqual({
@@ -140,7 +140,7 @@ describe("decideRoute", () => {
       pathname: "/sites/admin/login",
     });
     expect(
-      decideRoute({ ...base, host: "admin.chestlyace.online" }),
+      decideRoute({ ...base, host: "admin.chestlyace.me" }),
     ).toMatchObject({ pathname: "/sites/admin" });
   });
 
@@ -154,7 +154,7 @@ describe("decideRoute", () => {
   it("sends /admin on main to the admin host (the old panel's address)", () => {
     expect(decideRoute({ ...base, pathname: "/admin" })).toEqual({
       kind: "redirect",
-      location: "https://admin.chestlyace.online/",
+      location: "https://admin.chestlyace.me/",
     });
   });
 
@@ -162,7 +162,7 @@ describe("decideRoute", () => {
     expect(
       decideRoute({
         ...base,
-        host: "blog.chestlyace.online",
+        host: "blog.chestlyace.me",
         pathname: "/administrator",
       }),
     ).toMatchObject({
@@ -248,7 +248,7 @@ describe("decideRoute", () => {
 
 describe("languages in the address (docs/i18n.md §2–§3)", () => {
   const base: RoutingInput = {
-    host: "chestlyace.online",
+    host: "chestlyace.me",
     pathname: "/",
     siteParam: null,
     siteCookie: undefined,
@@ -265,7 +265,7 @@ describe("languages in the address (docs/i18n.md §2–§3)", () => {
     expect(
       decideRoute({
         ...base,
-        host: "blog.chestlyace.online",
+        host: "blog.chestlyace.me",
         pathname: "/fr/some-post",
       }),
     ).toMatchObject({ lang: "fr", pathname: "/sites/blog/fr/some-post" });
@@ -308,7 +308,7 @@ describe("languages in the address (docs/i18n.md §2–§3)", () => {
     expect(
       decideRoute({
         ...base,
-        host: "blog.chestlyace.online",
+        host: "blog.chestlyace.me",
         pathname: "/sitemap.xml",
       }),
     ).toMatchObject({ pathname: "/sites/blog/sitemap.xml" });
@@ -331,7 +331,7 @@ describe("languages in the address (docs/i18n.md §2–§3)", () => {
     expect(
       decideRoute({
         ...base,
-        host: "admin.chestlyace.online",
+        host: "admin.chestlyace.me",
         pathname: "/fr/anything",
       }),
     ).toEqual({
@@ -350,9 +350,9 @@ describe("siteUrl", () => {
   it("uses production hosts by default", async () => {
     const { siteUrl } = await import("@/lib/sites");
     expect(siteUrl("blog", "/hello")).toBe(
-      "https://blog.chestlyace.online/hello",
+      "https://blog.chestlyace.me/hello",
     );
-    expect(siteUrl("main")).toBe("https://chestlyace.online/");
+    expect(siteUrl("main")).toBe("https://chestlyace.me/");
   });
 
   it("uses NEXT_PUBLIC_*_URL overrides", async () => {
@@ -383,39 +383,39 @@ describe("siteUrl", () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("VERCEL_BRANCH_URL", "app-git-main-me.vercel.app");
     const { siteUrl } = await import("@/lib/sites");
-    expect(siteUrl("blog")).toBe("https://blog.chestlyace.online/");
+    expect(siteUrl("blog")).toBe("https://blog.chestlyace.me/");
     vi.unstubAllEnvs();
   });
 });
 
 describe("old addresses (ia-content.md §6)", () => {
   const base: RoutingInput = {
-    host: "chestlyace.online",
+    host: "chestlyace.me",
     pathname: "/",
     siteParam: null,
     siteCookie: undefined,
     allowOverride: false,
   };
-  const at = (pathname: string, host = "chestlyace.online") =>
+  const at = (pathname: string, host = "chestlyace.me") =>
     decideRoute({ ...base, host, pathname });
 
   it.each([
-    ["/software-development.html", "https://chestlyace.online/#services"],
-    ["/software-development.html/", "https://chestlyace.online/#services"],
-    ["/graphic-design.html", "https://creatives.chestlyace.online/services"],
-    ["/photography.html", "https://creatives.chestlyace.online/services"],
-    ["/admin", "https://admin.chestlyace.online/"],
-    ["/admin/", "https://admin.chestlyace.online/"],
-    ["/admin/index.html", "https://admin.chestlyace.online/"],
+    ["/software-development.html", "https://chestlyace.me/#services"],
+    ["/software-development.html/", "https://chestlyace.me/#services"],
+    ["/graphic-design.html", "https://creatives.chestlyace.me/services"],
+    ["/photography.html", "https://creatives.chestlyace.me/services"],
+    ["/admin", "https://admin.chestlyace.me/"],
+    ["/admin/", "https://admin.chestlyace.me/"],
+    ["/admin/index.html", "https://admin.chestlyace.me/"],
   ])("%s goes to %s", (pathname, location) => {
     expect(at(pathname)).toEqual({ kind: "redirect", location });
   });
 
   it("only redirects on the main host", () => {
     for (const host of [
-      "creatives.chestlyace.online",
-      "blog.chestlyace.online",
-      "admin.chestlyace.online",
+      "creatives.chestlyace.me",
+      "blog.chestlyace.me",
+      "admin.chestlyace.me",
     ]) {
       expect(at("/admin", host).kind).toBe("rewrite");
       expect(at("/photography.html", host).kind).toBe("rewrite");
@@ -432,17 +432,17 @@ describe("old addresses (ia-content.md §6)", () => {
     expect(
       decideRoute({
         ...base,
-        host: "www.chestlyace.online",
+        host: "www.chestlyace.me",
         pathname: "/projects/alexdy",
         search: "?utm_source=x",
       }),
     ).toEqual({
       kind: "redirect",
-      location: "https://chestlyace.online/projects/alexdy?utm_source=x",
+      location: "https://chestlyace.me/projects/alexdy?utm_source=x",
     });
-    expect(decideRoute({ ...base, host: "www.chestlyace.online" })).toEqual({
+    expect(decideRoute({ ...base, host: "www.chestlyace.me" })).toEqual({
       kind: "redirect",
-      location: "https://chestlyace.online/",
+      location: "https://chestlyace.me/",
     });
   });
 

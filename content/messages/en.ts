@@ -90,7 +90,7 @@ export const en = {
   // The coming-soon page of a site with nothing published yet (design.md §14.12).
   comingSoon: {
     label: "Coming soon",
-    button: "Visit chestlyace.online",
+    button: "Visit chestlyace.me",
     creatives: {
       title: "Design & Photography",
       lead: "Graphic design, branding, and photography by Chestly Ace (Amahndong Chestly). A new home for the work is on its way.",

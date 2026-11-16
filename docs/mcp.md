@@ -16,7 +16,7 @@ created, and every call is logged.
 
 ## 2. Endpoint and transport
 
-- `POST https://admin.chestlyace.online/mcp`, **Streamable HTTP**, JSON-RPC 2.0, in the
+- `POST https://admin.chestlyace.me/mcp`, **Streamable HTTP**, JSON-RPC 2.0, in the
   same Next.js app (`app/sites/admin/mcp/route.ts`, passed through by `proxy.ts` on the
   admin host; no new host, no new DNS).
 - **Stateless**: each request carries its token and is answered on its own (no session

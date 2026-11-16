@@ -152,7 +152,7 @@ const faq = (question: string, answer: string) =>
   ({ question, answer }) as never;
 
 describe("mainJsonLd", () => {
-  const origin = "https://chestlyace.online";
+  const origin = "https://chestlyace.me";
 
   it("is a Person, a WebSite and a FAQPage in one graph", () => {
     const data = mainJsonLd(
@@ -227,11 +227,11 @@ describe("jsonLdText", () => {
 describe("sitemapXml", () => {
   it("lists each address and escapes what XML needs escaped", () => {
     const xml = sitemapXml([
-      "https://chestlyace.online/",
+      "https://chestlyace.me/",
       "https://x.vercel.app/?site=main&a=1",
     ]);
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
-    expect(xml).toContain("<loc>https://chestlyace.online/</loc>");
+    expect(xml).toContain("<loc>https://chestlyace.me/</loc>");
     expect(xml).toContain("<loc>https://x.vercel.app/?site=main&amp;a=1</loc>");
   });
 });
@@ -241,13 +241,13 @@ describe("sitemapXml with languages", () => {
     const xml = sitemapXml(bothLanguages("blog", "/tags"));
     expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
     expect(xml.match(/<url>/g)).toHaveLength(2);
-    expect(xml).toContain("<loc>https://blog.chestlyace.online/tags</loc>");
-    expect(xml).toContain("<loc>https://blog.chestlyace.online/fr/tags</loc>");
+    expect(xml).toContain("<loc>https://blog.chestlyace.me/tags</loc>");
+    expect(xml).toContain("<loc>https://blog.chestlyace.me/fr/tags</loc>");
     expect(xml).toContain(
-      '<xhtml:link rel="alternate" hreflang="fr" href="https://blog.chestlyace.online/fr/tags"/>',
+      '<xhtml:link rel="alternate" hreflang="fr" href="https://blog.chestlyace.me/fr/tags"/>',
     );
     expect(xml).toContain(
-      '<xhtml:link rel="alternate" hreflang="x-default" href="https://blog.chestlyace.online/tags"/>',
+      '<xhtml:link rel="alternate" hreflang="x-default" href="https://blog.chestlyace.me/tags"/>',
     );
   });
 

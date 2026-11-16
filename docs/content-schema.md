@@ -4,7 +4,7 @@ Three content sources, one per site (decisions D3, D6, D7):
 
 | Site | Source | Edited through |
 |---|---|---|
-| main | Postgres (Prisma Postgres, D31) | Admin panel at `admin.chestlyace.online` |
+| main | Postgres (Prisma Postgres, D31) | Admin panel at `admin.chestlyace.me` |
 | blog | Postgres (posts, likes, comments, agent sessions; D83) | The admin's block editor; readers write comments |
 | creatives | Headless CMS (TBD) | The CMS's own editor |
 
@@ -237,7 +237,7 @@ data. Now it's data, rendered and turned into JSON-LD on the server.
 
 ## 2. Admin API
 
-All routes live on the admin host (`admin.chestlyace.online`, D71) under `/api/admin/`, require a valid admin
+All routes live on the admin host (`admin.chestlyace.me`, D71) under `/api/admin/`, require a valid admin
 session cookie, and validate bodies with Zod against an explicit field list.
 Every successful write calls `revalidateTag('portfolio', { expire: 0 })` (Next 16
 requires the second argument; `{ expire: 0 }` makes the next visit read fresh

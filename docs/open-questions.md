@@ -65,9 +65,9 @@ Shiki; comments (Giscus); newsletter; categories.
 Options were Vercel Web Analytics (simplest, privacy-friendly), Plausible, or none.
 
 ### Q21 — Where does the admin live? · Decided 2026-10-06
-**Answer: `admin.chestlyace.online`** (not the recommended `/admin` path). It is
+**Answer: `admin.chestlyace.me`** (not the recommended `/admin` path). It is
 a fourth host in the same app; see `architecture.md` §3 and §6.
-Recommendation was `chestlyace.online/admin`. Alternative: `admin.chestlyace.online`
+Recommendation was `chestlyace.me/admin`. Alternative: `admin.chestlyace.me`
 (cleaner separation, one more host to route).
 
 ---
@@ -113,7 +113,7 @@ LinkedIn (+ X/email); Instagram and TikTok show on creatives. Handled by
 The old site is inconsistent: the visible text and database say
 `developerace0@gmail.com`, but the contact tile's `mailto:` link points to
 `chestlyace@gmail.com`. Which is canonical? (A custom-domain address like
-`hello@chestlyace.online` is also an option now that the domain is on Vercel.)
+`hello@chestlyace.me` is also an option now that the domain is on Vercel.)
 
 ### Q10 — Contact form behaviour · Decided 2026-10-06
 **Answer: email plus WhatsApp.** The email service and spam protection still need the owner's approval before they are built (Phase 5b.5).
@@ -172,12 +172,12 @@ for all three sites, or use "Chestly Ace" on creatives/blog where "DEV" fits les
 ### Q20 — Cutover plan · Decided 2026-10-07
 **Answer: the owner migrates locally; main + admin go first; the old site stays up 14 days.**
 - The owner runs the `pg_dump` on the EC2 host and the migration on their own machine (`docs/migration.md`, D78).
-- `chestlyace.online` (with `www` and the old-URL redirects) and `admin.chestlyace.online` move to Vercel first; creatives and blog follow with Phases 9–10. **Amended 2026-10-07 (D81):** creatives and blog are added to Vercel at the same cutover, as short "coming soon" pages, and are indexed from launch.
+- `chestlyace.me` (with `www` and the old-URL redirects) and `admin.chestlyace.me` move to Vercel first; creatives and blog follow with Phases 9–10. **Amended 2026-10-07 (D81):** creatives and blog are added to Vercel at the same cutover, as short "coming soon" pages, and are indexed from launch.
 - The old EC2 site stays up, read-only, for 14 days after DNS moves, then is shut down.
 Original questions: who runs the `pg_dump` (live data ≠ seed file), launch all subdomains at once or main first, and how long the old site stays up.
 
 ### Q23 — The public email address · Open
-`hello@chestlyace.online` is a requirement (owner, 2026-10-07; mailbox on Zoho Mail's
+`hello@chestlyace.me` is a requirement (owner, 2026-10-07; mailbox on Zoho Mail's
 free plan, `docs/launch.md`). Q9 chose `chestlyace@gmail.com` as the address shown
 on the site. Once `hello@` works, does it **replace** `chestlyace@gmail.com`
 everywhere the site shows or uses an email (profile, contact tile, footer,

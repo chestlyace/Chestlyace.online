@@ -9,7 +9,7 @@ vi.mock("@/lib/portfolio", () => ({
 
 import { GET } from "../app/sites/main/[lang]/resume.pdf/route";
 
-const call = () => GET(new Request("https://chestlyace.online/resume.pdf"));
+const call = () => GET(new Request("https://chestlyace.me/resume.pdf"));
 
 beforeEach(() => {
   data.profile = { resumeUrl: null };
@@ -33,7 +33,7 @@ describe("/resume.pdf", () => {
     const response = await call();
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe(
-      "https://chestlyace.online/files/cv-2026.pdf",
+      "https://chestlyace.me/files/cv-2026.pdf",
     );
   });
 

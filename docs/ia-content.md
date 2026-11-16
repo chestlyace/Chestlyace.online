@@ -7,17 +7,17 @@ which no longer belongs on the main site (D4).
 
 ## 1. Sitemap
 
-### `chestlyace.online` — main
+### `chestlyace.me` — main
 
 | Route | Purpose |
 |---|---|
 | `/` | Single-page portfolio, all sections below |
-| — | The admin panel is no longer on this host: it lives at `admin.chestlyace.online` (D71, Q21) |
+| — | The admin panel is no longer on this host: it lives at `admin.chestlyace.me` (D71, Q21) |
 | `/resume.pdf` | Redirect to `profile.resume_url` so the link never changes |
 | `/sitemap.xml`, `/robots.txt` | Generated |
 | `/projects/[slug]` | Project detail pages — decided (Q11); spec in `design.md` §14.10 |
 
-### `creatives.chestlyace.online`
+### `creatives.chestlyace.me`
 
 | Route | Purpose |
 |---|---|
@@ -32,7 +32,7 @@ Contact on the creatives site is a block at the bottom of every page (owner,
 2026-10-08; `design.md` §13.60), reusing the WhatsApp/email pattern. Videography
 is a later section (D87).
 
-### `blog.chestlyace.online`
+### `blog.chestlyace.me`
 
 | Route | Purpose |
 |---|---|
@@ -109,7 +109,7 @@ performance, maintainable code, and clean delivery."
 
 **Creatives card** (fixed component, the last card of the service stack —
 `design.md` §13.12): "Looking for design or photography? → See my creative work at
-creatives.chestlyace.online".
+creatives.chestlyace.me".
 
 ### 2.5 Projects — `#projects`
 
@@ -178,7 +178,7 @@ Same capsule. Each site's own key links (creatives: `Work · Design · Photograp
 Services`; blog: `Posts · Tags`) are set in its design step; the Sites chip and theme toggle
 stay.
 
-The old header also showed a "chestlyace.online" globe link pointing at itself —
+The old header also showed a "chestlyace.me" globe link pointing at itself —
 dropped; the Sites chip replaces it.
 
 ### Footer — all sites
@@ -252,13 +252,13 @@ Old URLs are indexed. All redirects are permanent (308) and live in
 
 | Old URL | New URL |
 |---|---|
-| `chestlyace.online/software-development.html` | `chestlyace.online/#services` |
-| `chestlyace.online/graphic-design.html` | `creatives.chestlyace.online/services` |
-| `chestlyace.online/photography.html` | `creatives.chestlyace.online/services` |
-| `chestlyace.online/admin/` and `/admin/index.html` | `admin.chestlyace.online` |
-| `chestlyace.online/#work` | can't redirect (fragment); keep an empty `id="work"` anchor on Projects |
-| `chestlyace.online/#journey` | same — keep `id="journey"` anchor on Experience |
-| `www.chestlyace.online/*` | `chestlyace.online/*` |
+| `chestlyace.me/software-development.html` | `chestlyace.me/#services` |
+| `chestlyace.me/graphic-design.html` | `creatives.chestlyace.me/services` |
+| `chestlyace.me/photography.html` | `creatives.chestlyace.me/services` |
+| `chestlyace.me/admin/` and `/admin/index.html` | `admin.chestlyace.me` |
+| `chestlyace.me/#work` | can't redirect (fragment); keep an empty `id="work"` anchor on Projects |
+| `chestlyace.me/#journey` | same — keep `id="journey"` anchor on Experience |
+| `www.chestlyace.me/*` | `chestlyace.me/*` |
 
 ## 7. Copy edit checklist
 

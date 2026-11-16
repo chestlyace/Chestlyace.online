@@ -9,13 +9,13 @@ import {
 
 describe("the lang cookie", () => {
   it("is shared across the sites of a domain, and per host on localhost and IPs", () => {
-    expect(cookieDomain("blog.chestlyace.online")).toBe(".chestlyace.online");
-    expect(cookieDomain("chestlyace.online")).toBeUndefined();
+    expect(cookieDomain("blog.chestlyace.me")).toBe(".chestlyace.me");
+    expect(cookieDomain("chestlyace.me")).toBeUndefined();
     expect(cookieDomain("creatives.localhost:3100")).toBeUndefined();
     expect(cookieDomain("localhost")).toBeUndefined();
     expect(cookieDomain("127.0.0.1")).toBeUndefined();
-    expect(langCookie("fr", "blog.chestlyace.online")).toBe(
-      "lang=fr; path=/; max-age=31536000; samesite=lax; domain=.chestlyace.online",
+    expect(langCookie("fr", "blog.chestlyace.me")).toBe(
+      "lang=fr; path=/; max-age=31536000; samesite=lax; domain=.chestlyace.me",
     );
     expect(langCookie("en", "localhost")).toBe(
       "lang=en; path=/; max-age=31536000; samesite=lax",

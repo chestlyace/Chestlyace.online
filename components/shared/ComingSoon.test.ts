@@ -12,7 +12,7 @@ describe("ComingSoon", () => {
       expect(html.match(/<h1/g)).toHaveLength(1);
       expect(html).toContain(en.comingSoon[site].title.replace("&", "&amp;"));
       expect(html).toContain("Coming soon");
-      expect(html).toContain("Visit chestlyace.online");
+      expect(html).toContain("Visit chestlyace.me");
       expect(html).toMatch(/<a [^>]*href="https?:\/\/[^"]*chestlyace[^"]*"/);
     },
   );

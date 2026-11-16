@@ -407,7 +407,7 @@ const projects: AdminConfig = {
           name: "slug",
           label: "Address",
           from: "title",
-          prefix: "chestlyace.online/projects/",
+          prefix: "chestlyace.me/projects/",
         },
         {
           type: "text",

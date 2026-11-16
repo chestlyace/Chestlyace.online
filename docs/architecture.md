@@ -7,14 +7,14 @@ request belongs to is decided by its **host name**, not its path.
 
 | Host | Site | Purpose | Content source |
 |---|---|---|---|
-| `chestlyace.online` | **main** | Chestly as a software engineer: about, skills, services, projects, experience, volunteering, contact | Postgres (admin-edited) |
-| `creatives.chestlyace.online` | **creatives** | Graphic design, photography, event coverage | Headless CMS (TBD — `open-questions.md` Q1) |
-| `blog.chestlyace.online` | **blog** | Writing, with readers' likes and comments | Postgres (admin-written posts, D83) |
-| `admin.chestlyace.online` | **admin** | The owner's panel for the main site's data (D71) | Postgres (reads and writes), Cloudinary (uploads) |
+| `chestlyace.me` | **main** | Chestly as a software engineer: about, skills, services, projects, experience, volunteering, contact | Postgres (admin-edited) |
+| `creatives.chestlyace.me` | **creatives** | Graphic design, photography, event coverage | Headless CMS (TBD — `open-questions.md` Q1) |
+| `blog.chestlyace.me` | **blog** | Writing, with readers' likes and comments | Postgres (admin-written posts, D83) |
+| `admin.chestlyace.me` | **admin** | The owner's panel for the main site's data (D71) | Postgres (reads and writes), Cloudinary (uploads) |
 
 ```
                         ┌────────────────────────── Vercel ───────────────────────────┐
- chestlyace.online ───▶ │                                                              │
+ chestlyace.me ───────▶ │                                                              │
  creatives.… ─────────▶ │  proxy.ts ── reads Host ──▶ rewrite to /sites/<site>/<path>  │
  blog.… ──────────────▶ │                                                              │
                         │   app/sites/main ───────▶ Prisma Postgres + Cloudinary       │
@@ -65,10 +65,10 @@ sites from leaking into each other (see §3).
 ```ts
 // lib/sites.ts — single source of truth for hosts
 export const SITES = {
-  main:      { host: 'chestlyace.online',           devHost: 'localhost:3000' },
-  admin:     { host: 'admin.chestlyace.online',     devHost: 'admin.localhost:3000' },
-  creatives: { host: 'creatives.chestlyace.online', devHost: 'creatives.localhost:3000' },
-  blog:      { host: 'blog.chestlyace.online',      devHost: 'blog.localhost:3000' },
+  main:      { host: 'chestlyace.me',           devHost: 'localhost:3000' },
+  admin:     { host: 'admin.chestlyace.me',     devHost: 'admin.localhost:3000' },
+  creatives: { host: 'creatives.chestlyace.me', devHost: 'creatives.localhost:3000' },
+  blog:      { host: 'blog.chestlyace.me',      devHost: 'blog.localhost:3000' },
 } as const;
 ```
 
@@ -93,7 +93,7 @@ export const SITES = {
   like any other site; the old `/admin` path on main no longer exists.
 - Links that cross sites are always **absolute URLs** built from `lib/sites.ts`
   (`siteUrl('blog', '/some-post')`). Relative links stay within a site.
-- `www.chestlyace.online` permanently redirects to `chestlyace.online` (Vercel
+- `www.chestlyace.me` permanently redirects to `chestlyace.me` (Vercel
   domain setting, not code).
 
 ### Local development
@@ -120,7 +120,7 @@ production subdomains.
 ## 4. Folder layout
 
 ```
-chestlyace.online/
+chestlyace.me/
 ├─ app/
 │  ├─ sites/                       # no app/layout.tsx — each site is a root layout
 │  │  ├─ main/
@@ -235,7 +235,7 @@ Full schema and endpoints: `content-schema.md`.
 
 ## 6. Admin
 
-- Lives at `admin.chestlyace.online` (Q21, D71): its own site key, root layout and
+- Lives at `admin.chestlyace.me` (Q21, D71): its own site key, root layout and
   host; `noindex` (meta and `X-Robots-Tag`) and `robots.txt` disallows everything.
   Screens: `design.md` §13.18–13.26 and §14.11.
 - Manages the **main site's data and the blog** (posts, comments, imports);
@@ -253,7 +253,7 @@ Full schema and endpoints: `content-schema.md`.
 
 - `SiteHeader` and `SiteFooter` live in `components/shared/` and render on all
   three sites, highlighting the current one.
-- **Theme preference** is stored in a cookie scoped to `Domain=.chestlyace.online`
+- **Theme preference** is stored in a cookie scoped to `Domain=.chestlyace.me`
   so choosing dark mode on the main site carries over to the blog and creatives
   site. (`localStorage` is per-origin and would not carry over.)
 - Design tokens are shared; each site may override its accent colour
@@ -284,8 +284,8 @@ Full schema and endpoints: `content-schema.md`.
 
 - One Vercel project connected to this repo. `main` branch → production; every
   other branch → preview.
-- Domains attached to the project: `chestlyace.online`, `www.chestlyace.online`
-  (redirect), `creatives.chestlyace.online`, `blog.chestlyace.online`.
+- Domains attached to the project: `chestlyace.me`, `www.chestlyace.me`
+  (redirect), `creatives.chestlyace.me`, `blog.chestlyace.me`.
 - Database migrations run with Drizzle Kit as an explicit step (`pnpm db:migrate`
   against each database), not on app boot or during the Vercel build.
 - CI: Vercel's build on every pull request is the only automated check (D17) —

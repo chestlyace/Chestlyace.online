@@ -312,7 +312,7 @@ export default function DesignSystemPage() {
       <Section title="Theme toggle (§13.2)">
         <div className="flex items-center gap-3 text-sm text-muted">
           <ThemeToggle />
-          Cycles system → light → dark. Shared across *.chestlyace.online.
+          Cycles system → light → dark. Shared across *.chestlyace.me.
         </div>
       </Section>
     </div>
