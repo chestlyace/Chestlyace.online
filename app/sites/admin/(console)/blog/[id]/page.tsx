@@ -22,6 +22,14 @@ export default async function EditPostPage({
       id={post.id}
       initial={snapshotOf(post)}
       devtoUrl={post.devtoUrl}
+      share={
+        post.shareToken && post.shareCreatedAt
+          ? {
+              token: post.shareToken,
+              createdAt: post.shareCreatedAt.toISOString(),
+            }
+          : null
+      }
       initialPreview={await previewBody(post.content)}
     />
   );

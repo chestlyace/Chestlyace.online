@@ -1,6 +1,11 @@
 "use client";
 
-import { ArrowLeft, CircleAlert, Ellipsis } from "lucide-react";
+import {
+  ArrowLeft,
+  CircleAlert,
+  Ellipsis,
+  Link as LinkIcon,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/shared/Button";
@@ -20,6 +25,7 @@ import {
   type PostStatus,
 } from "@/lib/admin/blogForm";
 import { slugify } from "@/lib/admin/order";
+import type { ShareLink } from "@/lib/admin/shareApi";
 import {
   blockProblems,
   blocksToMarkdown,
@@ -37,6 +43,7 @@ import { BlockList } from "./BlockList";
 import { ExportDialog } from "./ExportDialog";
 import { FrenchPanel } from "./FrenchPanel";
 import { PostDetails } from "./PostDetails";
+import { ShareDialog } from "./ShareDialog";
 import { Preview } from "./Preview";
 
 type Tab = "write" | "preview" | "markdown";
@@ -53,6 +60,7 @@ export function PostEditor({
   initial,
   initialPreview,
   devtoUrl = null,
+  share: initialShare = null,
 }: {
   id?: number;
   initial?: PostSnapshot;
@@ -60,6 +68,8 @@ export function PostEditor({
   initialPreview: ReactNode;
   /** The DEV article this post is linked to, if any. */
   devtoUrl?: string | null;
+  /** The draft's share link, if sharing is on (D93). */
+  share?: ShareLink | null;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -100,6 +110,8 @@ export function PostEditor({
   const [slugTouched, setSlugTouched] = useState(Boolean(initialId));
   const [linked, setLinked] = useState(devtoUrl);
   const [exporting, setExporting] = useState(false);
+  const [share, setShare] = useState<ShareLink | null>(initialShare);
+  const [sharing, setSharing] = useState(false);
   const [previewAt, setPreviewAt] = useState<number | undefined>(undefined);
   const savingRef = useRef(false);
   const noteTimer = useRef<number | undefined>(undefined);
@@ -512,6 +524,19 @@ export function PostEditor({
         </>
       )}
 
+      {sharing && id && (
+        <ShareDialog
+          postId={id}
+          share={share}
+          hasFrench={
+            saved.french.published && saved.french.content.trim() !== ""
+          }
+          beforeCreate={() => (dirty ? persist({}) : Promise.resolve(true))}
+          onChange={setShare}
+          onClose={() => setSharing(false)}
+        />
+      )}
+
       {exporting && id && (
         <ExportDialog
           id={id}
@@ -594,6 +619,28 @@ export function PostEditor({
             >
               Save
             </Button>
+            {saved.status === "draft" && (
+              <Button
+                variant="ghost"
+                magnetic={false}
+                disabled={!id}
+                title={id ? undefined : "Save first"}
+                onClick={() => setSharing(true)}
+                trailingIcon={
+                  share ? (
+                    <span
+                      aria-hidden="true"
+                      className="size-2 rounded-full bg-primary"
+                    />
+                  ) : (
+                    <LinkIcon />
+                  )
+                }
+                iconNudge="none"
+              >
+                {share ? "Shared" : "Share"}
+              </Button>
+            )}
             {status === "published" ? (
               <Button
                 magnetic={false}
