@@ -231,6 +231,9 @@ export const blogPosts = pgTable(
     devtoId: integer("devto_id"),
     devtoUrl: text("devto_url"),
     likeCount: integer("like_count").notNull().default(0),
+    // The draft's share link (D93, content-schema.md §4): null = not shared.
+    shareToken: text("share_token").unique(),
+    shareCreatedAt: timestamp("share_created_at", { withTimezone: true }),
     ...translationsColumn,
     ...timestamps,
   },

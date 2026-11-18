@@ -223,3 +223,12 @@ export function decideRoute(input: RoutingInput): RoutingDecision {
 }
 
 const SITE_LEVEL_FILES = new Set(["/robots.txt", "/sitemap.xml"]);
+
+/**
+ * Whether a rewritten path is a shared blog draft (`/sites/blog/<lang>/drafts/<token>`,
+ * D93, design.md §14.27): a private page the proxy keeps out of search engines, caches
+ * and referrers.
+ */
+export function isSharedDraftPath(pathname: string): boolean {
+  return /^\/sites\/blog\/(?:en|fr)\/drafts\/[^/]+\/?$/.test(pathname);
+}

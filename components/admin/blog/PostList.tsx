@@ -219,6 +219,11 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
                       Draft
                     </Tag>
                   )}
+                  {!published && item.shared && (
+                    <Tag className="ml-2" title="Shared by private link">
+                      Shared
+                    </Tag>
+                  )}
                   {item.french !== "none" && (
                     <Chip
                       tone={item.french === "live" ? "on" : "off"}

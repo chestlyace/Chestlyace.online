@@ -374,7 +374,9 @@ The newsletter's subscribers are not stored here: they are a **Resend segment**
 base64url (43 characters). It is stored as it is, not hashed, so the admin can show
 the link again at any time. That is acceptable because it only opens one draft, and
 it can be renewed or turned off at once. Turning sharing off sets `share_token` and
-`share_created_at` to null; "New link" replaces both. Feedback stays when the link
+`share_created_at` to null; "New link" replaces both. Sharing is not an edit: the
+`updated_at` trigger on `blog_posts` skips an update that changes only the two share
+columns (migration 0014), so the draft's "Last saved" stays true. Feedback stays when the link
 changes or the post is published, and goes when the post is deleted. No IP address
 or browser data is stored with feedback (the rate limit is in memory, as D69); the
 privacy page (`design.md` §14.18) gains a line saying that feedback stores the name

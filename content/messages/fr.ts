@@ -260,6 +260,18 @@ export const fr: Messages = {
       markLabel: "En anglais",
       notice: "Cet article n’est disponible qu’en anglais.",
     },
+    draft: {
+      label: "Brouillon",
+      notice:
+        "Cet article n’est pas encore publié. Vous lisez un aperçu privé : merci de ne pas partager ce lien.",
+      noticeLabel: "Avis de brouillon",
+      saved: "Enregistré {time}",
+      notPublished: "NON PUBLIÉ",
+      feedbackLink: "Laisser un avis",
+      title: "Brouillon : {title} — Chestly Ace",
+      ogTitle: "Brouillon : {title}",
+      justNow: "à l’instant",
+    },
     post: {
       allPosts: "Tous les articles",
       tags: "Thèmes",

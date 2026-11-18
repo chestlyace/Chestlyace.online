@@ -35,11 +35,11 @@ const minutesOf = (text: SQL) =>
 const readingMinutes = minutesOf(sql`${blogPosts.content}`);
 
 // The French version lives in `translations.fr` (docs/i18n.md §5).
-const frenchContent = sql<
+export const frenchContent = sql<
   string | null
 >`${blogPosts.translations} -> 'fr' ->> 'content'`;
 
-const summaryColumns = {
+export const summaryColumns = {
   slug: blogPosts.slug,
   title: blogPosts.title,
   description: blogPosts.description,

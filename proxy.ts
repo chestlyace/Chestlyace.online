@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { PREVIEW_SITE_COOKIE, decideRoute } from "@/lib/sites";
+import {
+  PREVIEW_SITE_COOKIE,
+  decideRoute,
+  isSharedDraftPath,
+} from "@/lib/sites";
 
 // The admin is never to be indexed (D71): every response says so, on top of the
 // page's own robots meta and robots.txt.
@@ -53,6 +57,14 @@ export function proxy(request: NextRequest) {
     request: { headers: requestHeaders },
   });
   if (decision.site === "admin") noindex(response);
+
+  // A shared blog draft is private (D93, design.md §14.27): never indexed, never
+  // stored by a cache, and its address (the token) never sent on as a referrer.
+  if (decision.site === "blog" && isSharedDraftPath(decision.pathname)) {
+    noindex(response);
+    response.headers.set("Referrer-Policy", "no-referrer");
+    response.headers.set("Cache-Control", "private, no-store");
+  }
 
   if (decision.setPreviewCookie) {
     response.cookies.set(PREVIEW_SITE_COOKIE, decision.setPreviewCookie, {
