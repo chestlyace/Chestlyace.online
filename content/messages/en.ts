@@ -287,6 +287,19 @@ export const en = {
       markLabel: "In English",
       notice: "This article is only available in English.",
     },
+    /** A draft opened through its share link (design.md §13.68, §14.27; D93). */
+    draft: {
+      label: "Draft",
+      notice:
+        "This post isn't published yet. You're reading a private preview, so please don't share this link.",
+      noticeLabel: "Draft notice",
+      saved: "Last saved {time}",
+      notPublished: "NOT PUBLISHED",
+      feedbackLink: "Leave feedback",
+      title: "Draft: {title} — Chestly Ace",
+      ogTitle: "Draft: {title}",
+      justNow: "just now",
+    },
     post: {
       allPosts: "All posts",
       tags: "Tags",

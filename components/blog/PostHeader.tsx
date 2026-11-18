@@ -9,17 +9,21 @@ import type { Lang } from "@/lib/i18n";
 import { plural } from "@/lib/i18n/format";
 
 // The top of a post page (design.md §13.28): back link, meta row, title,
-// description and tags.
+// description and tags. A shared draft (§14.27) has no date yet: its meta row reads
+// "NOT PUBLISHED" and the reading time.
 export function PostHeader({
   post,
   lang,
 }: {
-  post: PostSummary;
+  post: Omit<PostSummary, "publishedAt"> & { publishedAt: string | null };
   /** The language of the page; the post may be in the other one. */
   lang: Lang;
 }) {
   const m = getMessages(lang).blog;
-  const { published, updated, reading } = metaParts(post, m.meta.minRead);
+  const { published, updated, reading } = metaParts(
+    { ...post, publishedAt: post.publishedAt ?? post.updatedAt },
+    m.meta.minRead,
+  );
   const textLang = post.lang !== lang ? post.lang : undefined;
   return (
     <header>
@@ -32,14 +36,18 @@ export function PostHeader({
         className="mt-6"
         label={
           <>
-            <time dateTime={post.publishedAt}>{published}</time>
+            {post.publishedAt ? (
+              <time dateTime={post.publishedAt}>{published}</time>
+            ) : (
+              m.draft.notPublished
+            )}
             {" · "}
             <span
               aria-label={plural(m.meta.minuteRead, post.readingMinutes, lang)}
             >
               {reading}
             </span>
-            {updated && (
+            {post.publishedAt && updated && (
               <>
                 {` · ${m.meta.updated} `}
                 <time dateTime={post.updatedAt}>{updated}</time>

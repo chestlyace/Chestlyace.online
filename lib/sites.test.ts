@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { decideRoute, siteFromHost, type RoutingInput } from "@/lib/sites";
+import {
+  decideRoute,
+  isSharedDraftPath,
+  siteFromHost,
+  type RoutingInput,
+} from "@/lib/sites";
 
 describe("siteFromHost", () => {
   it.each([
@@ -40,9 +45,7 @@ describe("decideRoute", () => {
       lang: "en",
       pathname: "/sites/main/en",
     });
-    expect(
-      decideRoute({ ...base, host: "blog.chestlyace.me" }),
-    ).toMatchObject({
+    expect(decideRoute({ ...base, host: "blog.chestlyace.me" })).toMatchObject({
       kind: "rewrite",
       pathname: "/sites/blog/en",
     });
@@ -139,9 +142,9 @@ describe("decideRoute", () => {
       site: "admin",
       pathname: "/sites/admin/login",
     });
-    expect(
-      decideRoute({ ...base, host: "admin.chestlyace.me" }),
-    ).toMatchObject({ pathname: "/sites/admin" });
+    expect(decideRoute({ ...base, host: "admin.chestlyace.me" })).toMatchObject(
+      { pathname: "/sites/admin" },
+    );
   });
 
   it("passes /api through untouched on main", () => {
@@ -349,9 +352,7 @@ describe("languages in the address (docs/i18n.md §2–§3)", () => {
 describe("siteUrl", () => {
   it("uses production hosts by default", async () => {
     const { siteUrl } = await import("@/lib/sites");
-    expect(siteUrl("blog", "/hello")).toBe(
-      "https://blog.chestlyace.me/hello",
-    );
+    expect(siteUrl("blog", "/hello")).toBe("https://blog.chestlyace.me/hello");
     expect(siteUrl("main")).toBe("https://chestlyace.me/");
   });
 
@@ -456,5 +457,39 @@ describe("old addresses (ia-content.md §6)", () => {
         allowOverride: true,
       }).kind,
     ).toBe("rewrite");
+  });
+});
+
+describe("isSharedDraftPath (D93)", () => {
+  it.each([
+    "/sites/blog/en/drafts/abc",
+    "/sites/blog/fr/drafts/abc",
+    "/sites/blog/en/drafts/abc/",
+  ])("is true for %s", (path) => {
+    expect(isSharedDraftPath(path)).toBe(true);
+  });
+
+  it.each([
+    "/sites/blog/en/drafts",
+    "/sites/blog/en/a-post",
+    "/sites/main/en/drafts/abc",
+    "/sites/blog/en/drafts/abc/more",
+  ])("is false for %s", (path) => {
+    expect(isSharedDraftPath(path)).toBe(false);
+  });
+
+  it("matches what decideRoute rewrites a blog draft address to", () => {
+    for (const pathname of ["/drafts/abc", "/fr/drafts/abc"]) {
+      const decision = decideRoute({
+        host: "blog.chestlyace.me",
+        pathname,
+        siteParam: null,
+        siteCookie: undefined,
+        allowOverride: true,
+      });
+      expect(decision.kind).toBe("rewrite");
+      if (decision.kind === "rewrite")
+        expect(isSharedDraftPath(decision.pathname)).toBe(true);
+    }
   });
 });
