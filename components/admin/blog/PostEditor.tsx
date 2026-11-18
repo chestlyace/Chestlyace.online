@@ -26,6 +26,7 @@ import {
 } from "@/lib/admin/blogForm";
 import { slugify } from "@/lib/admin/order";
 import type { ShareLink } from "@/lib/admin/shareApi";
+import type { Feedback } from "@/lib/blog/draftFeedback";
 import {
   blockProblems,
   blocksToMarkdown,
@@ -36,17 +37,19 @@ import {
 import { useIsWide } from "@/lib/media";
 import { siteUrl } from "@/lib/sites";
 import { cn } from "@/lib/cn";
+import { Chip } from "../Chip";
 import { useConfirm } from "../ConfirmDialog";
 import { useToast } from "../Toast";
 import { useUnsavedChanges } from "../UnsavedGuard";
 import { BlockList } from "./BlockList";
 import { ExportDialog } from "./ExportDialog";
+import { FeedbackPanel } from "./FeedbackPanel";
 import { FrenchPanel } from "./FrenchPanel";
 import { PostDetails } from "./PostDetails";
 import { ShareDialog } from "./ShareDialog";
 import { Preview } from "./Preview";
 
-type Tab = "write" | "preview" | "markdown";
+type Tab = "write" | "preview" | "markdown" | "feedback";
 type Errors = Record<string, string | undefined>;
 
 const AUTOSAVE_MS = 5000;
@@ -61,6 +64,8 @@ export function PostEditor({
   initialPreview,
   devtoUrl = null,
   share: initialShare = null,
+  feedback: initialFeedback = [],
+  initialTab = "write",
 }: {
   id?: number;
   initial?: PostSnapshot;
@@ -70,6 +75,10 @@ export function PostEditor({
   devtoUrl?: string | null;
   /** The draft's share link, if sharing is on (D93). */
   share?: ShareLink | null;
+  /** Feedback sent on the shared draft, newest first (design.md §13.71). */
+  feedback?: Feedback[];
+  /** The tab to open on (the feedback email links to `?tab=feedback`). */
+  initialTab?: Tab;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -102,7 +111,7 @@ export function PostEditor({
   const [french, setFrench] = useState<FrenchPost>(start.french);
   const [lang, setLang] = useState<"en" | "fr">("en");
   const [mdText, setMdText] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("write");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [errors, setErrors] = useState<Errors>({});
   const [banner, setBanner] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -112,6 +121,10 @@ export function PostEditor({
   const [exporting, setExporting] = useState(false);
   const [share, setShare] = useState<ShareLink | null>(initialShare);
   const [sharing, setSharing] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback[]>(initialFeedback);
+  const unreadFeedback = feedback.filter((item) => !item.readAt).length;
+  // The Feedback tab appears once a draft has been shared (or has feedback).
+  const hasFeedbackTab = share !== null || feedback.length > 0;
   const [previewAt, setPreviewAt] = useState<number | undefined>(undefined);
   const savingRef = useRef(false);
   const noteTimer = useRef<number | undefined>(undefined);
@@ -337,19 +350,19 @@ export function PostEditor({
     router.push("/blog");
   };
 
+  // From `xl`, Write sits beside the preview, or beside the feedback when that tab
+  // is chosen (§13.71); below it every tab is on its own.
   const split = wide && tab !== "markdown";
   const showWrite = split || tab === "write";
-  const showPreview = split || tab === "preview";
-  const tabs: [Tab, string][] = wide
-    ? [
-        ["write", "Write"],
-        ["markdown", "Markdown"],
-      ]
-    : [
-        ["write", "Write"],
-        ["preview", "Preview"],
-        ["markdown", "Markdown"],
-      ];
+  const showFeedback = hasFeedbackTab && tab === "feedback";
+  const showPreview = (split && !showFeedback) || tab === "preview";
+  const activeTab: Tab = wide && tab === "preview" ? "write" : tab;
+  const tabs: [Tab, string][] = [
+    ["write", "Write"],
+    ...(wide ? [] : ([["preview", "Preview"]] as [Tab, string][])),
+    ["markdown", "Markdown"],
+    ...(hasFeedbackTab ? ([["feedback", "Feedback"]] as [Tab, string][]) : []),
+  ];
 
   const word = status === "published" ? "Published" : "Draft";
   const statusText = saving
@@ -457,16 +470,22 @@ export function PostEditor({
                 key={value}
                 type="button"
                 role="tab"
-                aria-selected={(split ? "write" : tab) === value}
+                aria-selected={activeTab === value}
                 onClick={() => selectTab(value)}
                 className={cn(
-                  "h-9 rounded-full px-4 text-sm font-medium transition-colors duration-150",
-                  (split ? "write" : tab) === value
+                  "inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors duration-150",
+                  activeTab === value
                     ? "bg-surface-raised text-foreground shadow-sm"
                     : "text-muted [@media(hover:hover)]:hover:text-foreground",
                 )}
               >
                 {text}
+                {value === "feedback" && unreadFeedback > 0 && (
+                  <Chip tone="on">
+                    {unreadFeedback}
+                    <span className="sr-only"> unread</span>
+                  </Chip>
+                )}
               </button>
             ))}
           </div>
@@ -505,6 +524,16 @@ export function PostEditor({
                   />
                 </div>
               )}
+              {showFeedback && id && (
+                <div className={cn("min-w-0", split && "sticky top-6")}>
+                  <FeedbackPanel
+                    postId={id}
+                    items={feedback}
+                    onChange={setFeedback}
+                    onShare={() => setSharing(true)}
+                  />
+                </div>
+              )}
               {showPreview && (
                 <div className={cn("min-w-0", split && "sticky top-6")}>
                   <Preview
@@ -528,6 +557,7 @@ export function PostEditor({
         <ShareDialog
           postId={id}
           share={share}
+          feedbackCount={feedback.length}
           hasFrench={
             saved.french.published && saved.french.content.trim() !== ""
           }

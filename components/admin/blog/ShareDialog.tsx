@@ -22,6 +22,7 @@ export function shareUrl(token: string, lang: "en" | "fr" = "en"): string {
 export function ShareDialog({
   postId,
   share,
+  feedbackCount,
   hasFrench,
   beforeCreate,
   onChange,
@@ -29,6 +30,8 @@ export function ShareDialog({
 }: {
   postId: number;
   share: ShareLink | null;
+  /** How much feedback the draft has had (§13.71). */
+  feedbackCount: number;
   /** Whether the post has a published French version (the French link is offered). */
   hasFrench: boolean;
   /** Saves unsaved changes; false stops the link from being made. */
@@ -124,8 +127,8 @@ export function ShareDialog({
   return (
     <Dialog title="Share this draft" onClose={onClose}>
       <p className="text-sm text-muted">
-        Anyone with the link can read this draft. It isn&rsquo;t listed anywhere
-        or shown to search engines.
+        Anyone with the link can read this draft and send you feedback. It
+        isn&rsquo;t listed anywhere or shown to search engines.
       </p>
 
       {share ? (
@@ -187,6 +190,7 @@ export function ShareDialog({
             <time dateTime={share.createdAt}>
               {relativeTime(share.createdAt)}
             </time>
+            {` · ${feedbackCount} feedback`}
           </p>
           <p aria-live="polite" className="sr-only">
             {copied ? "Link copied" : ""}
