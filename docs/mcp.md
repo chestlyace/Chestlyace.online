@@ -114,6 +114,10 @@ the agent can act on (field → message, like the admin's 422).
 | `blog_post_duplicate` / `blog_post_delete` | A draft copy; delete | write / delete |
 | `blog_comments_list` | Comments (name, text, status, likes, reports) with the post, filterable | read |
 | `blog_comment_hide` / `_restore` / `_delete` | Moderation | delete |
+| `blog_post_share` | Turns sharing on for a draft (or returns the existing link); `renew: true` makes a new link. Returns the English and French addresses (D93) | publish |
+| `blog_post_unshare` | Turns sharing off; feedback is kept | publish |
+| `blog_draft_feedback_list` | A post's feedback (name, text, language, time, read or not), newest first | read |
+| `blog_draft_feedback_mark_read` / `_delete` | Marks given items (or all of a post's) read; deletes one (needs `confirm`) | write / delete |
 
 **Media**
 

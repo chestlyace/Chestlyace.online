@@ -43,6 +43,7 @@ is a later section (D87).
 | `/rss.xml` | RSS feed |
 | `/privacy` | What the blog stores about readers (accounts, comments, likes, newsletter) |
 | `/newsletter/confirm` | Where the emailed confirmation link lands |
+| `/drafts/[token]` | A shared draft (D93, `design.md` §14.27): private, never indexed or listed; a published post's link answers 307 to the post |
 | `/sitemap.xml`, `/robots.txt` | Generated |
 
 ## 2. Main site — homepage sections

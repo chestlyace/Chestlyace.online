@@ -489,6 +489,11 @@ write is in [`blog-markdown.md`](./blog-markdown.md).
 [Skeletons](#1365-skeletons) · [Inline pending states](#1366-inline-pending-states) ·
 [Not-found and error pages](#1367-not-found-and-error-pages) (§13.64–13.67).
 
+**Shareable drafts (D93):** [Draft banner](#1368-draft-banner) ·
+[Draft feedback form](#1369-draft-feedback-form) · [Share dialog](#1370-share-dialog) ·
+[Draft feedback panel](#1371-draft-feedback-panel) (§13.68–13.71); the page is
+[§14.27](#1427-shared-draft-page).
+
 **Core components (Phase 5a.2):** [Button](#131-button) ·
 [Icon button](#132-icon-button) · [Text link](#133-text-link) ·
 [Tag](#134-tag) · [Status pill](#135-status-pill) ·
@@ -2407,11 +2412,13 @@ Our own editor (D83), in the admin's plain, functional style (§13.18).
    kebab-case), the cover (the upload field, §13.22, plus "Use a generated cover"),
    and a **Settings** disclosure: published date, comments on/off, canonical
    address, series name.
-2. **Tabs:** **Write** · **Preview** · **Markdown**. From `xl` (1280px) Write and
+2. **Tabs:** **Write** · **Preview** · **Markdown** (and **Feedback**, §13.71, once a
+   draft has been shared). From `xl` (1280px) Write and
    Preview sit side by side, the preview scrolling with the block being edited.
 3. **The block list** (Write): the blocks in order.
 4. **The save bar** (§13.25), with the post's status ("Draft", "Published",
-   "Unsaved changes", "Saved"), Save, and **Publish** / **Unpublish**, and a
+   "Unsaved changes", "Saved"), Save, **Share** (drafts only, §13.70), and
+   **Publish** / **Unpublish**, and a
    "More" menu: Publish to DEV (§13.49), Duplicate post, Delete post.
 
 **A block** is a row: a drag handle, a mono Tag with the block's type, the block's
@@ -3137,6 +3144,167 @@ version.
 in the headline "Page not found — 404"), focus moves to the `h1` on arrival, buttons are
 standard buttons (§13.2), the doodles and glyphs are `aria-hidden`. Contrast of the
 number is decorative (it uses `tile-hover` on `background`) so the page does not rely on it.
+
+**Shareable drafts (owner request, 2026-11-18; D93).** The owner shares a blog draft
+through a private link without publishing it, and the people who open it can send
+private feedback. Owner's answers: blog posts only; anyone with the link can open it;
+the link works until revoked (a published post's link goes to the public post); the
+reader sees the real post page with a draft banner and a feedback form. These components
+reuse the blog's and the admin's existing parts; no new token, font or library.
+**Approved in:** the shareable-drafts design PR (issue #160).
+
+### 13.68 Draft banner
+
+**Purpose.** Tells whoever opens a shared draft (§14.27) that the post is not
+published, so they don't mistake it for the real thing or pass the link on.
+
+**References.** None supplied. It follows the admin's plain notices and the blog's
+mono labels (§13.4). Proposed.
+
+**Anatomy.** One bar at the top of the post, above the post header (§13.28):
+
+| Part | Value |
+|---|---|
+| Container | `surface` fill (`surface-raised` on `background-alt`), radius `lg`, 1px `border`, padding 16px 20px, the width of the post header's columns (1–10) |
+| Label | A Tag (§13.4) "DRAFT" |
+| Text | `sm`, `foreground`: "This post isn't published yet. You're reading a private preview, so please don't share this link." |
+| Saved time | `sm`, `muted`: "Last saved 2 hours ago" (relative, with the full date in `title` and `<time datetime>`), from the post's `updated_at` |
+| Link | A text link (§13.3), `sm`: "Leave feedback ↓", jumping to the feedback form (§13.69) |
+
+**Layout.** Label, text and saved time on one line from `md`, the link at the end of
+the line; on phones the label sits above the text and the link wraps under it.
+
+**States.** Only one. The banner is not dismissible (it is short, and a dismissed
+banner would hide what the page is).
+
+**Motion.** It enters with the page's default entrance (§14.0); reduced motion: none.
+
+**Light and dark.** Tokens only; no colour of its own (no warning yellow: the palette
+has none, D37).
+
+**Accessibility.** `role="note"` with `aria-label="Draft notice"`; the text is real
+text, not an image; the link is a normal in-page link to `#feedback`.
+
+**Approved in:** the shareable-drafts design PR (issue #160).
+
+### 13.69 Draft feedback form
+
+**Purpose.** Where someone reading a shared draft sends the owner a note. Feedback
+is **private**: only the owner sees it, in the admin (§13.71). It takes the place of
+the comments (§13.37) on the shared page.
+
+**References.** The owner chose "the real page, plus comments readers leave privately"
+(2026-11-18). It follows the contact form (§13.15, D69): filled fields, label above,
+the same spam protection, and no sign-in (reviewers may have no GitHub or Google
+account).
+
+**Anatomy.** A section with the id `feedback`, in the comments' place on the page
+(§14.27):
+
+1. A heading "Feedback" (`h3` step) and one line in `sm` `muted`: "Only Chestly sees
+   what you send here. It won't appear on the post."
+2. **Name**: a text field (§13.15), required, at most 80 characters.
+3. **Feedback**: a textarea (§13.15, min height 120px, grows to 320px), required, with
+   a word counter (`sm`, `muted`, `danger` over the limit) tied by
+   `aria-describedby`. **Limit: `DRAFT_FEEDBACK_MAX_WORDS`, placeholder 300**, the
+   owner's to set. Plain text only.
+4. A `primary` `md` Button "Send feedback".
+5. A hidden field and a minimum time on the form, as the contact form (D69).
+
+| State | Treatment |
+|---|---|
+| Default | As above |
+| Sending | The button's loading state (§13.66); fields disabled |
+| Sent | The form is replaced by a panel (`surface`, radius `lg`, padding 24px): "Thanks, your feedback was sent." and a ghost `sm` Button "Send more" that brings an empty form back (the name is kept) |
+| Field error | The field's error text (§13.15) |
+| Too many | An alert (`danger`, `circle-alert`, `role="alert"`): "That's a lot of feedback at once. Please try again in a little while." |
+| Link revoked or post published since the page loaded | An alert: "This draft isn't shared any more, so your feedback wasn't sent." Nothing is stored |
+| Other failure | An alert with "Try again" |
+
+**Limits.** 10 sends per hour per IP and per link (in memory, per server instance,
+as D69); the same text twice in a row from one IP is refused.
+
+**Motion.** The sent panel cross-fades in (200ms `ease-out`). Reduced motion: no fade.
+
+**Responsive.** Full width of the reading column (columns 1–8 on `lg+`), one column
+everywhere.
+
+**Accessibility.** A real `<form>` with visible labels; errors tied to their fields;
+the sent panel takes focus and is announced (`role="status"`).
+
+**Approved in:** the shareable-drafts design PR (issue #160).
+
+### 13.70 Share dialog
+
+**Purpose.** In the blog editor (§13.48), where the owner turns sharing on for a draft,
+copies the link, makes a new one or turns it off.
+
+**References.** None supplied; the admin's dialogs (§13.23) and the contact tiles'
+copy button (§13.14). Proposed.
+
+**Opening it.** A **Share** button (ghost `md`, Lucide `link`) in the save bar
+(§13.25) beside Publish, on drafts only. When a link is on, it reads "Shared" with a
+small `primary` dot. On a published post the button is not shown.
+
+**Anatomy** (a native `<dialog>` in §13.23's frame):
+
+| Part | Off (no link) | On (a link exists) |
+|---|---|---|
+| Title | "Share this draft" | "Share this draft" |
+| Text | `sm`, `muted`: "Anyone with the link can read this draft and send you feedback. It isn't listed anywhere or shown to search engines." | Same |
+| Body | A `primary` Button "Create link" | The link in a read-only mono field (§13.21) with a **Copy** button ("Copied" for 2 seconds, as §13.14); under it, `sm` `muted`: "Created 3 days ago · 2 feedback" |
+| Language | — | When the post has a French version (i18n §5), a segmented choice **English · Français** that switches the field between `/drafts/<token>` and `/fr/drafts/<token>` |
+| Actions | Close | **Turn off sharing** (ghost, `danger` text: asks first, §13.23: "The link will stop working. Feedback already sent is kept.") · **New link** (secondary: asks first: "The current link will stop working.") · Close |
+
+**Behaviour.** Creating a link saves the post first if it has unsaved changes. The
+link always shows the **last saved** version, so the autosave (§13.48) keeps it
+current. Publishing does not turn the link off: while the post is published the link
+sends readers to the public post; if the post is unpublished again, the same link
+shows the draft again. Deleting the post deletes the link and its feedback.
+
+**States.** Creating, renewing and turning off use the button loading state; failures
+show a toast (§13.24).
+
+**Accessibility.** A native dialog (focus trapped, Escape closes, focus returns to
+Share); the link field is labelled "Share link"; Copy announces "Link copied" in a
+polite live region.
+
+**Approved in:** the shareable-drafts design PR (issue #160).
+
+### 13.71 Draft feedback panel
+
+**Purpose.** Where the owner reads the feedback sent on a shared draft (§13.69).
+
+**References.** The comment moderation list (§13.50). Proposed.
+
+**Anatomy.** A **Feedback** tab in the editor, after Write · Preview · Markdown
+(§13.48), with an unread count Tag ("FEEDBACK 2"). Below `xl` it is one of the tabs;
+from `xl` it opens in the preview's place. Newest first, each item:
+
+- the name (semibold) and the time (`sm`, `muted`, relative, full date in `title`),
+  with a small `primary` dot while unread;
+- the text (`body`, line breaks kept, web addresses as links with
+  `rel="nofollow noopener"`, never HTML);
+- the language of the page it was sent from (a Tag "FR" when French);
+- an icon button **Delete** (asks first, §13.23).
+
+At the top: "Mark all as read" (ghost `sm`). Opening the tab marks nothing read by
+itself: an item becomes read when the owner clicks it (or "Mark all as read"), so
+nothing is missed.
+
+**Posts list.** On the Posts screen (§14.19), a draft with a link on shows a Tag
+"SHARED", and a draft with unread feedback shows a status pill "2 new feedback".
+
+**Email.** The owner is emailed about each new feedback (Resend, as the comments,
+§13.37): the post's title, the name, the text and a link to the Feedback tab.
+
+**States.** Empty: "No feedback yet. Share the draft to get some." with the Share
+button. Loading: three skeleton rows (§13.65).
+
+**Accessibility.** The list is a `<ul>`; each item an `<article>` labelled by the
+name; Delete is labelled "Delete feedback from <name>".
+
+**Approved in:** the shareable-drafts design PR (issue #160).
 
 ## 14. Page and section specs
 
@@ -4081,7 +4249,7 @@ more than 30 posts, pagination is designed then.
 ### 14.14 Post page
 
 **Purpose.** One post (`/[slug]`). An unknown slug, or a draft, shows the blog's
-404.
+404. A shared draft is read only at its private address (§14.27).
 
 **References.** Owner's choice (2026-10-07): **prose with a sticky contents rail**;
 the rich blocks of §13.38–13.47 sit inside the prose.
@@ -4216,8 +4384,8 @@ how to ask a question.
 
 | Screen | Content |
 |---|---|
-| Posts (`/blog`) | A resource list (§13.19): title, status ("Draft", "Published"), published date, likes and comments counts; a "New post" button and an "Import from DEV" button (§13.49); a publish switch per row; filter tabs All · Published · Drafts; delete with confirm |
-| New and edit post (`/blog/new`, `/blog/[id]`) | The block editor (§13.48) |
+| Posts (`/blog`) | A resource list (§13.19): title, status ("Draft", "Published"), published date, likes and comments counts; a "New post" button and an "Import from DEV" button (§13.49); a publish switch per row; filter tabs All · Published · Drafts; delete with confirm. A shared draft shows a "SHARED" Tag and, when it has unread feedback, a "2 new feedback" pill (§13.71) |
+| New and edit post (`/blog/new`, `/blog/[id]`) | The block editor (§13.48), with the Share dialog (§13.70) and the Feedback tab (§13.71) |
 | Comments (`/blog/comments`) | The moderation list (§13.50) |
 | Newsletter (`/blog/newsletter`) | One form like the profile's (§14.11, §13.21), no list: a **Show the signup box** switch, then the wording of the signup box (§13.34), of the two confirmation pages (§14.16) and of the confirmation email, each field showing the wording in use. Added in 9b.7 at the owner's request (2026-10-08: everything editable from the admin) |
 
@@ -4460,3 +4628,51 @@ the site is in these screens or in `content/copy.ts` as a default (`D86`: the ow
 edits everything from the admin).
 
 **Approved in:** the Phase 10a PR (issue #87).
+
+### 14.27 Shared draft page
+
+**Purpose and content.** A blog draft opened through its share link
+(`blog.chestlyace.me/drafts/<token>`, French `/fr/drafts/<token>`; D93), so the
+owner can get a read and feedback before publishing. The content is the draft's
+**last saved** row and markdown, exactly as the post page (§14.14) would render it.
+
+**References.** The owner's choice (2026-11-18): the real post page, with a draft
+banner and private feedback.
+
+**Layout.** The post page (§14.14) with these changes, in order:
+
+1. **Draft banner** (§13.68) above the post header, 32px above it (24px on phones).
+2. Post header, cover, contents, body and rail: unchanged. The header's date reads
+   "Not published" instead of a date; the reading time stays.
+3. **Reaction bar**: left out (likes are for published posts).
+4. **Post navigation** and **newsletter box**: left out.
+5. **Draft feedback form** (§13.69) in the comments' place, 96px below the prose
+   (64px on phones). Comments are never shown, whatever the post's setting.
+
+Header and footer are the blog's own; the language switcher (§13.62) moves between
+`/drafts/<token>` and `/fr/drafts/<token>`. Without a published French version
+(i18n §5), the French address shows the English text as a published post would.
+
+**Which answer the address gets.**
+
+| Case | Answer |
+|---|---|
+| Valid link, post is a draft | The page above |
+| Valid link, post is published | A **307** to the public post (`/<slug>`, or `/fr/<slug>`), so the link keeps working after publishing and starts showing the draft again if the post is unpublished |
+| Unknown or turned-off link, or deleted post | The blog's 404 (§13.67), the same as any missing page, so a guessed token learns nothing |
+
+**Not public.** The page is rendered on each request (never cached, `Cache-Control:
+private, no-store`), sends `X-Robots-Tag: noindex, nofollow` and a matching meta tag,
+`Referrer-Policy: no-referrer` (so the token never leaks to a site the draft links
+to), has no canonical or language alternates, and is left out of the sitemap, the
+RSS feed, the tag pages and the post list. Open Graph tags carry the title,
+description and cover, so a link pasted in a chat shows a preview; its title starts
+with "Draft:".
+
+**Components used.** §13.68, §13.69, and those of §14.14.
+
+**Motion.** As §14.14; the banner uses the default entrance.
+
+**Light and dark.** Nothing differs from the post page.
+
+**Approved in:** the shareable-drafts design PR (issue #160).
