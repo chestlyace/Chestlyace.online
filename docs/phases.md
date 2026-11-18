@@ -417,12 +417,19 @@ and whoever opens it can send private feedback that the owner reads in the admin
 
 | Step | Content | Status |
 |---|---|---|
-| S.1 Design | The specs, the schema, the route, the MCP tools and D93; docs only | In review (issue #160) |
-| S.2 Share links and the shared page | Migration (`share_token`, `share_created_at`), create / renew / turn off in the admin API, the Share dialog, `/drafts/[token]` and `/fr/drafts/[token]` with the draft banner, the 307 after publishing, the no-index and no-cache headers, `drafts` as a reserved slug, tests | Not started |
+| S.1 Design | The specs, the schema, the route, the MCP tools and D93; docs only | Done (PR #161) |
+| S.2 Share links and the shared page | Migration (`share_token`, `share_created_at`), create / renew / turn off in the admin API, the Share dialog, `/drafts/[token]` and `/fr/drafts/[token]` with the draft banner, the 307 after publishing, the no-index and no-cache headers, `drafts` as a reserved slug, tests | In review (issue #162) |
 | S.3 Feedback | Migration (`blog_draft_feedback`), the feedback form and its API with the contact form's spam protection, the owner's email, the Feedback tab and the Posts list marks, the privacy page line, the French copy, tests | Not started |
 | S.4 MCP tools | `blog_post_share`, `blog_post_unshare`, `blog_draft_feedback_*`, after Phase 13's blog tools, with tests | Not started |
 
-**Blocking:** the open points in the design PR (issue #160).
+**Decided** (owner, 2026-11-18, on PR #161): the proposals in the specs stand as written
+(one link per draft, a name and the text only, 300 words and 10 sends an hour, an email
+per feedback, chat previews on, the token stored as it is, placeholder wording).
+
+**Order and review** (owner, 2026-11-18): S.2 and S.3 first, then Phase 13's 13b.5 and
+13b.6, then S.4; one issue and one pull request per step, **stacked** as D90 describes,
+without waiting for a merge in between; the owner reviews and merges them in order at
+the end.
 
 **Done when:** a draft's link opens the draft with its banner for someone not signed
 in; feedback sent there appears in the editor's Feedback tab and by email; a turned-off
