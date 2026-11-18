@@ -67,7 +67,7 @@ describe("createPost", () => {
   });
 
   it("refuses the blog's own paths and unknown fields, and a taken address", async () => {
-    for (const slug of ["tags", "api", "rss.xml"]) {
+    for (const slug of ["tags", "api", "rss.xml", "drafts"]) {
       expect(await createPost(db, draft({ slug }))).toMatchObject({
         ok: false,
       });

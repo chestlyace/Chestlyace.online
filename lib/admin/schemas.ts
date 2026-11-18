@@ -392,6 +392,7 @@ export const RESERVED_BLOG_SLUGS = [
   "tags",
   "privacy",
   "newsletter",
+  "drafts",
   "rss.xml",
   "sitemap.xml",
   "robots.txt",
