@@ -406,3 +406,25 @@ with the right status code.
 **Done when:** an MCP client with a token can write and publish a blog post with a
 picture, add a project and a creatives piece, and the sites show them; a token without a
 scope is refused; a revoked token stops working; every call is in the Activity screen.
+
+---
+
+## Shareable blog drafts (owner request, 2026-11-18; D93)
+
+**Goal:** the owner shares a blog draft through a private link without publishing it,
+and whoever opens it can send private feedback that the owner reads in the admin
+(`design.md` §13.68–13.71, §14.27; `content-schema.md` §4; `mcp.md` §5).
+
+| Step | Content | Status |
+|---|---|---|
+| S.1 Design | The specs, the schema, the route, the MCP tools and D93; docs only | In review (issue #160) |
+| S.2 Share links and the shared page | Migration (`share_token`, `share_created_at`), create / renew / turn off in the admin API, the Share dialog, `/drafts/[token]` and `/fr/drafts/[token]` with the draft banner, the 307 after publishing, the no-index and no-cache headers, `drafts` as a reserved slug, tests | Not started |
+| S.3 Feedback | Migration (`blog_draft_feedback`), the feedback form and its API with the contact form's spam protection, the owner's email, the Feedback tab and the Posts list marks, the privacy page line, the French copy, tests | Not started |
+| S.4 MCP tools | `blog_post_share`, `blog_post_unshare`, `blog_draft_feedback_*`, after Phase 13's blog tools, with tests | Not started |
+
+**Blocking:** the open points in the design PR (issue #160).
+
+**Done when:** a draft's link opens the draft with its banner for someone not signed
+in; feedback sent there appears in the editor's Feedback tab and by email; a turned-off
+or renewed link answers 404; a published post's link goes to the post; the page is
+never indexed or listed; the public blog never shows a draft.

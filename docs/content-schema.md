@@ -310,7 +310,18 @@ blog_posts
   devto_id          integer                   -- set after an import or export (§13.49)
   devto_url         text
   like_count        integer not null default 0   -- kept in step with blog_likes
+  share_token       text unique               -- the draft's share link (D93); null = not shared
+  share_created_at  timestamptz               -- when the current link was made
   created_at, updated_at
+
+blog_draft_feedback                             -- private notes sent from a shared draft (D93)
+  id                serial primary key
+  post_id           integer not null references blog_posts on delete cascade
+  name              text not null             -- ≤ 80 characters
+  body              text not null             -- plain text, ≤ DRAFT_FEEDBACK_MAX_WORDS words
+  lang              text not null default 'en'   -- 'en' | 'fr': the page it was sent from
+  read_at           timestamptz               -- null = unread
+  created_at
 
 blog_likes                                      -- anyone can like, no account
   post_id           integer references blog_posts on delete cascade
@@ -359,11 +370,21 @@ The newsletter's subscribers are not stored here: they are a **Resend segment**
 (what Resend used to call an audience; its id is `RESEND_AUDIENCE_ID`); pending confirmations are signed links
 (`NEWSLETTER_SECRET`), not rows.
 
+**Shared drafts (D93).** `share_token` is 32 random bytes from `node:crypto`,
+base64url (43 characters). It is stored as it is, not hashed, so the admin can show
+the link again at any time. That is acceptable because it only opens one draft, and
+it can be renewed or turned off at once. Turning sharing off sets `share_token` and
+`share_created_at` to null; "New link" replaces both. Feedback stays when the link
+changes or the post is published, and goes when the post is deleted. No IP address
+or browser data is stored with feedback (the rate limit is in memory, as D69); the
+privacy page (`design.md` §14.18) gains a line saying that feedback stores the name
+and text given.
+
 **Images.** Uploaded through the admin to Cloudinary (§3 above uses the same
 signature route, with a `blog` folder, `portfolio/blog`, max 1600×1600).
 
 **Validation.** Zod on every write (as D74): `slug` unique and not one of the
-blog's own paths (`tags`, `privacy`, `newsletter`, `rss.xml`, `sitemap.xml`,
+blog's own paths (`tags`, `privacy`, `newsletter`, `drafts`, `rss.xml`, `sitemap.xml`,
 `robots.txt`, `api`), at most 8 tags,
 `title` ≤ 120 characters, `description` ≤ 300; the editor also checks each block
 (`docs/blog-markdown.md`) before a post can be published, including that every
