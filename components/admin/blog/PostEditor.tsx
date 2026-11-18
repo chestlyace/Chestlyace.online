@@ -352,11 +352,13 @@ export function PostEditor({
 
   // From `xl`, Write sits beside the preview, or beside the feedback when that tab
   // is chosen (§13.71); below it every tab is on its own.
-  const split = wide && tab !== "markdown";
-  const showWrite = split || tab === "write";
-  const showFeedback = hasFeedbackTab && tab === "feedback";
-  const showPreview = (split && !showFeedback) || tab === "preview";
-  const activeTab: Tab = wide && tab === "preview" ? "write" : tab;
+  // A Feedback tab asked for before there is one (`?tab=feedback`) opens Write.
+  const view: Tab = tab === "feedback" && !hasFeedbackTab ? "write" : tab;
+  const split = wide && view !== "markdown";
+  const showWrite = split || view === "write";
+  const showFeedback = view === "feedback";
+  const showPreview = (split && !showFeedback) || view === "preview";
+  const activeTab: Tab = wide && view === "preview" ? "write" : view;
   const tabs: [Tab, string][] = [
     ["write", "Write"],
     ...(wide ? [] : ([["preview", "Preview"]] as [Tab, string][])),

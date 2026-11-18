@@ -67,9 +67,7 @@ export function DraftFeedback({
     setErrors(found);
     const first = (Object.keys(found) as Field[])[0];
     if (first) {
-      form.current
-        ?.querySelector<HTMLElement>(`[name="${first}"]`)
-        ?.focus();
+      form.current?.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
 
@@ -123,7 +121,11 @@ export function DraftFeedback({
       .join(" ") || undefined;
 
   return (
-    <section id="feedback" aria-labelledby={`${ids}-title`} className="scroll-mt-28">
+    <section
+      id="feedback"
+      aria-labelledby={`${ids}-title`}
+      className="scroll-mt-28"
+    >
       <h2 id={`${ids}-title`} className="text-h3 text-foreground">
         {text.title}
       </h2>

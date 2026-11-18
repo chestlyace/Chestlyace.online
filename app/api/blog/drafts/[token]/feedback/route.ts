@@ -59,7 +59,10 @@ export async function POST(
     return reply({ error: "bad-request" }, 400);
   }
 
-  const bot = looksLikeBot({ website: body.website, elapsedMs: body.elapsedMs });
+  const bot = looksLikeBot({
+    website: body.website,
+    elapsedMs: body.elapsedMs,
+  });
   // A filled hidden field gets a fake success, so a bot learns nothing.
   if (bot === "honeypot") return reply({ ok: true }, 201);
   if (bot === "too-fast") return reply({ error: "too-fast" }, 400);

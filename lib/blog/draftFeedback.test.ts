@@ -50,7 +50,13 @@ const send = (
 ) =>
   addFeedback(
     db,
-    { token, name: "Ada", body: "Lovely, but cut the intro.", lang: "en", ...over },
+    {
+      token,
+      name: "Ada",
+      body: "Lovely, but cut the intro.",
+      lang: "en",
+      ...over,
+    },
     { maxWords: 300 },
   );
 
@@ -85,7 +91,12 @@ describe("addFeedback", () => {
     expect(result).toMatchObject({
       ok: true,
       post: { id, title: "A draft" },
-      feedback: { name: "Ada", body: "Cut the intro.", lang: "fr", readAt: null },
+      feedback: {
+        name: "Ada",
+        body: "Cut the intro.",
+        lang: "fr",
+        readAt: null,
+      },
     });
     expect(await listFeedback(db, id)).toHaveLength(1);
   });

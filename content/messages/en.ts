@@ -302,7 +302,8 @@ export const en = {
       /** The private feedback form under a shared draft (design.md §13.69). */
       feedback: {
         title: "Feedback",
-        intro: "Only Chestly sees what you send here. It won't appear on the post.",
+        intro:
+          "Only Chestly sees what you send here. It won't appear on the post.",
         name: "Name",
         body: "Feedback",
         words: "{count} / {max} words",

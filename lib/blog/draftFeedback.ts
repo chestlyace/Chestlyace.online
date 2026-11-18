@@ -3,10 +3,7 @@ import * as schema from "@/db/schema";
 import { isShareToken } from "@/lib/admin/shareApi";
 import type { Database } from "@/lib/db";
 import type { Lang } from "@/lib/i18n";
-import {
-  feedbackErrors,
-  type FeedbackFieldError,
-} from "./feedbackText";
+import { feedbackErrors, type FeedbackFieldError } from "./feedbackText";
 
 export {
   DEFAULT_FEEDBACK_MAX_WORDS,
@@ -74,10 +71,7 @@ export async function addFeedback(
     .select({ id: blogPosts.id, title: blogPosts.title })
     .from(blogPosts)
     .where(
-      and(
-        eq(blogPosts.shareToken, input.token),
-        eq(blogPosts.status, "draft"),
-      ),
+      and(eq(blogPosts.shareToken, input.token), eq(blogPosts.status, "draft")),
     )
     .limit(1);
   if (!post) return { ok: false, status: 404, error: "not-shared" };

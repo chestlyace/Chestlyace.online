@@ -126,9 +126,9 @@ describe("POST /api/blog/drafts/<token>/feedback", () => {
   it("refuses the same text twice in a row from one address", async () => {
     expect((await send({ body: "Same words." })).status).toBe(201);
     expect((await send({ body: "  same   WORDS. " })).status).toBe(409);
-    expect((await send({ body: "Same words." }, { ip: "2.2.2.2" })).status).toBe(
-      201,
-    );
+    expect(
+      (await send({ body: "Same words." }, { ip: "2.2.2.2" })).status,
+    ).toBe(201);
     expect(await stored()).toHaveLength(2);
   });
 

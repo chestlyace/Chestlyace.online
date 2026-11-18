@@ -17,10 +17,7 @@ export function feedbackMaxWords(
 }
 
 export type FeedbackFieldError =
-  | "name-required"
-  | "name-long"
-  | "body-required"
-  | "body-long";
+  "name-required" | "name-long" | "body-required" | "body-long";
 
 /** What is wrong with each field, by code (the form words them in its language). */
 export function feedbackErrors(
