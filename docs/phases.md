@@ -419,8 +419,8 @@ and whoever opens it can send private feedback that the owner reads in the admin
 |---|---|---|
 | S.1 Design | The specs, the schema, the route, the MCP tools and D93; docs only | Done (PR #161) |
 | S.2 Share links and the shared page | Migration (`share_token`, `share_created_at`), create / renew / turn off in the admin API, the Share dialog, `/drafts/[token]` and `/fr/drafts/[token]` with the draft banner, the 307 after publishing, the no-index and no-cache headers, `drafts` as a reserved slug, tests | In review (PR #163) |
-| S.3 Feedback | Migration (`blog_draft_feedback`), the feedback form and its API with the contact form's spam protection, the owner's email, the Feedback tab and the Posts list marks, the privacy page line, the French copy, tests | In review (issue #164) |
-| S.4 MCP tools | `blog_post_share`, `blog_post_unshare`, `blog_draft_feedback_*`, after Phase 13's blog tools, with tests | Not started |
+| S.3 Feedback | Migration (`blog_draft_feedback`), the feedback form and its API with the contact form's spam protection, the owner's email, the Feedback tab and the Posts list marks, the privacy page line, the French copy, tests | In review (PR #165) |
+| S.4 MCP tools | `blog_post_share`, `blog_post_unshare`, `blog_draft_feedback_*`, after Phase 13's blog tools, with tests | In review (issue #168) |
 
 **Decided** (owner, 2026-11-18, on PR #161): the proposals in the specs stand as written
 (one link per draft, a name and the text only, 300 words and 10 sends an hour, an email
