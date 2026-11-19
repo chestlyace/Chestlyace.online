@@ -165,7 +165,7 @@ describe("general tools", () => {
     expect(bad.isError).toBe(true);
   });
 
-  it("serves the guides as resources, and two prompts", async () => {
+  it("serves the guides as resources, and the prompts", async () => {
     const { client } = await connect(["read"]);
     const uris = (await client.listResources()).resources
       .map((r) => r.uri)
@@ -182,7 +182,19 @@ describe("general tools", () => {
     const prompts = (await client.listPrompts()).prompts
       .map((p) => p.name)
       .sort();
-    expect(prompts).toEqual(["add_project", "write_blog_post"]);
+    expect(prompts).toEqual([
+      "add_creative_piece",
+      "add_project",
+      "add_skill",
+      "write_blog_post",
+    ]);
+    const piece = await client.getPrompt({
+      name: "add_creative_piece",
+      arguments: { name: "Wedding in Buea", kind: "photography" },
+    });
+    expect((piece.messages[0].content as { text: string }).text).toContain(
+      "photo_events_create",
+    );
     const prompt = await client.getPrompt({
       name: "write_blog_post",
       arguments: { topic: "Caching" },

@@ -7,6 +7,12 @@ FAQ, socials and the profile, manage the creatives pieces and events, change the
 settings, and moderate comments. Nothing is reachable without a token the owner
 created, and every call is logged.
 
+**Status (2026-11-19).** Built in steps 13b.1–13b.6 (`phases.md`, Phase 13): tokens and
+activity, the server, the blog, portfolio, creatives and settings tools, the prompts
+(`write_blog_post`, `add_project`, `add_creative_piece`, `add_skill`) and an end-to-end
+test with the SDK's HTTP client (`lib/mcp/agentOverHttp.test.ts`). The owner's setup is
+`launch.md` §8b. The draft-sharing tools (D93) are added in shareable drafts S.4.
+
 ## 1. Scope
 
 | In | Out |
