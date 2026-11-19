@@ -42,7 +42,7 @@ export function createMcpServer(
     { name: "chestlyace-admin", version: "1.0.0" },
     {
       instructions:
-        "Tools to run Chestly Ace's websites (portfolio, blog, creatives). Start with whoami and list_resources; read get_guide before writing a blog post or uploading pictures. New content is created unpublished unless you have the publish scope. Deleting needs the item's exact name in `confirm`.",
+        "Tools to run Chestly Ace's websites: the portfolio (profile_*, projects_*, skills_*, journey_*, volunteering_*, certifications_*, services_*, faqs_*, socials_*), the blog (blog_*, comments), the creatives site (design_pieces_*, photo_events_*, creative_services_*, creative_faqs_*, creatives_settings_*) and the newsletter (newsletter_settings_*), plus picture uploads (media_*). Start with whoami and list_resources; read get_guide before writing a blog post or uploading pictures. New content is created unpublished unless you have the publish scope. Deleting needs the item's exact name in `confirm`.",
     },
   );
 
@@ -150,6 +150,56 @@ export function createMcpServer(
           content: {
             type: "text",
             text: `Add the project "${name}" to the portfolio.\n\n1. Call list_resources and read the projects fields.\n2. Upload its pictures with media_upload_many_from_urls (use "project"; or media_upload_from_url for one).\n3. Create it with projects_create (unpublished unless you may publish and the owner asked).\n4. Add the French text in translations.fr.\n5. Tell the owner what you created.`,
+          },
+        },
+      ],
+    }),
+  );
+
+  server.registerPrompt(
+    "add_creative_piece",
+    {
+      title: "Add a creative piece",
+      description:
+        "The order of work for a graphic design piece or a photography event with pictures.",
+      argsSchema: {
+        name: z.string().describe("The piece's or the event's name"),
+        kind: z
+          .enum(["design", "photography"])
+          .describe("A design piece, or a photography event"),
+      },
+    },
+    ({ name, kind }) => {
+      const tool = kind === "design" ? "design_pieces" : "photo_events";
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `Add "${name}" to the creatives site (${kind === "design" ? "graphic design" : "photography"}).\n\n1. Call list_resources and read the ${tool} fields; read get_guide("images").\n2. Upload the pictures with media_upload_many_from_urls (use "creatives"), keeping each one's width and height.\n3. Create it with ${tool}_create: every picture needs alt text. It is unpublished unless you may publish and the owner asked.\n4. Add the French text in translations.fr.\n5. Tell the owner what you created.`,
+            },
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerPrompt(
+    "add_skill",
+    {
+      title: "Add a skill",
+      description:
+        "The order of work for a skill in the portfolio's logo grid.",
+      argsSchema: { name: z.string().describe("The skill's name") },
+    },
+    ({ name }) => ({
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: `Add the skill "${name}" to the portfolio.\n\n1. Call list_resources and read the skills fields (the category and the Devicon icon slug).\n2. Check skills_list so it is not added twice.\n3. Create it with skills_create (unpublished unless you may publish and the owner asked), then skills_reorder if it belongs elsewhere in its group.\n4. Tell the owner what you added.`,
           },
         },
       ],
