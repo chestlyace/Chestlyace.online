@@ -400,7 +400,7 @@ with the right status code.
 | 13b.2 Server, general and media tools | `@modelcontextprotocol/sdk`, `/mcp` on the admin host, `whoami`, `list_resources`, `get_guide`, uploads | In review (PR #136) |
 | 13b.3 Blog tools | Posts (with French), validation, publish, duplicate, delete, comments moderation | In review (PR #138) |
 | 13b.4 Portfolio tools | Projects, skills, experience, volunteering, certifications, services, FAQ, socials, profile | In review (issue #139) |
-| 13b.5 Creatives and settings tools | Pieces, events, creative services and FAQ, the two settings | Not started |
+| 13b.5 Creatives and settings tools | Pieces, events, creative services and FAQ, the two settings | In review (issue #141) |
 | 13b.6 Docs and end-to-end | `launch.md` section, prompts and resources, an end-to-end run with the SDK client | Not started |
 
 **Done when:** an MCP client with a token can write and publish a blog post with a
