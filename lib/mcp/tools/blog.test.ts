@@ -36,6 +36,7 @@ describe("blog tools and scopes", () => {
     const read = await names(["read"]);
     expect(read.sort()).toEqual([
       "blog_comments_list",
+      "blog_draft_feedback_list",
       "blog_get",
       "blog_list",
       "blog_validate",
