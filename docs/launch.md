@@ -315,6 +315,67 @@ Before the cutover, check:
 - **Taking French offline** (if ever needed): `FRENCH_PUBLIC = false` in
   `lib/i18n/index.ts` makes every `/fr` address answer 404 in production.
 
+## 8b. Agent access (MCP, Phase 13)
+
+An AI agent (Claude Code, Claude Desktop, Cursor…) can run the admin for you over MCP
+(D92, `docs/mcp.md`): write and publish posts, add projects, skills, creatives pieces
+and events, change the settings, upload pictures, moderate comments. It only gets in
+with a token you create, and only does what that token's scopes allow.
+
+**1. Create a token.** Admin → **Settings → Agent access** → **New token**. Name it
+after where it will be used ("Claude Code on my laptop"), choose its scopes and when it
+expires:
+
+| Scope | What the agent may do |
+|---|---|
+| `read` | Read everything (always included) |
+| `write` | Create and change content; new items are unpublished, so nothing goes live by itself |
+| `publish` | Put things live: publish posts, projects, pieces and events, publish a French version, turn the newsletter on |
+| `delete` | Delete items (each needs its exact name repeated) and hide or delete comments |
+| `media` | Upload pictures and the résumé |
+
+Start with `write` and `media` and keep publishing for yourself; add `publish` or
+`delete` only to a token you watch. The token (`cmcp_…`) is shown **once**, with a Copy
+button and ready-made snippets: copy it then, it can't be shown again.
+
+**2. Connect a client.** The server is `https://admin.chestlyace.me/mcp` (Streamable
+HTTP); the token goes in the header `Authorization: Bearer cmcp_…`.
+
+- **Claude Code** (in a terminal; `--scope user` makes it available in every project):
+
+  ```bash
+  claude mcp add --transport http chestly --scope user https://admin.chestlyace.me/mcp --header "Authorization: Bearer cmcp_…"
+  ```
+
+- **Cursor**: in `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json`, with the token
+  in an environment variable so it is not written in the file:
+
+  ```json
+  {
+    "mcpServers": {
+      "chestly": {
+        "url": "https://admin.chestlyace.me/mcp",
+        "headers": { "Authorization": "Bearer ${env:CHESTLY_MCP_TOKEN}" }
+      }
+    }
+  }
+  ```
+
+- **Claude Desktop**: Customize → Connectors → **+ Add** → **Add custom connector**, the
+  server address above, and under **Request headers** the `Authorization` header with
+  `Bearer cmcp_…`. Claude's help page documents request headers for fixed credentials;
+  check with a short-lived token that the connector connects (it should list the tools)
+  before relying on it.
+
+**3. Check it.** Ask the agent to call `whoami`: it answers with the token's name, its
+scopes and when it expires. Then ask it to list the posts. Both calls appear in
+**Settings → Agent access → Activity**.
+
+**4. Watch and revoke.** The Activity screen lists the latest 200 calls (time, token,
+tool, ok or error, a one-line summary), filterable by token. **Revoke** stops a token at
+once; an agent using it is refused on its next call. Each token is limited to 120
+requests and 30 writes a minute.
+
 ## 9. Later
 
 - In Search Console add each host (the blog and the creatives site included) and
