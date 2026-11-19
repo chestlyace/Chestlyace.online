@@ -1,6 +1,7 @@
 import type { AnyTool } from "../tool";
 import { blogTools } from "./blog";
 import { creativesTools } from "./creatives";
+import { draftTools } from "./drafts";
 import { portfolioTools } from "./portfolio";
 import { generalTools } from "./general";
 import { mediaTools } from "./media";
@@ -12,6 +13,7 @@ export function allTools(): AnyTool[] {
     ...generalTools,
     ...mediaTools,
     ...blogTools,
+    ...draftTools,
     ...portfolioTools,
     ...creativesTools,
   ];
