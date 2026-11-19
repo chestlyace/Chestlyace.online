@@ -337,6 +337,29 @@ export const readerVerification = pgTable("reader_verification", {
 // Comments under a post (§13.37): plain text, one level of replies. A deleted
 // account leaves its comments behind as "Deleted user" (`user_id` set null); a post
 // or a parent comment going takes its comments with it.
+// Private notes sent from a shared draft (D93, content-schema.md §4, design.md
+// §13.69). Only the owner sees them; they go when the post is deleted.
+export const blogDraftFeedback = pgTable(
+  "blog_draft_feedback",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    body: text("body").notNull(),
+    lang: text("lang").notNull().default("en"),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    check("blog_draft_feedback_lang", sql`${t.lang} IN ('en', 'fr')`),
+    index("blog_draft_feedback_post_idx").on(t.postId, t.createdAt),
+  ],
+);
+
 export const blogComments = pgTable(
   "blog_comments",
   {

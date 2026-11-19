@@ -26,6 +26,8 @@ export type BlogPostSummary = {
   french: "live" | "draft" | "none";
   /** Whether the post has a share link (D93, design.md §13.71). */
   shared: boolean;
+  /** Feedback sent on the shared draft that the owner hasn't marked read. */
+  unreadFeedback: number;
 };
 
 const invalid = (fields: Record<string, string>): Failure => ({
@@ -97,6 +99,7 @@ export async function listPosts(db: Database): Promise<BlogPostSummary[]> {
         "live" | "draft" | "none"
       >`case when btrim(coalesce(${blogPosts.translations} -> 'fr' ->> 'content', '')) = '' then 'none' when ${blogPosts.translations} -> 'fr' ->> 'published' = 'true' then 'live' else 'draft' end`,
       shared: sql<boolean>`${blogPosts.shareToken} is not null`,
+      unreadFeedback: sql<number>`(select count(*)::int from blog_draft_feedback f where f.post_id = blog_posts.id and f.read_at is null)`,
     })
     .from(blogPosts)
     .orderBy(

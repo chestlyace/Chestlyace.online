@@ -299,6 +299,35 @@ export const en = {
       title: "Draft: {title} — Chestly Ace",
       ogTitle: "Draft: {title}",
       justNow: "just now",
+      /** The private feedback form under a shared draft (design.md §13.69). */
+      feedback: {
+        title: "Feedback",
+        intro:
+          "Only Chestly sees what you send here. It won't appear on the post.",
+        name: "Name",
+        body: "Feedback",
+        words: "{count} / {max} words",
+        send: "Send feedback",
+        sending: "Sending…",
+        sent: "Thanks, your feedback was sent.",
+        sendMore: "Send more",
+        website: "Leave this empty",
+        errors: {
+          "name-required": "Add your name.",
+          "name-long": "Keep your name under 80 characters.",
+          "body-required": "Write your feedback first.",
+          "body-long": "That's over {max} words. Please shorten it.",
+        },
+        failures: {
+          rateLimited:
+            "That's a lot of feedback at once. Please try again in a little while.",
+          notShared:
+            "This draft isn't shared any more, so your feedback wasn't sent.",
+          duplicate: "You've already sent that.",
+          failed: "Your feedback couldn't be sent.",
+          retry: "Try again",
+        },
+      },
     },
     post: {
       allPosts: "All posts",
@@ -455,7 +484,7 @@ export const en = {
       description: "What the blog stores about readers, and why.",
       updatedLabel: "Last updated {date}",
       /** ISO date of the last change to the text below (update it with the text). */
-      updated: "2026-10-08",
+      updated: "2026-11-19",
       // DRAFT WORDING for the owner's approval (design.md §14.18, Phase 9b.5b).
       // `{contact}` is the contact form's address.
       text: `
@@ -467,6 +496,7 @@ This blog keeps very little about you. This page says what, and why.
 - **Your account, if you sign in to comment.** GitHub or Google shares your **name, email address and profile picture** with me, and I store them. A sign-in cookie (\`reader.session_token\`) keeps you signed in for up to 30 days.
 - **Your comments**, the likes you give to comments, and any comments you report.
 - **Newsletter.** If you subscribe, I keep your **email address** in Resend, the email service I send the newsletter with. It is not stored in this blog's own database. I only add it after you open the link in the confirmation email; if you never do, it is not kept.
+- **Feedback on a draft.** If I share an unpublished post with you and you send feedback, I keep the **name and the text** you give, and get them by email. Only I see them; no account, email address or cookie is involved.
 
 ## Why
 

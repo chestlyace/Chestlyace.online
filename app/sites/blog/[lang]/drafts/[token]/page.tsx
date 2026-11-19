@@ -4,12 +4,14 @@ import { cache } from "react";
 import { Container } from "@/components/shared/Container";
 import { Reveal } from "@/components/shared/Reveal";
 import { DraftBanner } from "@/components/blog/DraftBanner";
+import { DraftFeedback } from "@/components/blog/DraftFeedback";
 import { PostHeader } from "@/components/blog/PostHeader";
 import { Prose } from "@/components/blog/Prose";
 import { TableOfContents } from "@/components/blog/TableOfContents";
 import { proseComponentsFor } from "@/components/blog/proseComponents";
 import { getMessages } from "@/content/messages";
 import { getSharedDraft } from "@/lib/blog/drafts";
+import { feedbackMaxWords } from "@/lib/blog/feedbackText";
 import { renderMarkdown } from "@/lib/blog/markdown";
 import { getDb } from "@/lib/db";
 import { isLang, localizedPath, type Lang } from "@/lib/i18n";
@@ -59,8 +61,8 @@ export async function generateMetadata({
   };
 }
 
-// The post page (§14.14) with the draft banner on top; no likes, post navigation,
-// newsletter or comments.
+// The post page (§14.14) with the draft banner on top and the private feedback form
+// (§13.69) in the comments' place; no likes, post navigation or newsletter.
 export default async function SharedDraftPage({
   params,
 }: PageProps<"/sites/blog/[lang]/drafts/[token]">) {
@@ -84,7 +86,11 @@ export default async function SharedDraftPage({
     <div className="pt-28 pb-24 md:pb-40">
       <Container>
         <div className="lg:max-w-[calc(100%*10/12)]">
-          <DraftBanner savedAt={post.updatedAt} lang={lang} />
+          <DraftBanner
+            savedAt={post.updatedAt}
+            lang={lang}
+            feedbackHref="#feedback"
+          />
           <div className="mt-6 md:mt-8">
             <PostHeader post={post} lang={lang} />
           </div>
@@ -119,6 +125,15 @@ export default async function SharedDraftPage({
           <article className="min-w-0 lg:col-span-8" lang={textLang}>
             <Prose>{content}</Prose>
           </article>
+        </div>
+
+        <div className="mt-16 md:mt-24 lg:max-w-[calc(100%*8/12)]">
+          <DraftFeedback
+            token={token}
+            lang={lang}
+            maxWords={feedbackMaxWords()}
+            text={m.draft.feedback}
+          />
         </div>
       </Container>
     </div>

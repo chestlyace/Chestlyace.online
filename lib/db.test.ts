@@ -55,6 +55,7 @@ describe("migrations", () => {
       "blog_comment_likes",
       "blog_comment_reports",
       "blog_comments",
+      "blog_draft_feedback",
       "blog_likes",
       "blog_posts",
       "certifications",

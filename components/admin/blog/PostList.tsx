@@ -224,6 +224,11 @@ export function PostList({ initial }: { initial: BlogPostSummary[] }) {
                       Shared
                     </Tag>
                   )}
+                  {item.unreadFeedback > 0 && (
+                    <Chip tone="on" className="ml-2">
+                      {item.unreadFeedback} new feedback
+                    </Chip>
+                  )}
                   {item.french !== "none" && (
                     <Chip
                       tone={item.french === "live" ? "on" : "off"}

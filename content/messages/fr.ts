@@ -271,6 +271,34 @@ export const fr: Messages = {
       title: "Brouillon : {title} — Chestly Ace",
       ogTitle: "Brouillon : {title}",
       justNow: "à l’instant",
+      feedback: {
+        title: "Votre avis",
+        intro:
+          "Seul Chestly voit ce que vous envoyez ici. Rien n’apparaîtra sur l’article.",
+        name: "Nom",
+        body: "Votre avis",
+        words: "{count} / {max} mots",
+        send: "Envoyer mon avis",
+        sending: "Envoi…",
+        sent: "Merci, votre avis a bien été envoyé.",
+        sendMore: "Envoyer autre chose",
+        website: "Laissez ce champ vide",
+        errors: {
+          "name-required": "Indiquez votre nom.",
+          "name-long": "Votre nom doit faire moins de 80 caractères.",
+          "body-required": "Écrivez d’abord votre avis.",
+          "body-long": "Cela dépasse {max} mots. Merci de raccourcir.",
+        },
+        failures: {
+          rateLimited:
+            "Cela fait beaucoup d’envois d’un coup. Réessayez dans un moment.",
+          notShared:
+            "Ce brouillon n’est plus partagé : votre avis n’a pas été envoyé.",
+          duplicate: "Vous avez déjà envoyé ce message.",
+          failed: "Votre avis n’a pas pu être envoyé.",
+          retry: "Réessayer",
+        },
+      },
     },
     post: {
       allPosts: "Tous les articles",
@@ -422,7 +450,7 @@ export const fr: Messages = {
       description:
         "Ce que le blog conserve au sujet de ses lecteurs, et pourquoi.",
       updatedLabel: "Dernière mise à jour : {date}",
-      updated: "2026-10-08",
+      updated: "2026-11-19",
       // BROUILLON pour relecture par le propriétaire (design.md §14.18, Phase 9b.5b) :
       // texte relatif aux données personnelles, à faire relire avant la mise en ligne
       // du français. `{contact}` est l’adresse du formulaire de contact.
@@ -435,6 +463,7 @@ Ce blog conserve très peu de choses à votre sujet. Cette page explique lesquel
 - **Votre compte, si vous vous connectez pour commenter.** GitHub ou Google me transmet votre **nom, votre adresse e-mail et votre photo de profil**, et je les conserve. Un cookie de connexion (\`reader.session_token\`) vous garde connecté jusqu’à 30 jours.
 - **Vos commentaires**, les « j’aime » que vous donnez aux commentaires, et les commentaires que vous signalez.
 - **Lettre d’information.** Si vous vous abonnez, votre **adresse e-mail** est conservée chez Resend, le service d’e-mail avec lequel j’envoie la lettre. Elle n’est pas stockée dans la base de données de ce blog. Je ne l’ajoute qu’une fois que vous avez ouvert le lien de l’e-mail de confirmation ; si vous ne le faites jamais, elle n’est pas conservée.
+- **Votre avis sur un brouillon.** Si je partage avec vous un article non publié et que vous m’envoyez votre avis, je conserve le **nom et le texte** que vous donnez, et je les reçois par e-mail. Personne d’autre que moi ne les voit ; aucun compte, adresse e-mail ni cookie n’est en jeu.
 
 ## Pourquoi
 
