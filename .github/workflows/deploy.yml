@@ -1,0 +1,48 @@
+# Deploys main to the server on every push (docs/hosting.md §6, D94). The server
+# never talks to GitHub: the commit is sent to it over SSH and built there.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time; a newer push waits for the running one to finish.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    env:
+      TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # The deploy script goes up as a file too: piped into `bash -s`, any command
+      # in it that reads stdin would swallow the rest of the script.
+      - name: Upload the commit
+        run: |
+          ssh "$TARGET" "mkdir -p /srv/chestlyace/incoming"
+          git archive --format=tar.gz "$GITHUB_SHA" |
+            ssh "$TARGET" "cat > /srv/chestlyace/incoming/$GITHUB_SHA.tar.gz"
+          ssh "$TARGET" "cat > /srv/chestlyace/incoming/deploy-$GITHUB_SHA.sh" < deploy/deploy.sh
+
+      - name: Build and switch
+        run: ssh "$TARGET" "bash /srv/chestlyace/incoming/deploy-$GITHUB_SHA.sh $GITHUB_SHA < /dev/null"
