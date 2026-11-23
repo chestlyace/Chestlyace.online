@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { decideRoute, siteFromHost, type RoutingInput } from "@/lib/sites";
+import {
+  decideRoute,
+  overridesAllowed,
+  siteFromHost,
+  type RoutingInput,
+} from "@/lib/sites";
 
 describe("siteFromHost", () => {
   it.each([
@@ -456,5 +461,25 @@ describe("old addresses (ia-content.md §6)", () => {
         allowOverride: true,
       }).kind,
     ).toBe("rewrite");
+  });
+});
+
+describe("overridesAllowed", () => {
+  it.each([
+    ["development", { NODE_ENV: "development" }, true],
+    ["self-hosted production (next start)", { NODE_ENV: "production" }, false],
+    [
+      "self-hosted production with a pulled VERCEL_ENV",
+      { NODE_ENV: "production", VERCEL_ENV: "development" },
+      false,
+    ],
+    ["Vercel preview", { NODE_ENV: "production", VERCEL_ENV: "preview" }, true],
+    [
+      "Vercel production",
+      { NODE_ENV: "production", VERCEL_ENV: "production" },
+      false,
+    ],
+  ])("%s", (_, env, expected) => {
+    expect(overridesAllowed(env as NodeJS.ProcessEnv)).toBe(expected);
   });
 });

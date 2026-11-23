@@ -16,7 +16,8 @@ import {
 // calls revalidateTag(BLOG_TAG).
 export const BLOG_TAG = "blog";
 
-const deployment = process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
+const deployment =
+  process.env.GIT_COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
 
 // In `next dev` reads are never cached, so edits show on the next refresh.
 function cached<Args extends unknown[], Result>(

@@ -15,7 +15,8 @@ import {
 // page stays static until something changes (D74).
 export const CREATIVES_TAG = "creatives";
 
-const deployment = process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
+const deployment =
+  process.env.GIT_COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
 
 // In `next dev` reads are never cached, so edits show on the next refresh.
 function cached<Args extends unknown[], Result>(

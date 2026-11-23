@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { PREVIEW_SITE_COOKIE, decideRoute } from "@/lib/sites";
+import {
+  PREVIEW_SITE_COOKIE,
+  decideRoute,
+  overridesAllowed,
+} from "@/lib/sites";
 
 // The admin is never to be indexed (D71): every response says so, on top of the
 // page's own robots meta and robots.txt.
@@ -14,7 +18,7 @@ export function proxy(request: NextRequest) {
     search: request.nextUrl.search,
     siteParam: request.nextUrl.searchParams.get("site"),
     siteCookie: request.cookies.get(PREVIEW_SITE_COOKIE)?.value,
-    allowOverride: process.env.VERCEL_ENV !== "production",
+    allowOverride: overridesAllowed(),
   });
 
   // Old addresses move for good (ia-content.md §6).
@@ -65,6 +69,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|_vercel|.*\\.(?:png|jpe?g|gif|svg|webp|avif|ico|woff2?)$).*)",
+    "/((?!_next/static|_next/image|.*\\.(?:png|jpe?g|gif|svg|webp|avif|ico|woff2?)$).*)",
   ],
 };
