@@ -4,6 +4,12 @@ How to take `chestlyace.me` and `admin.chestlyace.me` live on Vercel, and
 retire the old EC2 site (Phase 8; decisions Q17, Q20, D76–D79). The owner does
 these steps; nothing here changes code. Tick each box as you go.
 
+> **Hosting moved (2026-11-23, D94).** The site now runs on an Oracle Cloud server,
+> not Vercel. The Vercel steps below stay as the record of the first launch; for
+> the server, its environment file, deploys and DNS, follow [`hosting.md`](./hosting.md).
+> The variables in §2 are the same; they now live in the server's environment
+> file (`hosting.md` §4). Vercel Web Analytics (§1, §7) is gone.
+
 **Order of events.** Prepare everything on a Vercel preview first. Only the last
 section (DNS) changes what visitors see, and it is reversible until the old
 server is shut down.
