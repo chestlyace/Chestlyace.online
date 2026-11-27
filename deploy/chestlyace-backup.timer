@@ -1,0 +1,12 @@
+# /etc/systemd/system/chestlyace-backup.timer (docs/hosting.md §3a). The dump runs
+# at 02:30 UTC, before the daily disk snapshot at 03:00 UTC (§3b), so each
+# snapshot also holds that night's dump.
+[Unit]
+Description=Nightly dump of the chestlyace database
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

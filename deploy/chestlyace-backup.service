@@ -1,0 +1,13 @@
+# /etc/systemd/system/chestlyace-backup.service (docs/hosting.md §3a). Run each
+# night by chestlyace-backup.timer: dumps the database to
+# /var/backups/chestlyace/chestlyace-<date>.dump and keeps the last 7.
+# ($$ and %% are systemd's escapes for $ and %.)
+[Unit]
+Description=Nightly dump of the chestlyace database
+After=postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=oneshot
+User=postgres
+ExecStart=/bin/sh -c 'pg_dump --format=custom --file=/var/backups/chestlyace/chestlyace-$$(date -u +%%F).dump chestlyace && find /var/backups/chestlyace -name "chestlyace-*.dump" -mtime +6 -delete'

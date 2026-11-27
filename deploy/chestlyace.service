@@ -8,8 +8,8 @@
 # §2–§3); only Caddy, on the same machine, reaches it.
 [Unit]
 Description=chestlyace.me (Next.js)
-After=network-online.target
-Wants=network-online.target
+After=network-online.target postgresql.service
+Wants=network-online.target postgresql.service
 
 [Service]
 Type=simple

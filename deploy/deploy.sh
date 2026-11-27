@@ -61,6 +61,13 @@ printf '\n# Written by deploy.sh: keys the data cache to this commit.\nGIT_COMMI
 cd "$RELEASE"
 log "Installing dependencies"
 pnpm install --frozen-lockfile
+
+# Migrations run before the build, which reads the database (D67), and before the
+# switch: if one fails, nothing switches. The live release keeps serving on the
+# migrated schema meanwhile, so a migration must not break the code before it.
+log "Migrating the database"
+node --env-file=.env.production.local node_modules/drizzle-kit/bin.cjs migrate
+
 log "Building"
 pnpm build
 
