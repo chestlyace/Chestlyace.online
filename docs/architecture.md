@@ -17,9 +17,9 @@ request belongs to is decided by its **host name**, not its path.
  chestlyace.me ───────▶ │                                                              │
  creatives.… ─────────▶ │  proxy.ts ── reads Host ──▶ rewrite to /sites/<site>/<path>  │
  blog.… ──────────────▶ │                                                              │
-                        │   app/sites/main ───────▶ Prisma Postgres + Cloudinary       │
+                        │   app/sites/main ───────▶ Postgres + Cloudinary              │
                         │   app/sites/creatives ──▶ Headless CMS API                   │
-                        │   app/sites/blog ───────▶ Prisma Postgres (posts, comments)   │
+                        │   app/sites/blog ───────▶ Postgres (posts, comments)          │
                         └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -35,7 +35,7 @@ sites from leaking into each other (see §3).
 | Runtime | Node.js 24 LTS (`.nvmrc`, `engines`) | Decided (D16) |
 | Language | TypeScript, `strict: true` | Decided |
 | Styling | Tailwind CSS (v4, tokens in CSS via `@theme`) | Decided (D14) |
-| Database | Prisma Postgres, provisioned through the Vercel Marketplace | Decided (D2, D31) |
+| Database | PostgreSQL 17 on the EC2 server, localhost only, with nightly dumps and daily disk snapshots (`hosting.md` §3a–§3b). Local development keeps a Prisma Postgres database | Decided (D94; production was Prisma Postgres, D31) |
 | DB access | Drizzle ORM + `pg` (node-postgres) driver; migrations with Drizzle Kit | Decided (D15, D32) |
 | Validation | Zod (request bodies, post fields, CMS responses) | Proposed |
 | Image/file uploads | Cloudinary (existing assets already live there) | Proposed — Q14 |
@@ -268,7 +268,7 @@ Full schema and endpoints: `content-schema.md`.
 
 | Variable | Used by | Notes |
 |---|---|---|
-| `DATABASE_URL` | main | Prisma Postgres connection string; set by the Vercel–Prisma integration |
+| `DATABASE_URL` | main | Production: the server's own Postgres (`hosting.md` §4). Locally: the development Prisma Postgres database |
 | `DIRECT_URL` | `pnpm db:migrate`, `db:seed` | Optional direct (unpooled) Prisma Postgres connection; falls back to `DATABASE_URL` |
 | `ADMIN_PASSWORD_HASH` | admin | bcrypt hash, never the plain password |
 | `SESSION_SECRET` | admin | 32+ random bytes |
@@ -280,11 +280,11 @@ Full schema and endpoints: `content-schema.md`.
 - `.env.example` is committed with every key and no values. Real values live in
   the server's `/srv/chestlyace/shared/env` (`hosting.md` §4) and a git-ignored
   `.env.local`.
-- **Two databases (D31):** one Prisma Postgres database connected to the
-  **Production** environment, and a second one connected to **Preview** and
-  **Development** (local dev pulls it with `vercel env pull .env.local`). Previews
-  and local dev never touch production data. (On the old site any non-localhost
-  hostname hit the live database.)
+- **Two databases (D31, D94):** production's is PostgreSQL on the EC2 server
+  (D94; it was a Prisma Postgres database until then), and a second, Prisma
+  Postgres one serves **Development** (local dev pulls it with
+  `vercel env pull .env.local`). Local dev never touches production data. (On the
+  old site any non-localhost hostname hit the live database.)
 
 ## 9. Deployment
 
@@ -296,8 +296,10 @@ Full schema and endpoints: `content-schema.md`.
   sends the commit over SSH, and `deploy/deploy.sh` builds it in its own release
   directory, switches to it, checks the home page answers, and rolls back if not.
   There are no preview deployments.
-- Database migrations run with Drizzle Kit as an explicit step (`pnpm db:migrate`
-  against each database), not on app boot or during the deploy.
+- Database migrations run with Drizzle Kit: in production, `deploy.sh` runs them
+  before the build and before switching (D94), and a failed migration stops the
+  deploy; for the development database, `pnpm db:migrate` by hand. Never on app
+  boot.
 - CI: none runs on pull requests since D94 (Vercel's build was the only one, D17).
   Typecheck, lint, format, build and tests are run locally before opening a PR
   (`instructions.md` §6). Tests where logic warrants them (host resolution, admin

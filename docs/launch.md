@@ -8,7 +8,9 @@ these steps; nothing here changes code. Tick each box as you go.
 > not Vercel. The Vercel steps below stay as the record of the first launch; for
 > the server, its environment file, deploys and DNS, follow [`hosting.md`](./hosting.md).
 > The variables in §2 are the same; they now live in the server's environment
-> file (`hosting.md` §4). Vercel Web Analytics (§1, §7) is gone.
+> file (`hosting.md` §4). The production database moved onto the server too
+> (`hosting.md` §3a–§4a), and migrations run in each deploy. Vercel Web Analytics
+> (§1, §7) is gone.
 
 **Order of events.** Prepare everything on a Vercel preview first. Only the last
 section (DNS) changes what visitors see, and it is reversible until the old
