@@ -14,7 +14,8 @@ export const PORTFOLIO_TAG = "portfolio";
 // Next's data cache outlives deployments. Keying on the commit means a new
 // deployment never shows an older deployment's data; the admin's tag
 // revalidation still refreshes within a deployment.
-const deployment = process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
+const deployment =
+  process.env.GIT_COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
 
 // In `next dev` reads are never cached, so editing or re-seeding the database
 // shows up on the next refresh.

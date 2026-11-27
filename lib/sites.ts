@@ -80,6 +80,16 @@ export function siteUrl(site: SiteKey, path = "/"): string {
   return new URL(path, base).toString();
 }
 
+// Whether `?site=` and unpublished French may be used: in development and on Vercel
+// previews, never in production. Production is told by NODE_ENV (`next start` and
+// every Vercel build set it), not by VERCEL_ENV, which is unset on the server and
+// can be left over as "development" in an env file pulled from Vercel.
+export function overridesAllowed(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return env.NODE_ENV !== "production" || env.VERCEL_ENV === "preview";
+}
+
 export type RoutingInput = {
   host: string | null;
   pathname: string;

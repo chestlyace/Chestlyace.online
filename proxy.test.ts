@@ -17,8 +17,6 @@ describe("proxy matcher", () => {
   it.each([
     "/_next/static/chunks/a.js",
     "/_next/image",
-    "/_vercel/insights/script.js",
-    "/_vercel/insights/view",
     "/hero.webp",
     "/favicon.ico",
   ])("leaves %s alone", (path) => {

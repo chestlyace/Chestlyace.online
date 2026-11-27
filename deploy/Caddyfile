@@ -1,0 +1,15 @@
+# /etc/caddy/Caddyfile (docs/hosting.md §3). Caddy gets and renews the HTTPS
+# certificates by itself once DNS points at the server (§7).
+#
+# It passes the Host header through, so proxy.ts picks the site as before, and it
+# sets X-Forwarded-For to the visitor's real address (ignoring any value the
+# visitor sent), which the rate limits read.
+chestlyace.me, admin.chestlyace.me, blog.chestlyace.me, creatives.chestlyace.me {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3000
+}
+
+# One address for search engines (architecture.md §3).
+www.chestlyace.me {
+	redir https://chestlyace.me{uri} permanent
+}

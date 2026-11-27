@@ -13,13 +13,13 @@ request belongs to is decided by its **host name**, not its path.
 | `admin.chestlyace.me` | **admin** | The owner's panel for the main site's data (D71) | Postgres (reads and writes), Cloudinary (uploads) |
 
 ```
-                        ┌────────────────────────── Vercel ───────────────────────────┐
+                        ┌──────────── EC2 server: Caddy → next start (D94) ────────────┐
  chestlyace.me ───────▶ │                                                              │
  creatives.… ─────────▶ │  proxy.ts ── reads Host ──▶ rewrite to /sites/<site>/<path>  │
  blog.… ──────────────▶ │                                                              │
-                        │   app/sites/main ───────▶ Prisma Postgres + Cloudinary       │
+                        │   app/sites/main ───────▶ Postgres + Cloudinary              │
                         │   app/sites/creatives ──▶ Headless CMS API                   │
-                        │   app/sites/blog ───────▶ Prisma Postgres (posts, comments)   │
+                        │   app/sites/blog ───────▶ Postgres (posts, comments)          │
                         └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -35,13 +35,13 @@ sites from leaking into each other (see §3).
 | Runtime | Node.js 24 LTS (`.nvmrc`, `engines`) | Decided (D16) |
 | Language | TypeScript, `strict: true` | Decided |
 | Styling | Tailwind CSS (v4, tokens in CSS via `@theme`) | Decided (D14) |
-| Database | Prisma Postgres, provisioned through the Vercel Marketplace | Decided (D2, D31) |
+| Database | PostgreSQL 17 on the EC2 server, localhost only, with nightly dumps and daily disk snapshots (`hosting.md` §3a–§3b). Local development keeps a Prisma Postgres database | Decided (D94; production was Prisma Postgres, D31) |
 | DB access | Drizzle ORM + `pg` (node-postgres) driver; migrations with Drizzle Kit | Decided (D15, D32) |
 | Validation | Zod (request bodies, post fields, CMS responses) | Proposed |
 | Image/file uploads | Cloudinary (existing assets already live there) | Proposed — Q14 |
 | Blog | Posts in Postgres, written in the admin's block editor as custom markdown; rendered on the server (unified/remark/rehype + Shiki), cached with the `blog` tag | Decided (D83, supersedes D7) |
 | Creatives content | Headless CMS | CMS choice open — Q1 |
-| Hosting | Vercel | Decided (D2) |
+| Hosting | AWS EC2 `t3.small` running Ubuntu 24.04: Node 24 under systemd, Caddy for HTTPS, deploys from GitHub Actions (`hosting.md`) | Decided (D94, replaces D2's Vercel) |
 | Package manager | pnpm 10 (pinned in `packageManager`; newest major Vercel supports) | Decided (D16) |
 | Lint / format | ESLint (`eslint-config-next`) + Prettier (Markdown excluded) | Decided |
 | Tests | Vitest (`pnpm test`), `*.test.ts` next to the code | Decided (D20) |
@@ -93,8 +93,8 @@ export const SITES = {
   like any other site; the old `/admin` path on main no longer exists.
 - Links that cross sites are always **absolute URLs** built from `lib/sites.ts`
   (`siteUrl('blog', '/some-post')`). Relative links stay within a site.
-- `www.chestlyace.me` permanently redirects to `chestlyace.me` (Vercel
-  domain setting, not code).
+- `www.chestlyace.me` permanently redirects to `chestlyace.me` (Caddy on the
+  server, D94; `decideRoute` does the same).
 
 ### Local development
 
@@ -106,8 +106,10 @@ Browsers resolve `*.localhost` to `127.0.0.1`, so no hosts-file edits are needed
 | `http://creatives.localhost:3000` | creatives |
 | `http://blog.localhost:3000` | blog |
 
-Vercel preview deployments get one URL. Previews use a `?site=creatives` query
-parameter (honoured only when `VERCEL_ENV !== 'production'`) to pick a site. The
+Vercel preview deployments got one URL (there are no previews since the move to
+the EC2 server, D94). Previews use a `?site=creatives` query parameter
+(honoured only where `overridesAllowed()` says so: development and Vercel
+previews, never production) to pick a site. The
 choice is remembered in a `preview-site` cookie so internal links stay on that
 site; `?site=main` switches back (D21). Production ignores both.
 
@@ -176,6 +178,9 @@ chestlyace.me/
 │  ├─ cms.ts                       # creatives CMS client
 │  └─ blog/                        # markdown parsing/rendering, DEV client, session parser
 ├─ public/                         # brand/logo.png, favicons, resume, OG images
+├─ deploy/                         # the server's files (hosting.md, D94): deploy.sh,
+│                                  # chestlyace.service, Caddyfile, sudoers
+├─ .github/workflows/deploy.yml    # deploys main to the server on every push
 ├─ docs/                           # these documents
 ├─ proxy.ts
 └─ vitest.config.mts
@@ -199,7 +204,7 @@ chestlyace.me/
 - **Caching** (D64): the pages read through `lib/portfolio.ts`, which wraps the
   queries in `unstable_cache` with the `portfolio` tag. Every admin write calls
   `revalidateTag('portfolio', { expire: 0 })`, so the public page is static until
-  something changes. The cache key includes `VERCEL_GIT_COMMIT_SHA` (Next's data
+  something changes. The cache key includes the deployed commit, `GIT_COMMIT_SHA` (D94; Next's data
   cache outlives deployments, so a redeploy must not show an older deployment's
   data), and `next dev` skips the cache. `unstable_cache` is marked replaced by
   `use cache` in Next 16; moving to Cache Components later only changes that file.
@@ -263,7 +268,7 @@ Full schema and endpoints: `content-schema.md`.
 
 | Variable | Used by | Notes |
 |---|---|---|
-| `DATABASE_URL` | main | Prisma Postgres connection string; set by the Vercel–Prisma integration |
+| `DATABASE_URL` | main | Production: the server's own Postgres (`hosting.md` §4). Locally: the development Prisma Postgres database |
 | `DIRECT_URL` | `pnpm db:migrate`, `db:seed` | Optional direct (unpooled) Prisma Postgres connection; falls back to `DATABASE_URL` |
 | `ADMIN_PASSWORD_HASH` | admin | bcrypt hash, never the plain password |
 | `SESSION_SECRET` | admin | 32+ random bytes |
@@ -273,25 +278,32 @@ Full schema and endpoints: `content-schema.md`.
 | `NEXT_PUBLIC_MAIN_URL`, `NEXT_PUBLIC_CREATIVES_URL`, `NEXT_PUBLIC_BLOG_URL` | cross-site links | Override `lib/sites.ts` per environment |
 
 - `.env.example` is committed with every key and no values. Real values live in
-  Vercel project settings and a git-ignored `.env.local`.
-- **Two databases (D31):** one Prisma Postgres database connected to the
-  **Production** environment, and a second one connected to **Preview** and
-  **Development** (local dev pulls it with `vercel env pull .env.local`). Previews
-  and local dev never touch production data. (On the old site any non-localhost
-  hostname hit the live database.)
+  the server's `/srv/chestlyace/shared/env` (`hosting.md` §4) and a git-ignored
+  `.env.local`.
+- **Two databases (D31, D94):** production's is PostgreSQL on the EC2 server
+  (D94; it was a Prisma Postgres database until then), and a second, Prisma
+  Postgres one serves **Development** (local dev pulls it with
+  `vercel env pull .env.local`). Local dev never touches production data. (On the
+  old site any non-localhost hostname hit the live database.)
 
 ## 9. Deployment
 
-- One Vercel project connected to this repo. `main` branch → production; every
-  other branch → preview.
-- Domains attached to the project: `chestlyace.me`, `www.chestlyace.me`
-  (redirect), `creatives.chestlyace.me`, `blog.chestlyace.me`.
-- Database migrations run with Drizzle Kit as an explicit step (`pnpm db:migrate`
-  against each database), not on app boot or during the Vercel build.
-- CI: Vercel's build on every pull request is the only automated check (D17) —
-  it compiles and typechecks. Lint, format, and tests are run locally before
-  opening a PR (`instructions.md` §6). Tests where logic warrants them (host
-  resolution, admin validation, frontmatter parsing).
+- One AWS EC2 `t3.small` (D94, replaces Vercel). Caddy serves HTTPS
+  for `chestlyace.me`, `admin.`, `creatives.` and `blog.chestlyace.me`, redirects
+  `www`, and proxies to `next start` on port 3000 (systemd), which the firewalls
+  keep closed to the internet. Setup and day-to-day: `hosting.md`.
+- Every push to `main` deploys: GitHub Actions (`.github/workflows/deploy.yml`)
+  sends the commit over SSH, and `deploy/deploy.sh` builds it in its own release
+  directory, switches to it, checks the home page answers, and rolls back if not.
+  There are no preview deployments.
+- Database migrations run with Drizzle Kit: in production, `deploy.sh` runs them
+  before the build and before switching (D94), and a failed migration stops the
+  deploy; for the development database, `pnpm db:migrate` by hand. Never on app
+  boot.
+- CI: none runs on pull requests since D94 (Vercel's build was the only one, D17).
+  Typecheck, lint, format, build and tests are run locally before opening a PR
+  (`instructions.md` §6). Tests where logic warrants them (host resolution, admin
+  validation, frontmatter parsing).
 
 ## 10. Migrating off the old site
 
