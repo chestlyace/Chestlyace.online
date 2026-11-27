@@ -4,8 +4,8 @@
 # No `-H 127.0.0.1`: next start sends the proxy's rewrites to `localhost`, which
 # can resolve to ::1 only, so a server bound to 127.0.0.1 fails every page
 # ("Failed to proxy … socket hang up"). Port 3000 stays private because neither
-# Oracle's security list nor the server's iptables opens it (docs/hosting.md §2–§3);
-# only Caddy, on the same machine, reaches it.
+# the EC2 security group nor the server's ufw firewall opens it (docs/hosting.md
+# §2–§3); only Caddy, on the same machine, reaches it.
 [Unit]
 Description=chestlyace.me (Next.js)
 After=network-online.target

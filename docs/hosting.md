@@ -1,12 +1,13 @@
-# Hosting runbook: the Oracle server
+# Hosting runbook: the EC2 server
 
-How the four sites run on an Oracle Cloud Always Free server (D94), and how to set
-one up from nothing. It replaces the Vercel hosting in `launch.md`, which stays as
-the record of the first launch. The owner does these steps; tick each box as you go.
+How the four sites run on an AWS EC2 server (D94), and how to set one up from
+nothing. It replaces the Vercel hosting in `launch.md`, which stays as the record
+of the first launch. The owner does these steps; tick each box as you go.
 
 **Why the move (2026-11-23):** Vercel paused the project for going over the Hobby
 plan's limits (`402 DEPLOYMENT_DISABLED` on every host). A server has no usage
-limit that can switch the site off.
+limit that can switch the site off. EC2 is the host "for now" (owner, 2026-11-27);
+the setup is plain Ubuntu, so another host later changes only §2–§3.
 
 ## 0. What runs where
 
@@ -22,16 +23,20 @@ limit that can switch the site off.
 
 | Piece | Where |
 |---|---|
-| Server | Oracle Cloud Always Free, Ampere A1 (ARM), Ubuntu 24.04 |
+| Server | AWS EC2 `t3.small` (2 vCPU, 2 GB), Ubuntu 24.04, an Elastic IP |
 | App | Node 24, `next start`, run by systemd as the `deploy` user |
 | HTTPS | Caddy, certificates from Let's Encrypt, renewed by itself |
 | Deploys | GitHub Actions on every push to `main` (`.github/workflows/deploy.yml`) |
 | Secrets | `/srv/chestlyace/shared/env`, readable by `deploy` only |
-| DNS | Namecheap (Advanced DNS), A records to the server |
+| DNS | Namecheap (Advanced DNS), A records to the Elastic IP |
 | Database | Prisma Postgres, as before, still connected through the Vercel project |
 
 The files the server uses are in `deploy/`: `chestlyace.service`, `Caddyfile`,
 `sudoers` and `deploy.sh`.
+
+**What it costs** (on-demand, us-east-1, before any credits; other regions differ a
+little): the `t3.small` about $15 a month, the public IPv4 address about $3.60, the
+20 GB disk about $1.60. Roughly $20 a month in all.
 
 ## 1. Before you start
 
@@ -39,47 +44,58 @@ The files the server uses are in `deploy/`: `chestlyace.service`, `Caddyfile`,
       database was created through it. Deleting the project or the integration can
       delete the database. You can remove the domains from it after §7.
 - [ ] Note the **region of the production database** (Prisma console → the
-      database → settings). Pick the Oracle region closest to it in §2: every
-      page load talks to the database.
+      database → settings). Prisma Postgres runs in AWS regions: launch the server
+      in the same one (§2). Every page load talks to the database.
+- [ ] Set a spending alarm before anything else: AWS console → Billing and Cost
+      Management → **Budgets** → Create budget → Monthly cost budget, $25, with an
+      email alert. Anything unexpected then shows up at once.
 
 ## 2. Create the server
 
-- [ ] Sign up at `cloud.oracle.com` (Free Tier). The **home region** you pick is
-      permanent, and Always Free servers only run there, so choose the one near
-      the database.
-- [ ] **Recommended: upgrade the account to Pay As You Go** (Billing → Upgrade).
-      Always Free resources stay free, but Oracle can reclaim an idle Always Free
-      server on a free account, and a quiet portfolio looks idle (low CPU, network
-      and memory for 7 days). Then set a budget alert at $1 (Billing → Budgets) so
-      anything that isn't free shows up at once.
-- [ ] Compute → Instances → **Create instance**:
-  - Image: **Canonical Ubuntu 24.04** (the aarch64 build).
-  - Shape: **Ampere → VM.Standard.A1.Flex**, 2 OCPUs and 12 GB of memory. The free
-    allowance is 4 OCPUs and 24 GB in total, so this leaves room for another server.
-  - Networking: create a new virtual cloud network with a **public subnet**, and
-    assign a public IPv4 address.
-  - SSH keys: paste your own public key (e.g. `~/.ssh/id_ed25519.pub`).
-  - If it says **"Out of capacity"**, try another availability domain or try again
-    later; ARM capacity comes and goes.
-- [ ] Make the address permanent: Networking → IP management → **Reserved public
-      IPs**, reserve one and assign it to the server's network interface. Write it
-      down: it's `<IP>` below.
-- [ ] Open the web ports in Oracle's firewall: the network → the public subnet's
-      **security list** → Add ingress rules: source `0.0.0.0/0`, TCP, destination
-      port `80`, and a second for `443`. **Never open 3000**: the app listens on
-      every address (see `deploy/chestlyace.service` for why), so the firewalls are
-      what keep it behind Caddy.
+- [ ] AWS console, in the database's region → EC2 → **Launch instance**:
+  - Name: `chestlyace`.
+  - Image: **Ubuntu Server 24.04 LTS**, 64-bit (x86).
+  - Instance type: **t3.small**.
+  - Key pair: pick yours, or create one (ED25519) and keep the `.pem` file safe.
+    You sign in with it as `ubuntu`.
+  - Network settings → Edit → create a security group named `chestlyace-web` with
+    three inbound rules: **SSH (22)**, **HTTP (80)** and **HTTPS (443)**, each from
+    `0.0.0.0/0` (and `::/0` for 80 and 443). SSH has to be open to anywhere because
+    GitHub Actions connects from addresses that change; only keys can sign in
+    (Ubuntu turns passwords off). **Never open 3000**: the app listens on every
+    address (`deploy/chestlyace.service` says why), so the firewalls are what keep
+    it behind Caddy.
+  - Storage: **20 GB gp3**.
+  - Advanced details → Credit specification: **Standard**. A `t3` in the default
+    "Unlimited" mode bills extra for long bursts of CPU; Standard slows down
+    instead, which a build every few merges never reaches.
+- [ ] Give it a fixed address: EC2 → Network & Security → **Elastic IPs** →
+      Allocate, then Actions → Associate with the `chestlyace` instance. Without it
+      the address changes whenever the instance stops. Write it down: it's `<IP>`
+      below.
 
-Check that you can sign in: `ssh ubuntu@<IP>`.
+Check that you can sign in: `ssh -i <your key> ubuntu@<IP>`. The steps below write
+plain `ssh ubuntu@<IP>`; add `-i <your key>` if your key isn't the default one.
 
 ## 3. Install the software (on the server, as `ubuntu`)
 
-Oracle's Ubuntu image also has its own firewall (iptables) that rejects everything
-but SSH. Open 80 and 443 there too:
+A second firewall on the server itself, so port 3000 stays closed even if the
+security group is ever edited by mistake:
 
 ```bash
-sudo iptables -I INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -j ACCEPT
-sudo netfilter-persistent save
+sudo ufw allow OpenSSH
+sudo ufw allow 80,443/tcp
+sudo ufw --force enable
+```
+
+A 2 GB swap file, so `next build` has room next to the running app on a 2 GB box:
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
 Updates, Node 24 (with pnpm through corepack) and Caddy:
@@ -182,7 +198,7 @@ What happens (`deploy/deploy.sh`):
    no access to GitHub.
 2. The server unpacks it into `releases/<time>-<commit>`, adds the environment
    file, runs `pnpm install` and `pnpm build`. The live release keeps serving
-   meanwhile.
+   meanwhile. A build takes a few minutes on a `t3.small`.
 3. `current` is pointed at the new release and the app restarts (a few seconds).
 4. The script checks that the home page answers. **If it doesn't, `current` goes
    back to the previous release** and the run fails, so you see it in Actions.
@@ -248,6 +264,9 @@ sudo systemctl reload caddy
 - [ ] `/robots.txt` on each public host still says `Allow: /`.
 - [ ] In the Vercel project, remove the domains (Settings → Domains). Keep the
       project and the Prisma integration (§1).
+- [ ] If the old site's EC2 instance is still running, stop it now and terminate it
+      once you're sure nothing on it is needed (`launch.md` §8), and release its
+      Elastic IP if it had one: an unused one is still billed.
 
 ## 9. Day to day
 

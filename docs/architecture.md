@@ -13,7 +13,7 @@ request belongs to is decided by its **host name**, not its path.
 | `admin.chestlyace.me` | **admin** | The owner's panel for the main site's data (D71) | Postgres (reads and writes), Cloudinary (uploads) |
 
 ```
-                        ┌────────── Oracle server: Caddy → next start (D94) ───────────┐
+                        ┌──────────── EC2 server: Caddy → next start (D94) ────────────┐
  chestlyace.me ───────▶ │                                                              │
  creatives.… ─────────▶ │  proxy.ts ── reads Host ──▶ rewrite to /sites/<site>/<path>  │
  blog.… ──────────────▶ │                                                              │
@@ -41,7 +41,7 @@ sites from leaking into each other (see §3).
 | Image/file uploads | Cloudinary (existing assets already live there) | Proposed — Q14 |
 | Blog | Posts in Postgres, written in the admin's block editor as custom markdown; rendered on the server (unified/remark/rehype + Shiki), cached with the `blog` tag | Decided (D83, supersedes D7) |
 | Creatives content | Headless CMS | CMS choice open — Q1 |
-| Hosting | Oracle Cloud Always Free server: Node 24 under systemd, Caddy for HTTPS, deploys from GitHub Actions (`hosting.md`) | Decided (D94, replaces D2's Vercel) |
+| Hosting | AWS EC2 `t3.small` running Ubuntu 24.04: Node 24 under systemd, Caddy for HTTPS, deploys from GitHub Actions (`hosting.md`) | Decided (D94, replaces D2's Vercel) |
 | Package manager | pnpm 10 (pinned in `packageManager`; newest major Vercel supports) | Decided (D16) |
 | Lint / format | ESLint (`eslint-config-next`) + Prettier (Markdown excluded) | Decided |
 | Tests | Vitest (`pnpm test`), `*.test.ts` next to the code | Decided (D20) |
@@ -107,7 +107,7 @@ Browsers resolve `*.localhost` to `127.0.0.1`, so no hosts-file edits are needed
 | `http://blog.localhost:3000` | blog |
 
 Vercel preview deployments got one URL (there are no previews since the move to
-the Oracle server, D94). Previews use a `?site=creatives` query parameter
+the EC2 server, D94). Previews use a `?site=creatives` query parameter
 (honoured only where `overridesAllowed()` says so: development and Vercel
 previews, never production) to pick a site. The
 choice is remembered in a `preview-site` cookie so internal links stay on that
@@ -288,7 +288,7 @@ Full schema and endpoints: `content-schema.md`.
 
 ## 9. Deployment
 
-- One Oracle Cloud Always Free server (D94, replaces Vercel). Caddy serves HTTPS
+- One AWS EC2 `t3.small` (D94, replaces Vercel). Caddy serves HTTPS
   for `chestlyace.me`, `admin.`, `creatives.` and `blog.chestlyace.me`, redirects
   `www`, and proxies to `next start` on port 3000 (systemd), which the firewalls
   keep closed to the internet. Setup and day-to-day: `hosting.md`.
